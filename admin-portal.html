@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ECHELON | COMMAND CENTER</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root { --primary: #FFD700; --bg: #050505; --surface: #111; --border: #222; }
+        body { background: var(--bg); color: #fff; font-family: 'Courier New', monospace; margin: 0; padding: 0; overflow: hidden; }
+        
+        /* SIDEBAR SYSTEM */
+        .dashboard-container { display: flex; height: 100vh; }
+        .sidebar { width: 260px; background: #000; border-right: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; }
+        .main-content { flex: 1; padding: 40px; overflow-y: auto; background: var(--bg); }
+
+        .nav-group { margin-bottom: 30px; }
+        .nav-label { font-size: 10px; color: #444; letter-spacing: 2px; margin-bottom: 10px; display: block; text-transform: uppercase; }
+
+        .nav-item { 
+            padding: 12px 15px; color: #888; cursor: pointer; font-size: 11px; letter-spacing: 1.5px;
+            transition: 0.2s; border-left: 2px solid transparent; margin-bottom: 5px;
+        }
+        .nav-item:hover { color: var(--primary); background: #111; }
+        .nav-item.active { color: var(--primary); background: #111; border-left: 2px solid var(--primary); }
+
+        /* CONTENT SECTIONS */
+        .content-section { display: none; animation: fadeIn 0.3s; }
+        .content-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* CARDS & TABLES */
+        .card { background: var(--surface); border: 1px solid var(--border); padding: 25px; margin-bottom: 20px; position: relative; }
+        .card h3 { color: var(--primary); font-size: 13px; margin-top: 0; letter-spacing: 2px; text-transform: uppercase; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { text-align: left; color: #444; font-size: 10px; padding: 12px; border-bottom: 1px solid var(--border); text-transform: uppercase; }
+        td { padding: 12px; font-size: 12px; border-bottom: 1px solid #111; color: #ccc; }
+
+        .status-tag { padding: 2px 6px; border-radius: 3px; font-size: 9px; font-weight: bold; }
+        .tag-active { background: rgba(0, 255, 0, 0.1); color: #0f0; }
+
+        .logout-btn { background: none; border: 1px solid #ff4444; color: #ff4444; padding: 10px; cursor: pointer; margin-top: auto; font-family: inherit; font-size: 10px; letter-spacing: 2px; }
+        .logout-btn:hover { background: #ff4444; color: #000; }
+    </style>
+</head>
+<body>
+
+<div class="dashboard-container">
+    <div class="sidebar">
+        <h2 style="color:var(--primary); font-size:14px; letter-spacing:4px; margin-bottom:40px;">ECHELON_OS</h2>
+        
+        <div class="nav-group">
+            <span class="nav-label">INTELLIGENCE</span>
+            <div class="nav-item active" onclick="showTab('intel')">INQUIRY_FEED</div>
+            <div class="nav-item" onclick="showTab('ledger')">MEMBER_LEDGER</div>
+            <div class="nav-item" onclick="showTab('access-logs')">ACCESS_LOGS</div>
+        </div>
+
+        <div class="nav-group">
+            <span class="nav-label">LOGISTICS</span>
+            <div class="nav-item" onclick="showTab('merch')">MERCH_INVENTORY</div>
+            <div class="nav-item" onclick="showTab('finance')">FINANCE_EXPENSES</div>
+        </div>
+
+        <div class="nav-group">
+            <span class="nav-label">PROTOCOLS</span>
+            <div class="nav-item" onclick="showTab('manual')">OPS_MANUAL</div>
+            <div class="nav-item" onclick="showTab('vault')">CREDENTIALS</div>
+        </div>
+
+        <button class="logout-btn" onclick="logout()">TERMINATE_SESSION</button>
+    </div>
+
+    <div class="main-content">
+        
+        <div id="intel" class="content-section active">
+            <h3>ACTIVE_INQUIRIES</h3>
+            <div class="card">
+                <table>
+                    <thead>
+                        <tr><th>DATE</th><th>NAME</th><th>OBJECTIVE</th><th>STATUS</th></tr>
+                    </thead>
+                    <tbody id="inquiry-list">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="ledger" class="content-section">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>OPERATIVE_LEDGER</h3>
+                <button onclick="toggleForm('member-form')" style="background:var(--primary); border:none; padding:5px 10px; cursor:pointer; font-weight:bold;">+ ADD OPERATIVE</button>
+            </div>
+            
+            <div id="member-form" class="card" style="display:none; margin-top:10px;">
+                <input type="text" id="m-name" placeholder="FULL NAME" style="background:#000; color:#fff; border:1px solid #222; padding:10px; margin-right:5px;">
+                <select id="m-type" style="background:#000; color:#fff; border:1px solid #222; padding:10px; margin-right:5px;">
+                    <option value="Performance Club">PERFORMANCE CLUB</option>
+                    <option value="Elite">ELITE</option>
+                    <option value="Drop-in">DROP-IN</option>
+                </select>
+                <button onclick="addMember()" style="background:#fff; padding:10px;">SAVE</button>
+            </div>
+
+            <div id="member-display" style="margin-top:20px;">Fetching Vault Data...</div>
+        </div>
+
+        <div id="merch" class="content-section">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>INVENTORY_LOGISTICS</h3>
+                <button onclick="toggleForm('merch-form')" style="background:var(--primary); border:none; padding:5px 10px; cursor:pointer; font-weight:bold;">+ NEW STOCK</button>
+            </div>
+
+            <div id="merch-form" class="card" style="display:none; margin-top:10px;">
+                <input type="text" id="i-name" placeholder="ITEM NAME" style="background:#000; color:#fff; border:1px solid #222; padding:10px;">
+                <input type="text" id="i-size" placeholder="SIZE" style="width:50px; background:#000; color:#fff; border:1px solid #222; padding:10px;">
+                <input type="number" id="i-count" placeholder="QTY" style="width:50px; background:#000; color:#fff; border:1px solid #222; padding:10px;">
+                <button onclick="addInventory()" style="background:#fff; padding:10px;">LOG ITEM</button>
+            </div>
+
+            <div class="card" style="margin-top:20px;">
+                <table id="inventory-table">
+                    <thead>
+                        <tr><th>ITEM</th><th>SIZE</th><th>STOCK</th><th>PRICE</th></tr>
+                    </thead>
+                    <tbody id="inventory-list"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="finance" class="content-section">
+            <h3>FINANCIAL_LEDGER</h3>
+            <div class="card">
+                <input type="text" id="ex-desc" placeholder="EXPENSE DESCRIPTION" style="background:#000; color:#fff; border:1px solid #222; padding:10px; width:60%;">
+                <input type="number" id="ex-amt" placeholder="$0.00" style="background:#000; color:#fff; border:1px solid #222; padding:10px; width:20%;">
+                <button onclick="addExpense()" style="background:red; color:#fff; border:none; padding:10px; width:15%;">LOG COST</button>
+            </div>
+            <div class="card">
+                <p id="total-finance" style="font-size:32px; margin:0;">$0.00</p>
+                <small style="color:#444;">TOTAL_EXPENSES_YTD</small>
+            </div>
+        </div>
+        
+        <div id="manual" class="content-section">...</div>
+
+    </div>
+
+<script>
+    // 1. SECURITY & DATABASE CONNECTION
+    if (localStorage.getItem('admin_auth') !== 'true') {
+    window.location.href = "index.html";
+}
+
+    // YOUR ACTUAL KEYS (PRE-PLUGGED)
+    const supabaseUrl = 'https://wmwiovvrfdsainngmmki.supabase.co'; 
+    const supabaseKey = 'sb_publishable_6qpc-oFSsEU9Kg-8RYhREQ_Fa6eZST9';
+    const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+    // 2. NAVIGATION LOGIC
+    function showTab(tabId) {
+        document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        
+        document.getElementById(tabId).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+
+    // 3. DATA LOADING ENGINE
+    async function loadAllData() {
+        // Load Members
+        const { data: members } = await _supabase.from('members').select('*');
+        const mDiv = document.getElementById('member-display');
+        if (members && members.length > 0) {
+            mDiv.innerHTML = members.map(m => `
+                <div class="card">
+                    <h3>${m.name.toUpperCase()}</h3>
+                    <p style="font-size:11px; color:#666;">TYPE: ${m.membership_type} | JOINED: ${new Date(m.joined_at).toLocaleDateString()}</p>
+                </div>
+            `).join('');
+        } else {
+            mDiv.innerHTML = "<p style='color:#444;'>> NO MEMBERS LOGGED.</p>";
+        }
+
+        // Load Inventory
+        const { data: inv } = await _supabase.from('inventory').select('*');
+        const iList = document.getElementById('inventory-list');
+        if (inv && inv.length > 0) {
+            iList.innerHTML = inv.map(i => `
+                <tr><td>${i.item_name}</td><td>${i.size}</td><td>${i.stock_count}</td><td>$${i.price}</td></tr>
+            `).join('');
+        }
+    }
+
+  function logout() {
+    // SCORCHED EARTH: This completely empties the browser's memory.
+    // It deletes the Admin Auth AND resets your secret sequence steps.
+    localStorage.clear(); 
+    sessionStorage.clear(); 
+    
+    // Kick you back to the public front page
+    window.location.href = "index.html"; 
+}
+
+    loadAllData();
+    // TOGGLE FORM VISIBILITY
+    function toggleForm(id) {
+        const f = document.getElementById(id);
+        f.style.display = f.style.display === 'none' ? 'block' : 'none';
+    }
+
+    // ADD MEMBER TO VAULT
+    async function addMember() {
+        const name = document.getElementById('m-name').value;
+        const type = document.getElementById('m-type').value;
+        const { error } = await _supabase.from('members').insert([{ name: name, membership_type: type }]);
+        if (!error) { location.reload(); }
+    }
+
+    // ADD MERCH TO VAULT
+    async function addInventory() {
+        const name = document.getElementById('i-name').value;
+        const size = document.getElementById('i-size').value;
+        const qty = document.getElementById('i-count').value;
+        const { error } = await _supabase.from('inventory').insert([{ item_name: name, size: size, stock_count: qty }]);
+        if (!error) { location.reload(); }
+    }
+
+    // LOG EXPENSE
+    async function addExpense() {
+        const desc = document.getElementById('ex-desc').value;
+        const amt = document.getElementById('ex-amt').value;
+        const { error } = await _supabase.from('finances').insert([{ description: desc, amount: amt }]);
+        if (!error) { location.reload(); }
+    }
+</script>
+
+</body>
+</html>
