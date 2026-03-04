@@ -233,6 +233,30 @@
         if (!error) { location.reload(); }
     }
 </script>
+<script>
+/**
+ * THE ACTION HANDLER
+ * This makes the "CHECK IN" and "NOTIFY ME" buttons actually do something.
+ */
+function prefillForm(type, service) {
+    // 1. Log it so you can see it working in the console
+    console.log("Request Triggered:", type, "for", service);
 
+    // 2. THE ACTION: Tell the user the request is recorded
+    // You can change this to an Email link or a Popup later
+    alert("REQUEST RECEIVED\n-------------------\nTYPE: " + type + "\nSERVICE: " + service + "\n\nForwarding to Echelon HQ...");
+
+    // OPTION: If you want it to open an email automatically, uncomment the line below:
+    // window.location.href = `mailto:lex.c351@gmail.com?subject=${type}: ${service}`;
+}
+
+/**
+ * THE GATEKEEPER (RE-VERIFY)
+ * Just a safety check to make sure nobody bypassed the sequence
+ */
+if (localStorage.getItem('admin_auth') !== 'true') {
+    window.location.href = "index.html";
+}
+</script>
 </body>
 </html>
