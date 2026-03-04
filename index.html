@@ -1229,7 +1229,7 @@ function openProtocol(protocol) {
 
 <section id="training-hub" style="background: #080808; padding: 60px 0; overflow-x: hidden;">
     <div style="max-width: 1400px; margin: 0 auto;" class="reveal">
-        <h2 class="section-title" style="border-left: 8px solid var(--primary); padding-left: 20px; font-family: var(--heading-font); font-size: clamp(2.5rem, 8vw, 4.5rem); margin-bottom: 60px; margin-left: 20px; text-transform: uppercase; color: #fff;">
+        <h2 class="section-title" style="border-left: 8px solid var(--primary); padding-left: 20px; font-family: var(--heading-font); font-size: clamp(2.5rem, 8vw, 4.5rem); margin-bottom: 30px; margin-left: 20px; text-transform: uppercase; color: #fff;">
             Training <span style="color: var(--primary);">Hub</span>
         </h2>
 
@@ -1352,12 +1352,12 @@ function openProtocol(protocol) {
 </section>
 
 <style>
-/* 1. LAYOUT RESET: This fixes the "Red Circle" side spacing */
+/* 1. LAYOUT RESET: Side spacing fix */
 .hub-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 25px;
-    padding: 0 20px; /* Force spacing on the sides */
+    padding: 0 20px;
 }
 
 @media (max-width: 768px) {
@@ -1366,23 +1366,21 @@ function openProtocol(protocol) {
         overflow-x: auto;
         scroll-snap-type: x mandatory;
         gap: 15px;
-        margin: 0; /* Removed the -5% that was stretching it */
-        padding: 0 20px 20px 20px; /* Consistent gaps on mobile */
+        margin: 0;
+        padding: 0 20px 20px 20px;
         scrollbar-width: none;
     }
-    
     .hub-card {
-        min-width: 85vw !important; /* Shows a peek of next card */
+        min-width: 85vw !important;
         scroll-snap-align: center;
         padding: 30px !important;
     }
-    
     .hub-card h3 {
         font-size: 2rem !important;
     }
 }
 
-/* 2. CARD DESIGN: Clean & Professional */
+/* 2. CARD DESIGN */
 .hub-card {
     background: #111;
     padding: 40px;
@@ -1395,16 +1393,10 @@ function openProtocol(protocol) {
     transition: 0.3s;
 }
 
-.hub-card:hover {
-    border-color: var(--primary);
-}
+.hub-card:hover { border-color: var(--primary); }
 
-/* 3. DETAILS/SUMMARY Logic */
-.hub-details summary {
-    list-style: none;
-    outline: none;
-    cursor: pointer;
-}
+/* 3. DETAILS/SUMMARY */
+.hub-details summary { list-style: none; outline: none; cursor: pointer; }
 .hub-details summary::-webkit-details-marker { display: none; }
 .hub-details[open] summary { color: #fff !important; border-bottom: 1px solid #333; }
 
@@ -1417,9 +1409,7 @@ function openProtocol(protocol) {
 
 /* 5. MOBILE GUIDES */
 .swipe-only-mobile { display: none; }
-@media (max-width: 768px) {
-    .swipe-only-mobile { display: block; }
-}
+@media (max-width: 768px) { .swipe-only-mobile { display: block; } }
 </style>
 
 <section id="shop" style="background: #000; padding: 100px 5%; overflow-x: hidden;">
