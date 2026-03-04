@@ -2002,8 +2002,7 @@ If I have any doubt regarding my health, I understand it is <strong>my responsib
                 <textarea name="entry.472462045" id="contact-message" placeholder="Anything else we should know?" rows="4" style="background: #111; border: 1px solid #333; color: #fff; padding: 15px; font-family: var(--body-font); resize: none; outline: none;"></textarea>
             </div>
 
-            <button type="submit" id="submit-btn" 
-    style="position: relative; z-index: 10000 !important; pointer-events: auto !important; background: var(--primary); color: #000; border: none; padding: 20px; font-family: var(--heading-font); font-size: 1.5rem; cursor: pointer; transition: 0.3s; letter-spacing: 2px;">
+            <button type="submit" id="submit-btn" style="position: relative; z-index: 10000 !important; pointer-events: auto !important; background: var(--primary); color: #000; border: none; padding: 20px; font-family: var(--heading-font); font-size: 1.5rem; cursor: pointer; transition: 0.3s; letter-spacing: 2px;">
     SUBMIT REQUEST
 </button>
         </form>
@@ -2361,17 +2360,12 @@ function typeEffect(elementId, text) {
 function checkAccess() {
     const p = document.getElementById('console-pass').value;
     
-    // This is checking for your password "ADMIN_ACCESS" (encoded)
     if (btoa(p.toUpperCase()) === "QURNSU5fQUNDRVNT") { 
-        
-        // --- THE FIX: CHANGE SESSION TO LOCAL ---
         localStorage.setItem('admin_auth', 'true'); 
-        // ----------------------------------------
-        
+        closeConsole();
         window.location.href = "admin-portal.html";
     } else {
         typeEffect("terminal-status", "> AUTH_FAIL: ACCESS DENIED.");
-        // Shows the error for 2 seconds then hides the box
         setTimeout(closeConsole, 2000);
     }
 }
