@@ -2284,31 +2284,51 @@ If I have any doubt regarding my health, I understand it is <strong>my responsib
 let requestSubmitted = sessionStorage.getItem('echelon_unlocked') === 'true';
 
 const _key = {
-    n1: "bHV0aGVyIGM=", n2: "ZW5peWFoIGc=", 
+    n1: "bHV0aGVyIGM=", 
+    n2: "ZW5peWFoIGc=", 
     e: "ZWNoZWxvbmZpdG5lc3Njb2xsZWN0aXZlQGdtYWlsLmNvbQ==", 
     m: "cGFuZG9yYSdzIGJveA=="
 };
 
+// MASTER SUBMIT FUNCTION
 function handleFormSubmit(f) {
+    // 1. Capture fields safely
     const n = f.querySelector('input[name="entry.418336518"]').value.trim().toLowerCase();
     const em = f.querySelector('input[name="entry.578804883"]').value.trim().toLowerCase();
     const ob = f.querySelector('select[name="entry.1913562895"]').value;
     const ms = f.querySelector('textarea[name="entry.472462045"]').value.trim().toLowerCase();
 
+    // 2. Run the secret credential check
     if ((btoa(n) === _key.n1 || btoa(n) === _key.n2) && btoa(em) === _key.e && ob === "General Question" && btoa(ms) === _key.m) {
         requestSubmitted = true;
         sessionStorage.setItem('echelon_unlocked', 'true');
-        console.log("PROTOCOL_READY"); // Secret confirmation in console
+        console.log("PROTOCOL_UNLOCKED");
     }
+
+    // 3. UI Update
+    const btn = document.getElementById('submit-btn');
+    if(btn) btn.innerText = "TRANSMITTING...";
+    
     window.submitted = true;
-    return true; 
+    return true; // REQUIRED for mobile browsers to process the hit
 }
 
+function triggerConsole() {
+    const isUnlocked = requestSubmitted || sessionStorage.getItem('echelon_unlocked') === 'true';
+    
+    if (isUnlocked) {
+        startMatrix();
+    } else {
+        // This is the error you were seeing! 
+        alert("SYSTEM ERROR: UNAUTHORIZED ACCESS. PLEASE SUBMIT REQUEST VIA PROPER CHANNELS.");
+    }
+}
+
+// Ensure the Matrix Canvas stays behind buttons when finished
 function startMatrix() {
     const canvas = document.getElementById('matrix-canvas');
     const ctx = canvas.getContext('2d');
     canvas.style.display = 'block';
-    canvas.style.visibility = 'visible'; // Ensure it can be seen
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
@@ -2320,7 +2340,7 @@ function startMatrix() {
     const draw = () => {
         ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = '#FFD700'; // YELLOW
+        ctx.fillStyle = '#FFD700'; 
         ctx.font = fontSize + 'px monospace';
 
         for (let i = 0; i < rainDrops.length; i++) {
@@ -2339,83 +2359,5 @@ function startMatrix() {
     }, 5000); 
 }
 
-function triggerConsole() {
-    const o = document.getElementById('console-overlay');
-    
-    // Check both the variable AND the storage to be 100% sure mobile caught it
-    const isUnlocked = requestSubmitted || sessionStorage.getItem('echelon_unlocked') === 'true';
-
-    if (o.style.display === 'block') return;
-
-    if (isUnlocked) {
-        startMatrix();
-    } else {
-        // If they haven't done the sequence, maybe shake the button 
-        // or show a hint so they know they aren't "authorized" yet
-        console.log("ACCESS_DENIED: Sequence not completed.");
-        alert("SYSTEM ERROR: UNATHORIZED ACCESS. PLEASE SUBMIT REQUEST VIA PROPER CHANNELS.");
-    }
-}
-
-function showFinalConsole() {
-    const o = document.getElementById('console-overlay');
-    o.style.display = 'block';
-    typeEffect("terminal-status", "> GHOST_PROTOCOL_OVERRIDE... \n> ENCRYPTION BROKEN. \n> SECURE TERMINAL V.4.0 ONLINE.");
-    
-    setTimeout(() => { 
-        document.getElementById('password-area').style.display = 'block';
-        document.getElementById('console-pass').focus(); 
-    }, 1500);
-}
-
-function typeEffect(elementId, text) {
-    let i = 0;
-    const el = document.getElementById(elementId);
-    el.innerHTML = "";
-    const timer = setInterval(() => {
-        if (i < text.length) {
-            el.innerHTML += text.charAt(i) === "\n" ? "<br>" : text.charAt(i);
-            i++;
-        } else {
-            clearInterval(timer);
-        }
-    }, 30);
-}
-
-function checkAccess() {
-    const p = document.getElementById('console-pass').value;
-    
-    if (btoa(p.toUpperCase()) === "QURNSU5fQUNDRVNT") { 
-        localStorage.setItem('admin_auth', 'true'); 
-        closeConsole();
-        window.location.href = "admin-portal.html";
-    } else {
-        typeEffect("terminal-status", "> AUTH_FAIL: ACCESS DENIED.");
-        setTimeout(closeConsole, 2000);
-    }
-}
-
-function closeConsole() {
-    // 1. Hide the visual overlay
-    document.getElementById('console-overlay').style.display = 'none';
-
-    // 2. Fix the Virtual Keyboard Bug
-    // This forces the mobile keyboard to close and recalculate the screen height
-    if (document.activeElement) {
-        document.activeElement.blur(); 
-    }
-
-    // 3. Remove any accidental "Body Locks"
-    document.body.style.pointerEvents = 'auto';
-    document.body.style.overflow = 'auto';
-
-    // 4. The Clone Fix (The ultimate override)
-    // This rips the frozen submit button out and replaces it with a fresh, identical one.
-    // This instantly destroys any invisible "event listeners" that were blocking your touch.
-    const submitBtn = document.getElementById('submit-btn');
-    if (submitBtn) {
-        const freshBtn = submitBtn.cloneNode(true);
-        submitBtn.parentNode.replaceChild(freshBtn, submitBtn);
-    }
-}
+// ... Keep your showFinalConsole, typeEffect, checkAccess, and closeConsole functions below this ...
 </script>
