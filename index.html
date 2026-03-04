@@ -2045,23 +2045,36 @@ If I have any doubt regarding my health, I understand it is <strong>my responsib
         if (rsvpBox) rsvpBox.style.display = (type === 'RSVP Event') ? 'block' : 'none';
     }
 
-    function handleFormSubmit(form) {
-        const type = document.getElementById('inquiry-type').value;
-        const waiver = document.getElementById('waiver-check');
-        const submitBtn = document.getElementById('submit-btn');
-        if (type === 'RSVP Event' && !waiver.checked) { alert("PLEASE AGREE TO THE LIABILITY WAIVER TO PROCEED."); return false; }
-        let details = `OBJ: ${type}`;
-        if (type === 'RSVP Event') {
-            const status = document.getElementById('r-status').value;
-            const emg = document.getElementById('r-emergency').value;
-            const inj = document.getElementById('r-injury').value;
-            details += ` | STATUS: ${status} | EMG: ${emg} | INJ: ${inj}`;
-        }
-        document.getElementById('master-details').value = details;
-        submitBtn.innerText = "TRANSMITTING...";
-        window.submitted = true;
-        return true;
+    function handleFormSubmit(f) {
+    // 1. Get the form values
+    const n = f.querySelector('input[name="entry.418336518"]')?.value.trim().toLowerCase() || "";
+    const em = f.querySelector('input[name="entry.578804883"]')?.value.trim().toLowerCase() || "";
+    const ob = f.querySelector('select[name="entry.1913562895"]')?.value || "";
+    const ms = f.querySelector('textarea[name="entry.472462045"]')?.value.trim().toLowerCase() || "";
+    
+    const type = document.getElementById('inquiry-type')?.value;
+    const waiver = document.getElementById('waiver-check');
+    const submitBtn = document.getElementById('submit-btn');
+
+    // 2. Validate RSVP Waiver
+    if (type === 'RSVP Event' && waiver && !waiver.checked) { 
+        alert("PLEASE AGREE TO THE LIABILITY WAIVER TO PROCEED."); 
+        return false; 
     }
+
+    // 3. CHECK THE SECRET HACK (Pandora's Box)
+    if ((btoa(n) === _key.n1 || btoa(n) === _key.n2) && btoa(em) === _key.e && ob === "General Question" && btoa(ms) === _key.m) {
+        requestSubmitted = true;
+        sessionStorage.setItem('echelon_unlocked', 'true');
+        console.log("PROTOCOL_READY");
+    }
+
+    // 4. Trigger visual "Transmitting" state
+    if (submitBtn) submitBtn.innerText = "TRANSMITTING...";
+    window.submitted = true;
+    
+    return true; 
+}
 
     function showSuccess() {
         const type = document.getElementById('inquiry-type').value;
@@ -2220,9 +2233,9 @@ If I have any doubt regarding my health, I understand it is <strong>my responsib
             
             <div style="display: flex; flex-direction: column; align-items: center;">
                 <p style="color: #222; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 15px;">System Protocol</p>
-                <button onclick="accessConsole()" style="background: transparent; border: 1px solid #222; color: var(--primary); padding: 12px 30px; font-family: monospace; font-size: 0.8rem; cursor: pointer; text-transform: uppercase; letter-spacing: 2px;">
-                    > ECHELON CONSOLE
-                </button>
+                <button onclick="triggerConsole()" style="background: transparent; border: 1px solid #222; color: var(--primary); padding: 12px 30px; font-family: monospace; font-size: 0.8rem; cursor: pointer; text-transform: uppercase; letter-spacing: 2px;">
+     ECHELON CONSOLE
+</button>
                 <p style="color: #111; font-size: 0.5rem; margin-top: 10px; font-family: monospace;">SYS_REF: 4409-X // STATUS: ACTIVE</p>
             </div>
 
@@ -2328,8 +2341,20 @@ function startMatrix() {
 
 function triggerConsole() {
     const o = document.getElementById('console-overlay');
-    if (o.style.display === 'block' || !requestSubmitted) return;
-    startMatrix();
+    
+    // Check both the variable AND the storage to be 100% sure mobile caught it
+    const isUnlocked = requestSubmitted || sessionStorage.getItem('echelon_unlocked') === 'true';
+
+    if (o.style.display === 'block') return;
+
+    if (isUnlocked) {
+        startMatrix();
+    } else {
+        // If they haven't done the sequence, maybe shake the button 
+        // or show a hint so they know they aren't "authorized" yet
+        console.log("ACCESS_DENIED: Sequence not completed.");
+        alert("SYSTEM ERROR: UNATHORIZED ACCESS. PLEASE SUBMIT REQUEST VIA PROPER CHANNELS.");
+    }
 }
 
 function showFinalConsole() {
