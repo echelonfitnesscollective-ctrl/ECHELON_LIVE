@@ -41,6 +41,28 @@
 
         .logout-btn { background: none; border: 1px solid #ff4444; color: #ff4444; padding: 10px; cursor: pointer; margin-top: auto; font-family: inherit; font-size: 10px; letter-spacing: 2px; }
         .logout-btn:hover { background: #ff4444; color: #000; }
+        @media (max-width: 768px) {
+    /* 1. Ensure the card itself doesn't trap the touch */
+    .hub-card {
+        pointer-events: auto !important;
+        position: relative;
+        z-index: 5;
+    }
+
+    /* 2. THE FIX: Force the button to the very top layer */
+    .hub-card button {
+        position: relative !important;
+        z-index: 999 !important; /* Higher than everything else */
+        pointer-events: auto !important;
+        touch-action: manipulation; /* Tells the phone: "This is for tapping" */
+        cursor: pointer;
+    }
+
+    /* 3. Prevent the swipe container from 'eating' the tap */
+    .hub-grid {
+        padding-bottom: 40px !important; /* Gives the button more 'breathing room' */
+    }
+}
     </style>
 </head>
 <body>
