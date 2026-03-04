@@ -88,7 +88,6 @@
     justify-content: center;
     align-items: center; 
     text-align: center;
-    /* SWAP THE URL BELOW */
     background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.7)), 
                 url('YOUR_NEW_IMAGE_PATH_HERE.jpg') center/cover no-repeat;
     padding: 0 20px; 
@@ -96,7 +95,6 @@
     z-index: 1;
 }
 
-        /* Verse: Pure white text, stacks on mobile, centered below on desktop */
         .hero-verse { 
             color: #ffffff; 
             font-style: italic; 
@@ -107,9 +105,9 @@
             border-bottom: 1px solid rgba(255,255,255,0.2); 
             padding: 15px 0;
             width: 100%;
-            max-width: 800px; /* Wider to allow one line on desktop */
+            max-width: 800px; 
             display: flex;
-            flex-direction: column; /* This keeps the Ref centered under the text */
+            flex-direction: column; 
             gap: 5px;
         }
 
@@ -128,10 +126,9 @@
             line-height: 1.1; 
         }
 
-        /* Container to keep buttons side-by-side */
         .cta-container {
             display: flex;
-            flex-direction: row; /* Side-by-side */
+            flex-direction: row; 
             gap: 10px;
             width: 100%;
             max-width: 450px;
@@ -139,7 +136,6 @@
             margin-top: 10px;
         }
 
-        /* Both Buttons: Yellow, matching, no "white line" artifact */
         .btn-hero { 
             background: var(--primary) !important; 
             color: black !important; 
@@ -150,8 +146,8 @@
             font-weight: bold;
             transition: 0.3s; 
             cursor: pointer; 
-            border: none; /* Removed to fix the line issue on mobile wrap */
-            flex: 1; /* Makes them identical width */
+            border: none; 
+            flex: 1; 
             text-align: center;
             white-space: nowrap;
         }
@@ -161,48 +157,92 @@
             filter: brightness(1.1);
         }
 
+        /* --- TRAINING HUB GRID & CARDS --- */
+        .hub-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            padding: 0 20px;
+        }
+
+        .hub-card {
+            background: #111;
+            padding: 40px;
+            border: 1px solid #222;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 550px;
+            transition: 0.3s;
+        }
+
+        .hub-card:hover { border-color: var(--primary); }
+
+        .hub-details summary { list-style: none; outline: none; cursor: pointer; }
+        .hub-details summary::-webkit-details-marker { display: none; }
+        .hub-details[open] summary { color: #fff !important; border-bottom: 1px solid #333; }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(255, 0, 0, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
+        }
+
         /* Responsive Mobile Tweak */
         @media (max-width: 480px) {
             #hero { padding-top: 40px; }
             .btn-hero { font-size: 0.75rem; padding: 12px 2px; }
             .hero-verse { font-size: 0.85rem; }
+            .logo-text { 
+                font-size: 1rem !important; 
+                white-space: nowrap !important; 
+                display: flex !important;
+                align-items: center;
+                letter-spacing: 1px !important;
+            }
+            .hamburger, .menu-toggle i {
+                font-size: 1.1rem !important; 
+                display: flex;
+                align-items: center;
+            }
+            header {
+                padding: 10px 15px !important;
+                display: flex !important;
+                flex-direction: row !important; 
+                justify-content: space-between !important;
+                align-items: center !important; 
+            }
         }
-        @media (max-width: 480px) {
-    /* 1. Keep text on one line and shrink just enough to fit */
-    .logo-text { 
-        font-size: 1rem !important; 
-        white-space: nowrap !important; /* Forces it to stay on one line */
-        display: flex !important;
-        align-items: center;
-        letter-spacing: 1px !important;
-    }
-
-    /* 2. Shrink the hamburger to match the text height */
-    .hamburger, .menu-toggle i {
-        font-size: 1.1rem !important; /* Reduced from the standard 1.5rem+ */
-        display: flex;
-        align-items: center;
-    }
-
-    /* 3. Force the header to be a perfect 'Flex Row' */
-    header {
-        padding: 10px 15px !important;
-        display: flex !important;
-        flex-direction: row !important; /* Ensures it NEVER stacks */
-        justify-content: space-between !important;
-        align-items: center !important; /* This aligns them by their centers */
-    }
-}
 
         /* --- RESPONSIVE SWIPE & MOBILE --- */
         @media (max-width: 900px) {
             .nav-links { display: none; }
             .menu-toggle { display: flex; }
-            .cart-icon-wrapper { display: none; } /* Hide in top nav on mobile, use menu */
+            .cart-icon-wrapper { display: none; } 
         }
 
-        .swipe-container { display: grid; gap: 20px; }
+        /* Training Hub Mobile Fix (Zoom/Width Correction) */
         @media (max-width: 768px) {
+            .hub-grid {
+                display: flex !important;
+                overflow-x: auto;
+                scroll-snap-type: x mandatory;
+                gap: 15px;
+                margin: 0;
+                padding: 0 20px 20px 20px;
+                scrollbar-width: none;
+            }
+            .hub-grid::-webkit-scrollbar { display: none; }
+            .hub-card {
+                min-width: 75vw !important; /* Fixed "zoomed" look */
+                scroll-snap-align: center;
+                padding: 25px !important;
+                min-height: 480px !important;
+            }
+            .hub-card h3 { font-size: 1.8rem !important; }
+
+            /* Previous Swipe Container Logic */
             .swipe-container {
                 display: flex !important; overflow-x: auto; scroll-snap-type: x mandatory;
                 gap: 15px; margin: 0 -5%; padding: 0 5% 20px 5%; scrollbar-width: none;
@@ -210,6 +250,7 @@
             .swipe-container::-webkit-scrollbar { display: none; }
             .swipe-card { min-width: 85vw; scroll-snap-align: center; box-sizing: border-box; }
         }
+
         /* --- RESPONSIVE FOOTER --- */
     .main-footer {
         background: #000;
@@ -258,7 +299,6 @@
         justify-content: flex-end;
     }
 
-    /* Mobile Center Alignment & Tight Spacing */
     @media (max-width: 768px) {
         .main-footer {
             padding: 40px 5% 20px;
@@ -310,7 +350,6 @@
     overflow: hidden;
 }
 
-/* This creates the smooth fade into the next section */
 #hero::after {
     content: '';
     position: absolute;
@@ -323,31 +362,25 @@
 }
 
 .hero-content-wrapper {
-    z-index: 3; /* Keeps text above the gradient fade */
+    z-index: 3; 
     display: flex;
     flex-direction: column;
     align-items: center;
 }
-/* This targets phones and tablets */
 @media (max-width: 1024px) {
     #hero {
-        /* This removes the 'fixed' property which causes the blur */
         background-attachment: scroll !important;
-        
-        /* This ensures the image is centered and covers the screen properly */
         background-position: center center !important;
         background-size: cover !important;
     }
 }
 @media (max-width: 480px) {
-    /* 1. Scale down the logo text slightly */
     .logo-text { 
         font-size: 1.1rem !important; 
-        max-width: 70%; /* Prevents it from running into the right side */
+        max-width: 70%; 
         line-height: 1.2;
     }
 
-    /* 2. Adjust the header padding for more space */
     header {
         padding: 15px 4% !important;
         display: flex;
@@ -355,35 +388,30 @@
         align-items: center;
     }
 
-    /* 3. Ensure the hamburger has a fixed area */
     .menu-toggle {
         padding-left: 10px;
         z-index: 1001;
     }
 }
 @media (max-width: 768px) {
-    /* Stack the 4 columns into 1 */
     .footer-grid {
         grid-template-columns: 1fr !important;
         text-align: center !important;
         gap: 50px !important;
     }
 
-    /* Center the social icons and map marker */
     .footer-grid div {
         display: flex;
         flex-direction: column;
         align-items: center;
     }
 
-    /* Center the protocol links and give them space */
     .protocol-bar {
         flex-direction: column !important;
         gap: 20px !important;
         padding: 40px 0 !important;
     }
 
-    /* Center the Bottom Tier (Copyright and Console) */
     .footer-bottom {
         flex-direction: column !important;
         text-align: center !important;
@@ -396,10 +424,9 @@
     }
 
 }
-/* Only triggers when the "Ghost" is active */
 .is-glitching {
     animation: logo-shred 0.2s infinite !important;
-    color: #ffeb3b !important; /* Echelon Yellow Highlight */
+    color: #ffeb3b !important; 
     text-shadow: 2px 0 #fff, -2px 0 #000;
 }
 
@@ -410,7 +437,7 @@
     75% { transform: translate(-2px, -3px); clip-path: inset(20% 0 50% 0); }
     100% { transform: translate(0); }
 }
-/* Mobile Header Adjustment */
+
 @media (max-width: 768px) {
     header .container {
         display: flex;
@@ -419,15 +446,13 @@
         padding: 10px 15px;
     }
 
-    /* Adjusting the logo text size so it fits on one line */
     .brand-name {
-        font-size: 18px !important; /* Slightly smaller to prevent wrapping */
+        font-size: 18px !important; 
         line-height: 1.2;
-        max-width: 80%; /* Leaves room for the hamburger */
+        max-width: 80%; 
         display: inline-block;
     }
 
-    /* Ensuring the hamburger menu stays aligned */
     .menu-toggle {
         margin: 0;
         padding: 5px;
@@ -435,561 +460,18 @@
 }
 #contact {
     position: relative;
-    z-index: 10; /* Keeps the form above the background layers */
+    z-index: 10; 
 }
 
 #contact-form button {
     position: relative;
-    z-index: 20 !important; /* Forces the button to the absolute front */
+    z-index: 20 !important; 
     pointer-events: auto !important; 
     touch-action: manipulation;
 }
-    </style>
-</head>
-<div id="legal-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; padding: 40px 5%; box-sizing: border-box; overflow-y: auto;">
-    <div style="max-width: 800px; margin: 0 auto; background: #111; border: 1px solid #333; padding: 40px; position: relative;">
-        <button onclick="closeLegal()" style="position: absolute; top: 20px; right: 20px; background: none; border: none; color: var(--primary); font-size: 1.5rem; cursor: pointer;">&times;</button>
-        
-        <div id="legal-content" style="color: #ccc; font-family: var(--body-font); line-height: 1.6; font-size: 0.9rem;">
-            </div>
-    </div>
-</div>
 
-<script>
-const legalDocs = {
-    privacy: `
-        <h2 style="color: #fff; font-family: var(--heading-font); text-transform: uppercase; border-bottom: 1px solid var(--primary); padding-bottom: 10px;">Privacy Notice</h2>
-        <p><strong>Effective Date: March 2026</strong></p>
-        <p>Echelon Fitness Collective ("EFC") respects your privacy. We collect only necessary data provided via our contact and registration forms (Name, Email, and Performance Stats).</p>
-        <h4 style="color: var(--primary);">1. Data Usage</h4>
-        <p>Your information is used strictly for session registration, waitlist notifications, and order processing. We do not sell your data to third parties.</p>
-        <h4 style="color: var(--primary);">2. Security</h4>
-        <p>All form data is transmitted via secure Google Cloud protocols. While we take every precaution, no digital transmission is 100% secure.</p>
-        <h4 style="color: var(--primary);">3. Third Parties</h4>
-        <p>Nutrition links lead to Amway.com. Their privacy policy governs any data shared on their platform.</p>
-    `,
-    terms: `
-        <h2 style="color: #fff; font-family: var(--heading-font); text-transform: uppercase; border-bottom: 1px solid var(--primary); padding-bottom: 10px;">Terms of Service</h2>
-        <p><strong>Last Updated: March 2026</strong></p>
-        <h4 style="color: var(--primary);">1. Participation & Conduct</h4>
-        <p>By using this site and attending EFC sessions, you agree to move with intent and respect the safety protocols established by the coaches.</p>
-        <h4 style="color: var(--primary);">2. Liability</h4>
-        <p>All participants must sign the Liability Waiver during RSVP. EFC is not responsible for injuries sustained during high-intensity training sessions.</p>
-        <h4 style="color: var(--primary);">3. Merchandise</h4>
-        <p>Apparel orders are custom-made. All sales are final unless the item is defective. Waitlist sign-up does not guarantee stock availability.</p>
-        <h4 style="color: var(--primary);">4. Branding</h4>
-        <p>All Echelon Fitness Collective logos and "Design with Intent" materials are the property of EFC.</p>
-    `
-};
-
-function openLegal(doc) {
-    document.getElementById('legal-content').innerHTML = legalDocs[doc];
-    document.getElementById('legal-modal').style.display = 'block';
-    document.body.style.overflow = 'hidden'; // Stop background scrolling
-}
-
-function closeLegal() {
-    document.getElementById('legal-modal').style.display = 'none';
-    document.body.style.overflow = 'auto'; // Re-enable scrolling
-}
-</script>
-<script>
-    function reveal() {
-        var reveals = document.querySelectorAll(".reveal");
-        for (var i = 0; i < reveals.length; i++) {
-            var windowHeight = window.innerHeight;
-            var elementTop = reveals[i].getBoundingClientRect().top;
-            var elementVisible = 150;
-            if (elementTop < windowHeight - elementVisible) {
-                reveals[i].classList.add("active");
-            }
-        }
-    }
-
-    window.addEventListener("scroll", reveal);
-
-    // To check the scroll position on page load
-    window.onload = reveal;
-    window.onbeforeunload = function () {
-    window.scrollTo(0, 0); // Forces the scroll to the top before the page reloads
-};
-
-// Or, if the browser is stubborn:
-if (window.location.hash) {
-    window.history.replaceState('', document.title, window.location.pathname);
-}
-function openProtocol(protocol) {
-    const protocols = {
-        'privacy': "PRIVACY PROTOCOL: Athlete data is encrypted and used solely for performance tracking. No third-party distribution.",
-        'terms': "TERMS OF USE: All members must adhere to the physical and safety standards of the Collective.",
-        'data': "ENCRYPTION: 256-bit secure socket layer active for all terminal check-ins."
-    };
-    alert("SYSTEM SECURE ACCESS:\n\n" + protocols[protocol]);
-}
-</script>
-<body>
-  
-
-<nav>
-    <a href="#" class="brand-name" onclick="triggerConsole();">
-        ECHELON <span>FITNESS COLLECTIVE</span>
-    </a>
-    
-    <ul class="nav-links">
-        <li><a href="#about">About</a></li>
-        <li><a href="#training-hub">Training</a></li> 
-        <li><a href="#shop">Shop</a></li>
-        <li><a href="#contact">Contact</a></li>
-        <li>
-            <div class="cart-icon-wrapper" onclick="toggleCart()">
-                <i class="fas fa-shopping-bag"></i>
-                <span id="cart-count">0</span>
-            </div>
-        </li>
-    </ul>
-    <div class="menu-toggle" id="mobile-btn" onclick="toggleMenu()">
-        <span></span><span></span><span></span>
-    </div>
-</nav>
-
-<div class="mobile-menu" id="mobile-overlay">
-    <div style="width: 100%; padding: 20px; display: flex; justify-content: flex-end; box-sizing: border-box;">
-        <button onclick="toggleMenu()" style="background:none; border:none; color:#fff; font-size:2.5rem; cursor:pointer;">&times;</button>
-    </div>
-    <a href="#hero" onclick="toggleMenu()">HOME</a>
-    <a href="#about" onclick="toggleMenu()">ABOUT</a>
-    <a href="#training-hub" onclick="toggleMenu()">TRAINING</a>
-    <a href="#shop" onclick="toggleMenu()">SHOP</a>
-    <a href="#contact" onclick="toggleMenu()">CONTACT</a>
-    <div style="border-top: 1px solid #333; margin-top: 20px; padding-top: 20px; width: 80%; text-align: center;">
-        <a href="javascript:void(0)" onclick="toggleMenu(); toggleCart();" style="color: var(--primary); font-size: 2rem;">
-            VIEW CART (<span id="menu-cart-count">0</span>)
-        </a>
-    </div>
-</div>
-
-<div id="cart-drawer">
-    <div style="padding: 20px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; background: #050505;">
-        <h3 style="margin:0; font-family: var(--heading-font); color: var(--primary); font-size: 1.8rem; letter-spacing: 2px;">YOUR GEAR</h3>
-        <button onclick="toggleCart()" style="background:none; border:none; color:#fff; font-size:2rem; cursor:pointer;">&times;</button>
-    </div>
-    
-    <div id="cart-items-container" style="padding: 20px; flex-grow: 1; overflow-y: auto;">
-        </div>
-
-    <div style="padding: 20px; border-top: 1px solid #222; background: #050505;">
-        <div style="display: flex; justify-content: space-between; font-family: var(--heading-font); margin-bottom: 20px; color: #fff; font-size: 1.2rem;">
-            <span>TOTAL:</span>
-            <span id="cart-total-amount">$0.00</span>
-        </div>
-        <button onclick="handleCheckout()" style="width:100%; background: var(--primary); color: #000; font-weight: 900; border: none; padding: 18px; cursor: pointer; font-family: var(--heading-font); font-size: 1.1rem; letter-spacing: 1px;">PROCEED TO CHECKOUT</button>
-    </div>
-</div>
-
-<div id="admin-gate">
-    <div id="admin-login-box" style="background:#111; padding:40px; border:1px solid var(--primary); width:90%; max-width:400px; text-align:center;">
-        <h2 style="font-family:var(--heading-font); color:var(--primary); margin-bottom:20px;">ECHELON COMMAND</h2>
-        <input type="email" id="adm-email" placeholder="Admin Email" style="width:100%; margin-bottom:15px; padding:12px; background:#000; color:#fff; border:1px solid #333;">
-        <input type="password" id="adm-pass" placeholder="Password" style="width:100%; margin-bottom:20px; padding:12px; background:#000; color:#fff; border:1px solid #333;">
-        <button onclick="realAdminLogin()" style="width:100%; background:var(--primary); color:#000; padding:15px; border:none; font-family:var(--heading-font); cursor:pointer;">AUTHORIZE</button>
-        <p onclick="toggleAdminGate()" style="color:#666; font-size:0.8rem; margin-top:20px; cursor:pointer;">CLOSE TERMINAL</p>
-    </div>
-
-    <div id="admin-dashboard" style="display:none; width:95%; max-width:1200px; background:#080808; border:1px solid #222; padding:30px; height:80vh; overflow-y:auto;">
-        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--primary); padding-bottom:15px; margin-bottom:20px;">
-            <h3 style="color:var(--primary); margin:0; font-family:var(--heading-font);">ECHELON SUPABASE CONSOLE</h3>
-            <button onclick="adminLogout()" style="background:transparent; color:#ff4444; border:1px solid #ff4444; padding:5px 15px; cursor:pointer;">EXIT SESSION</button>
-        </div>
-        <div style="display:flex; gap:20px;">
-            <div style="width:200px; display:flex; flex-direction:column; gap:10px;">
-                <button onclick="fetchSupabaseData('orders')" style="background:#111; color:#fff; border:1px solid #333; padding:10px; cursor:pointer; font-family:var(--heading-font);">📦 ORDERS</button>
-            </div>
-            <div id="admin-main-view" style="flex-grow:1; background:#000; border:1px solid #222; padding:20px;"></div>
-        </div>
-    </div>
-</div>
-
-<section id="hero">
-    <div class="hero-content-wrapper reveal">
-        <div class="hero-verse">
-            <span>"Blessed is the man who remains steadfast under trial..."</span>
-            <span style="display: block; font-size: 0.7rem; margin-top: 5px; opacity: 0.8;">— James 1:12</span>
-        </div>
-    <img src="logo.png" alt="Echelon Logo" class="hero-logo">
-    <h1>BUILDING STRENGTH THROUGH STRUCTURE</h1>
-    <p class="hero-sub" style="max-width: 600px; margin: 0 auto 30px; font-size: 1rem; opacity: 0.9;">
-            We help driven individuals train with structure, develop discipline, and build strength that carries into every area of life.
-        </p>
-        
-   <div style="display: flex; gap: 20px; justify-content: center; margin-top: 40px; flex-wrap: wrap;">
-    <a href="#training-hub" class="btn-main" style="text-decoration: none; display: flex; align-items: center; justify-content: center; padding: 18px 45px; background: var(--primary); color: #000; font-weight: bold; font-family: var(--heading-font); letter-spacing: 2px; transition: 0.3s; border: 1px solid var(--primary); min-width: 250px; text-transform: uppercase;">
-        VIEW PROGRAMS <i class="fas fa-chevron-right" style="margin-left: 10px; font-size: 0.8rem;"></i>
-    </a>
-
-    <a href="#contact" 
-   onclick="prefillForm('RSVP Event', 'Performance Club')" 
-   class="btn-main" 
-   style="text-decoration: none; display: flex; align-items: center; justify-content: center; padding: 18px 45px; background: var(--primary); color: #000; font-weight: bold; font-family: var(--heading-font); letter-spacing: 2px; transition: 0.3s; border: 1px solid var(--primary); min-width: 250px; text-transform: uppercase;">
-    CHECK-IN <i class="fas fa-chevron-right" style="margin-left: 10px; font-size: 0.8rem;"></i>
-</a>
-</div>
-    </div>
-</section>
-
-<section id="about" style="background: #080808; padding: 90px 5%; color: #ffffff; overflow-x: hidden;">
-    <div style="max-width: 1400px; margin: 0 auto;">
-        
-        <div class="about-flex-container">
-            
-            <div class="about-image-wrapper">
-                <img src="coach.jpg" alt="Coach Training" loading="lazy" class="coach-img">
-                <div class="image-accent-border"></div>
-            </div>
-            
-            <div class="about-text-content">
-                <h2 class="about-title">
-                    The <span style="color: var(--primary);">Collective</span>
-                </h2>
-                
-                <p style="font-size: 1.1rem; line-height: 1.5; margin-bottom: 20px; color: #fff;">
-                    <strong>At Echelon Fitness Collective, we don’t just train—we advance.</strong>
-                </p>
-                
-                <p style="color: var(--gray); font-size: 1rem; line-height: 1.7; margin-bottom: 25px;">
-                    We believe that elite fitness is built on a foundation of <strong>uncompromising structure</strong> and the power of <strong>shared effort</strong>. We provide the environment for those who seek more from their journey.
-                </p>
-
-                <div class="mission-quote">
-                    "Echelon was built on the belief that discipline creates freedom—physically, mentally, and spiritually."
-                </div>
-
-                <p style="color: var(--gray); font-size: 1rem; line-height: 1.7;">
-                    Whether you are setting the pace at our <strong>Saturday Performance Club</strong> or pushing your limits in our <strong>VL Body Lab</strong>, our programming is designed for total advancement.
-                </p>
-            </div>
-        </div>
-
-        <div class="pillar-scroll-container">
-            
-            <div class="pillar-card">
-                <h3 class="pillar-icon">🎯 WHO WE TRAIN</h3>
-                <span class="pillar-subtitle">The Committed</span>
-                <p class="pillar-para">
-                    Not the curious. Not the inconsistent. For the beginner ready to earn discipline, and the advanced ready to refine their edge.
-                </p>
-            </div>
-
-            <div class="pillar-card">
-                <h3 class="pillar-icon">⚙️ HOW WE TRAIN</h3>
-                <span class="pillar-subtitle">The Echelon Method</span>
-                <p class="pillar-para">
-                    Structured. Calculated. Progressive. Every session is intentional—built to develop strength, endurance, and mental resilience.
-                </p>
-            </div>
-
-            <div class="pillar-card">
-                <h3 class="pillar-icon">🛡️ WHY ECHELON</h3>
-                <span class="pillar-subtitle">Faith. Standard. Community.</span>
-                <p class="pillar-para">
-                    We train the whole person. We move as one. We pursue excellence—without compromise and without apology.
-                </p>
-            </div>
-
-        </div>
-
-        <div class="swipe-indicator">
-            <i class="fas fa-arrow-left"></i> SWIPE TO VIEW MORE <i class="fas fa-arrow-right"></i>
-        </div>
-
-    </div>
-</section>
-<style>
-/* --- ABOUT SECTION STYLING --- */
-.about-flex-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 60px;
-    margin-bottom: 60px;
-}
-
-.about-image-wrapper {
-    flex: 1;
-    min-width: 300px;
-    max-width: 500px; /* Prevents being "super zoomed in" on desktop */
-    position: relative;
-}
-
-.coach-img {
-    width: 100%;
-    height: auto;
-    border: 1px solid #333;
-    display: block;
-    position: relative;
-    z-index: 2;
-    background: #000;
-}
-
-.image-accent-border {
-    position: absolute;
-    top: 15px;
-    left: 15px;
-    width: 100%;
-    height: 100%;
-    border: 2px solid var(--primary);
-    z-index: 1;
-}
-
-.about-text-content {
-    flex: 1.2;
-}
-
-.about-title {
-    font-family: var(--heading-font);
-    font-size: clamp(2.5rem, 6vw, 4rem);
-    line-height: 1;
-    margin: 0 0 25px 0;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-}
-
-.mission-quote {
-    margin: 25px 0;
-    font-style: italic;
-    font-weight: bold;
-    color: #ffffff;
-    border-left: 4px solid var(--primary);
-    padding: 10px 0 10px 20px;
-    font-size: 1rem;
-    line-height: 1.4;
-    background: linear-gradient(90deg, rgba(255,215,0,0.05) 0%, rgba(0,0,0,0) 100%);
-}
-
-/* --- PILLAR CARDS (DESKTOP) --- */
-.pillar-scroll-container {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 50px;
-    border-top: 1px solid #222;
-    padding-top: 50px;
-}
-
-.pillar-card {
-    background: #111;
-    padding: 40px 30px;
-    border-top: 3px solid var(--primary);
-    transition: transform 0.3s ease;
-}
-
-.pillar-card:hover { transform: translateY(-5px); }
-.pillar-icon { color: var(--primary); font-family: var(--heading-font); font-size: 1.8rem; margin: 0 0 10px 0; }
-.pillar-subtitle { color: #fff; font-weight: bold; font-size: 0.9rem; display: block; text-transform: uppercase; letter-spacing: 1px; }
-.pillar-para { color: #888; font-size: 0.95rem; margin-top: 12px; line-height: 1.6; }
-
-.swipe-indicator { display: none; } /* Hidden on desktop */
-
-/* --- MOBILE OPTIMIZATION --- */
-@media (max-width: 768px) {
-    .about-flex-container {
-        flex-direction: column;
-        gap: 40px;
-    }
-    
-    .about-image-wrapper {
-        width: 90%; /* Fixed the "super zoomed" issue */
-        max-width: 350px;
-        margin: 0 auto;
-    }
-
-    .about-text-content {
-        text-align: center;
-    }
-
-    .mission-quote {
-        text-align: left;
-    }
-
-    /* Mobile Swipe Logic for Pillars */
-    .pillar-scroll-container {
-        display: flex;
-        grid-template-columns: none;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        gap: 15px;
-        padding-top: 40px;
-        padding-bottom: 20px;
-        margin: 0 -5%; /* Pulls to screen edges */
-        padding-left: 10%;
-        padding-right: 10%;
-        scrollbar-width: none;
-    }
-
-    .pillar-scroll-container::-webkit-scrollbar { display: none; }
-
-    .pillar-card {
-        min-width: 80vw;
-        scroll-snap-align: center;
-        padding: 30px 25px;
-    }
-
-    /* Swipe Indicator Logic */
-    .swipe-indicator {
-        display: block;
-        text-align: center;
-        font-size: 0.75rem;
-        color: var(--primary);
-        font-weight: bold;
-        letter-spacing: 2px;
-        margin-top: 15px;
-        opacity: 0.6;
-        animation: pulseSwipe 2s infinite;
-    }
-
-    @keyframes pulseSwipe {
-        0%, 100% { opacity: 0.4; }
-        50% { opacity: 1; }
-    }
-}
-/* Layout Engine */
-.footer-grid {
-    display: grid;
-    grid-template-columns: 1.5fr 1fr 1fr 1fr; /* desktop spread */
-    gap: 40px;
-    margin-bottom: 60px;
-}
-
-.footer-header {
-    color: #fff;
-    font-family: var(--heading-font);
-    text-transform: uppercase;
-    font-size: 0.8rem;
-    letter-spacing: 2px;
-    margin-bottom: 25px;
-}
-
-.footer-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.footer-nav a {
-    color: #666;
-    text-decoration: none;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    transition: 0.3s;
-}
-
-.footer-nav a:hover {
-    color: var(--primary);
-}
-
-.protocol-bar {
-    border-top: 1px solid #111;
-    border-bottom: 1px solid #111;
-    padding: 25px 0;
-    margin-bottom: 40px;
-    display: flex;
-    justify-content: center;
-    gap: 40px;
-}
-
-.protocol-bar span {
-    color: #333;
-    cursor: pointer;
-    font-size: 0.65rem;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    transition: 0.3s;
-}
-
-.protocol-bar span:hover {
-    color: #fff;
-}
-
-.footer-bottom {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-}
-
-.console-btn {
-    background: transparent;
-    border: 1px solid #222;
-    color: var(--primary);
-    padding: 8px 15px;
-    font-family: monospace;
-    font-size: 0.7rem;
-    cursor: pointer;
-    letter-spacing: 1px;
-    transition: 0.3s;
-}
-
-.console-btn:hover {
-    background: var(--primary);
-    color: #000;
-}
-
-/* MOBILE FIX */
-@media (max-width: 768px) {
-    .footer-grid {
-        grid-template-columns: 1fr;
-        text-align: center;
-        gap: 50px;
-    }
-    
-    .footer-col {
-        align-items: center;
-        display: flex;
-        flex-direction: column;
-    }
-    
-    .protocol-bar {
-        flex-direction: column;
-        align-items: center;
-        gap: 15px;
-    }
-    
-    .footer-bottom {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        gap: 40px;
-    }
-    
-    .footer-bottom div {
-        text-align: center !important;
-    }
-}
-@media (max-width: 1024px) {
-    .footer-grid {
-        grid-template-columns: 1fr 1fr !important; /* 2 columns on tablets */
-        gap: 40px !important;
-    }
-}
-
-@media (max-width: 600px) {
-    .footer-grid {
-        grid-template-columns: 1fr !important; /* 1 column on phones */
-        text-align: center !important;
-    }
-    
-    .footer-grid div {
-        align-items: center !important;
-    }
-
-    .footer-bottom {
-        flex-direction: column !important;
-        align-items: center !important;
-        text-align: center !important;
-    }
-
-    .footer-bottom div {
-        text-align: center !important;
-    }
-}
+.swipe-only-mobile { display: none; }
+@media (max-width: 768px) { .swipe-only-mobile { display: block; } }
 </style>
 
 <section id="gallery" style="background: #000; padding: 5px 5%; overflow-x: hidden;">
