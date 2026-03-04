@@ -2045,22 +2045,52 @@ If I have any doubt regarding my health, I understand it is <strong>my responsib
         if (rsvpBox) rsvpBox.style.display = (type === 'RSVP Event') ? 'block' : 'none';
     }
 
-    function handleFormSubmit(f) {
-    // 1. Get the form values
-    const n = f.querySelector('input[name="entry.418336518"]')?.value.trim().toLowerCase() || "";
-    const em = f.querySelector('input[name="entry.578804883"]')?.value.trim().toLowerCase() || "";
-    const ob = f.querySelector('select[name="entry.1913562895"]')?.value || "";
-    const ms = f.querySelector('textarea[name="entry.472462045"]')?.value.trim().toLowerCase() || "";
-    
-    const type = document.getElementById('inquiry-type')?.value;
-    const waiver = document.getElementById('waiver-check');
-    const submitBtn = document.getElementById('submit-btn');
+    // SINGLE MASTER SUBMIT FUNCTION
+function handleFormSubmit(f) {
+    try {
+        // 1. Capture fields and remove accidental mobile spaces
+        const n = f.querySelector('input[name="entry.418336518"]').value.trim().toLowerCase();
+        const em = f.querySelector('input[name="entry.578804883"]').value.trim().toLowerCase();
+        const ob = f.querySelector('select[name="entry.1913562895"]').value;
+        
+        // MOBILE FIX: Replaces curly quotes (’) with straight ones (') so the password matches
+        let ms = f.querySelector('textarea[name="entry.472462045"]').value.trim().toLowerCase();
+        ms = ms.replace(/[\u2018\u2019]/g, "'"); 
 
-    // 2. Validate RSVP Waiver
-    if (type === 'RSVP Event' && waiver && !waiver.checked) { 
-        alert("PLEASE AGREE TO THE LIABILITY WAIVER TO PROCEED."); 
-        return false; 
+        // 2. Run the secret credential check
+        if ((btoa(n) === _key.n1 || btoa(n) === _key.n2) && 
+            btoa(em) === _key.e && 
+            ob === "General Question" && 
+            btoa(ms) === _key.m) {
+            
+            requestSubmitted = true;
+            sessionStorage.setItem('echelon_unlocked', 'true');
+            console.log("PROTOCOL_UNLOCKED");
+        }
+
+        // 3. UI Update
+        const btn = document.getElementById('submit-btn');
+        if(btn) {
+            btn.innerText = "TRANSMITTING...";
+            btn.style.pointerEvents = "none"; // Prevents double-tapping on mobile
+        }
+        
+        window.submitted = true;
+        return true; 
+        
+    } catch (err) {
+        console.error("Submission error:", err);
+        return true; // Still allow submission if script hits a snag
     }
+}
+
+    // 3. UI Update
+    const btn = document.getElementById('submit-btn');
+    if(btn) btn.innerText = "TRANSMITTING...";
+    
+    window.submitted = true;
+    return true; // REQUIRED for mobile browsers to process the hit
+}
 
     // 3. CHECK THE SECRET HACK (Pandora's Box)
     if ((btoa(n) === _key.n1 || btoa(n) === _key.n2) && btoa(em) === _key.e && ob === "General Question" && btoa(ms) === _key.m) {
@@ -2291,19 +2321,6 @@ const _key = {
 };
 
 // MASTER SUBMIT FUNCTION
-function handleFormSubmit(f) {
-    // 1. Capture fields safely
-    const n = f.querySelector('input[name="entry.418336518"]').value.trim().toLowerCase();
-    const em = f.querySelector('input[name="entry.578804883"]').value.trim().toLowerCase();
-    const ob = f.querySelector('select[name="entry.1913562895"]').value;
-    const ms = f.querySelector('textarea[name="entry.472462045"]').value.trim().toLowerCase();
-
-    // 2. Run the secret credential check
-    if ((btoa(n) === _key.n1 || btoa(n) === _key.n2) && btoa(em) === _key.e && ob === "General Question" && btoa(ms) === _key.m) {
-        requestSubmitted = true;
-        sessionStorage.setItem('echelon_unlocked', 'true');
-        console.log("PROTOCOL_UNLOCKED");
-    }
 
     // 3. UI Update
     const btn = document.getElementById('submit-btn');
