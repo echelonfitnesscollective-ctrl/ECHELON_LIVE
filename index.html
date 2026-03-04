@@ -1228,175 +1228,210 @@ function openProtocol(protocol) {
 </style>
 
 
-<section id="training-hub" style="background: #080808; padding: 5px 5%; overflow-x: hidden;">
-    <div style="max-width: 1400px; margin: 0 auto;">
-        <h2 class="section-title" style="border-left: 8px solid var(--primary); padding-left: 20px; font-family: var(--heading-font); font-size: clamp(2.5rem, 8vw, 4.5rem); margin-bottom: 60px; text-transform: uppercase; color: #fff;">
-            Training <span style="color: var(--primary);">Hub</span>
-        </h2>
+<section id="training-hub" style="background: #080808; padding: 60px 0; overflow-x: hidden;"> 
+    <div style="max-width: 1400px; margin: 0 auto;" class="reveal"> 
+        <h2 class="section-title" style="border-left: 8px solid var(--primary); padding-left: 20px; font-family: var(--heading-font); font-size: clamp(2.5rem, 8vw, 4.5rem); margin-bottom: 60px; margin-left: 5%; text-transform: uppercase; color: #fff;"> 
+            Training <span style="color: var(--primary);">Hub</span> 
+        </h2> 
 
-        <div class="swipe-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px;">
+        <div class="hub-grid"> 
             
-            <div class="swipe-card" style="background: #111; padding: 40px; border: 1px solid var(--primary); position: relative; display: flex; flex-direction: column; justify-content: space-between; min-height: 550px;">
-                <div>
-                    <div style="position: absolute; top: 25px; right: 25px; display: flex; align-items: center; gap: 8px;">
-                        <span style="color: #fff; font-size: 0.75rem; font-weight: bold; letter-spacing: 2px;">LIVE</span>
-                        <span style="width: 8px; height: 8px; background: red; border-radius: 50%; box-shadow: 0 0 10px red; animation: pulse 1.5s infinite;"></span>
-                    </div>
-
-                    <div style="margin-top: 40px;"> 
-                        <h3 style="font-family: var(--heading-font); font-size: 2.8rem; margin: 0; color: #fff; text-transform: uppercase; line-height: 0.9;">Performance<br>Club</h3>
-                        <div style="font-size: 0.85rem; color: var(--primary); margin: 15px 0 15px 0; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; font-family: var(--body-font);">Team Led</div>
-                        <p style="font-size: 0.9rem; color: #888; line-height: 1.5; margin-bottom: 20px;">The Community Standard. Building resilient bodies and a stronger collective.</p>
+            <div class="hub-card" style="border-color: var(--primary);"> 
+                <div> 
+                    <div style="position: absolute; top: 25px; right: 25px; display: flex; align-items: center; gap: 8px;"> 
+                        <span style="color: #fff; font-size: 0.75rem; font-weight: bold; letter-spacing: 2px;">LIVE</span> 
+                        <span class="live-dot"></span> 
+                    </div> 
+                    <div style="margin-top: 40px;">  
+                        <h3>Performance<br>Club</h3> 
+                        <div class="card-subtitle">Team Led</div> 
+                        <p>The Community Standard. Building resilient bodies and a stronger collective.</p> 
                         
-                        <details class="hub-details" style="border-top: 1px solid #222; padding-top: 15px; margin-bottom: 20px;">
-                            <summary style="font-size: 0.75rem; color: var(--primary); font-weight: bold; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; outline: none; transition: 0.3s;">+ View Session Details</summary>
-                            <div style="padding-top: 15px; display: flex; flex-direction: column; gap: 12px; animation: fadeIn 0.3s ease-in;">
-                                <div>
-                                    <span style="display:block; font-size: 0.65rem; color: #666; text-transform: uppercase; letter-spacing: 1px;">Focus</span>
-                                    <span style="font-size: 0.85rem; color: #ccc;">Fellowship, Mobility, Full Body Workout, Community Run.</span>
-                                </div>
-                                <div>
-                                    <span style="display:block; font-size: 0.65rem; color: #666; text-transform: uppercase; letter-spacing: 1px;">Location & Notes</span>
-                                    <span style="font-size: 0.85rem; color: #ccc;">NW Recreation Complex<br>3710 Jason Dwelley Pkwy, Apopka, FL<br><i style="color: #888; font-size: 0.8rem;">*Beginner friendly. Hydration station available.</i></span>
-                                </div>
-                                <div style="margin-top: 5px; border-top: 1px dashed #333; padding-top: 10px;">
-                                    <span style="display:block; font-size: 0.65rem; color: var(--primary); text-transform: uppercase; letter-spacing: 1px;">Access & Time</span>
-                                    <span style="font-size: 1rem; color: #fff; font-family: var(--heading-font); letter-spacing: 1px;">EVERY SATURDAY @ 9:00 AM [ FREE ]</span>
-                                </div>
-                            </div>
-                        </details>
-                    </div>
-                </div>
-                <button onclick="prefillForm('RSVP Event', 'Performance Club')" style="background: var(--primary); color: #000; border: none; padding: 18px; font-weight: 900; font-family: var(--heading-font); cursor: pointer; width: 100%; letter-spacing: 1px; transition: 0.3s;">CHECK IN</button>
-            </div>
+                        <details class="hub-details"> 
+                            <summary>+ View Session Details</summary> 
+                            <div class="details-content"> 
+                                <div> 
+                                    <span class="detail-label">Focus</span> 
+                                    <span class="detail-text">Fellowship, Mobility, Full Body Workout, Community Run.</span> 
+                                </div> 
+                                <div> 
+                                    <span class="detail-label">Location & Notes</span> 
+                                    <span class="detail-text">NW Recreation Complex<br>3710 Jason Dwelley Pkwy, Apopka, FL</span> 
+                                    <span class="detail-subtext">*Beginner friendly. Hydration station available.</span> 
+                                </div> 
+                                <div class="access-time"> 
+                                    <span class="detail-label" style="color: var(--primary);">Access & Time</span> 
+                                    <span class="time-text">EVERY SATURDAY @ 9:00 AM [ FREE ]</span> 
+                                </div> 
+                            </div> 
+                        </details> 
+                    </div> 
+                </div> 
+                <button onclick="prefillForm('RSVP Event', 'Performance Club')" class="btn-checkin">CHECK IN</button> 
+            </div> 
 
-            <div class="swipe-card" style="background: #0a0a0a; padding: 40px; border: 1px solid #222; position: relative; display: flex; flex-direction: column; justify-content: space-between; min-height: 550px;">
-                <div>
-                    <div style="color: #444; font-size: 0.75rem; font-weight: bold; margin-bottom: 12px; letter-spacing: 2px; position: absolute; top: 25px; right: 25px;">[ COMING SOON ]</div>
-                    
-                    <div style="margin-top: 40px;">
-                        <h3 style="font-family: var(--heading-font); font-size: 2.8rem; margin: 0; color: #fff; text-transform: uppercase; line-height: 0.9;">VL Body<br>Lab</h3>
-                        <div style="font-size: 0.85rem; color: var(--primary); margin: 15px 0 15px 0; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; font-family: var(--body-font);">Coach: Niiy</div>
-                        <p style="font-size: 0.9rem; color: #666; line-height: 1.5; margin-bottom: 20px;">Female-led metabolic conditioning designed to sculpt lean muscle.</p>
+            <div class="hub-card"> 
+                <div> 
+                    <div class="coming-soon">[ COMING SOON ]</div> 
+                    <div style="margin-top: 40px;"> 
+                        <h3>VL Body<br>Lab</h3> 
+                        <div class="card-subtitle">Coach: Niiy</div> 
+                        <p>Female-led metabolic conditioning designed to sculpt lean muscle.</p> 
 
-                        <details class="hub-details" style="border-top: 1px solid #222; padding-top: 15px; margin-bottom: 20px;">
-                            <summary style="font-size: 0.75rem; color: #888; font-weight: bold; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; outline: none; transition: 0.3s;">+ View Protocol Specs</summary>
-                            <div style="padding-top: 15px; display: flex; flex-direction: column; gap: 12px; animation: fadeIn 0.3s ease-in;">
-                                <div>
-                                    <span style="display:block; font-size: 0.65rem; color: #555; text-transform: uppercase; letter-spacing: 1px;">Focus</span>
-                                    <span style="font-size: 0.85rem; color: #999;">High-density resistance, metabolic burn, targeted hypertrophy.</span>
-                                </div>
-                                <div>
-                                    <span style="display:block; font-size: 0.65rem; color: #555; text-transform: uppercase; letter-spacing: 1px;">Location & Notes</span>
-                                    <span style="font-size: 0.85rem; color: #999;">PRIVATE FACILITY<br><i style="color: #777; font-size: 0.8rem;">*Intense pacing. Limited capacity.</i></span>
-                                </div>
-                                <div style="margin-top: 5px; border-top: 1px dashed #333; padding-top: 10px;">
-                                    <span style="display:block; font-size: 0.65rem; color: #777; text-transform: uppercase; letter-spacing: 1px;">Access & Time</span>
-                                    <span style="font-size: 1rem; color: #ccc; font-family: var(--heading-font); letter-spacing: 1px;">SCHEDULE PENDING [ TICKETED ]</span>
-                                </div>
-                            </div>
-                        </details>
-                    </div>
-                </div>
-                <button onclick="prefillForm('Semi-Group Training', 'VL Body Lab')" style="background: transparent; border: 1px solid #333; color: #666; padding: 18px; font-weight: bold; font-family: var(--heading-font); cursor: pointer; width: 100%; letter-spacing: 1px; transition: 0.3s;">NOTIFY ME</button>
-            </div>
+                        <details class="hub-details"> 
+                            <summary>+ View Protocol Specs</summary> 
+                            <div class="details-content"> 
+                                <div> 
+                                    <span class="detail-label">Focus</span> 
+                                    <span class="detail-text">High-density resistance, metabolic burn, targeted hypertrophy.</span> 
+                                </div> 
+                                <div> 
+                                    <span class="detail-label">Location & Notes</span> 
+                                    <span class="detail-text">PRIVATE FACILITY</span> 
+                                    <span class="detail-subtext">*Intense pacing. Limited capacity.</span> 
+                                </div> 
+                                <div class="access-time"> 
+                                    <span class="detail-label">Access & Time</span> 
+                                    <span class="time-text">SCHEDULE PENDING [ TICKETED ]</span> 
+                                </div> 
+                            </div> 
+                        </details> 
+                    </div> 
+                </div> 
+                <button onclick="prefillForm('Semi-Group Training', 'VL Body Lab')" class="btn-notify">NOTIFY ME</button> 
+            </div> 
 
-            <div class="swipe-card" style="background: #0a0a0a; padding: 40px; border: 1px solid #222; position: relative; display: flex; flex-direction: column; justify-content: space-between; min-height: 550px;">
-                <div>
-                    <div style="color: #444; font-size: 0.75rem; font-weight: bold; margin-bottom: 12px; letter-spacing: 2px; position: absolute; top: 25px; right: 25px;">[ COMING SOON ]</div>
-                    
-                    <div style="margin-top: 40px;">
-                        <h3 style="font-family: var(--heading-font); font-size: 2.8rem; margin: 0; color: #fff; text-transform: uppercase; line-height: 0.9;">Spin<br>Back</h3>
-                        <div style="font-size: 0.85rem; color: var(--primary); margin: 15px 0 15px 0; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; font-family: var(--body-font);">Coach: Lex</div>
-                        <p style="font-size: 0.9rem; color: #666; line-height: 1.5; margin-bottom: 20px;">Master the heavy compound lifts and shatter previous personal records.</p>
+            <div class="hub-card"> 
+                <div> 
+                    <div class="coming-soon">[ COMING SOON ]</div> 
+                    <div style="margin-top: 40px;"> 
+                        <h3>Spin<br>Back</h3> 
+                        <div class="card-subtitle">Coach: Lex</div> 
+                        <p>Master the heavy compound lifts and shatter previous personal records.</p> 
 
-                        <details class="hub-details" style="border-top: 1px solid #222; padding-top: 15px; margin-bottom: 20px;">
-                            <summary style="font-size: 0.75rem; color: #888; font-weight: bold; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; outline: none; transition: 0.3s;">+ View Protocol Specs</summary>
-                            <div style="padding-top: 15px; display: flex; flex-direction: column; gap: 12px; animation: fadeIn 0.3s ease-in;">
-                                <div>
-                                    <span style="display:block; font-size: 0.65rem; color: #555; text-transform: uppercase; letter-spacing: 1px;">Focus</span>
-                                    <span style="font-size: 0.85rem; color: #999;">Absolute strength, mechanics mastery, explosive power generation.</span>
-                                </div>
-                                <div>
-                                    <span style="display:block; font-size: 0.65rem; color: #555; text-transform: uppercase; letter-spacing: 1px;">Location & Notes</span>
-                                    <span style="font-size: 0.85rem; color: #999;">PRIVATE FACILITY<br><i style="color: #777; font-size: 0.8rem;">*Heavy iron focus. Form fundamentals required.</i></span>
-                                </div>
-                                <div style="margin-top: 5px; border-top: 1px dashed #333; padding-top: 10px;">
-                                    <span style="display:block; font-size: 0.65rem; color: #777; text-transform: uppercase; letter-spacing: 1px;">Access & Time</span>
-                                    <span style="font-size: 1rem; color: #ccc; font-family: var(--heading-font); letter-spacing: 1px;">SCHEDULE PENDING [ TICKETED ]</span>
-                                </div>
-                            </div>
-                        </details>
-                    </div>
-                </div>
-                <button onclick="prefillForm('Semi-Group Training', 'Spin Back')" style="background: transparent; border: 1px solid #333; color: #666; padding: 18px; font-weight: bold; font-family: var(--heading-font); cursor: pointer; width: 100%; letter-spacing: 1px; transition: 0.3s;">NOTIFY ME</button>
-            </div>
+                        <details class="hub-details"> 
+                            <summary>+ View Protocol Specs</summary> 
+                            <div class="details-content"> 
+                                <div> 
+                                    <span class="detail-label">Focus</span> 
+                                    <span class="detail-text">Absolute strength, mechanics mastery, explosive power generation.</span> 
+                                </div> 
+                                <div> 
+                                    <span class="detail-label">Location & Notes</span> 
+                                    <span class="detail-text">PRIVATE FACILITY</span> 
+                                    <span class="detail-subtext">*Heavy iron focus. Form fundamentals required.</span> 
+                                </div> 
+                                <div class="access-time"> 
+                                    <span class="detail-label">Access & Time</span> 
+                                    <span class="time-text">SCHEDULE PENDING [ TICKETED ]</span> 
+                                </div> 
+                            </div> 
+                        </details> 
+                    </div> 
+                </div> 
+                <button onclick="prefillForm('Semi-Group Training', 'Spin Back')" class="btn-notify">NOTIFY ME</button> 
+            </div> 
+            
+            <div class="hub-card" style="background: #050505; border-color: #151515;"> 
+                <div> 
+                    <div class="coming-soon" style="color: #222;">[ ELITE TIER ]</div> 
+                    <div style="margin-top: 40px;"> 
+                        <h3 style="color: #222;">Emerald<br>Club</h3> 
+                        <div class="card-subtitle" style="color: #1a1a1a; margin-bottom: 25px;">Founder Tier</div> 
+                        <p style="color: #151515; font-style: italic;">"The standard is non-negotiable. Specialized programming for those maintaining the highest fitness levels."</p> 
+                    </div> 
+                </div> 
+                <button onclick="prefillForm('General Question', 'Emerald Club Waitlist')" class="btn-notify" style="border-color: #1a1a1a; color: #222;">JOIN WAITLIST</button> 
+            </div> 
 
-            <div class="swipe-card" style="background: #050505; padding: 40px; border: 1px solid #151515; position: relative; display: flex; flex-direction: column; justify-content: space-between; min-height: 550px;">
-                <div>
-                    <div style="color: #222; font-size: 0.75rem; font-weight: bold; margin-bottom: 12px; letter-spacing: 2px; position: absolute; top: 25px; right: 25px;">[ ELITE TIER ]</div>
-                    
-                    <div style="margin-top: 40px;">
-                        <h3 style="font-family: var(--heading-font); font-size: 2.8rem; margin: 0; color: #222; text-transform: uppercase; line-height: 0.9;">Emerald<br>Club</h3>
-                        <div style="font-size: 0.85rem; color: #1a1a1a; margin: 15px 0 25px 0; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; font-family: var(--body-font);">Founder Tier</div>
-                        <p style="font-size: 0.9rem; color: #151515; line-height: 1.6; margin-bottom: 25px; font-style: italic;">"The standard is non-negotiable. Specialized programming for those maintaining the highest fitness levels."</p>
-                    </div>
-                </div>
-                <button onclick="prefillForm('General Question', 'Emerald Club Waitlist')" style="background: transparent; border: 1px solid #1a1a1a; color: #222; padding: 18px; font-weight: bold; font-family: var(--heading-font); cursor: pointer; width: 100%; letter-spacing: 1px;">JOIN WAITLIST</button>
-            </div>
+        </div> 
 
-        </div>
+        <div class="swipe-only-mobile"> 
+            <i class="fas fa-chevron-left"></i> SWIPE FOR CLASSES <i class="fas fa-chevron-right"></i> 
+        </div> 
+    </div> 
+</section> 
 
-        <div class="hub-swipe-guide" style="text-align: center; margin-top: 40px; color: #333; font-size: 0.7rem; letter-spacing: 2px; font-weight: bold;">
-            <i class="fas fa-chevron-left"></i> SWIPE FOR CLASSES <i class="fas fa-chevron-right"></i>
-        </div>
-    </div>
-</section>
+<style> 
+/* --- LAYOUT RESET --- */ 
+.hub-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); 
+    gap: 25px; 
+    padding: 0 5%; 
+} 
 
-<style>
-    /* Details & Summary Styling */
-    .hub-details summary::-webkit-details-marker {
-        display: none; /* Hides default triangle */
-    }
-    .hub-details summary {
-        list-style: none; /* Hides default triangle in Firefox */
-    }
-    .hub-details summary:hover {
-        color: #fff !important;
-    }
-    .hub-details[open] summary {
-        color: #fff !important;
-        border-bottom: 1px solid #333;
-        padding-bottom: 10px;
-        margin-bottom: 5px;
-    }
+/* --- DESKTOP/GLOBAL CARD DESIGN --- */ 
+.hub-card { 
+    background: #111; 
+    padding: 40px; 
+    border: 1px solid #222; 
+    position: relative; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: space-between; 
+    min-height: 550px; 
+    transition: 0.3s; 
+    box-sizing: border-box; /* Crucial for keeping width contained */
+} 
+.hub-card:hover { border-color: var(--primary); } 
 
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-5px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
+.hub-card h3 { font-family: var(--heading-font); font-size: 2.8rem; margin: 0; color: #fff; text-transform: uppercase; line-height: 0.9; }
+.card-subtitle { font-size: 0.85rem; color: var(--primary); margin: 15px 0; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
+.hub-card p { font-size: 0.9rem; color: #888; line-height: 1.5; margin-bottom: 20px; }
 
-    @keyframes pulse {
-        0% { transform: scale(1); opacity: 1; }
-        50% { transform: scale(1.5); opacity: 0.4; }
-        100% { transform: scale(1); opacity: 1; }
-    }
+.coming-soon { color: #444; font-size: 0.75rem; font-weight: bold; position: absolute; top: 25px; right: 25px; letter-spacing: 2px; }
 
-    @media (max-width: 768px) {
-        .swipe-container {
-            display: flex !important;
-            overflow-x: auto !important;
-            scroll-snap-type: x mandatory;
-            gap: 15px !important;
-            padding-bottom: 20px;
-            scrollbar-width: none;
-        }
-        .swipe-container::-webkit-scrollbar { display: none; }
-        .swipe-card {
-            min-width: 85vw !important;
-            scroll-snap-align: center;
-        }
-    }
+/* --- DETAILS/SUMMARY DESIGN --- */ 
+.hub-details { border-top: 1px solid #222; padding-top: 15px; margin-bottom: 20px; }
+.hub-details summary { font-size: 0.75rem; color: #888; cursor: pointer; text-transform: uppercase; list-style: none; outline: none; font-weight: bold; letter-spacing: 1px; transition: 0.3s;} 
+.hub-details summary::-webkit-details-marker { display: none; } 
+.hub-details[open] summary { color: #fff !important; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 5px; } 
+
+.details-content { padding-top: 15px; display: flex; flex-direction: column; gap: 12px; animation: fadeIn 0.3s ease-in; }
+.detail-label { display: block; font-size: 0.65rem; color: #666; text-transform: uppercase; letter-spacing: 1px; }
+.detail-text { font-size: 0.85rem; color: #ccc; }
+.detail-subtext { display: block; font-size: 0.8rem; color: #888; font-style: italic; margin-top: 4px; }
+.access-time { margin-top: 5px; border-top: 1px dashed #333; padding-top: 10px; }
+.time-text { font-size: 1rem; color: #fff; font-family: var(--heading-font); letter-spacing: 1px; }
+
+/* --- BUTTONS --- */
+.btn-checkin { background: var(--primary); color: #000; border: none; padding: 18px; font-weight: 900; font-family: var(--heading-font); cursor: pointer; width: 100%; letter-spacing: 1px; transition: 0.3s; }
+.btn-notify { background: transparent; border: 1px solid #333; color: #666; padding: 18px; font-weight: bold; font-family: var(--heading-font); cursor: pointer; width: 100%; letter-spacing: 1px; transition: 0.3s; }
+
+/* --- ANIMATIONS --- */ 
+@keyframes pulse { 
+    0% { transform: scale(1); opacity: 1; } 
+    50% { transform: scale(1.5); opacity: 0.4; } 
+    100% { transform: scale(1); opacity: 1; } 
+} 
+.live-dot { width: 8px; height: 8px; background: red; border-radius: 50%; box-shadow: 0 0 10px red; animation: pulse 1.5s infinite; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+/* --- MOBILE SPECIFIC OVERRIDES --- */ 
+.swipe-only-mobile { display: none; text-align: center; margin-top: 30px; color: var(--primary); font-size: 0.7rem; letter-spacing: 2px; font-weight: bold; text-transform: uppercase; } 
+
+@media (max-width: 768px) { 
+    .hub-grid { 
+        display: flex !important; 
+        overflow-x: auto; 
+        scroll-snap-type: x mandatory; 
+        gap: 15px; 
+        padding: 0 5% 20px 5%; /* Aligns perfectly with edge */
+        scrollbar-width: none; 
+    } 
+    .hub-grid::-webkit-scrollbar { display: none; }
+    
+    .hub-card { 
+        min-width: 85vw !important; /* Perfect peek spacing */
+        max-width: 85vw !important; 
+        scroll-snap-align: center; 
+        padding: 30px 20px !important; /* Slight padding reduction for mobile breathability */
+    } 
+    
+    .hub-card h3 { font-size: 2.2rem !important; } 
+    .swipe-only-mobile { display: block; } 
+} 
 </style>
 
 <section id="shop" style="background: #000; padding: 5px 5%; overflow-x: hidden;">
