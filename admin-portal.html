@@ -213,16 +213,21 @@
         }
     }
 
-  function logout() {
-    // SCORCHED EARTH: This completely empties the browser's memory.
-    // It deletes the Admin Auth AND resets your secret sequence steps.
-    localStorage.clear(); 
-    sessionStorage.clear(); 
+function logout() {
+    // 1. Visual Shutdown
+    document.body.style.filter = "grayscale(1) brightness(0.4)";
+    document.body.style.transition = "filter 0.5s ease";
     
-    // Kick you back to the public front page
-    window.location.href = "index.html"; 
+    // 2. Targeted Strike (Only delete Auth and Admin keys)
+    localStorage.removeItem('isAdmin'); 
+    localStorage.removeItem('auth_token');
+    sessionStorage.clear(); // Safe to clear session as it's temporary anyway
+    
+    // 3. Redirect to Root
+    setTimeout(() => {
+        window.location.href = "/index.html"; 
+    }, 600);
 }
-
     loadAllData();
     // TOGGLE FORM VISIBILITY
     function toggleForm(id) {
