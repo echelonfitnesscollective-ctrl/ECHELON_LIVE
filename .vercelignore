@@ -1,0 +1,2 @@
+# Optional: shave upload payload (Vercel still installs from package.json)
+server/node_modules

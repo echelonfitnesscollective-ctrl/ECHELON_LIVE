@@ -6,6 +6,7 @@
     <title>Echelon Fitness Collective | Building Strength Through Structure</title>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/echelon-config.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -90,7 +91,7 @@
     text-align: center;
     /* SWAP THE URL BELOW */
     background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.7)), 
-                url('YOUR_NEW_IMAGE_PATH_HERE.jpg') center/cover no-repeat;
+                url('coach.jpg') center/cover no-repeat;
     padding: 0 20px; 
     position: relative;
     z-index: 1;
@@ -531,7 +532,7 @@ function openProtocol(protocol) {
   
 
 <nav>
-    <a href="#" class="brand-name" onclick="triggerConsole();">
+    <a href="javascript:void(0)" class="brand-name" onclick="triggerConsole(); return false;">
         ECHELON <span>FITNESS COLLECTIVE</span>
     </a>
     
@@ -1298,7 +1299,7 @@ function openProtocol(protocol) {
                         </details> 
                     </div> 
                 </div> 
-                <button onclick="prefillForm('Semi-Group Training', 'VL Body Lab')" class="btn-notify">NOTIFY ME</button> 
+                <button onclick="prefillForm('General Question', 'VL Body Lab')" class="btn-notify">NOTIFY ME</button> 
             </div> 
 
             <div class="hub-card"> 
@@ -1329,7 +1330,7 @@ function openProtocol(protocol) {
                         </details> 
                     </div> 
                 </div> 
-                <button onclick="prefillForm('Semi-Group Training', 'Spin Back')" class="btn-notify">NOTIFY ME</button> 
+                <button onclick="prefillForm('Spin Back Waitlist', 'Spin Back')" class="btn-notify">NOTIFY ME</button> 
             </div> 
             
             <div class="hub-card" style="background: #050505; border-color: #151515;"> 
@@ -1456,7 +1457,7 @@ function openProtocol(protocol) {
                         <div onclick="updateMerchColor('tee', 'Signature Black', 'merch_1.jpg', this)" class="swatch active-swatch" style="background:#000;"></div>
                         <div onclick="updateMerchColor('tee', 'Cloud White', 'merch_1_white.jpg', this)" class="swatch" style="background:#fff;"></div>
                         <div onclick="updateMerchColor('tee', 'Carbon Gray', 'merch_1_gray.jpg', this)" class="swatch" style="background:#444;"></div>
-                        <div onclick="updateMerchColor('tee', 'Military Olive', 'merch_1_olive.jpg', this)" class="swatch" style="background:#4b5320;"></div>
+                        <div onclick="updateMerchColor('tee', 'Military Olive', 'merch_4.jpg', this)" class="swatch" style="background:#4b5320;" title="Olive variant ships as stocked colorway"></div>
                     </div>
                     <h4 class="merch-title" style="color: #fff;">Training Tee</h4>
                     <p id="tee-color-display" class="color-label" style="font-size: 0.75rem; color: #888; margin-bottom: 12px;">Color: Signature Black</p>
@@ -1786,14 +1787,6 @@ function openProtocol(protocol) {
         element.classList.add('active-swatch');
     }
 
-    function prefillMerchWaitlist(itemName) {
-        const messageBox = document.getElementById('contact-message');
-        if(messageBox) {
-            messageBox.value = "Notify me when the " + itemName + " drops!";
-            document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
-        }
-    }
- // 1. Function for the Merch "Notify Me" buttons
 function prefillMerchWaitlist(itemName, category) {
     const select = document.getElementById('inquiry-type');
     const msgBox = document.getElementById('contact-message');
@@ -1801,8 +1794,9 @@ function prefillMerchWaitlist(itemName, category) {
 
     if (select) {
         select.value = 'Merch Waitlist';
-        // Hide all special RSVP boxes since it's just a waitlist
-        document.getElementById('rsvp-options').style.display = 'none';
+        const rsvpBox = document.getElementById('rsvp-options');
+        if (rsvpBox) rsvpBox.style.display = 'none';
+        if (typeof toggleInquiryFields === 'function') toggleInquiryFields();
     }
 
     if (msgBox) {
@@ -1845,7 +1839,7 @@ function handleAddToCartWithSpecs(itemName, price, itemPrefix) {
     const fullSpecs = `${itemName} - ${colorLabel} (${size})`;
 
     // 5. Fire Cart Logic
-    handleAddToCart(fullSpecs, price, imgUrl);
+    handleAddToCart(fullSpecs, price, imgUrl, 'training_tee');
 }
 </script>
 <section id="reviews" style="background: #000; padding: 100px 5%; overflow-x: hidden;">
@@ -1995,7 +1989,14 @@ If I have any doubt regarding my health, I understand it is <strong>my responsib
 <script>
     let cart = [];
     function toggleCart() { const drawer = document.getElementById('cart-drawer'); if (drawer) drawer.classList.toggle('active'); }
-    function handleAddToCart(name, price, image) { cart.push({ name, price, image }); updateCartUI(); const drawer = document.getElementById('cart-drawer'); if (drawer) drawer.classList.add('active'); }
+    function handleAddToCart(name, price, image, sku) {
+        var row = { name: name, price: Number(price), image: image };
+        if (sku) row.sku = sku;
+        cart.push(row);
+        updateCartUI();
+        var drawer = document.getElementById('cart-drawer');
+        if (drawer) drawer.classList.add('active');
+    }
 
     function updateCartUI() {
         const container = document.getElementById('cart-items-container');
@@ -2010,6 +2011,8 @@ If I have any doubt regarding my health, I understand it is <strong>my responsib
         });
         if (countLabel) countLabel.innerText = cart.length;
         if (totalLabel) totalLabel.innerText = `$${total.toFixed(2)}`;
+        const menuCart = document.getElementById('menu-cart-count');
+        if (menuCart) menuCart.innerText = cart.length;
     }
 
     function removeFromCart(index) { cart.splice(index, 1); updateCartUI(); }
@@ -2020,23 +2023,75 @@ If I have any doubt regarding my health, I understand it is <strong>my responsib
         if (rsvpBox) rsvpBox.style.display = (type === 'RSVP Event') ? 'block' : 'none';
     }
 
-    function handleFormSubmit(form) {
-        const type = document.getElementById('inquiry-type').value;
-        const waiver = document.getElementById('waiver-check');
-        const submitBtn = document.getElementById('submit-btn');
-        if (type === 'RSVP Event' && !waiver.checked) { alert("PLEASE AGREE TO THE LIABILITY WAIVER TO PROCEED."); return false; }
-        let details = `OBJ: ${type}`;
-        if (type === 'RSVP Event') {
-            const status = document.getElementById('r-status').value;
-            const emg = document.getElementById('r-emergency').value;
-            const inj = document.getElementById('r-injury').value;
-            details += ` | STATUS: ${status} | EMG: ${emg} | INJ: ${inj}`;
+    window.handleCheckout = async function () {
+        if (typeof cart === 'undefined' || !cart.length) {
+            alert("YOUR GEAR LOCKER IS EMPTY.");
+            return;
         }
-        document.getElementById('master-details').value = details;
-        submitBtn.innerText = "TRANSMITTING...";
-        window.submitted = true;
-        return true;
-    }
+        var checkoutRows = [];
+        cart.forEach(function (item) {
+            if (!item || item.sku !== 'training_tee') return;
+            var customization = String(item.name || '')
+                .replace(/^Training Tee\s*-?\s*/i, '')
+                .trim();
+            checkoutRows.push({
+                sku: 'training_tee',
+                quantity: 1,
+                customization: customization || 'variant',
+            });
+        });
+        if (!checkoutRows.length) {
+            alert(
+                'Checkout is only wired for stocked Echelon pieces with a checkout SKU.\n\n' +
+                    'Everything else please use CONTACT (Merch waitlist).'
+            );
+            return;
+        }
+        var base = typeof window.ECHELON_CHECKOUT_API === 'string' ? window.ECHELON_CHECKOUT_API.trim() : '';
+        if (!base) {
+            alert('Payments server URL missing. Set ECHELON_CHECKOUT_API in js/echelon-config.js');
+            return;
+        }
+        var btnStrip = Array.prototype.slice.call(document.querySelectorAll('#cart-drawer button'));
+        btnStrip.forEach(function (b) {
+            if (typeof b.dataset !== 'undefined') b.dataset.origDisabled = String(b.disabled);
+            b.disabled = true;
+        });
+        try {
+            var res = await fetch(base.replace(/\/$/, '') + '/api/create-checkout-session', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ items: checkoutRows }),
+            });
+            var payload = {};
+            try {
+                payload = await res.json();
+            } catch (_) {
+                payload = {};
+            }
+            if (!res.ok) {
+                var errMsg = payload && payload.error ? payload.error : res.statusText;
+                alert('Checkout could not start: ' + errMsg);
+                return;
+            }
+            if (payload.url) {
+                window.location.href = payload.url;
+                return;
+            }
+            alert('Checkout responded without a Stripe URL.');
+        } catch (err) {
+            alert(
+                err && err.message
+                    ? 'Network error: ' + err.message
+                    : 'Could not reach the checkout server.'
+            );
+        } finally {
+            btnStrip.forEach(function (b) {
+                b.disabled =
+                    typeof b.dataset !== 'undefined' && b.dataset.origDisabled === 'true';
+            });
+        }
+    };
 
     function showSuccess() {
         const type = document.getElementById('inquiry-type').value;
@@ -2061,14 +2116,6 @@ If I have any doubt regarding my health, I understand it is <strong>my responsib
         if (msgBox) msgBox.value = "Inquiry regarding: " + sessionName;
         document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
     };
-
-    function prefillMerchWaitlist(itemName, category) {
-        const select = document.getElementById('inquiry-type');
-        const msgBox = document.getElementById('contact-message');
-        if (select) { select.value = 'Merch Waitlist'; toggleInquiryFields(); }
-        if (msgBox) msgBox.value = "Please notify me when the " + itemName + " is back in stock.";
-        document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
-    }
 
     function toggleMenu() {
         const btn = document.getElementById('mobile-btn');
@@ -2198,7 +2245,7 @@ If I have any doubt regarding my health, I understand it is <strong>my responsib
                 ECHELON <span style="color: var(--primary);">FITNESS COLLECTIVE</span>
             </h2>
             <nav style="display: flex; gap: 30px; flex-wrap: wrap; justify-content: center;">
-                <a href="#training" style="color: #666; text-decoration: none; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px;">Training Hub</a>
+                <a href="#training-hub" style="color: #666; text-decoration: none; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px;">Training Hub</a>
                 <a href="#shop" style="color: #666; text-decoration: none; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px;">Official Apparel</a>
                 <a href="#nutrition" style="color: #666; text-decoration: none; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px;">Elite Nutrition</a>
             </nav>
@@ -2266,24 +2313,137 @@ If I have any doubt regarding my health, I understand it is <strong>my responsib
 let requestSubmitted = sessionStorage.getItem('echelon_unlocked') === 'true';
 
 const _key = {
-    n1: "bHV0aGVyIGM=", n2: "ZW5peWFoIGc=", 
-    e: "ZWNoZWxvbmZpdG5lc3Njb2xsZWN0aXZlQGdtYWlsLmNvbQ==", 
+    n1: "bHV0aGVyIGM=", n2: "ZW5peWFoIGc=",
+    e: "ZWNoZWxvbmZpdG5lc3Njb2xsZWN0aXZlQGdtYWlsLmNvbQ==",
     m: "cGFuZG9yYSdzIGJveA=="
 };
 
-function handleFormSubmit(f) {
-    const n = f.querySelector('input[name="entry.418336518"]').value.trim().toLowerCase();
-    const em = f.querySelector('input[name="entry.578804883"]').value.trim().toLowerCase();
-    const ob = f.querySelector('select[name="entry.1913562895"]').value;
-    const ms = f.querySelector('textarea[name="entry.472462045"]').value.trim().toLowerCase();
-
-    if ((btoa(n) === _key.n1 || btoa(n) === _key.n2) && btoa(em) === _key.e && ob === "General Question" && btoa(ms) === _key.m) {
-        requestSubmitted = true;
-        sessionStorage.setItem('echelon_unlocked', 'true');
-        console.log("PROTOCOL_READY"); // Secret confirmation in console
+function ensureEchelonSupabase() {
+    if (window._echelonSupabase) return window._echelonSupabase;
+    if (typeof supabase === 'undefined' || !window.ECHELON_SUPABASE_URL || !window.ECHELON_SUPABASE_ANON_KEY) {
+        console.warn('[Echelon] Supabase config missing (js/echelon-config.js).');
+        return null;
     }
+    window._echelonSupabase = supabase.createClient(
+        window.ECHELON_SUPABASE_URL,
+        window.ECHELON_SUPABASE_ANON_KEY
+    );
+    return window._echelonSupabase;
+}
+
+function handleFormSubmit(form) {
+    const inquirySelect = document.getElementById('inquiry-type');
+    const type = inquirySelect ? inquirySelect.value : '';
+    const waiver = document.getElementById('waiver-check');
+    const submitBtn = document.getElementById('submit-btn');
+    const master = document.getElementById('master-details');
+
+    if (type === 'RSVP Event' && waiver && !waiver.checked) {
+        alert("PLEASE AGREE TO THE LIABILITY WAIVER TO PROCEED.");
+        return false;
+    }
+
+    let details = `OBJ: ${type}`;
+    if (type === 'RSVP Event') {
+        const status = document.getElementById('r-status').value;
+        const emg = document.getElementById('r-emergency').value;
+        const inj = document.getElementById('r-injury').value;
+        details += ` | STATUS: ${status} | EMG: ${emg} | INJ: ${inj}`;
+    }
+    if (master) master.value = details;
+
+    const nEl = form.querySelector('input[name="entry.418336518"]');
+    const emEl = form.querySelector('input[name="entry.578804883"]');
+    const obEl = form.querySelector('select[name="entry.1913562895"]');
+    const msEl = form.querySelector('textarea[name="entry.472462045"]');
+    if (nEl && emEl && obEl && msEl) {
+        const n = nEl.value.trim().toLowerCase();
+        const em = emEl.value.trim().toLowerCase();
+        const ob = obEl.value;
+        const ms = msEl.value.trim().toLowerCase();
+        if ((btoa(n) === _key.n1 || btoa(n) === _key.n2) && btoa(em) === _key.e && ob === "General Question" && btoa(ms) === _key.m) {
+            requestSubmitted = true;
+            sessionStorage.setItem('echelon_unlocked', 'true');
+            console.log("PROTOCOL_READY");
+        }
+    }
+
+    if (submitBtn) submitBtn.innerText = "TRANSMITTING...";
     window.submitted = true;
-    return true; 
+    return true;
+}
+
+function accessConsole() {
+    const gate = document.getElementById('admin-gate');
+    if (!gate) return;
+    gate.style.display = 'flex';
+    const loginBox = document.getElementById('admin-login-box');
+    const dash = document.getElementById('admin-dashboard');
+    if (dash) dash.style.display = 'none';
+    if (loginBox) loginBox.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+function toggleAdminGate() {
+    const gate = document.getElementById('admin-gate');
+    if (!gate) return;
+    const open = gate.style.display === 'flex';
+    gate.style.display = open ? 'none' : 'flex';
+    document.body.style.overflow = open ? 'auto' : 'hidden';
+}
+
+async function realAdminLogin() {
+    const emailEl = document.getElementById('adm-email');
+    const passEl = document.getElementById('adm-pass');
+    if (!emailEl || !passEl) return;
+    const email = emailEl.value.trim();
+    const password = passEl.value;
+    if (!email || !password) {
+        alert('Enter admin email and password.');
+        return;
+    }
+    const client = ensureEchelonSupabase();
+    if (!client) {
+        alert('Supabase is not configured. Check js/echelon-config.js and your connection.');
+        return;
+    }
+    const { error } = await client.auth.signInWithPassword({ email: email, password: password });
+    if (error) {
+        alert('Authorization failed: ' + error.message);
+        return;
+    }
+    document.getElementById('admin-login-box').style.display = 'none';
+    document.getElementById('admin-dashboard').style.display = 'block';
+}
+
+async function adminLogout() {
+    const client = ensureEchelonSupabase();
+    if (client) await client.auth.signOut({ scope: 'local' }).catch(function () {});
+    const loginBox = document.getElementById('admin-login-box');
+    const dash = document.getElementById('admin-dashboard');
+    if (dash) dash.style.display = 'none';
+    if (loginBox) loginBox.style.display = 'block';
+    toggleAdminGate();
+}
+
+async function fetchSupabaseData(tableName) {
+    const view = document.getElementById('admin-main-view');
+    if (!view) return;
+    view.innerHTML = '<p style="color:#888;">Loading...</p>';
+    const client = ensureEchelonSupabase();
+    if (!client) {
+        view.innerHTML = '<p>Supabase client unavailable.</p>';
+        return;
+    }
+    const { data, error } = await client.from(tableName).select('*').limit(100);
+    if (error) {
+        view.innerHTML = '<pre style="color:#f44; white-space:pre-wrap;">' + error.message + '</pre>';
+        return;
+    }
+    view.innerHTML =
+        '<pre style="color:#ccc; font-size:11px; white-space:pre-wrap;">' +
+        JSON.stringify(data, null, 2) +
+        '</pre>';
 }
 
 function startMatrix() {
@@ -2323,13 +2483,28 @@ function startMatrix() {
 
 function triggerConsole() {
     const o = document.getElementById('console-overlay');
-    if (o.style.display === 'block' || !requestSubmitted) return;
+    if (!o) return;
+    if (!requestSubmitted) {
+        o.style.display = 'block';
+        o.dataset.mode = 'locked';
+        document.getElementById('password-area').style.display = 'none';
+        const denied = document.getElementById('denied-msg');
+        if (denied) denied.style.display = 'none';
+        typeEffect(
+            'terminal-status',
+            '> CHANNEL SEALED.\n> ESTABLISH SECURE CONTACT (GENERAL QUESTION PROTOCOL) FIRST.'
+        );
+        return;
+    }
+    if (o.style.display === 'block' && o.dataset.mode === 'locked') return;
+    if (o.style.display === 'block') return;
     startMatrix();
 }
 
 function showFinalConsole() {
     const o = document.getElementById('console-overlay');
     o.style.display = 'block';
+    o.dataset.mode = 'password';
     typeEffect("terminal-status", "> GHOST_PROTOCOL_OVERRIDE... \n> ENCRYPTION BROKEN. \n> SECURE TERMINAL V.4.0 ONLINE.");
     
     setTimeout(() => { 
@@ -2371,8 +2546,11 @@ function checkAccess() {
 }
 
 function closeConsole() {
-    // 1. Hide the visual overlay
-    document.getElementById('console-overlay').style.display = 'none';
+    const o = document.getElementById('console-overlay');
+    if (o) {
+        o.style.display = 'none';
+        delete o.dataset.mode;
+    }
 
     // 2. Fix the Virtual Keyboard Bug
     // This forces the mobile keyboard to close and recalculate the screen height
@@ -2393,4 +2571,29 @@ function closeConsole() {
         submitBtn.parentNode.replaceChild(freshBtn, submitBtn);
     }
 }
+
+(function checkoutReturnSplash() {
+    try {
+        var u = new URL(window.location.href);
+        var st = u.searchParams.get('checkout');
+        if (!st) return;
+        u.searchParams.delete('checkout');
+        u.searchParams.delete('session_id');
+        window.history.replaceState({}, document.title, u.pathname + u.search + u.hash);
+        var banner = document.createElement('div');
+        banner.setAttribute('role', 'status');
+        banner.style.cssText =
+            'position:fixed;top:80px;left:50%;transform:translateX(-50%);max-width:420px;background:#080808;border:1px solid #FFD700;padding:14px 20px;z-index:100001;font-size:0.92rem;color:#eee;text-align:center;box-sizing:border-box;';
+        if (st === 'success')
+            banner.innerHTML =
+                'Payment captured — thanks for supporting Echelon. Stripe will email your receipt.';
+        else if (st === 'cancel')
+            banner.textContent = 'Checkout cancelled. Anything still in cart is shown in your gear locker.';
+        else return;
+        document.body.appendChild(banner);
+        setTimeout(function () {
+            banner.remove();
+        }, 8200);
+    } catch (_) {}
+})();
 </script>

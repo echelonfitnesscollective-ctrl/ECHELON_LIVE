@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>ECHELON | COMMAND CENTER</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/echelon-config.js"></script>
     <style>
         :root { --primary: #FFD700; --bg: #050505; --surface: #111; --border: #222; }
         body { background: var(--bg); color: #fff; font-family: 'Courier New', monospace; margin: 0; padding: 0; overflow: hidden; }
@@ -73,21 +74,21 @@
         
         <div class="nav-group">
             <span class="nav-label">INTELLIGENCE</span>
-            <div class="nav-item active" onclick="showTab('intel')">INQUIRY_FEED</div>
-            <div class="nav-item" onclick="showTab('ledger')">MEMBER_LEDGER</div>
-            <div class="nav-item" onclick="showTab('access-logs')">ACCESS_LOGS</div>
+            <div class="nav-item active" onclick="showTab('intel', this)">INQUIRY_FEED</div>
+            <div class="nav-item" onclick="showTab('ledger', this)">MEMBER_LEDGER</div>
+            <div class="nav-item" onclick="showTab('access-logs', this)">ACCESS_LOGS</div>
         </div>
 
         <div class="nav-group">
             <span class="nav-label">LOGISTICS</span>
-            <div class="nav-item" onclick="showTab('merch')">MERCH_INVENTORY</div>
-            <div class="nav-item" onclick="showTab('finance')">FINANCE_EXPENSES</div>
+            <div class="nav-item" onclick="showTab('merch', this)">MERCH_INVENTORY</div>
+            <div class="nav-item" onclick="showTab('finance', this)">FINANCE_EXPENSES</div>
         </div>
 
         <div class="nav-group">
             <span class="nav-label">PROTOCOLS</span>
-            <div class="nav-item" onclick="showTab('manual')">OPS_MANUAL</div>
-            <div class="nav-item" onclick="showTab('vault')">CREDENTIALS</div>
+            <div class="nav-item" onclick="showTab('manual', this)">OPS_MANUAL</div>
+            <div class="nav-item" onclick="showTab('vault', this)">CREDENTIALS</div>
         </div>
 
         <button class="logout-btn" onclick="logout()">TERMINATE_SESSION</button>
@@ -127,6 +128,13 @@
             <div id="member-display" style="margin-top:20px;">Fetching Vault Data...</div>
         </div>
 
+        <div id="access-logs" class="content-section">
+            <h3>ACCESS_LOGS</h3>
+            <div class="card">
+                <p style="color:#888;font-size:12px;margin:0;">No automated access telemetry is wired yet. Use Supabase Auth logs and Postgres audit tables when you enable them.</p>
+            </div>
+        </div>
+
         <div id="merch" class="content-section">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <h3>INVENTORY_LOGISTICS</h3>
@@ -163,127 +171,163 @@
             </div>
         </div>
         
-        <div id="manual" class="content-section">...</div>
+        <div id="manual" class="content-section">
+            <h3>OPS_MANUAL</h3>
+            <div class="card">
+                <p style="font-size:12px;color:#ccc;line-height:1.6;">Internal runbook: session check-in flows, waiver handling, merch fulfillment, and finance logging. Replace this stub with your SOP links or Markdown export.</p>
+            </div>
+        </div>
+
+        <div id="vault" class="content-section">
+            <h3>CREDENTIALS</h3>
+            <div class="card">
+                <p style="font-size:12px;color:#888;margin:0;">Never store secrets in browser code. Manage API keys and service credentials in Supabase Vault / your deployment host.</p>
+            </div>
+        </div>
 
     </div>
 
 <script>
-    // 1. SECURITY & DATABASE CONNECTION
+    // Gate: password flow from index sets admin_auth OR you use Supabase sign-in only on dashboard.
     if (localStorage.getItem('admin_auth') !== 'true') {
-    window.location.href = "index.html";
-}
-
-    // YOUR ACTUAL KEYS (PRE-PLUGGED)
-    const supabaseUrl = 'https://wmwiovvrfdsainngmmki.supabase.co'; 
-    const supabaseKey = 'sb_publishable_6qpc-oFSsEU9Kg-8RYhREQ_Fa6eZST9';
-    const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
-
-    // 2. NAVIGATION LOGIC
-    function showTab(tabId) {
-        document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        
-        document.getElementById(tabId).classList.add('active');
-        event.currentTarget.classList.add('active');
+        window.location.href = 'index.html';
     }
 
-    // 3. DATA LOADING ENGINE
+    const _supabase =
+        typeof supabase !== 'undefined' &&
+        window.ECHELON_SUPABASE_URL &&
+        window.ECHELON_SUPABASE_ANON_KEY
+            ? supabase.createClient(window.ECHELON_SUPABASE_URL, window.ECHELON_SUPABASE_ANON_KEY)
+            : null;
+
+    function showTab(tabId, clickedEl) {
+        const pane = document.getElementById(tabId);
+        if (!pane) {
+            console.warn('Unknown tab:', tabId);
+            return;
+        }
+        document.querySelectorAll('.content-section').forEach((s) => s.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach((n) => n.classList.remove('active'));
+        pane.classList.add('active');
+        if (clickedEl && clickedEl.classList) clickedEl.classList.add('active');
+    }
+
     async function loadAllData() {
-        // Load Members
-        const { data: members } = await _supabase.from('members').select('*');
         const mDiv = document.getElementById('member-display');
-        if (members && members.length > 0) {
-            mDiv.innerHTML = members.map(m => `
-                <div class="card">
-                    <h3>${m.name.toUpperCase()}</h3>
-                    <p style="font-size:11px; color:#666;">TYPE: ${m.membership_type} | JOINED: ${new Date(m.joined_at).toLocaleDateString()}</p>
-                </div>
-            `).join('');
+        const iList = document.getElementById('inventory-list');
+        const totalEl = document.getElementById('total-finance');
+
+        if (!_supabase) {
+            if (mDiv) mDiv.innerHTML = '<p style="color:#f44;">Supabase not configured. Load js/echelon-config.js.</p>';
+            return;
+        }
+
+        const { data: members, error: mErr } = await _supabase.from('members').select('*');
+        if (mErr) {
+            console.error(mErr);
+            if (mDiv) mDiv.innerHTML = '<p style="color:#f44;">' + mErr.message + '</p>';
+        } else if (members && members.length > 0) {
+            mDiv.innerHTML = members
+                .map(function (m) {
+                    const joinedRaw = m.joined_at || m.created_at;
+                    var joinedTxt = joinedRaw ? new Date(joinedRaw).toLocaleDateString() : '—';
+                    return (
+                        '<div class="card"><h3>' +
+                        String(m.name || '').toUpperCase() +
+                        '</h3><p style="font-size:11px; color:#666;">TYPE: ' +
+                        String(m.membership_type || '') +
+                        ' | JOINED: ' +
+                        joinedTxt +
+                        '</p></div>'
+                    );
+                })
+                .join('');
         } else {
             mDiv.innerHTML = "<p style='color:#444;'>> NO MEMBERS LOGGED.</p>";
         }
 
-        // Load Inventory
-        const { data: inv } = await _supabase.from('inventory').select('*');
-        const iList = document.getElementById('inventory-list');
-        if (inv && inv.length > 0) {
-            iList.innerHTML = inv.map(i => `
-                <tr><td>${i.item_name}</td><td>${i.size}</td><td>${i.stock_count}</td><td>$${i.price}</td></tr>
-            `).join('');
+        const { data: inv, error: iErr } = await _supabase.from('inventory').select('*');
+        if (iErr) {
+            console.error(iErr);
+        } else if (inv && inv.length > 0) {
+            iList.innerHTML = inv
+                .map(function (i) {
+                    var price =
+                        i.price != null && i.price !== ''
+                            ? '$' + Number(i.price).toFixed(2)
+                            : '—';
+                    return (
+                        '<tr><td>' +
+                        String(i.item_name || '') +
+                        '</td><td>' +
+                        String(i.size || '') +
+                        '</td><td>' +
+                        String(i.stock_count != null ? i.stock_count : '') +
+                        '</td><td>' +
+                        price +
+                        '</td></tr>'
+                    );
+                })
+                .join('');
+        }
+
+        var { data: expenses, error: fErr } = await _supabase.from('finances').select('amount');
+        if (!fErr && expenses && expenses.length && totalEl) {
+            var sum = expenses.reduce(function (a, row) {
+                return a + Number(row.amount || 0);
+            }, 0);
+            totalEl.textContent = '$' + sum.toFixed(2);
         }
     }
 
-function logout() {
-    // 1. Visual Shutdown
-    document.body.style.filter = "grayscale(1) brightness(0.4)";
-    document.body.style.transition = "filter 0.5s ease";
-    
-    // 2. Targeted Strike (Only delete Auth and Admin keys)
-    localStorage.removeItem('isAdmin'); 
-    localStorage.removeItem('auth_token');
-    sessionStorage.clear(); // Safe to clear session as it's temporary anyway
-    
-    // 3. Redirect to Root
-    setTimeout(() => {
-        window.location.href = "/index.html"; 
-    }, 600);
-}
+    async function logout() {
+        document.body.style.filter = 'grayscale(1) brightness(0.4)';
+        document.body.style.transition = 'filter 0.5s ease';
+
+        if (_supabase) {
+            await _supabase.auth.signOut({ scope: 'local' }).catch(function () {});
+        }
+        localStorage.removeItem('admin_auth');
+        localStorage.removeItem('isAdmin');
+        localStorage.removeItem('auth_token');
+        sessionStorage.clear();
+
+        setTimeout(function () {
+            window.location.href = 'index.html';
+        }, 600);
+    }
+
     loadAllData();
-    // TOGGLE FORM VISIBILITY
+
     function toggleForm(id) {
         const f = document.getElementById(id);
         f.style.display = f.style.display === 'none' ? 'block' : 'none';
     }
 
-    // ADD MEMBER TO VAULT
     async function addMember() {
-        const name = document.getElementById('m-name').value;
-        const type = document.getElementById('m-type').value;
-        const { error } = await _supabase.from('members').insert([{ name: name, membership_type: type }]);
-        if (!error) { location.reload(); }
+        if (!_supabase) return;
+        var name = document.getElementById('m-name').value;
+        var type = document.getElementById('m-type').value;
+        var res = await _supabase.from('members').insert([{ name: name, membership_type: type }]);
+        if (!res.error) location.reload();
     }
 
-    // ADD MERCH TO VAULT
     async function addInventory() {
-        const name = document.getElementById('i-name').value;
-        const size = document.getElementById('i-size').value;
-        const qty = document.getElementById('i-count').value;
-        const { error } = await _supabase.from('inventory').insert([{ item_name: name, size: size, stock_count: qty }]);
-        if (!error) { location.reload(); }
+        if (!_supabase) return;
+        var name = document.getElementById('i-name').value;
+        var size = document.getElementById('i-size').value;
+        var qty = document.getElementById('i-count').value;
+        var res = await _supabase.from('inventory').insert([{ item_name: name, size: size, stock_count: qty }]);
+        if (!res.error) location.reload();
     }
 
-    // LOG EXPENSE
     async function addExpense() {
-        const desc = document.getElementById('ex-desc').value;
-        const amt = document.getElementById('ex-amt').value;
-        const { error } = await _supabase.from('finances').insert([{ description: desc, amount: amt }]);
-        if (!error) { location.reload(); }
+        if (!_supabase) return;
+        var desc = document.getElementById('ex-desc').value;
+        var amt = document.getElementById('ex-amt').value;
+        var res = await _supabase.from('finances').insert([{ description: desc, amount: amt }]);
+        if (!res.error) location.reload();
     }
-</script>
-<script>
-/**
- * THE ACTION HANDLER
- * This makes the "CHECK IN" and "NOTIFY ME" buttons actually do something.
- */
-function prefillForm(type, service) {
-    // 1. Log it so you can see it working in the console
-    console.log("Request Triggered:", type, "for", service);
-
-    // 2. THE ACTION: Tell the user the request is recorded
-    // You can change this to an Email link or a Popup later
-    alert("REQUEST RECEIVED\n-------------------\nTYPE: " + type + "\nSERVICE: " + service + "\n\nForwarding to Echelon HQ...");
-
-    // OPTION: If you want it to open an email automatically, uncomment the line below:
-    // window.location.href = `mailto:lex.c351@gmail.com?subject=${type}: ${service}`;
-}
-
-/**
- * THE GATEKEEPER (RE-VERIFY)
- * Just a safety check to make sure nobody bypassed the sequence
- */
-if (localStorage.getItem('admin_auth') !== 'true') {
-    window.location.href = "index.html";
-}
 </script>
 </body>
 </html>
