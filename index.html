@@ -1236,6 +1236,41 @@ function openProtocol(protocol) {
         </h2> 
 
         <div class="hub-grid"> 
+
+            <div class="hub-card" style="border-color: var(--primary);">  
+                <div> 
+                    
+                    <div style="position: absolute; top: 25px; right: 25px; display: flex; align-items: center; gap: 8px;"> 
+                        <span style="color: #fff; font-size: 0.75rem; font-weight: bold; letter-spacing: 2px;">LIVE</span> 
+                        <span class="live-dot"></span> 
+                    </div> 
+                    <div style="margin-top: 40px;"> 
+                        <h3>1-ON-1 COACHING<br></h3> 
+                        <div class="card-subtitle">Coach: Luther</div> 
+                        <p>Elite coaching designed to completely transform your body. A comprehensive lifestyle system combining high-performance trainning, custom nutrition guide, and daily accountability to guarentee results</p> 
+
+                        <details class="hub-details"> 
+                            <summary>+ View Session Details</summary> 
+                            <div class="details-content"> 
+                                <div> 
+                                    <span class="detail-label">Focus</span> 
+                                    <span class="detail-text">Hyper-customized programming, elite movement science, and bespoke physical progression tailored to your exact goals.</span> 
+                                </div> 
+                                <div> 
+                                    <span class="detail-label">Location & Notes</span> 
+                                    <span class="detail-text">Mobile HYBRID </span> 
+                                    <span class="detail-subtext">*Central Florida gym access or direct premium driveway delivery.</span> 
+                                </div> 
+                                <div class="access-time"> 
+                                    <span class="detail-label" style="color: var(--primary);" >Access & Time</span> 
+                                    <span class="time-text">APPLICATION ONLY</span> 
+                                </div> 
+                            </div> 
+                        </details> 
+                    </div> 
+                </div> 
+                <button onclick="prefillForm('RSVP Event', '1-ON-1 COACHING')" class="btn-checkin"> APPLY FOR ENROLLMENT</button> 
+            </div> 
             
             <div class="hub-card" style="border-color: var(--primary);"> 
                 <div> 
@@ -1244,16 +1279,16 @@ function openProtocol(protocol) {
                         <span class="live-dot"></span> 
                     </div> 
                     <div style="margin-top: 40px;">  
-                        <h3>Performance<br>Club</h3> 
+                        <h3>FITNESS INTRO<br></h3> 
                         <div class="card-subtitle">Team Led</div> 
-                        <p>The Community Standard. Building resilient bodies and a stronger collective.</p> 
+                        <p>The ultimate entry point to the Echelon community culture. A team-led environment engineered to build resilient functional movement, establish core fitness baselines, and unite a high-performance collective</p> 
                         
                         <details class="hub-details"> 
                             <summary>+ View Session Details</summary> 
                             <div class="details-content"> 
                                 <div> 
                                     <span class="detail-label">Focus</span> 
-                                    <span class="detail-text">Fellowship, Mobility, Full Body Workout, Community Run.</span> 
+                                    <span class="detail-text">High-vibe fellowship, dynamic mobility, total-body metabolic activation, and community conditioning loops</span> 
                                 </div> 
                                 <div> 
                                     <span class="detail-label">Location & Notes</span> 
@@ -1261,14 +1296,15 @@ function openProtocol(protocol) {
                                     <span class="detail-subtext">*Beginner friendly. Hydration station available.</span> 
                                 </div> 
                                 <div class="access-time"> 
-                                    <span class="detail-label" style="color: var(--primary);">Access & Time</span> 
-                                    <span class="time-text">EVERY SATURDAY @ 9:00 AM [ FREE ]</span> 
+                                    <span class="detail-label" style="color: var(--primary);" >Access & Time</span> 
+                                    <span class="time-text">TBA [ FREE ]</span> 
                                 </div> 
                             </div> 
                         </details> 
                     </div> 
                 </div> 
-                <button onclick="prefillForm('RSVP Event', 'Performance Club')" class="btn-checkin">CHECK IN</button> 
+                <button onclick="prefillForm('RSVP Event', '1-ON-1 COACHING')" class="btn-checkin">CHECK IN</button>
+
             </div> 
 
             <div class="hub-card"> 
@@ -1276,15 +1312,15 @@ function openProtocol(protocol) {
                     <div class="coming-soon">[ COMING SOON ]</div> 
                     <div style="margin-top: 40px;"> 
                         <h3>VL KINETIC<br></h3> 
-                        <div class="card-subtitle">Coach: Niiy</div> 
-                        <p>Female-led metabolic conditioning designed to sculpt lean muscle.</p> 
+                        <div class="card-subtitle">Coach: NiiY</div> 
+                        <p>An elite, female-led workout designed to tone your entire body and sculpt your glutes. A high-energy mix of lifting and intense conditioning built to burn fat, build lean muscle, and completely change your shape."</p> 
 
                         <details class="hub-details"> 
                             <summary>+ View Session Details</summary> 
                             <div class="details-content"> 
                                 <div> 
                                     <span class="detail-label">Focus</span> 
-                                    <span class="detail-text">High-density resistance, metabolic burn, targeted hypertrophy.</span> 
+                                    <span class="detail-text">Glute growth and target shaping, total-body toning, and fast-paced fat burn. "</span> 
                                 </div> 
                                 <div> 
                                     <span class="detail-label">Location & Notes</span> 
@@ -1292,7 +1328,7 @@ function openProtocol(protocol) {
                                     <span class="detail-subtext">*Intense pacing. Limited capacity.</span> 
                                 </div> 
                                 <div class="access-time"> 
-                                    <span class="detail-label">Access & Time</span> 
+                                    <span class="detail-label" >Access & Time</span> 
                                     <span class="time-text">SCHEDULE PENDING [ TICKETED ]</span> 
                                 </div> 
                             </div> 
@@ -1302,48 +1338,9 @@ function openProtocol(protocol) {
                 <button onclick="prefillForm('General Question', 'VL KINECTIC')" class="btn-notify">NOTIFY ME</button> 
             </div> 
 
-            <div class="hub-card"> 
-                <div> 
-                    <div class="coming-soon">[ COMING SOON ]</div> 
-                    <div style="margin-top: 40px;"> 
-                        <h3>Spin<br>Back</h3> 
-                        <div class="card-subtitle">Coach: Lex</div> 
-                        <p>Master the heavy compound lifts and shatter previous personal records.</p> 
-
-                        <details class="hub-details"> 
-                            <summary>+ View Session Details</summary> 
-                            <div class="details-content"> 
-                                <div> 
-                                    <span class="detail-label">Focus</span> 
-                                    <span class="detail-text">Absolute strength, mechanics mastery, explosive power generation.</span> 
-                                </div> 
-                                <div> 
-                                    <span class="detail-label">Location & Notes</span> 
-                                    <span class="detail-text">PRIVATE FACILITY</span> 
-                                    <span class="detail-subtext">*Heavy iron focus. Form fundamentals required.</span> 
-                                </div> 
-                                <div class="access-time"> 
-                                    <span class="detail-label">Access & Time</span> 
-                                    <span class="time-text">SCHEDULE PENDING [ TICKETED ]</span> 
-                                </div> 
-                            </div> 
-                        </details> 
-                    </div> 
-                </div> 
-                <button onclick="prefillForm('Spin Back Waitlist', 'Spin Back')" class="btn-notify">NOTIFY ME</button> 
-            </div> 
             
-            <div class="hub-card" style="background: #050505; border-color: #151515;"> 
-                <div> 
-                    <div class="coming-soon" style="color: #222;">[ ELITE TIER ]</div> 
-                    <div style="margin-top: 40px;"> 
-                        <h3 style="color: #222;">Emerald<br>Club</h3> 
-                        <div class="card-subtitle" style="color: #1a1a1a; margin-bottom: 25px;">Founder Tier</div> 
-                        <p style="color: #151515; font-style: italic;">"The standard is non-negotiable. Specialized programming for those maintaining the highest fitness levels."</p> 
-                    </div> 
-                </div> 
-                <button onclick="prefillForm('General Question', 'Emerald Club Waitlist')" class="btn-notify" style="border-color: #1a1a1a; color: #222;">JOIN WAITLIST</button> 
-            </div> 
+            
+
 
         </div> 
 
