@@ -29,7 +29,7 @@ function installLaunchBasics() {
     if (!document.querySelector('link[rel="icon"]')) {
         const icon = document.createElement('link');
         icon.rel = 'icon'; icon.type = 'image/svg+xml';
-        icon.href = window.location.pathname.includes('/pages/') ? '../assets/images/favicon.svg' : 'assets/images/favicon.svg';
+        icon.href = window.location.pathname.includes('/pages/') ? '../assets/images/favicon.svg?v=1' : 'assets/images/favicon.svg?v=1';
         document.head.append(icon);
     }
     document.querySelectorAll('a[target="_blank"]').forEach((link) => {
