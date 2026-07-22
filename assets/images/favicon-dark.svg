@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Echelon Fitness Collective">
   <defs>
-    <mask id="echelon-monogram-dark" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64" mask-type="luminance">
-      <image href="echelon-logo-gold.png" x="-30" y="-20" width="125.4" height="125.4"/>
-    </mask>
+    <filter id="echelon-white" color-interpolation-filters="sRGB">
+      <feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  .2126 .7152 .0722 0 0"/>
+    </filter>
   </defs>
   <rect width="64" height="64" fill="#090909"/>
-  <rect width="64" height="64" fill="#ffffff" mask="url(#echelon-monogram-dark)"/>
+  <image href="echelon-logo-gold.png" x="-30" y="-20" width="125.4" height="125.4" filter="url(#echelon-white)"/>
 </svg>
