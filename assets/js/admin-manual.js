@@ -12,10 +12,18 @@ const EFC_MANUAL_SECTIONS = [
         ['Amway', 'Performance nutrition', 'https://www.amway.com/', 'Use only the approved product links and disclosure language already placed on the Echelon shop.']
     ]},
     { id: 'daily-ops', tag: 'DAILY OPERATIONS', title: 'THE DAILY COMMAND ROUTINE', steps: [
-        ['Open Coach Command', 'Start in the Admin Console. Clear overdue tasks, then review new applications and website inquiries.'],
-        ['Review member activity', 'Check new weekly reviews, nutrition logs, photos, and coach messages from each member record.'],
+        ['Open the Today tab', 'Start in the Admin Console on Today. Clear overdue Coach Command tasks and create any new task that requires a next action.'],
+        ['Review members and leads', 'Move to Members for active coaching activity, then Leads for new applications, contact requests, and waitlist entries.'],
         ['Follow up with intent', 'Create a task for every lead or member action that needs a next step. Give it a due date and priority.'],
         ['Close the loop', 'Mark completed tasks done and leave a private coach note for context the next time you return.']
+    ]},
+    { id: 'console-tabs', tag: 'ADMIN CONSOLE MAP', title: 'USE ONE FOCUSED TAB AT A TIME', intro: 'The Admin Console is intentionally organized as a horizontal tab workspace. Only the selected tab is visible, so operators can focus on one kind of work without losing their place.', steps: [
+        ['Today', 'Your daily command center. Review priorities, clear Coach Command tasks, and create the next action for anything that needs follow-through.'],
+        ['Members', 'Open member records, onboarding details, and recent check-ins. Use this tab for active coaching context and member-care decisions.'],
+        ['Leads', 'Review coaching applications first, then contact and waitlist inquiries. Send the appropriate response and create a Coach Command task before moving on.'],
+        ['Programs', 'Open an offering’s collapsible playbook for its delivery steps. The Echelon 12 card includes the completed coach PDF; other offerings show a clear PDF placeholder until their playbooks are built.'],
+        ['Comms', 'Use the collapsed Response Library categories for approved scripts. Open only the situation you need, copy it, personalize every bracketed detail, then send.'],
+        ['Library', 'Manage the member vault and private trainer resources. Use this for publishing guides and storing coach education, not for daily follow-ups.']
     ]},
     { id: 'new-lead', tag: 'LEAD FLOW', title: 'WHEN A NEW LEAD COMES IN', steps: [
         ['Find the lead', 'Open Coaching Applications or Contact & Waitlist in the Admin Console.'],
@@ -35,6 +43,13 @@ const EFC_MANUAL_SECTIONS = [
         ['Complete readiness', 'Confirm onboarding intake and the Echelon waiver are complete before training begins.'],
         ['Build their program', 'Open their member record, add goals and notes, then publish their first workout plan in the Coaching Hub.'],
         ['Set the rhythm', 'Ask for weekly check-ins, review their momentum, and use private messages for timely support.']
+    ]},
+    { id: 'member-portal', tag: 'MEMBER EXPERIENCE', title: 'WHAT MEMBERS SEE FIRST', intro: 'The Member Portal is arranged around the member’s current coaching rhythm rather than a long menu of links. Direct a member to the first relevant action instead of asking them to search.', steps: [
+        ['Coaching Hub first', 'This is the member&apos;s primary daily space: current plan, nutrition log, progress photos, and private coach messaging.'],
+        ['Session Check-In next', 'Use when they are preparing for an in-person session or need to signal readiness to the coach.'],
+        ['Weekly Performance', 'Use for the structured weekly review of progress, habits, recovery, and coaching focus.'],
+        ['Vault and Resource Hub', 'The Member Vault holds private Echelon material. The Resource Hub provides the broader education and complimentary resources.'],
+        ['First-Time Setup last', 'Onboarding and waiver are intentionally collapsed at the bottom. They must be complete before training begins, but they do not distract active members after setup.']
     ]},
     { id: 'publishing', tag: 'WEBSITE UPDATES', title: 'HOW TO PUBLISH AN UPDATE', steps: [
         ['Work locally first', 'Make changes in the Echelon website folder and review them in your browser.'],
