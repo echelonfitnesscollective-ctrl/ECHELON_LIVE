@@ -591,6 +591,7 @@ document.addEventListener('DOMContentLoaded', () => {
         initializeCoachCommand();
         initializeMemberLibraryManager();
         initializeCommunicationsLibrary();
+        initializeAdminTabs();
     });
 });
 
@@ -752,4 +753,22 @@ function initializeCommunicationsLibrary() {
         section.append(categorySummary, grid);
         library.append(section);
     });
+}
+
+function initializeAdminTabs() {
+    const tabs = [...document.querySelectorAll('[data-admin-tab]')];
+    const panels = [...document.querySelectorAll('[data-admin-panel]')];
+    if (!tabs.length || !panels.length) return;
+
+    const selectTab = (tabName) => {
+        tabs.forEach((tab) => {
+            const active = tab.dataset.adminTab === tabName;
+            tab.classList.toggle('active', active);
+            tab.setAttribute('aria-selected', String(active));
+        });
+        panels.forEach((panel) => { panel.hidden = panel.dataset.adminPanel !== tabName; });
+    };
+
+    tabs.forEach((tab) => tab.addEventListener('click', () => selectTab(tab.dataset.adminTab)));
+    selectTab('today');
 }
