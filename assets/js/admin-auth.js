@@ -713,7 +713,24 @@ function initializeCommunicationsLibrary() {
     const library = document.getElementById('communications-library');
     if (!library || library.childElementCount) return;
 
-    EFC_COMMUNICATION_TEMPLATES.forEach((template) => {
+    const groups = [
+        { label: 'LEADS & FIRST RESPONSE', copy: 'New inquiries, applications, waitlist decisions, and the first Echelon experience.', templates: EFC_COMMUNICATION_TEMPLATES.slice(0, 5) },
+        { label: 'MEMBER EXPERIENCE', copy: 'Onboarding and the composed weekly coaching rhythm for active members.', templates: EFC_COMMUNICATION_TEMPLATES.slice(5, 8) },
+        { label: 'SUPPORT, COMMUNITY & BOUNDARIES', copy: 'Portal support, review requests, shop questions, and professional scope.', templates: EFC_COMMUNICATION_TEMPLATES.slice(8) }
+    ];
+
+    groups.forEach((group) => {
+        const section = document.createElement('details');
+        section.className = 'communication-category';
+        const categorySummary = document.createElement('summary');
+        const categoryLabel = document.createElement('span'); categoryLabel.className = 'checkin-tag'; categoryLabel.textContent = group.label;
+        const categoryTitle = document.createElement('strong'); categoryTitle.textContent = `${group.templates.length} READY-TO-SEND SCRIPTS`;
+        const categoryCopy = document.createElement('p'); categoryCopy.textContent = group.copy;
+        const categoryMark = document.createElement('i'); categoryMark.textContent = '+';
+        categorySummary.append(categoryLabel, categoryTitle, categoryCopy, categoryMark);
+        const grid = document.createElement('div'); grid.className = 'communication-category-grid';
+
+        group.templates.forEach((template) => {
         const card = document.createElement('article');
         card.className = `communication-card${template.featured ? ' featured' : ''}`;
         const tag = document.createElement('span'); tag.className = 'checkin-tag'; tag.textContent = template.tag;
@@ -730,6 +747,9 @@ function initializeCommunicationsLibrary() {
             catch (error) { script.focus(); script.select(); feedback.textContent = 'Script selected — press Command + C to copy.'; }
         });
         card.append(tag, title, description, details, copy, feedback);
-        library.append(card);
+        grid.append(card);
+        });
+        section.append(categorySummary, grid);
+        library.append(section);
     });
 }
