@@ -4911,6 +4911,44 @@ ACTIONS
 
 }
 
+/* Work-with-Echelon conversion links */
+.footer-opportunities{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:18px 28px;
+    flex-wrap:wrap;
+    margin:-8px auto 34px;
+    font-family:'Montserrat',sans-serif;
+    letter-spacing:.12em;
+}
+
+.footer-opportunities span{
+    color:rgba(255,255,255,.48);
+    font-size:.64rem;
+    font-weight:700;
+}
+
+.footer-opportunities a{
+    color:var(--primary);
+    font-size:.68rem;
+    font-weight:800;
+    text-decoration:none;
+    border-bottom:1px solid rgba(215,181,91,.5);
+    padding-bottom:4px;
+    transition:color .2s ease,border-color .2s ease;
+}
+
+.footer-opportunities a:hover{
+    color:#fff;
+    border-color:#fff;
+}
+
+@media (max-width: 560px){
+    .footer-opportunities{ gap:14px 18px; margin-bottom:28px; }
+    .footer-opportunities span{ width:100%; text-align:center; }
+}
+
 /* ==========================================
 PARTNERS
 ========================================== */

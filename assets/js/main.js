@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     installLaunchBasics();
     installSharedFooter();
+    configureContactInquiryFromLink();
     initializePhilosophyToggle();
     initializeMobileMenu();
     initializeSmoothScroll();
@@ -54,6 +55,7 @@ function installSharedFooter() {
                 <div class="footer-socials"><a href="https://www.instagram.com/EchelonFitness.co" target="_blank" rel="noopener">INSTAGRAM</a><a href="https://tr.ee/pO3gLtovXy" target="_blank" rel="noopener">TIKTOK</a></div>
             </div>
             <div class="footer-links-row"><a href="${prefix}index.html">HOME</a><a href="${prefix}index.html#about">ABOUT</a><a href="${prefix}index.html#training">TRAINING</a><a href="${prefix}index.html#resources">RESOURCES</a><a href="${prefix}index.html#shop">SHOP</a><a href="${prefix}index.html#reviews">REVIEWS</a><a href="${prefix}index.html#contact">CONTACT</a></div>
+            <div class="footer-opportunities" aria-label="Work with Echelon"><span>WORK WITH ECHELON</span><a href="${prefix}index.html?inquiry=sponsor#contact">APPLY TO BE A SPONSOR</a><a href="${prefix}index.html?inquiry=coach#contact">APPLY TO COACH</a></div>
             <div class="footer-actions"><a href="${prefix}pages/member-login.html" class="btn-primary">MEMBER PORTAL</a><a href="${prefix}pages/admin-login.html" class="btn-secondary">ADMIN PORTAL</a></div>
         </div>
         <div class="footer-partners"><span class="footer-partners-title">TRUSTED PARTNERS</span><div class="footer-partner-grid"><a href="#" class="partner-logo"><img src="${prefix}assets/images/Cashmir.jpg" alt="Cashmir"></a><a href="https://intentrev.net" target="_blank" rel="noopener" class="partner-logo"><img src="${prefix}assets/images/intent-logo-i1.svg" alt="Intent Revenue"></a><a href="#" class="partner-logo"><img src="${prefix}assets/images/Official CentralShine logo.PNG" alt="Central Shine"></a><a href="#" class="partner-logo"><img src="${prefix}assets/images/VL-Logo.png" alt="VL Body Lab"></a></div></div>
@@ -61,6 +63,32 @@ function installSharedFooter() {
     const existing = document.querySelector('footer.footer');
     if (existing) existing.replaceWith(footer);
     else document.body.append(footer);
+}
+
+function configureContactInquiryFromLink() {
+    const form = document.getElementById('contact-form');
+    if (!form) return;
+
+    const inquiry = new URLSearchParams(window.location.search).get('inquiry');
+    const presets = {
+        sponsor: {
+            type: 'Sponsorship / Brand Partnership',
+            message: 'I am interested in exploring a sponsorship or brand partnership with Echelon Fitness Collective.'
+        },
+        coach: {
+            type: 'Coach Application',
+            message: 'I am interested in applying to coach with Echelon Fitness Collective. I would love to share my background and availability.'
+        }
+    };
+    const preset = presets[inquiry];
+    if (!preset) return;
+
+    const inquirySelect = form.querySelector('[name="inquiry_type"]');
+    const message = form.querySelector('[name="message"]');
+    if (inquirySelect) inquirySelect.value = preset.type;
+    if (message && !message.value) message.value = preset.message;
+
+    window.setTimeout(() => form.querySelector('[name="name"]')?.focus(), 450);
 }
 
 function showEchelonSuccess(target, title, message) {
