@@ -35,11 +35,18 @@ html{
 }
 
 body{
-    background:var(--black);
+    background:
+        linear-gradient(90deg,rgba(0,0,0,.96) 0%,rgba(0,0,0,.91) 52%,rgba(0,0,0,.86) 100%),
+        linear-gradient(180deg,rgba(0,0,0,.35),rgba(0,0,0,.7)),
+        url('../images/efc-studio-dawn.png') center top / cover fixed;
     color:var(--white);
     font-family:var(--body-font);
     line-height:1.6;
     overflow-x:hidden;
+}
+
+@media(max-width:720px){
+    body{background-attachment:scroll;background-position:62% top;}
 }
 
 img{
