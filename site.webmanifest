@@ -5,5 +5,5 @@
   "display": "standalone",
   "background_color": "#090909",
   "theme_color": "#090909",
-  "icons": [{ "src": "/assets/images/echelon-logo-gold.png?v=1", "sizes": "1254x1254", "type": "image/png" }]
+  "icons": [{ "src": "/assets/images/favicon.svg?v=2", "sizes": "64x64", "type": "image/svg+xml" }]
 }

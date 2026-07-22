@@ -29,7 +29,7 @@ function installLaunchBasics() {
     if (!document.querySelector('link[rel="icon"]')) {
         const icon = document.createElement('link');
         icon.rel = 'icon'; icon.type = 'image/svg+xml';
-        icon.href = window.location.pathname.includes('/pages/') ? '../assets/images/echelon-logo-gold.png?v=1' : 'assets/images/echelon-logo-gold.png?v=1';
+        icon.href = window.location.pathname.includes('/pages/') ? '../assets/images/favicon.svg?v=2' : 'assets/images/favicon.svg?v=2';
         document.head.append(icon);
     }
     document.querySelectorAll('a[target="_blank"]').forEach((link) => {
