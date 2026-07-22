@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Explore Echelon Fitness Collective training, nutrition, and performance resources.">
+
+<title>Echelon Fitness Collective | Resource Hub</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="../assets/css/main.css">
+
+<script src="../assets/js/main.js" defer></script>
+<script src="../assets/js/resource-hub.js" defer></script>
+<script src="../assets/js/resource-slider.js" defer></script>
+</head>
+
+<script>
+
+function changeProductImage(imageId, newImage, dot){
+
+    const image =
+        document.getElementById(imageId);
+
+    image.src = newImage;
+
+    const dots =
+        dot.parentElement.querySelectorAll('.image-dot');
+
+    dots.forEach(d =>
+        d.classList.remove('active')
+    );
+
+    dot.classList.add('active');
+}
+
+</script>
+
+<body>
+
+<!-- NAVIGATION -->
+
+<header class="site-header">
+
+    <div class="container">
+
+        <a href="../index.html" class="logo">
+
+            ECHELON
+            <span>FITNESS COLLECTIVE</span>
+
+        </a>
+
+        <nav class="desktop-nav">
+
+            <a href="../index.html#about">About</a>
+<a href="../index.html#training">Training</a>
+<a href="../index.html#resources">Resources </a>
+<a href="../index.html#shop">Shop</a>
+<a href="../index.html#contact">Contact</a>
+
+        </nav>
+
+        <button
+            class="mobile-toggle"
+            aria-label="Open Menu">
+
+            ☰
+
+        </button>
+
+    </div>
+
+</header>
+
+<!-- MOBILE MENU -->
+
+<div class="mobile-menu">
+
+    <a href="../index.html#about">About</a>
+    <a href="../index.html#training">Training</a>
+    <a href="../index.html#resources">Resources</a>
+    <a href="../index.html#shop">Shop</a>
+    <a href="../index.html#contact">Contact</a>
+
+</div>
+
+
+
+<!-- ==========================
+     RESOURCE HUB HEADER
+========================== -->
+
+<header class="checkin-header">
+
+
+<div class="container">
+
+    <span class="checkin-tag">
+        FREE ACCESS
+    </span>
+
+    <h1>
+        FREE RESOURCE HUB
+    </h1>
+
+    <p>
+        Explore foundational training education, simple nutrition ideas,
+        and Echelon principles designed to support your next step.
+    </p>
+
+</div>
+
+
+</header>
+
+<!-- ==========================
+     RESOURCE HUB PORTAL
+========================== -->
+
+<section class="portal-section">
+
+
+<div class="container">
+
+    <div class="portal-card resource-portal-card">
+
+        <!-- ==========================
+             RESOURCE NAVIGATION
+        ========================== -->
+
+        <nav class="hub-tabs">
+
+            <button
+                class="tab-btn active"
+                data-target="learn">
+
+                LEARN
+
+            </button>
+
+            <button class="tab-btn" data-target="vault">MEMBER VAULT</button>
+
+            <button
+                class="tab-btn"
+                data-target="fuel">
+
+                FUEL
+
+            </button>
+
+        </nav>
+
+        <!-- ==========================
+             LEARN
+        ========================== -->
+
+        <section
+            id="learn"
+            class="tab-content active">
+
+            <div class="form-section-header">
+
+                <h3>
+                    EDUCATION & DEVELOPMENT
+                </h3>
+
+            </div>
+
+            <div class="accordion-item">
+
+                <button class="accordion-header">
+
+                    Reading Lists
+
+                    <span>+</span>
+
+                </button>
+
+                <div class="accordion-body">
+
+                    <ul class="resource-list">
+
+                        <li>
+                            <a href="member-login.html">Member Vault: Muscle Manual</a>
+                        </li>
+
+                        <li>
+                            <a href="member-login.html">Member Vault: Muscle Building 101</a>
+                        </li>
+
+                        <li>
+                            <a href="#">
+                                Discipline & Consistency Framework
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="#">
+                                Leadership Development Resources
+                            </a>
+                        </li>
+
+                    </ul>
+
+                </div>
+
+            </div>
+
+            <div class="accordion-item">
+
+                <button class="accordion-header">
+
+                    Video Library
+
+                    <span>+</span>
+
+                </button>
+
+                <div class="accordion-body">
+
+                    <div class="resource-placeholder">
+
+                        Exercise Tutorials<br>
+                        Coaching Lessons<br>
+                        Educational Content
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="accordion-item">
+
+                <button class="accordion-header">
+
+                    Success Frameworks
+
+                    <span>+</span>
+
+                </button>
+
+                <div class="accordion-body">
+
+                    <ul class="resource-list">
+
+                        <li>Goal Setting Systems</li>
+                        <li>Habit Tracking Frameworks</li>
+                        <li>Accountability Worksheets</li>
+                        <li>Weekly Reflection Templates</li>
+
+                    </ul>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ==========================
+             MEMBER VAULT
+        ========================== -->
+
+        <section
+            id="vault"
+            class="tab-content">
+
+            <div class="form-section-header">
+
+                <h3>
+                    READY FOR MORE?
+                </h3>
+
+            </div>
+
+            <div class="accordion-item">
+
+                <button class="accordion-header">
+
+                    MEMBER-ONLY COACHING TOOLS
+
+                    <span>+</span>
+
+                </button>
+
+                <div class="accordion-body">
+
+                    <p>Your workout plan, progress photos, weekly check-ins, private messages, and premium guides live inside the Echelon Member Vault.</p>
+                    <a href="member-login.html" class="btn-primary">ENTER MEMBER PORTAL</a>
+
+                </div>
+
+            </div>
+
+            <div class="accordion-item">
+
+                <button class="accordion-header">
+
+                    PREMIUM EDUCATION
+
+                    <span>+</span>
+
+                </button>
+
+                <div class="accordion-body">
+
+                    <p>Member-only training guides, nutrition blueprints, and downloadable tools are added by your coach as you progress.</p>
+
+                </div>
+
+            </div>
+
+            <div class="accordion-item">
+
+                <button class="accordion-header">
+
+                    PERSONALIZED SUPPORT
+
+                    <span>+</span>
+
+                </button>
+
+                <div class="accordion-body">
+
+                    <p>Members receive a coaching experience that is built around their goals—not a one-size-fits-all library.</p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ==========================
+             FUEL
+        ========================== -->
+
+        <section
+            id="fuel"
+            class="tab-content">
+
+            <div class="form-section-header">
+
+                <h3>
+                    NUTRITION HUB
+                </h3>
+
+            </div>
+
+            <div class="accordion-item">
+
+                <button class="accordion-header">
+
+                    Meal Blueprints
+
+                    <span>+</span>
+
+                </button>
+
+                <div class="accordion-body">
+
+                    <ul class="resource-list">
+
+                        <li>
+                            <a href="#">
+                                Fat Loss Blueprint
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="#">
+                                Muscle Gain Blueprint
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="#">
+                                Maintenance Blueprint
+                            </a>
+                        </li>
+
+                    </ul>
+
+                </div>
+
+            </div>
+
+            <div class="accordion-item">
+
+                <button class="accordion-header">
+
+                    Meal Guides
+
+                    <span>+</span>
+
+                </button>
+
+                <div class="accordion-body">
+
+                    <ul class="resource-list">
+
+                         <li>
+                            <a href="../assets/images/5-Meals-Under-5-Min-Breakfast-Pt2B.png">
+                                5 Minute Breakfast 1
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="../assets/images/5-Meals-Under-5-Min-Breakfast-Pt2B.png">
+                                5 Minute Breakfast 2
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="../assets/images/5-Meals-Under-5-Min-Lunch-Pt1B.png">
+                                5 Minute Lunch 1
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="../assets/images/5-Meals-Under-5-Min-Lunch-Pt2B.png">
+                                5 Minute Lunch 2
+                            </a>
+                        </li>
+
+
+                    </ul>
+
+                </div>
+
+            </div>
+
+            <div class="accordion-item">
+
+                <button class="accordion-header">
+
+                    Supplement Education
+
+                    <span>+</span>
+
+                </button>
+
+                <div class="accordion-body">
+
+                    <p>
+
+                        Learn what supplements may help,
+                        when to use them,
+                        and how to avoid wasting money.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </div>
+
+</div>
+
+
+</section>
+
+
+
+
+<!-- ==========================================
+SITE FOOTER
+========================================== -->
+
+<footer class="footer">
+
+    <div class="container">
+
+        <!-- BRAND -->
+
+        <div class="footer-brand">
+
+            <h2>
+                ECHELON <span>FITNESS COLLECTIVE</span>
+            </h2>
+
+            <p class="footer-tagline">
+                Building Strength Through Structure.
+            </p>
+
+            <div class="footer-socials">
+
+                <a href="https://www.instagram.com/EchelonFitness.co" target="_blank">
+                    <i class="fab fa-instagram"></i>
+                </a>
+
+                <a href="https://tr.ee/pO3gLtovXy" target="_blank">
+                    <i class="fab fa-tiktok"></i>
+                </a>
+
+            </div>
+
+        </div>
+
+        <!-- NAVIGATION -->
+
+        <div class="footer-links-row">
+
+            <a href="../index.html">HOME</a>
+            <a href="../index.html#about">ABOUT</a>
+            <a href="../index.html#training">TRAINING</a>
+            <a href="../index.html#resources">RESOURCES</a>
+            <a href="../index.html#shop">SHOP</a>
+            <a href="../index.html#reviews">REVIEWS</a>
+            <a href="../index.html#contact">CONTACT</a>
+
+        </div>
+
+        <!-- MEMBER ACTIONS -->
+
+        <div class="footer-actions">
+
+            <a href="member-login.html" class="btn-primary">
+                MEMBER PORTAL
+            </a>
+
+            <a href="admin-login.html" class="btn-secondary">
+    ADMIN PORTAL
+</a>
+
+        </div>
+
+    </div>
+
+    <!-- PARTNERS -->
+
+    <div class="footer-partners">
+
+        <span class="footer-partners-title">
+            TRUSTED PARTNERS
+        </span>
+
+        <div class="footer-partner-grid">
+
+            <a href="#" target="_blank" class="partner-logo">
+                <img src="../assets/images/Cashmir.jpg" alt="Cashmir">
+            </a>
+
+            <a href="https://intentrev.net" target="_blank" class="partner-logo">
+                <img src="../assets/images/intent-logo-i1.svg" alt="Intent Revenue">
+            </a>
+
+            <a href="#" target="_blank" class="partner-logo">
+                <img src="../assets/images/Official CentralShine logo.PNG" alt="Central Shine">
+            </a>
+
+            <a href="#" target="_blank" class="partner-logo">
+                <img src="../assets/images/VL-Logo.png" alt="VL Body Lab">
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- LEGAL -->
+
+    <div class="footer-bottom">
+
+        <p>
+            © 2026 Echelon Fitness Collective. All Rights Reserved.
+        </p>
+
+        <div class="footer-legal">
+
+            <a href="privacy.html">
+                Privacy Policy
+            </a>
+
+            <a href="terms.html">
+                Terms & Conditions
+            </a>
+
+            <a href="disclaimer.html">
+                Disclaimer
+            </a>
+
+        </div>
+
+    </div>
+
+</footer>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+    <title>Echelon Fitness Collective | Member Onboarding</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/js/main.js" defer></script>
+    <script src="../assets/js/member-auth.js" defer></script>
+    <script src="../assets/js/member-onboarding.js" defer></script>
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <a href="member-portal.html" class="logo">ECHELON <span>FITNESS COLLECTIVE</span></a>
+            <nav class="desktop-nav">
+                <a href="member-portal.html">Member Portal</a>
+                <a href="checkin.html">Check In</a>
+                <a href="resources-hub.html">Resources</a>
+            </nav>
+            <button class="mobile-toggle" aria-label="Open Menu">☰</button>
+        </div>
+    </header>
+
+    <main class="portal-section onboarding-page">
+        <div class="container">
+            <div class="portal-card onboarding-card">
+                <span class="checkin-tag">MEMBER ONBOARDING</span>
+                <h1>HEALTH & READINESS</h1>
+                <p class="onboarding-intro">Complete this before training begins. Answer honestly so your Echelon coach can plan safely. A “Yes” response in the readiness screen may require medical clearance before participation.</p>
+
+                <form id="member-onboarding-form" class="echelon-form">
+                    <div class="form-section-header"><h3>PHYSICAL ACTIVITY READINESS</h3></div>
+
+                    <label for="heart-condition">Has a clinician diagnosed a heart condition and advised supervised activity?</label>
+                    <select id="heart-condition" name="heart_condition" required><option value="">Select one</option><option>Yes</option><option>No</option></select>
+
+                    <label for="heart-medication">Do you currently take medication for blood pressure or a heart condition?</label>
+                    <select id="heart-medication" name="heart_medication" required><option value="">Select one</option><option>Yes</option><option>No</option></select>
+
+                    <label for="chest-pain-activity">Do you experience chest pain during physical activity?</label>
+                    <select id="chest-pain-activity" name="chest_pain_activity" required><option value="">Select one</option><option>Yes</option><option>No</option></select>
+
+                    <label for="dizziness-or-fainting">Have you had dizziness, loss of balance, or loss of consciousness in the past 12 months?</label>
+                    <select id="dizziness-or-fainting" name="dizziness_or_fainting" required><option value="">Select one</option><option>Yes</option><option>No</option></select>
+
+                    <label for="bone-joint-tissue">Do you have a bone, joint, or soft-tissue condition that physical activity could aggravate?</label>
+                    <select id="bone-joint-tissue" name="bone_joint_tissue" required><option value="">Select one</option><option>Yes</option><option>No</option></select>
+
+                    <label for="recent-chest-pain">Have you had chest pain at any point in the past 30 days?</label>
+                    <select id="recent-chest-pain" name="recent_chest_pain" required><option value="">Select one</option><option>Yes</option><option>No</option></select>
+
+                    <label for="other-activity-concern">Is there another reason you should not begin physical activity at this time?</label>
+                    <select id="other-activity-concern" name="other_activity_concern" required><option value="">Select one</option><option>Yes</option><option>No</option></select>
+
+                    <div class="form-section-header"><h3>FOCUSED HEALTH HISTORY</h3></div>
+
+                    <textarea id="current-injuries" name="current_injuries_or_limitations" rows="4" placeholder="Current injuries, pain, or movement limitations"></textarea>
+                    <textarea id="medications" name="medications_or_conditions" rows="4" placeholder="Relevant medications or diagnosed conditions"></textarea>
+                    <textarea id="allergies" name="allergies" rows="3" placeholder="Allergies or other safety considerations"></textarea>
+                    <textarea id="surgeries" name="surgeries_or_hospitalizations" rows="3" placeholder="Recent surgeries or hospitalizations"></textarea>
+                    <select id="pregnancy" name="pregnancy_or_postpartum"><option value="">Pregnancy or postpartum considerations (if applicable)</option><option>Yes</option><option>No</option><option>Not applicable</option></select>
+                    <input id="emergency-contact" name="emergency_contact" type="text" placeholder="Emergency contact name and phone number" required>
+                    <textarea id="health-notes" name="health_notes" rows="4" placeholder="Anything else your Echelon coach should know for safe training?"></textarea>
+
+                    <label class="waiver-agreement">
+                        <input name="health_acknowledgment" type="checkbox" required>
+                        <span>I confirm that these answers are accurate and understand Echelon may request medical clearance before I train.</span>
+                    </label>
+
+                    <button type="submit" class="btn-primary">SAVE ONBOARDING</button>
+                    <p id="member-onboarding-feedback" class="form-error" role="status"></p>
+                </form>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

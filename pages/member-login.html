@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+    <title>Echelon Fitness Collective | Member Sign In</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/js/main.js" defer></script>
+    <script src="../assets/js/member-auth.js" defer></script>
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <a href="../index.html" class="logo">ECHELON <span>FITNESS COLLECTIVE</span></a>
+            <nav class="desktop-nav">
+                <a href="../index.html#about">About</a>
+                <a href="../index.html#training">Training</a>
+                <a href="../index.html#resources">Resources</a>
+                <a href="../index.html#shop">Shop</a>
+                <a href="../index.html#contact">Contact</a>
+            </nav>
+            <button class="mobile-toggle" aria-label="Open Menu">☰</button>
+        </div>
+    </header>
+
+    <div class="mobile-menu">
+        <a href="../index.html#about">About</a>
+        <a href="../index.html#training">Training</a>
+        <a href="../index.html#resources">Resources</a>
+        <a href="../index.html#shop">Shop</a>
+        <a href="../index.html#contact">Contact</a>
+    </div>
+
+    <main class="portal-section member-access-page">
+        <div class="container">
+            <div class="portal-card member-access-card">
+                <span class="checkin-tag">MEMBER ACCESS</span>
+                <h1>MEMBER PORTAL</h1>
+                <p>Sign in with the credentials issued by Echelon Fitness Collective.</p>
+
+                <form id="member-login-form" class="echelon-form">
+                    <label for="member-email">EMAIL ADDRESS</label>
+                    <input id="member-email" name="email" type="email" autocomplete="email" required>
+
+                    <label for="member-password">PASSWORD</label>
+                    <input id="member-password" name="password" type="password" autocomplete="current-password" required>
+
+                    <button type="submit" class="btn-primary">SIGN IN</button>
+                    <p id="member-login-feedback" class="form-error" role="status"></p>
+                </form>
+
+                <a href="member-reset.html" class="member-password-link">SET OR RESET YOUR PASSWORD</a>
+
+                <p class="submit-note">Portal access is provided after your membership is activated.</p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-brand">
+                <h2>ECHELON <span>FITNESS COLLECTIVE</span></h2>
+                <p class="footer-tagline">Building Strength Through Structure.</p>
+            </div>
+            <div class="footer-links-row">
+                <a href="../index.html">HOME</a>
+                <a href="../index.html#about">ABOUT</a>
+                <a href="../index.html#training">TRAINING</a>
+                <a href="../index.html#resources">RESOURCES</a>
+                <a href="../index.html#shop">SHOP</a>
+                <a href="../index.html#contact">CONTACT</a>
+            </div>
+            <div class="footer-actions">
+                <a href="member-login.html" class="btn-primary">MEMBER PORTAL</a>
+                <a href="admin-login.html" class="btn-secondary">ADMIN PORTAL</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2026 Echelon Fitness Collective. All Rights Reserved.</p>
+            <div class="footer-legal">
+                <a href="privacy.html">Privacy Policy</a>
+                <a href="terms.html">Terms & Conditions</a>
+                <a href="disclaimer.html">Disclaimer</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

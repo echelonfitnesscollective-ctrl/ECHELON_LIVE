@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Check in for your Echelon Fitness Collective training session.">
+
+<title>Echelon Fitness Collective | Check-In Portal</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="../assets/css/main.css">
+
+</head>
+
+
+<!-- ==========================
+     NAVIGATION
+========================== -->
+
+<header class="site-header">
+
+    <div class="container">
+
+        <a href="../index.html" class="logo">
+
+            ECHELON
+            <span>FITNESS COLLECTIVE</span>
+
+        </a>
+
+        <nav class="desktop-nav">
+
+            <a href="../index.html#about">About</a>
+<a href="../index.html#training">Training</a>
+<a href="../index.html#resources">Resources</a>
+<a href="../index.html#shop">Shop</a>
+<a href="../index.html#contact">Contact</a>
+
+        </nav>
+
+        <button
+            class="mobile-toggle"
+            aria-label="Open Menu">
+
+            ☰
+
+        </button>
+
+    </div>
+
+</header>
+
+<!-- MOBILE MENU -->
+
+<div class="mobile-menu">
+
+    <a href="../index.html#about">About</a>
+    <a href="../index.html#training">Training</a>
+    <a href="../index.html#resources">Resources</a>
+    <a href="../index.html#shop">Shop</a>
+    <a href="../index.html#contact">Contact</a>
+
+</div>
+
+
+
+
+
+
+<!-- ==========================
+     CHECK-IN HEADER
+========================== -->
+<header class="checkin-header">
+    <div class="container">
+        <span class="checkin-tag">MEMBER ACCESS</span>
+        <h1>SESSION CHECK-IN</h1>
+        <p>Complete your check-in before arriving so our coaches can prepare for your training experience.</p>
+    </div>
+</header>
+
+<!-- ==========================
+     CHECK-IN PORTAL
+========================== -->
+<section class="portal-section">
+    <div class="container">
+        <div class="portal-card">
+
+<form id="checkin-form" class="echelon-form">
+
+                <!-- PERSONAL INFORMATION -->
+                <div class="form-section-header"><h3>PERSONAL INFORMATION</h3></div>
+                <input type="text" name="full_name" placeholder="First & Last Name" required>
+                <input type="email" name="email" placeholder="Email Address" required>
+                <input type="tel" name="phone" placeholder="Phone Number" required>
+
+                <!-- SESSION INFORMATION -->
+                <div class="form-section-header"><h3>SESSION INFORMATION</h3></div>
+                <select name="program" required>
+                    <option value="">Select Program</option>
+                    <option value="1-On-1 Coaching">1-On-1 Coaching</option>
+                    <option value="Fitness Intro">Fitness Intro</option>
+                    <option value="VL Kinetic">VL Kinetic</option>
+                    <option value="Community Run">Community Run</option>
+                    <option value="Special Event">Special Event</option>
+                    <option value="Open Gym">Open Gym</option>
+                </select>
+
+                <select name="first_time" required>
+                    <option value="">First Time Training With Echelon?</option>
+                    <option value="Yes it's my first time!">Yes it's my first time!</option>
+                    <option value="No I've trained before!">No I've trained before!</option>
+                </select>
+
+                <input type="text" name="emergency_contact" placeholder="Emergency Contact Name & Number" required>
+
+                <!-- COACH NOTES -->
+                <div class="form-section-header"><h3>COACH NOTES</h3></div>
+                <textarea name="coach_note" rows="6" placeholder="Anything your coach should know before today's session?"></textarea>
+
+                <!-- LIABILITY WAIVER -->
+                <div class="waiver-box">
+                    <div class="waiver-header">
+                        <h4>ECHELON FITNESS COLLECTIVE</h4>
+                        <span>LIABILITY WAIVER & ASSUMPTION OF RISK</span>
+                    </div>
+                    <div class="waiver-content">
+                        By registering for and/or participating in any session offered by <strong>Echelon Fitness Collective (EFC)</strong>—including but not limited to <strong>Fitness Intro, VL Kinetic, and 1-On-1 Coaching</strong>—I acknowledge, understand, and agree to the following terms:
+                        <br><br>
+                        <strong>1. Assumption of Risk:</strong> I understand that Echelon sessions involve <strong>intense physical activity</strong>, including metabolic conditioning, heavy resistance training, and community runs. I acknowledge that these activities carry <strong>inherent risks</strong> such as slips, falls, muscle strains, joint injuries, or other physical ailments. I voluntarily choose to participate and <strong>assume full responsibility</strong> for any risks associated with these movements.
+                        <br><br>
+                        <strong>2. Safety & Modifications:</strong> I acknowledge that <strong>Echelon Fitness Collective</strong> is built on movement with intent. It is my responsibility to work within my own physical limits. I agree to utilize modifications when encouraged, move at my own pace, and exercise caution.
+                        <br><br>
+                        <strong>3. Health Conditions & Prior Injuries:</strong> I affirm that I am physically capable of participating in high-intensity training. I understand that <strong>EFC</strong>, its coaches, and management are not responsible for injuries related to pre-existing conditions or previous injuries.
+                        <ul>
+                            <li>I agree to disclose any health conditions, injuries, pregnancy, medications, or medical concerns to the Lead Coach prior to the start of the session.</li>
+                            <li>If I have any doubt regarding my health, I understand it is my responsibility to consult a medical professional before training.</li>
+                        </ul>
+                        <strong>4. Release of Liability:</strong> In consideration of being allowed to participate in the Collective, I hereby release, waive, and discharge Echelon Fitness Collective, its owners, coaches, staff, and affiliates from any and all liability, claims, demands, or causes of action arising from participation, including but not limited to personal injury, illness, or property damage.
+                        <br><br>
+                        <strong>5. No Refund Policy:</strong> I acknowledge and agree that all payments for Drop-In sessions are non-refundable. If I am unable to attend a scheduled session, a credit toward a future session may be issued at the sole discretion of EFC Management.
+                    </div>
+                </div>
+
+                <!-- REPLACE THE LIABILITY WAIVER LABEL/CHECKBOX SECTION WITH THIS -->
+<div class="waiver-agreement" style="margin: 20px 0;">
+    <select name="waiver_agreed" required>
+                    <option value="">I have read the Echelon Fitness Collective Waiver and agree to the terms above.(Click Here To Agree)</option>
+                    <option value="YES">YES</option>
+                    <option value="yes">yes</option>
+                </select>
+</div>
+
+
+
+
+                <button type="submit" class="btn-primary">COMPLETE CHECK-IN</button>
+            </form>
+
+            <!-- SUCCESS MESSAGE (Hidden by default) -->
+            <div id="success-message" style="display:none; padding: 40px; text-align: center;">
+                <h2>CHECK-IN RECEIVED</h2>
+                <p>Thank you for checking in. We look forward to training with you.</p>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+
+
+
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../assets/js/main.js" defer></script>
+<script src="../assets/js/site-intake.js"></script>
+
+
+<!-- ==========================================
+SITE FOOTER
+========================================== -->
+
+<footer class="footer">
+
+    <div class="container">
+
+        <!-- BRAND -->
+
+        <div class="footer-brand">
+
+            <h2>
+                ECHELON <span>FITNESS COLLECTIVE</span>
+            </h2>
+
+            <p class="footer-tagline">
+                Building Strength Through Structure.
+            </p>
+
+            <div class="footer-socials">
+
+                <a href="https://www.instagram.com/EchelonFitness.co" target="_blank">
+                    <i class="fab fa-instagram"></i>
+                </a>
+
+                <a href="https://tr.ee/pO3gLtovXy" target="_blank">
+                    <i class="fab fa-tiktok"></i>
+                </a>
+
+            </div>
+
+        </div>
+
+        <!-- NAVIGATION -->
+
+        <div class="footer-links-row">
+
+            <a href="../index.html">HOME</a>
+            <a href="../index.html#about">ABOUT</a>
+            <a href="../index.html#training">TRAINING</a>
+            <a href="../index.html#resources">RESOURCES</a>
+            <a href="../index.html#shop">SHOP</a>
+            <a href="../index.html#reviews">REVIEWS</a>
+            <a href="../index.html#contact">CONTACT</a>
+
+        </div>
+
+        <!-- MEMBER ACTIONS -->
+
+        <div class="footer-actions">
+
+            <a href="member-login.html" class="btn-primary">
+                MEMBER PORTAL
+            </a>
+
+           <a href="admin-login.html" class="btn-secondary">
+    ADMIN PORTAL
+</a>
+
+        </div>
+
+    </div>
+
+    <!-- PARTNERS -->
+
+    <div class="footer-partners">
+
+        <span class="footer-partners-title">
+            TRUSTED PARTNERS
+        </span>
+
+        <div class="footer-partner-grid">
+
+            <a href="#" target="_blank" class="partner-logo">
+                <img src="../assets/images/Cashmir.jpg" alt="Cashmir">
+            </a>
+
+            <a href="https://intentrev.net" target="_blank" class="partner-logo">
+                <img src="../assets/images/intent-logo-i1.svg" alt="Intent Revenue">
+            </a>
+
+            <a href="#" target="_blank" class="partner-logo">
+                <img src="../assets/images/Official CentralShine logo.PNG" alt="Central Shine">
+            </a>
+
+            <a href="#" target="_blank" class="partner-logo">
+                <img src="../assets/images/VL-Logo.png" alt="VL Body Lab">
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- LEGAL -->
+
+    <div class="footer-bottom">
+
+        <p>
+            © 2026 Echelon Fitness Collective. All Rights Reserved.
+        </p>
+
+        <div class="footer-legal">
+
+            <a href="privacy.html">
+                Privacy Policy
+            </a>
+
+            <a href="terms.html">
+                Terms & Conditions
+            </a>
+
+            <a href="disclaimer.html">
+                Disclaimer
+            </a>
+
+        </div>
+
+    </div>
+
+</footer>

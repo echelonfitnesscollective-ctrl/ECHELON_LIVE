@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Join the Echelon Fitness Collective waitlist for future coaching and training opportunities.">
+
+<title>Echelon Fitness Collective | Waitlist Portal</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="../assets/css/main.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../assets/js/site-intake.js" defer></script>
+
+<script src="../assets/js/main.js" defer></script>
+</head>
+
+<script>
+
+function changeProductImage(imageId, newImage, dot){
+
+    const image =
+        document.getElementById(imageId);
+
+    image.src = newImage;
+
+    const dots =
+        dot.parentElement.querySelectorAll('.image-dot');
+
+    dots.forEach(d =>
+        d.classList.remove('active')
+    );
+
+    dot.classList.add('active');
+}
+
+</script>
+
+<body>
+
+<!-- NAVIGATION -->
+
+<header class="site-header">
+
+    <div class="container">
+
+        <a href="../index.html" class="logo">
+
+            ECHELON
+            <span>FITNESS COLLECTIVE</span>
+
+        </a>
+
+        <nav class="desktop-nav">
+
+            <a href="../index.html#about">About</a>
+<a href="../index.html#training">Training</a>
+<a href="../index.html#resources">Resources </a>
+<a href="../index.html#shop">Shop</a>
+<a href="../index.html#contact">Contact</a>
+
+        </nav>
+
+        <button
+            class="mobile-toggle"
+            aria-label="Open Menu">
+
+            ☰
+
+        </button>
+
+    </div>
+
+</header>
+
+<!-- MOBILE MENU -->
+
+<div class="mobile-menu">
+
+    <a href="../index.html#about">About</a>
+    <a href="../index.html#training">Training</a>
+    <a href="../index.html#resources">Resources</a>
+    <a href="../index.html#shop">Shop</a>
+    <a href="../index.html#contact">Contact</a>
+
+</div>
+
+
+
+<!-- ==========================
+     WAITLIST HEADER
+========================== -->
+
+<header class="checkin-header">
+
+
+<div class="container">
+
+    <span class="checkin-tag">
+        PRIORITY ACCESS
+    </span>
+
+    <h1>
+        WAITLIST PORTAL
+    </h1>
+
+    <p>
+        Secure your spot and receive priority access to
+        upcoming coaching opportunities, merchandise drops,
+        special events, and future Echelon Fitness Collective releases.
+    </p>
+
+</div>
+
+
+</header>
+
+<!-- ==========================
+     WAITLIST PORTAL
+========================== -->
+
+<section class="portal-section">
+
+
+<div class="container">
+
+    <div class="portal-card">
+
+        <form
+            id="waitlist-form"
+            class="echelon-form"
+            >
+
+            <!-- ==========================
+                 PERSONAL INFORMATION
+            ========================== -->
+
+            <div class="form-section-header">
+
+                <h3>
+                    PERSONAL INFORMATION
+                </h3>
+
+            </div>
+
+            <input
+                type="text"
+                name="full_name"
+                placeholder="First & Last Name"
+                required>
+
+            <input
+                type="email"
+                name="email"
+                placeholder="Email Address"
+                required>
+
+            <input
+                type="tel"
+                name="phone"
+                placeholder="Phone Number"
+                required>
+
+            <!-- ==========================
+                 INTERESTS
+            ========================== -->
+
+            <div class="form-section-header">
+
+                <h3>
+                    WHAT ARE YOU INTERESTED IN?
+                </h3>
+
+            </div>
+
+            <select
+                name="interest"
+                required>
+
+                <option value="">
+                    Select Interest
+                </option>
+
+                <option value="1-On-1 Coaching">
+                    1-On-1 Coaching
+                </option>
+
+                <option value="Fitness Intro">
+                    Fitness Intro
+                </option>
+
+                <option value="VL Kinetic">
+                    VL Kinetic
+                </option>
+
+                <option value="Community Runs">
+                    Community Runs
+                </option>
+
+                <option value="Special Events">
+                    Special Events
+                </option>
+
+                <option value="Merchandise Drops">
+                    Merchandise Drops
+                </option>
+
+                <option value="Future Programs">
+                    Future Programs
+                </option>
+
+            </select>
+
+            <select
+                name="referral_source">
+
+                <option value="">
+                    How did you hear about Echelon?
+                </option>
+
+                <option value="Instagram">
+                    Instagram
+                </option>
+
+                <option value="Facebook">
+                    Facebook
+                </option>
+
+                <option value="TikTok">
+                    TikTok
+                </option>
+
+                <option value="Friend Referral">
+                    Friend Referral
+                </option>
+
+                <option value="Member Referral">
+                    Member Referral
+                </option>
+
+                <option value="Community Event">
+                    Community Event
+                </option>
+
+                <option value="Other">
+                    Other
+                </option>
+
+            </select>
+
+            <!-- ==========================
+                 NOTES
+            ========================== -->
+
+            <div class="form-section-header">
+
+                <h3>
+                    ADDITIONAL DETAILS
+                </h3>
+
+            </div>
+
+            <textarea
+                name="notes"
+                rows="6"
+                placeholder="Anything else you'd like us to know? Goals, questions, interests, or specific programs you're waiting for.">
+            </textarea>
+
+            <!-- ==========================
+                 MEMBER NOTICE
+            ========================== -->
+
+            <div class="waiver-box">
+
+                <div class="waiver-header">
+
+                    <h4>
+                        ECHELON FITNESS COLLECTIVE
+                    </h4>
+
+                    <span>
+                        PRIORITY ACCESS NOTIFICATION
+                    </span>
+
+                </div>
+
+                <div class="waiver-content">
+
+                    By joining the Echelon Fitness Collective Waitlist,
+                    you agree to receive updates regarding coaching
+                    availability, new programs, merchandise releases,
+                    community events, educational resources, and future
+                    opportunities offered by Echelon Fitness Collective.
+
+                    <br><br>
+
+                    Joining the waitlist does not guarantee enrollment,
+                    product availability, or placement in any future
+                    program. Priority notifications will be sent in the
+                    order received whenever applicable.
+
+                    <br><br>
+
+                    You may unsubscribe from communications at any time.
+
+                </div>
+
+            </div>
+
+            <label class="waiver-agreement">
+
+                <input
+                    type="checkbox"
+                    required>
+
+                <span>
+                    I understand that joining the waitlist provides
+                    priority notification access but does not guarantee
+                    placement or availability.
+                </span>
+
+            </label>
+
+            <!-- ==========================
+                 SUBMIT
+            ========================== -->
+
+            <button
+                type="submit"
+                class="btn-primary">
+
+                JOIN THE WAITLIST
+
+            </button>
+
+        </form>
+
+        <!-- SUCCESS MESSAGE -->
+
+        <div
+            id="waitlist-success"
+            style="display:none;">
+
+            <h2>
+
+                YOU'RE ON THE LIST
+
+            </h2>
+
+            <p>
+
+                Thank you for joining the Echelon Fitness Collective
+                Waitlist. You'll be among the first to hear about
+                upcoming opportunities, events, and releases.
+
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+</section>
+
+<!-- ==========================================
+SITE FOOTER
+========================================== -->
+
+<footer class="footer">
+
+    <div class="container">
+
+        <!-- BRAND -->
+
+        <div class="footer-brand">
+
+            <h2>
+                ECHELON <span>FITNESS COLLECTIVE</span>
+            </h2>
+
+            <p class="footer-tagline">
+                Building Strength Through Structure.
+            </p>
+
+            <div class="footer-socials">
+
+                <a href="https://www.instagram.com/EchelonFitness.co" target="_blank">
+                    <i class="fab fa-instagram"></i>
+                </a>
+
+                <a href="https://tr.ee/pO3gLtovXy" target="_blank">
+                    <i class="fab fa-tiktok"></i>
+                </a>
+
+            </div>
+
+        </div>
+
+        <!-- NAVIGATION -->
+
+        <div class="footer-links-row">
+
+            <a href="../index.html">HOME</a>
+            <a href="../index.html#about">ABOUT</a>
+            <a href="../index.html#training">TRAINING</a>
+            <a href="../index.html#resources">RESOURCES</a>
+            <a href="../index.html#shop">SHOP</a>
+            <a href="../index.html#reviews">REVIEWS</a>
+            <a href="../index.html#contact">CONTACT</a>
+
+        </div>
+
+        <!-- MEMBER ACTIONS -->
+
+        <div class="footer-actions">
+
+            <a href="member-login.html" class="btn-primary">
+                MEMBER PORTAL
+            </a>
+
+            <a href="admin-login.html" class="btn-secondary">
+    ADMIN PORTAL
+</a>
+
+        </div>
+
+    </div>
+
+    <!-- PARTNERS -->
+
+    <div class="footer-partners">
+
+        <span class="footer-partners-title">
+            TRUSTED PARTNERS
+        </span>
+
+        <div class="footer-partner-grid">
+
+            <a href="#" target="_blank" class="partner-logo">
+                <img src="../assets/images/Cashmir.jpg" alt="Cashmir">
+            </a>
+
+            <a href="https://intentrev.net" target="_blank" class="partner-logo">
+                <img src="../assets/images/intent-logo-i1.svg" alt="Intent Revenue">
+            </a>
+
+            <a href="#" target="_blank" class="partner-logo">
+                <img src="../assets/images/Official CentralShine logo.PNG" alt="Central Shine">
+            </a>
+
+            <a href="#" target="_blank" class="partner-logo">
+                <img src="../assets/images/VL-Logo.png" alt="VL Body Lab">
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- LEGAL -->
+
+    <div class="footer-bottom">
+
+        <p>
+            © 2026 Echelon Fitness Collective. All Rights Reserved.
+        </p>
+
+        <div class="footer-legal">
+
+            <a href="privacy.html">
+                Privacy Policy
+            </a>
+
+            <a href="terms.html">
+                Terms & Conditions
+            </a>
+
+            <a href="disclaimer.html">
+                Disclaimer
+            </a>
+
+        </div>
+
+    </div>
+
+</footer>

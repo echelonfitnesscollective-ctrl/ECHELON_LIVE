@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+    <title>Echelon Fitness Collective | Admin Sign In</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/js/main.js" defer></script>
+    <script src="../assets/js/admin-auth.js" defer></script>
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <a href="../index.html" class="logo">ECHELON <span>FITNESS COLLECTIVE</span></a>
+            <nav class="desktop-nav">
+                <a href="../index.html#about">About</a>
+                <a href="../index.html#training">Training</a>
+                <a href="../index.html#resources">Resources</a>
+                <a href="../index.html#shop">Shop</a>
+                <a href="../index.html#contact">Contact</a>
+            </nav>
+            <button class="mobile-toggle" aria-label="Open Menu">☰</button>
+        </div>
+    </header>
+
+    <div class="mobile-menu">
+        <a href="../index.html#about">About</a>
+        <a href="../index.html#training">Training</a>
+        <a href="../index.html#resources">Resources</a>
+        <a href="../index.html#shop">Shop</a>
+        <a href="../index.html#contact">Contact</a>
+    </div>
+
+    <main class="portal-section member-access-page">
+        <div class="container">
+            <div class="portal-card member-access-card">
+                <span class="checkin-tag">PRIVATE STAFF ACCESS</span>
+                <h1>ADMIN CONSOLE</h1>
+                <p>Sign in with an Echelon administrator account.</p>
+
+                <form id="admin-login-form" class="echelon-form">
+                    <label for="admin-email">EMAIL ADDRESS</label>
+                    <input id="admin-email" name="email" type="email" autocomplete="email" required>
+
+                    <label for="admin-password">PASSWORD</label>
+                    <input id="admin-password" name="password" type="password" autocomplete="current-password" required>
+
+                    <button type="submit" class="btn-primary">SIGN IN</button>
+                    <p id="admin-login-feedback" class="form-error" role="status"></p>
+                </form>
+
+                <p class="submit-note">Member accounts cannot access this area.</p>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
