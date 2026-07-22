@@ -1,5 +1,7 @@
 const EFC_SUPABASE_URL = 'https://plkdyvtriajpzcfgtwzp.supabase.co';
 const EFC_SUPABASE_KEY = 'sb_publishable_CwFNrWSrhLKURZIk_-yt1A_ZVpFHEwf';
+const EFC_ADMIN_MEMBER_EMAIL = 'luther.casimir@gmail.com';
+const EFC_MEMBER_STEP_UP_KEY = 'efc_member_step_up_user';
 
 const echelonMemberClient = window.supabase.createClient(
     EFC_SUPABASE_URL,
@@ -16,10 +18,26 @@ async function getAuthenticatedMember() {
     return error ? null : data.user;
 }
 
+function isAdministratorMember(member) {
+    return member?.email?.trim().toLowerCase() === EFC_ADMIN_MEMBER_EMAIL;
+}
+
+function hasRequiredMemberSignIn(member) {
+    return !isAdministratorMember(member) || window.sessionStorage.getItem(EFC_MEMBER_STEP_UP_KEY) === member.id;
+}
+
+function markMemberSignIn(member) {
+    if (isAdministratorMember(member)) window.sessionStorage.setItem(EFC_MEMBER_STEP_UP_KEY, member.id);
+}
+
+function clearMemberSignIn() {
+    window.sessionStorage.removeItem(EFC_MEMBER_STEP_UP_KEY);
+}
+
 async function requireMemberSession() {
     const member = await getAuthenticatedMember();
 
-    if (!member) {
+    if (!member || !hasRequiredMemberSignIn(member)) {
         window.location.replace(
             `member-login.html?next=${encodeURIComponent(window.location.pathname.split('/').pop())}`
         );
@@ -34,7 +52,7 @@ async function initializeMemberLogin() {
     if (!form) return;
 
     const existingMember = await getAuthenticatedMember();
-    if (existingMember) {
+    if (existingMember && hasRequiredMemberSignIn(existingMember)) {
         window.location.replace(getSafeNextPage());
         return;
     }
@@ -60,6 +78,7 @@ async function initializeMemberLogin() {
             return;
         }
 
+        markMemberSignIn(await getAuthenticatedMember());
         window.location.replace(getSafeNextPage());
     });
 }
@@ -78,6 +97,7 @@ async function initializeMemberPortal() {
     if (emailElement) emailElement.textContent = member.email || 'Echelon Member';
 
     signOutButton.addEventListener('click', async () => {
+        clearMemberSignIn();
         await echelonMemberClient.auth.signOut();
         window.location.replace('member-login.html');
     });
