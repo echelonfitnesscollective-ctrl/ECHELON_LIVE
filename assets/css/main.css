@@ -5131,8 +5131,8 @@ MOBILE
 #checkin-success { padding: 40px; text-align: center; }
 #checkin-success h2 { font-family: 'Bebas Neue'; color: #FFD700; font-size: 2rem; }
 
-/* Homepage story backdrop: the hero remains its own opening image; every following section reveals the shared Echelon studio beneath a composed dark veil. */
-#about,#training,#resources,#shop,#reviews,.contact-section{position:relative;background:linear-gradient(90deg,rgba(0,0,0,.87),rgba(0,0,0,.78) 55%,rgba(0,0,0,.83))!important}
+/* Homepage story backdrop: the hero remains its own opening image; every following section carries the shared Echelon studio with a composed dark veil. */
+#about,#training,#resources,#shop,#reviews,.contact-section{position:relative;background:linear-gradient(90deg,rgba(0,0,0,.76),rgba(0,0,0,.62) 55%,rgba(0,0,0,.68)),url('../images/efc-studio-dawn.png') center / cover no-repeat!important}
 
 /* Collapsible program playbooks */
 .program-operation-card{padding:0}.program-operation-card>summary{position:relative;display:block;padding:30px;cursor:pointer;list-style:none}.program-operation-card>summary::-webkit-details-marker{display:none}.program-operation-card>summary i{position:absolute;right:25px;top:25px;color:var(--primary);font:400 1.7rem/1 var(--heading-font);font-style:normal}.program-operation-card[open]>summary{border-bottom:1px solid rgba(215,181,91,.3);background:rgba(215,181,91,.055)}.program-operation-card[open]>summary i{transform:rotate(45deg)}.program-operation-content{padding:0 30px 30px}.program-operation-content ol{margin-top:24px}.program-operation-content>a{display:inline-block;margin-top:22px;color:var(--primary);font-size:.7rem;font-weight:700;letter-spacing:.09em}.program-operation-placeholder{display:inline-block;margin-top:22px;padding:10px 12px;border:1px dashed rgba(215,181,91,.38);color:#bca76a;font-size:.64rem;font-weight:700;letter-spacing:.09em}@media(max-width:480px){.program-operation-card>summary{padding:25px}.program-operation-content{padding:0 25px 25px}.program-operation-card>summary i{right:20px;top:20px}}
