@@ -766,7 +766,11 @@ function initializeAdminTabs() {
             tab.classList.toggle('active', active);
             tab.setAttribute('aria-selected', String(active));
         });
-        panels.forEach((panel) => { panel.hidden = panel.dataset.adminPanel !== tabName; });
+        panels.forEach((panel) => {
+            const active = panel.dataset.adminPanel === tabName;
+            panel.hidden = !active;
+            if (active) panel.open = true;
+        });
     };
 
     tabs.forEach((tab) => tab.addEventListener('click', () => selectTab(tab.dataset.adminTab)));
