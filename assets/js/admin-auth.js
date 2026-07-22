@@ -590,5 +590,146 @@ document.addEventListener('DOMContentLoaded', () => {
         initializeOperationsConsole();
         initializeCoachCommand();
         initializeMemberLibraryManager();
+        initializeCommunicationsLibrary();
     });
 });
+
+const EFC_COMMUNICATION_TEMPLATES = [
+    { tag: '01 · AUTOMATIC ACKNOWLEDGMENT', title: 'GENERAL INQUIRY RECEIVED', description: 'Use for every website contact request.', featured: true, subject: 'We received your message — Echelon Fitness Collective', body: `Hi [First Name],
+
+Thank you for reaching out to Echelon Fitness Collective. Your message is in, and we’re reviewing the details now.
+
+A member of our team will personally follow up within [timeframe] with the clearest next step. If your message includes a preferred time to connect, we’ll do our best to honor it.
+
+Respectfully,
+[Your Name]
+Echelon Fitness Collective` },
+    { tag: '02 · LEAD RESPONSE', title: 'COACHING APPLICATION RECEIVED', description: 'Confirm review without promising acceptance.', subject: 'Your Echelon coaching application is in', body: `Hi [First Name],
+
+Thank you for applying to coach with Echelon. We received your application and will review your goals, availability, and the support you’re looking for.
+
+We’ll follow up by [date/timeframe] with either a recommended next step or a few questions to help us place you well.
+
+Respectfully,
+[Your Name]
+Echelon Fitness Collective` },
+    { tag: '03 · NEXT STEP', title: 'COACHING ACCEPTANCE', description: 'Invite the right-fit applicant into onboarding.', subject: 'Your Echelon coaching next step', body: `Hi [First Name],
+
+Thank you for sharing your goals with us. Based on what you shared, I’d be glad to move forward with [Echelon 12 / 1-on-1 Coaching].
+
+Your next step is [booking link / payment step / consultation time]. Once that is complete, I’ll send your welcome sequence, onboarding checklist, and first training date.
+
+I’m looking forward to building this with intention.
+
+Respectfully,
+[Your Name]
+Echelon Fitness Collective` },
+    { tag: '04 · GENTLE CLOSE', title: 'NOT YET / WAITLIST', description: 'Keep the relationship warm and the answer clear.', subject: 'Your place with Echelon', body: `Hi [First Name],
+
+Thank you again for your interest in Echelon. [The current coaching roster is full / I recommend beginning with a Fitness Intro before private coaching].
+
+I’ve added you to the [program] waitlist, and I’ll personally reach out when the next opening or appropriate starting point is available. In the meantime, you can explore our complimentary training resources here: [link].
+
+Respectfully,
+[Your Name]
+Echelon Fitness Collective` },
+    { tag: '05 · EXPERIENCE', title: 'FITNESS INTRO CONFIRMATION', description: 'Set a polished first-visit expectation.', subject: 'Your Echelon Fitness Intro is confirmed', body: `Hi [First Name],
+
+Your Fitness Intro is confirmed for [day, date] at [time]. We’ll use this time to talk through your goals, movement history, and the most aligned path forward.
+
+Please arrive [10] minutes early, wear comfortable training clothes, and bring water. If anything changes, reply here and we’ll help you adjust your reservation.
+
+Respectfully,
+[Your Name]
+Echelon Fitness Collective` },
+    { tag: '06 · ONBOARDING', title: 'WELCOME & REQUIRED FORMS', description: 'Use after a member has committed.', subject: 'Welcome to Echelon — your onboarding begins here', body: `Hi [First Name],
+
+Welcome to Echelon. Before your program begins, please complete your Member Portal onboarding: [portal link]. This includes your readiness information, waiver acknowledgment, goals, and preferred training schedule.
+
+Once complete, I’ll finalize your Week 1 plan and send your first check-in date. Please complete it by [date] so we can begin with a clear foundation.
+
+Respectfully,
+[Your Name]
+Echelon Fitness Collective` },
+    { tag: '07 · MEMBER CARE', title: 'WEEKLY CHECK-IN REMINDER', description: 'Support consistency without pressure.', subject: 'Your Echelon weekly check-in', body: `Hi [First Name],
+
+It’s time for your weekly Echelon check-in. Please submit your updates in the Member Portal by [day/time] so I can review your momentum, answer questions, and make any needed adjustments before the next training week.
+
+Progress is built from honest information, not perfect weeks. Share what happened, what felt strong, and where you need support.
+
+Respectfully,
+[Your Name]
+Echelon Fitness Collective` },
+    { tag: '08 · MEMBER CARE', title: 'MISSED CHECK-IN FOLLOW-UP', description: 'Bring the member back into rhythm.', subject: 'Let’s reset your Echelon rhythm', body: `Hi [First Name],
+
+I noticed we missed your weekly check-in. No pressure — I want to make sure you have what you need to keep moving forward.
+
+Reply with a quick update on how the week went, or submit your check-in here: [portal link]. If your schedule, recovery, or goals have shifted, we’ll adjust the plan together.
+
+Respectfully,
+[Your Name]
+Echelon Fitness Collective` },
+    { tag: '09 · PORTAL SUPPORT', title: 'LOGIN / PASSWORD HELP', description: 'Guide access without ever handling a password.', subject: 'Member Portal access', body: `Hi [First Name],
+
+I’m glad to help you get back into the Echelon Member Portal. Please use the password reset option on the login page: [member portal link]. Enter the email address connected to your membership, then follow the reset link sent to your inbox.
+
+For security, Echelon cannot see or send passwords. If the reset email does not arrive within [timeframe], reply here with the email address you used and I’ll check the account setup.
+
+Respectfully,
+[Your Name]
+Echelon Fitness Collective` },
+    { tag: '10 · COMMUNITY', title: 'REVIEW REQUEST', description: 'Ask after a real, positive milestone.', subject: 'A small favor from Echelon', body: `Hi [First Name],
+
+I’m grateful you’ve chosen to train with Echelon. If your experience has felt valuable, would you be willing to leave a brief Google review? It helps the right people find a coaching space built with intention.
+
+You can share your experience here: [Google review link]
+
+Thank you for being part of the collective.
+
+Respectfully,
+[Your Name]
+Echelon Fitness Collective` },
+    { tag: '11 · BOUNDARY', title: 'MEDICAL / HIGH-RISK QUESTION', description: 'Stay caring, professional, and in scope.', subject: 'Your question and next best step', body: `Hi [First Name],
+
+Thank you for sharing that with me. Your safety comes first. I can help with general training structure and modifications once you have appropriate guidance, but I’m not able to diagnose, treat, or provide medical advice.
+
+Please speak with a licensed healthcare professional about [concern] before continuing or changing your training. Once you have their guidance, send me any relevant training restrictions and we’ll build the next step thoughtfully.
+
+Respectfully,
+[Your Name]
+Echelon Fitness Collective` },
+    { tag: '12 · SHOP', title: 'MERCH / NUTRITION REQUEST', description: 'Direct to the storefront without a hard sell.', subject: 'Echelon shop details', body: `Hi [First Name],
+
+Thank you for your interest in Echelon goods. Our current apparel collections are available through [Etsy shop link].
+
+For performance nutrition, you can explore the current product options here: [nutrition link]. Products are not intended to diagnose, treat, cure, or prevent any disease; please review labels and consult a qualified healthcare professional for personal health questions.
+
+Respectfully,
+[Your Name]
+Echelon Fitness Collective` }
+];
+
+function initializeCommunicationsLibrary() {
+    const library = document.getElementById('communications-library');
+    if (!library || library.childElementCount) return;
+
+    EFC_COMMUNICATION_TEMPLATES.forEach((template) => {
+        const card = document.createElement('article');
+        card.className = `communication-card${template.featured ? ' featured' : ''}`;
+        const tag = document.createElement('span'); tag.className = 'checkin-tag'; tag.textContent = template.tag;
+        const title = document.createElement('h3'); title.textContent = template.title;
+        const description = document.createElement('p'); description.textContent = template.description;
+        const details = document.createElement('details');
+        const summary = document.createElement('summary'); summary.textContent = 'VIEW SCRIPT';
+        const script = document.createElement('textarea'); script.readOnly = true; script.setAttribute('aria-label', template.title); script.value = `Subject: ${template.subject}\n\n${template.body}`;
+        details.append(summary, script);
+        const copy = document.createElement('button'); copy.className = 'template-copy'; copy.type = 'button'; copy.textContent = 'COPY SCRIPT';
+        const feedback = document.createElement('p'); feedback.className = 'template-feedback'; feedback.setAttribute('aria-live', 'polite');
+        copy.addEventListener('click', async () => {
+            try { await navigator.clipboard.writeText(script.value); feedback.textContent = 'Copied — personalize the bracketed details before sending.'; }
+            catch (error) { script.focus(); script.select(); feedback.textContent = 'Script selected — press Command + C to copy.'; }
+        });
+        card.append(tag, title, description, details, copy, feedback);
+        library.append(card);
+    });
+}

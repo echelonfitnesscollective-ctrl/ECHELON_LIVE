@@ -1,12 +1,15 @@
 const EFC_MANUAL_SECTIONS = [
     { id: 'systems', tag: 'SYSTEM DIRECTORY', title: 'THE Echelon STACK', intro: 'The systems currently supporting Echelon. Use the secure access directory in your password manager for the actual credentials.', cards: [
         ['Echelon Website', 'Public site', 'https://www.echelonfitness.co', 'Use for public pages, coaching applications, waitlist, and member access.'],
-        ['Vercel', 'Hosting & deployments', 'https://vercel.com/dashboard', 'Publish a preview first. Promote only after the site, forms, and portals pass a quick test.'],
+        ['GitHub', 'Source control', 'https://github.com/echelonfitnesscollective-ctrl/ECHELON_LIVE', 'The live site source. Every approved update is recorded here and triggers the Vercel deployment.'],
+        ['Vercel', 'Hosting & deployments', 'https://vercel.com/dashboard', 'Hosts echelonfitness.co. Review the fresh deployment after every approved update.'],
         ['Supabase', 'Members, forms, admin data & photos', 'https://supabase.com/dashboard/project/plkdyvtriajpzcfgtwzp', 'Source of truth for member data, check-ins, goals, plans, messages, photos, and the Admin Console.'],
-        ['Formspree', 'Form delivery inbox', 'https://formspree.io/', 'Secondary email copies for contact requests and coaching applications.'],
+        ['Formspree', 'Form delivery inbox', 'https://formspree.io/', 'Delivers contact and coaching application submissions to the Echelon inbox. Use it for fast notification, then track the actual follow-up in Coach Command.'],
+        ['Google Business Profile', 'Reviews & discovery', 'https://business.google.com/', 'Manage business details, verification, and the link used in Echelon review-request messages.'],
         ['Instagram', 'Social channel', 'https://www.instagram.com/EchelonFitness.co', 'Primary social presence and community touchpoint.'],
         ['TikTok', 'Social channel', 'https://tr.ee/pO3gLtovXy', 'Short-form content and discovery channel.'],
-        ['Etsy', 'Merch storefront · planned', '', 'Keep the shop placeholder until the Etsy shop is ready. Then add the Etsy URL in one place.']
+        ['Etsy', 'Merch storefront · planned', '', 'Keep the shop placeholder until the Etsy shop is ready. Then add the Etsy URL in one place.'],
+        ['Amway', 'Performance nutrition', 'https://www.amway.com/', 'Use only the approved product links and disclosure language already placed on the Echelon shop.']
     ]},
     { id: 'daily-ops', tag: 'DAILY OPERATIONS', title: 'THE DAILY COMMAND ROUTINE', steps: [
         ['Open Coach Command', 'Start in the Admin Console. Clear overdue tasks, then review new applications and website inquiries.'],
@@ -20,6 +23,13 @@ const EFC_MANUAL_SECTIONS = [
         ['Respond personally', 'Use your approved contact method. Update your private note with the important context and outcome.'],
         ['Move forward or close out', 'Keep the task open until there is a real next step. Mark it complete once the handoff or decision is final.']
     ]},
+    { id: 'communication', tag: 'COMMUNICATION STANDARD', title: 'HOW ECHELON RESPONDS', intro: 'The Response Library in the Admin Console is the approved starting point for every outreach moment. It keeps the language warm, clear, and consistent while leaving space for a real personal reply.', notice: 'Never paste credentials, health details, payment details, or a member’s private information into an email, text, or public message. Do not guarantee a fitness outcome or provide medical advice. Use the Medical / High-Risk Question script when a concern falls outside coaching scope.', steps: [
+        ['Acknowledge quickly', 'For contact requests, coaching applications, waitlist entries, and check-ins, send the matching acknowledgment immediately or as soon as you see it.'],
+        ['Personalize before sending', 'Replace every bracketed detail, read the full message, and give one clear next step. Never send a template untouched.'],
+        ['Track the promise', 'If you say you will reply, schedule, review, or follow up, create a Coach Command task with a due date before leaving the conversation.'],
+        ['Use the right channel', 'Email is the record for leads, onboarding, and decisions. Portal messaging is for active-member coaching. Social DMs should move to email or the application form when personal details are needed.'],
+        ['Close the loop', 'After the person responds or the next action is complete, add the outcome to the relevant member or lead note and mark the Coach Command task complete.']
+    ]},
     { id: 'member-care', tag: 'MEMBER FLOW', title: 'WHEN A MEMBER JOINS', steps: [
         ['Create secure access', 'Create or invite the member through Supabase Authentication, then direct them to the Member Portal.'],
         ['Complete readiness', 'Confirm onboarding intake and the Echelon waiver are complete before training begins.'],
@@ -28,8 +38,8 @@ const EFC_MANUAL_SECTIONS = [
     ]},
     { id: 'publishing', tag: 'WEBSITE UPDATES', title: 'HOW TO PUBLISH AN UPDATE', steps: [
         ['Work locally first', 'Make changes in the Echelon website folder and review them in your browser.'],
-        ['Deploy a Vercel Preview', 'Use the existing Vercel project to create a preview deployment. Check the important links and forms there.'],
-        ['Approve production', 'Promote the verified preview to Production only after testing. The live domain then receives the new version.'],
+        ['Publish through GitHub', 'Commit the approved website changes to the ECHELON_LIVE main branch. Vercel automatically creates the production deployment.'],
+        ['Review the deployment', 'Open Vercel after the GitHub update and confirm the production deployment is ready. The live domain then receives the new version.'],
         ['Verify live essentials', 'Test the home page, a form, member login, admin login, and password reset on echelonfitness.co.']
     ]},
     { id: 'access', tag: 'CREDENTIAL DIRECTORY', title: 'SECURE ACCESS, NOT SHARED PASSWORDS', notice: 'Do not store passwords, recovery codes, or payment details in this website or in the Admin Console. Keep them in a dedicated password manager and grant each operator their own access.', steps: [
