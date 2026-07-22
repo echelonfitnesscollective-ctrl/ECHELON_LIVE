@@ -1,5 +1,7 @@
 const EFC_ADMIN_SUPABASE_URL = 'https://plkdyvtriajpzcfgtwzp.supabase.co';
 const EFC_ADMIN_SUPABASE_KEY = 'sb_publishable_CwFNrWSrhLKURZIk_-yt1A_ZVpFHEwf';
+const EFC_ADMIN_EMAIL = 'luther.casimir@gmail.com';
+const EFC_ADMIN_STEP_UP_KEY = 'efc_admin_step_up_user';
 
 const echelonAdminClient = window.supabase.createClient(
     EFC_ADMIN_SUPABASE_URL,
@@ -11,16 +13,34 @@ async function getAdminUser() {
     return error ? null : data.user;
 }
 
+function hasAdminEmail(user) {
+    return user?.email?.trim().toLowerCase() === EFC_ADMIN_EMAIL;
+}
+
+function hasAdminStepUp(user) {
+    return Boolean(user && window.sessionStorage.getItem(EFC_ADMIN_STEP_UP_KEY) === user.id);
+}
+
+function markAdminStepUp(user) {
+    if (user) window.sessionStorage.setItem(EFC_ADMIN_STEP_UP_KEY, user.id);
+}
+
+function clearAdminStepUp() {
+    window.sessionStorage.removeItem(EFC_ADMIN_STEP_UP_KEY);
+}
+
 async function isEchelonAdmin() {
+    const user = await getAdminUser();
+    if (!hasAdminEmail(user)) return false;
     const { data, error } = await echelonAdminClient.rpc('is_echelon_admin');
     return !error && data === true;
 }
 
 async function requireAdminSession() {
     const user = await getAdminUser();
-    if (!user || !(await isEchelonAdmin())) {
-        await echelonAdminClient.auth.signOut();
-        window.location.replace('admin-login.html?reason=not-authorized');
+    if (!user || !(await isEchelonAdmin()) || !hasAdminStepUp(user)) {
+        clearAdminStepUp();
+        window.location.replace(`admin-login.html?reason=${hasAdminEmail(user) ? 'admin-sign-in-required' : 'not-authorized'}`);
         return null;
     }
     return user;
@@ -35,12 +55,15 @@ async function initializeAdminLogin() {
     const form = document.getElementById('admin-login-form');
     if (!form) return;
 
-    if (new URLSearchParams(window.location.search).get('reason') === 'not-authorized') {
+    const reason = new URLSearchParams(window.location.search).get('reason');
+    if (reason === 'not-authorized') {
         showAdminLoginFeedback('This account is not authorized for the Echelon Admin Console.');
+    } else if (reason === 'admin-sign-in-required') {
+        showAdminLoginFeedback('Enter your admin password to access the Echelon Admin Console.');
     }
 
     const currentUser = await getAdminUser();
-    if (currentUser && await isEchelonAdmin()) {
+    if (currentUser && await isEchelonAdmin() && hasAdminStepUp(currentUser)) {
         window.location.replace('admin-dashboard.html');
         return;
     }
@@ -57,8 +80,10 @@ async function initializeAdminLogin() {
             password: form.elements.password.value
         });
 
-        if (error || !(await isEchelonAdmin())) {
+        const signedInUser = await getAdminUser();
+        if (error || !(await isEchelonAdmin()) || !hasAdminEmail(signedInUser)) {
             await echelonAdminClient.auth.signOut();
+            clearAdminStepUp();
             showAdminLoginFeedback(error
                 ? 'We could not sign you in. Check your email and password, then try again.'
                 : 'This account is not authorized for the Echelon Admin Console.');
@@ -67,6 +92,7 @@ async function initializeAdminLogin() {
             return;
         }
 
+        markAdminStepUp(signedInUser);
         window.location.replace('admin-dashboard.html');
     });
 }
@@ -479,6 +505,7 @@ async function initializeAdminDashboard() {
 
     const signOut = document.getElementById('admin-sign-out');
     signOut.addEventListener('click', async () => {
+        clearAdminStepUp();
         await echelonAdminClient.auth.signOut();
         window.location.replace('admin-login.html');
     });
