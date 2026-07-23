@@ -315,6 +315,171 @@ async function initializeMemberLibraryManager() {
     });
 }
 
+function cmsDateForInput(value) {
+    const date = value ? new Date(value) : new Date();
+    date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+    return date.toISOString().slice(0, 16);
+}
+
+function cmsPlacementLabel(value) {
+    return { homepage: 'Homepage', training: 'Training Hub', resources: 'Resources', shop: 'Shop' }[value] || value;
+}
+
+function cmsStatusClass(value) {
+    return value === 'Published' ? 'is-published' : value === 'Scheduled' ? 'is-scheduled' : '';
+}
+
+function cmsScheduleLabel(item) {
+    const publish = new Date(item.publish_at).toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+    if (item.status === 'Draft') return 'Private draft';
+    return item.status === 'Scheduled' || new Date(item.publish_at) > new Date() ? `Scheduled · ${publish}` : `Live since ${publish}`;
+}
+
+async function initializeSiteContentManager() {
+    const form = document.getElementById('site-content-form');
+    if (!form) return;
+    const list = document.getElementById('site-content-list');
+    const feedback = document.getElementById('site-content-feedback');
+    const count = document.getElementById('site-content-count');
+    const editorTitle = document.getElementById('site-content-form-title');
+    const reset = document.getElementById('site-content-reset');
+    const save = document.getElementById('site-content-save');
+    let records = [];
+
+    const resetEditor = () => {
+        form.reset();
+        form.elements.content_id.value = '';
+        form.elements.placement.value = 'homepage';
+        form.elements.status.value = 'Draft';
+        form.elements.publish_at.value = cmsDateForInput();
+        form.elements.sort_order.value = '0';
+        editorTitle.textContent = 'CREATE AN UPDATE';
+        save.textContent = 'SAVE UPDATE';
+        reset.hidden = true;
+        feedback.textContent = '';
+    };
+
+    const editRecord = (item) => {
+        form.elements.content_id.value = item.id;
+        form.elements.placement.value = item.placement;
+        form.elements.status.value = item.status;
+        form.elements.eyebrow.value = item.eyebrow || '';
+        form.elements.title.value = item.title || '';
+        form.elements.body.value = item.body || '';
+        form.elements.cta_label.value = item.cta_label || '';
+        form.elements.cta_url.value = item.cta_url || '';
+        form.elements.image_url.value = item.image_url || '';
+        form.elements.publish_at.value = cmsDateForInput(item.publish_at);
+        form.elements.expires_at.value = item.expires_at ? cmsDateForInput(item.expires_at) : '';
+        form.elements.sort_order.value = String(item.sort_order || 0);
+        editorTitle.textContent = 'EDIT SITE UPDATE';
+        save.textContent = 'SAVE CHANGES';
+        reset.hidden = false;
+        form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
+    const render = () => {
+        list.replaceChildren();
+        count.textContent = `${records.length} ITEM${records.length === 1 ? '' : 'S'}`;
+        if (!records.length) {
+            const empty = document.createElement('p');
+            empty.className = 'cms-content-empty';
+            empty.textContent = 'No site updates yet. Create your first one on the left.';
+            list.append(empty);
+            return;
+        }
+        records.forEach((item) => {
+            const card = document.createElement('article');
+            card.className = `cms-content-item ${cmsStatusClass(item.status)}`;
+            const copy = document.createElement('div');
+            const tag = document.createElement('span'); tag.className = 'checkin-tag'; tag.textContent = item.eyebrow || cmsPlacementLabel(item.placement).toUpperCase();
+            const title = document.createElement('h4'); title.textContent = item.title;
+            const body = document.createElement('p'); body.textContent = item.body || 'No supporting copy added.';
+            const meta = document.createElement('div'); meta.className = 'cms-content-meta';
+            const status = document.createElement('span'); status.className = 'cms-status'; status.textContent = item.status.toUpperCase();
+            const placement = document.createElement('span'); placement.textContent = cmsPlacementLabel(item.placement).toUpperCase();
+            const schedule = document.createElement('span'); schedule.textContent = cmsScheduleLabel(item);
+            meta.append(status, placement, schedule);
+            copy.append(tag, title, body, meta);
+
+            const actions = document.createElement('div'); actions.className = 'cms-content-actions';
+            const edit = document.createElement('button'); edit.type = 'button'; edit.textContent = 'EDIT'; edit.addEventListener('click', () => editRecord(item));
+            const publish = document.createElement('button'); publish.type = 'button';
+            publish.textContent = item.status === 'Published' ? 'UNPUBLISH' : 'PUBLISH NOW';
+            publish.addEventListener('click', async () => {
+                publish.disabled = true;
+                const values = item.status === 'Published' ? { status: 'Draft' } : { status: 'Published', publish_at: new Date().toISOString() };
+                const { error } = await echelonAdminClient.from('site_content_items').update(values).eq('id', item.id);
+                if (error) { feedback.textContent = 'That update could not be changed. Please try again.'; publish.disabled = false; return; }
+                await refresh();
+            });
+            const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'cms-delete'; remove.textContent = 'REMOVE';
+            remove.addEventListener('click', async () => {
+                if (!window.confirm(`Remove “${item.title}”? This cannot be undone.`)) return;
+                remove.disabled = true;
+                const { error } = await echelonAdminClient.from('site_content_items').delete().eq('id', item.id);
+                if (error) { feedback.textContent = 'That update could not be removed. Please try again.'; remove.disabled = false; return; }
+                if (form.elements.content_id.value === item.id) resetEditor();
+                await refresh();
+            });
+            actions.append(edit, publish, remove);
+            card.append(copy, actions); list.append(card);
+        });
+    };
+
+    const refresh = async () => {
+        count.textContent = 'LOADING…';
+        const { data, error } = await echelonAdminClient.from('site_content_items').select('*').order('updated_at', { ascending: false }).limit(100);
+        if (error) {
+            list.textContent = 'Run the Site Content CMS database update to activate this section.';
+            count.textContent = 'SETUP REQUIRED';
+            return;
+        }
+        records = data || [];
+        render();
+    };
+
+    resetEditor();
+    reset.addEventListener('click', resetEditor);
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        feedback.textContent = '';
+        const values = form.elements;
+        const publishAt = new Date(values.publish_at.value);
+        const expiresAt = values.expires_at.value ? new Date(values.expires_at.value) : null;
+        if (Number.isNaN(publishAt.getTime()) || (expiresAt && expiresAt <= publishAt)) {
+            feedback.textContent = 'Choose a valid go-live time and an end time that is later.';
+            return;
+        }
+        save.disabled = true;
+        save.textContent = 'SAVING…';
+        const payload = {
+            placement: values.placement.value,
+            status: values.status.value,
+            eyebrow: values.eyebrow.value.trim() || null,
+            title: values.title.value.trim(),
+            body: values.body.value.trim() || null,
+            cta_label: values.cta_label.value.trim() || null,
+            cta_url: values.cta_url.value.trim() || null,
+            image_url: values.image_url.value.trim() || null,
+            publish_at: publishAt.toISOString(),
+            expires_at: expiresAt ? expiresAt.toISOString() : null,
+            sort_order: Number(values.sort_order.value) || 0
+        };
+        const query = values.content_id.value
+            ? echelonAdminClient.from('site_content_items').update(payload).eq('id', values.content_id.value)
+            : echelonAdminClient.from('site_content_items').insert(payload);
+        const { error } = await query;
+        save.disabled = false;
+        save.textContent = values.content_id.value ? 'SAVE CHANGES' : 'SAVE UPDATE';
+        if (error) { feedback.textContent = 'Your update could not be saved. Please check the details and try again.'; return; }
+        resetEditor();
+        feedback.textContent = payload.status === 'Published' ? 'Published — the site will refresh with this update.' : payload.status === 'Scheduled' ? 'Scheduled — it will publish automatically at the time you set.' : 'Saved as a private draft.';
+        await refresh();
+    });
+    await refresh();
+}
+
 function renderIntakeDetail(row) {
     const detail = document.getElementById('admin-intake-detail');
     const profile = row.profile;
@@ -590,6 +755,7 @@ document.addEventListener('DOMContentLoaded', () => {
         initializeOperationsConsole();
         initializeCoachCommand();
         initializeMemberLibraryManager();
+        initializeSiteContentManager();
         initializeCommunicationsLibrary();
         initializeAdminTabs();
     });

@@ -3,7 +3,7 @@ const EFC_MANUAL_SECTIONS = [
         ['Echelon Website', 'Public site', 'https://www.echelonfitness.co', 'Use for public pages, coaching applications, waitlist, and member access.'],
         ['GitHub', 'Source control', 'https://github.com/echelonfitnesscollective-ctrl/ECHELON_LIVE', 'The live site source. Every approved update is recorded here and triggers the Vercel deployment.'],
         ['Vercel', 'Hosting & deployments', 'https://vercel.com/dashboard', 'Hosts echelonfitness.co. Review the fresh deployment after every approved update.'],
-        ['Supabase', 'Members, forms, admin data & photos', 'https://supabase.com/dashboard/project/plkdyvtriajpzcfgtwzp', 'Source of truth for member data, check-ins, goals, plans, messages, photos, and the Admin Console.'],
+        ['Supabase', 'Members, forms, admin data & site content', 'https://supabase.com/dashboard/project/plkdyvtriajpzcfgtwzp', 'Source of truth for member data, check-ins, goals, plans, messages, photos, the Admin Console, and the published Site Content feed.'],
         ['Formspree', 'Form delivery inbox', 'https://formspree.io/', 'Delivers contact and coaching application submissions to the Echelon inbox. Use it for fast notification, then track the actual follow-up in Coach Command.'],
         ['Google Business Profile', 'Reviews & discovery', 'https://business.google.com/', 'Manage business details, verification, and the link used in Echelon review-request messages.'],
         ['Instagram', 'Social channel', 'https://www.instagram.com/EchelonFitness.co', 'Primary social presence and community touchpoint.'],
@@ -22,6 +22,7 @@ const EFC_MANUAL_SECTIONS = [
         ['Members', 'Open member records, onboarding details, and recent check-ins. Use this tab for active coaching context and member-care decisions.'],
         ['Leads', 'Review coaching applications first, then contact and waitlist inquiries. Send the appropriate response and create a Coach Command task before moving on.'],
         ['Programs', 'Open an offering’s collapsible playbook for its delivery steps. The Echelon 12 card includes the completed coach PDF; other offerings show a clear PDF placeholder until their playbooks are built.'],
+        ['Site Content', 'Create announcements, offers, resource releases, storefront notes, and calls to action without code. Drafts stay private; Published items display immediately; Scheduled items go live automatically; expiry dates remove items automatically.'],
         ['Comms', 'Use the collapsed Response Library categories for approved scripts. Open only the situation you need, copy it, personalize every bracketed detail, then send.'],
         ['Library', 'Manage the member vault and private trainer resources. Use this for publishing guides and storing coach education, not for daily follow-ups.']
     ]},
@@ -52,6 +53,9 @@ const EFC_MANUAL_SECTIONS = [
         ['First-Time Setup last', 'Onboarding and waiver are intentionally collapsed at the bottom. They must be complete before training begins, but they do not distract active members after setup.']
     ]},
     { id: 'publishing', tag: 'WEBSITE UPDATES', title: 'HOW TO PUBLISH AN UPDATE', steps: [
+        ['Use Site Content for daily changes', 'For announcements, temporary offers, class notices, resource releases, shop messages, or a focused button, use the Site Content tab in the Admin Console. It publishes directly from Supabase—no code, GitHub, or Vercel step needed.'],
+        ['Choose the right placement', 'Homepage places the update before About. Training, Resources, and Shop place it at the top of that specific section. Keep one strong message per placement whenever possible.'],
+        ['Set the life cycle', 'Save unfinished copy as Draft. Choose Published for immediate visibility or Scheduled for a future go-live time. Add an end time for anything temporary so it removes itself automatically.'],
         ['Work locally first', 'Make changes in the Echelon website folder and review them in your browser.'],
         ['Publish through GitHub', 'Commit the approved website changes to the ECHELON_LIVE main branch. Vercel automatically creates the production deployment.'],
         ['Review the deployment', 'Open Vercel after the GitHub update and confirm the production deployment is ready. The live domain then receives the new version.'],

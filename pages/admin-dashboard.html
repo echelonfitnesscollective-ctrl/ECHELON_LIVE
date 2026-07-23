@@ -50,9 +50,38 @@
                 <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="members" data-step="02">MEMBERS</button>
                 <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="leads" data-step="03">LEADS</button>
                 <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="programs" data-step="04">PROGRAMS</button>
-                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="communications" data-step="05">COMMS</button>
-                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="library" data-step="06">LIBRARY</button>
+                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="content" data-step="05">SITE CONTENT</button>
+                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="communications" data-step="06">COMMS</button>
+                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="library" data-step="07">LIBRARY</button>
             </nav>
+
+            <details class="admin-intake-section admin-console-section admin-content-section admin-tab-panel" data-admin-panel="content">
+                <summary class="admin-section-heading">
+                    <div><span class="checkin-tag">ECHELON SITE CMS</span><h2>DAILY SITE UPDATES</h2></div>
+                    <p>Write once, choose where it belongs, then publish now or schedule it ahead.</p>
+                </summary>
+                <div class="cms-intro">
+                    <div><span class="checkin-tag">CONTENT CONTROL</span><h3>KEEP THE SITE CURRENT WITHOUT TOUCHING CODE.</h3><p>Use this for announcements, limited offers, class notices, resource releases, storefront messages, and focused calls to action. Drafts stay private. Published updates appear only during the dates you set.</p></div>
+                    <div class="cms-placement-key"><span>HOME</span><span>TRAINING</span><span>RESOURCES</span><span>SHOP</span></div>
+                </div>
+                <div class="cms-layout">
+                    <form id="site-content-form" class="echelon-form site-content-form">
+                        <input type="hidden" name="content_id">
+                        <div class="cms-form-heading"><span class="checkin-tag">CONTENT EDITOR</span><strong id="site-content-form-title">CREATE AN UPDATE</strong></div>
+                        <div class="cms-form-grid"><select name="placement" required><option value="homepage">Homepage feature</option><option value="training">Training hub</option><option value="resources">Resources</option><option value="shop">Shop</option></select><select name="status" required><option value="Draft">Save as draft</option><option value="Published">Publish now</option><option value="Scheduled">Schedule</option></select></div>
+                        <input name="eyebrow" type="text" maxlength="60" placeholder="Small label (ex: THIS WEEK AT ECHELON)">
+                        <input name="title" type="text" maxlength="100" placeholder="Update headline" required>
+                        <textarea name="body" rows="5" maxlength="480" placeholder="Keep the message clear, premium, and useful."></textarea>
+                        <div class="cms-form-grid"><input name="cta_label" type="text" maxlength="40" placeholder="Button label (optional)"><input name="cta_url" type="text" maxlength="500" placeholder="Button link (optional)"></div>
+                        <input name="image_url" type="url" maxlength="1000" placeholder="Optional image URL">
+                        <div class="cms-form-grid"><label>GOES LIVE<input name="publish_at" type="datetime-local" required></label><label>ENDS (OPTIONAL)<input name="expires_at" type="datetime-local"></label></div>
+                        <label>DISPLAY PRIORITY<input name="sort_order" type="number" min="0" max="999" value="0"><small>Lower numbers appear first.</small></label>
+                        <div class="cms-form-actions"><button type="submit" class="btn-primary" id="site-content-save">SAVE UPDATE</button><button type="button" class="btn-secondary" id="site-content-reset" hidden>CANCEL EDIT</button></div>
+                        <p id="site-content-feedback" class="form-error" role="status"></p>
+                    </form>
+                    <section class="cms-published-panel"><div class="cms-list-heading"><div><span class="checkin-tag">CONTENT QUEUE</span><h3>YOUR SITE UPDATES</h3></div><span id="site-content-count">Loading…</span></div><div id="site-content-list" class="cms-content-list"></div></section>
+                </div>
+            </details>
 
             <details class="admin-intake-section admin-console-section communications-section admin-tab-panel" data-admin-panel="communications">
                 <summary class="admin-section-heading">
