@@ -480,6 +480,83 @@ async function initializeSiteContentManager() {
     await refresh();
 }
 
+function siteMediaPublicUrl(path) {
+    return echelonAdminClient.storage.from('site-media').getPublicUrl(path).data.publicUrl;
+}
+
+async function initializeSiteMediaManager() {
+    const form = document.getElementById('site-media-form');
+    if (!form) return;
+    const list = document.getElementById('site-media-list');
+    const feedback = document.getElementById('site-media-feedback');
+    const count = document.getElementById('site-media-count');
+    const save = document.getElementById('site-media-save');
+    let records = [];
+
+    const refresh = async () => {
+        count.textContent = 'LOADING…';
+        const { data, error } = await echelonAdminClient.from('site_media_items').select('*').order('sort_order', { ascending: true }).order('created_at', { ascending: false }).limit(60);
+        if (error) { list.textContent = 'Run the Media Manager database update to activate this section.'; count.textContent = 'SETUP REQUIRED'; return; }
+        records = data || [];
+        list.replaceChildren(); count.textContent = `${records.length} FRAME${records.length === 1 ? '' : 'S'}`;
+        if (!records.length) { const empty = document.createElement('p'); empty.className = 'cms-content-empty'; empty.textContent = 'No managed media yet. Your original Echelon gallery remains live until you publish a frame here.'; list.append(empty); return; }
+        records.forEach((item) => {
+            const card = document.createElement('article'); card.className = `cms-content-item media-content-item${item.published ? ' is-published' : ''}`;
+            const preview = document.createElement(item.media_type === 'video' ? 'video' : 'img'); preview.className = 'media-manager-preview'; preview.src = siteMediaPublicUrl(item.storage_path); preview.alt = item.title || 'Echelon media';
+            if (item.media_type === 'video') { preview.muted = true; preview.preload = 'metadata'; preview.playsInline = true; }
+            const copy = document.createElement('div');
+            const tag = document.createElement('span'); tag.className = 'checkin-tag'; tag.textContent = item.media_type === 'video' ? 'SHORT VIDEO' : 'PHOTO';
+            const title = document.createElement('h4'); title.textContent = item.title || 'ECHELON IN MOTION';
+            const caption = document.createElement('p'); caption.textContent = item.caption || 'No caption added.';
+            const meta = document.createElement('div'); meta.className = 'cms-content-meta';
+            const visibility = document.createElement('span'); visibility.className = 'cms-status'; visibility.textContent = item.published ? 'PUBLISHED' : 'DRAFT';
+            const order = document.createElement('span'); order.textContent = `ORDER ${item.sort_order}`; meta.append(visibility, order); copy.append(tag, title, caption, meta);
+            const actions = document.createElement('div'); actions.className = 'cms-content-actions';
+            const reorder = document.createElement('button'); reorder.type = 'button'; reorder.textContent = 'SET ORDER';
+            reorder.addEventListener('click', async () => {
+                const value = window.prompt('Display order (lower numbers appear first):', String(item.sort_order));
+                if (value === null) return; const sortOrder = Number(value);
+                if (!Number.isInteger(sortOrder) || sortOrder < 0 || sortOrder > 999) { feedback.textContent = 'Use a whole number from 0 to 999.'; return; }
+                const { error } = await echelonAdminClient.from('site_media_items').update({ sort_order: sortOrder }).eq('id', item.id);
+                if (error) { feedback.textContent = 'The display order could not be saved.'; return; } feedback.textContent = 'Display order updated.'; refresh();
+            });
+            const publish = document.createElement('button'); publish.type = 'button'; publish.textContent = item.published ? 'UNPUBLISH' : 'PUBLISH';
+            publish.addEventListener('click', async () => {
+                const { error } = await echelonAdminClient.from('site_media_items').update({ published: !item.published }).eq('id', item.id);
+                if (error) { feedback.textContent = 'That media item could not be updated.'; return; } feedback.textContent = item.published ? 'Removed from the public gallery.' : 'Published to the public gallery.'; refresh();
+            });
+            const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'cms-delete'; remove.textContent = 'REMOVE';
+            remove.addEventListener('click', async () => {
+                if (!window.confirm(`Remove “${item.title || 'this media item'}” from the Echelon gallery?`)) return;
+                remove.disabled = true;
+                const { error } = await echelonAdminClient.from('site_media_items').delete().eq('id', item.id);
+                if (error) { feedback.textContent = 'The media item could not be removed.'; remove.disabled = false; return; }
+                await echelonAdminClient.storage.from('site-media').remove([item.storage_path]);
+                feedback.textContent = 'Removed from the gallery.'; refresh();
+            });
+            actions.append(reorder, publish, remove); card.append(preview, copy, actions); list.append(card);
+        });
+    };
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault(); feedback.textContent = '';
+        const file = form.elements.media_file.files[0];
+        if (!file || file.size > 30 * 1024 * 1024) { feedback.textContent = 'Choose a JPG, PNG, WebP, MP4, or WebM file under 30 MB.'; return; }
+        const isVideo = file.type.startsWith('video/'); const isImage = file.type.startsWith('image/');
+        if (!isVideo && !isImage) { feedback.textContent = 'Choose a JPG, PNG, WebP, MP4, or WebM file.'; return; }
+        save.disabled = true; save.textContent = 'UPLOADING…';
+        const safeName = file.name.toLowerCase().replace(/[^a-z0-9.]+/g, '-'); const path = `${Date.now()}-${safeName}`;
+        const upload = await echelonAdminClient.storage.from('site-media').upload(path, file, { contentType: file.type, upsert: false });
+        if (upload.error) { feedback.textContent = 'The file could not be uploaded. Please try again.'; save.disabled = false; save.textContent = 'UPLOAD TO GALLERY'; return; }
+        const { error } = await echelonAdminClient.from('site_media_items').insert({ media_type: isVideo ? 'video' : 'image', title: form.elements.title.value.trim() || 'ECHELON IN MOTION', caption: form.elements.caption.value.trim() || null, storage_path: path, published: form.elements.published.value === 'true', sort_order: Number(form.elements.sort_order.value) || 0 });
+        save.disabled = false; save.textContent = 'UPLOAD TO GALLERY';
+        if (error) { await echelonAdminClient.storage.from('site-media').remove([path]); feedback.textContent = 'The file uploaded, but the gallery could not be updated.'; return; }
+        form.reset(); form.elements.title.value = 'ECHELON IN MOTION'; form.elements.published.value = 'true'; form.elements.sort_order.value = '0';
+        feedback.textContent = 'Added to your media queue. It is live if you chose Publish.'; await refresh();
+    });
+    await refresh();
+}
+
 function renderIntakeDetail(row) {
     const detail = document.getElementById('admin-intake-detail');
     const profile = row.profile;
@@ -756,6 +833,7 @@ document.addEventListener('DOMContentLoaded', () => {
         initializeCoachCommand();
         initializeMemberLibraryManager();
         initializeSiteContentManager();
+        initializeSiteMediaManager();
         initializeCommunicationsLibrary();
         initializeAdminTabs();
     });
