@@ -35,6 +35,7 @@
 <script src="assets/js/site-content-feed.js" defer></script>
 <script src="assets/js/media-carousel.js" defer></script>
 <script src="assets/js/site-intake.js" defer></script>
+<script src="assets/js/checkout.js" defer></script>
 </head>
 
 <script>
@@ -335,24 +336,27 @@ function changeProductImage(imageId, newImage, dot){
             <!-- The scrollable track -->
             <div class="training-carousel" id="trainingCarousel">
 
-                <!-- INTRO -->
+                <!-- GROUP FITNESS -->
                 <div class="training-card" id="startingCard">
                     <div class="status live">LIVE <span class="live-dot"></span></div>
                     <div class="training-card-inner">
-                        <h3>FITNESS INTRO</h3>
+                        <h3>GROUP FITNESS</h3>
                         <div class="coach-name">Team Led</div>
-                        <p>Your best place to begin. Establish your baseline, learn how Echelon trains, and leave with a clear recommendation for your next step.</p>
+                        <p>Train with the Collective through coached group sessions built for consistency, strength, and real community.</p>
                     </div>
                     <div class="training-card-footer">
                         <details>
                             <summary>+ View Session Details</summary>
                             <div class="detail-content">
-                                <strong>Focus</strong><p>Readiness, movement quality, conditioning baseline, and program placement.</p>
-                                <strong>Format</strong><p>Complimentary introductory session · designed for new members.</p>
-                                <strong>Access</strong><p>Reserve your introduction before joining a training path.</p>
+                                <strong>Access</strong><p>$20 drop-in · $59/month for unlimited access to all available group sessions.</p>
+                                <strong>Included</strong><p>Complimentary for active Echelon 12-Week Transformation and 1-on-1 Hybrid Coaching clients.</p>
+                                <strong>Community</strong><p>One session each month is free and open to the public.</p>
                             </div>
                         </details>
-                        <a href="pages/checkin.html" class="btn-primary">RESERVE INTRO</a>
+                        <div class="training-card-actions">
+                            <button type="button" class="btn-secondary" data-checkout-offer="group_drop_in">$20 DROP-IN</button>
+                            <button type="button" class="btn-primary" data-checkout-offer="group_unlimited">JOIN UNLIMITED · $59/MO</button>
+                        </div>
                     </div>
                 </div>
 

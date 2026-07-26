@@ -4503,6 +4503,25 @@ MOBILE
     gap: 20px;
 }
 
+#training .training-card-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+#training .training-card-actions .btn-primary,
+#training .training-card-actions .btn-secondary {
+    width: 100%;
+    border: 0;
+    cursor: pointer;
+    text-align: center;
+}
+
+#training .training-card-actions button:disabled {
+    cursor: wait;
+    opacity: 0.72;
+}
+
 /* 5. Typography & Status (Same premium look) */
 #training .training-card h3 {
     font-family: var(--heading-font);
