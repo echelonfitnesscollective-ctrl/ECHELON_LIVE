@@ -1,7 +1,11 @@
 const EFC_SUPABASE_URL = 'https://plkdyvtriajpzcfgtwzp.supabase.co';
 const EFC_SUPABASE_KEY = 'sb_publishable_CwFNrWSrhLKURZIk_-yt1A_ZVpFHEwf';
-const EFC_ADMIN_MEMBER_EMAIL = 'luther.casimir@gmail.com';
 const EFC_MEMBER_STEP_UP_KEY = 'efc_member_step_up_user';
+const EFC_MEMBER_PAGES = new Set([
+    'member-portal.html', 'member-coaching.html', 'member-nutrition.html',
+    'member-performance.html', 'member-library.html', 'member-onboarding.html',
+    'member-waiver.html'
+]);
 
 const echelonMemberClient = window.supabase.createClient(
     EFC_SUPABASE_URL,
@@ -10,7 +14,7 @@ const echelonMemberClient = window.supabase.createClient(
 
 function getSafeNextPage() {
     const nextPage = new URLSearchParams(window.location.search).get('next');
-    return nextPage && nextPage.endsWith('.html') ? nextPage : 'member-portal.html';
+    return nextPage && EFC_MEMBER_PAGES.has(nextPage) ? nextPage : 'member-portal.html';
 }
 
 async function getAuthenticatedMember() {
@@ -18,16 +22,12 @@ async function getAuthenticatedMember() {
     return error ? null : data.user;
 }
 
-function isAdministratorMember(member) {
-    return member?.email?.trim().toLowerCase() === EFC_ADMIN_MEMBER_EMAIL;
-}
-
 function hasRequiredMemberSignIn(member) {
-    return !isAdministratorMember(member) || window.sessionStorage.getItem(EFC_MEMBER_STEP_UP_KEY) === member.id;
+    return Boolean(member && window.sessionStorage.getItem(EFC_MEMBER_STEP_UP_KEY) === member.id);
 }
 
 function markMemberSignIn(member) {
-    if (isAdministratorMember(member)) window.sessionStorage.setItem(EFC_MEMBER_STEP_UP_KEY, member.id);
+    if (member) window.sessionStorage.setItem(EFC_MEMBER_STEP_UP_KEY, member.id);
 }
 
 function clearMemberSignIn() {
@@ -37,7 +37,7 @@ function clearMemberSignIn() {
 async function requireMemberSession() {
     const member = await getAuthenticatedMember();
 
-    if (!member || !hasRequiredMemberSignIn(member)) {
+    if (!member || !hasRequiredMemberSignIn(member) || !(await hasMemberHubAccess())) {
         window.location.replace(
             `member-login.html?next=${encodeURIComponent(window.location.pathname.split('/').pop())}`
         );
@@ -47,12 +47,17 @@ async function requireMemberSession() {
     return member;
 }
 
+async function hasMemberHubAccess() {
+    const { data, error } = await echelonMemberClient.rpc('has_member_hub_access');
+    return !error && data === true;
+}
+
 async function initializeMemberLogin() {
     const form = document.getElementById('member-login-form');
     if (!form) return;
 
     const existingMember = await getAuthenticatedMember();
-    if (existingMember && hasRequiredMemberSignIn(existingMember)) {
+    if (existingMember && hasRequiredMemberSignIn(existingMember) && await hasMemberHubAccess()) {
         window.location.replace(getSafeNextPage());
         return;
     }
@@ -78,7 +83,17 @@ async function initializeMemberLogin() {
             return;
         }
 
-        markMemberSignIn(await getAuthenticatedMember());
+        const signedInMember = await getAuthenticatedMember();
+        if (!signedInMember || !(await hasMemberHubAccess())) {
+            await echelonMemberClient.auth.signOut();
+            clearMemberSignIn();
+            feedback.textContent = 'Member Hub access is available after Echelon approval. Please contact Echelon if you believe this is an error.';
+            submitButton.disabled = false;
+            submitButton.textContent = 'SIGN IN';
+            return;
+        }
+
+        markMemberSignIn(signedInMember);
         window.location.replace(getSafeNextPage());
     });
 }

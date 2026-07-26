@@ -1,6 +1,5 @@
 const EFC_ADMIN_SUPABASE_URL = 'https://plkdyvtriajpzcfgtwzp.supabase.co';
 const EFC_ADMIN_SUPABASE_KEY = 'sb_publishable_CwFNrWSrhLKURZIk_-yt1A_ZVpFHEwf';
-const EFC_ADMIN_EMAIL = 'luther.casimir@gmail.com';
 const EFC_ADMIN_STEP_UP_KEY = 'efc_admin_step_up_user';
 
 const echelonAdminClient = window.supabase.createClient(
@@ -11,10 +10,6 @@ const echelonAdminClient = window.supabase.createClient(
 async function getAdminUser() {
     const { data, error } = await echelonAdminClient.auth.getUser();
     return error ? null : data.user;
-}
-
-function hasAdminEmail(user) {
-    return user?.email?.trim().toLowerCase() === EFC_ADMIN_EMAIL;
 }
 
 function hasAdminStepUp(user) {
@@ -31,16 +26,17 @@ function clearAdminStepUp() {
 
 async function isEchelonAdmin() {
     const user = await getAdminUser();
-    if (!hasAdminEmail(user)) return false;
+    if (!user) return false;
     const { data, error } = await echelonAdminClient.rpc('is_echelon_admin');
     return !error && data === true;
 }
 
 async function requireAdminSession() {
     const user = await getAdminUser();
-    if (!user || !(await isEchelonAdmin()) || !hasAdminStepUp(user)) {
+    const isAdmin = user && await isEchelonAdmin();
+    if (!user || !isAdmin || !hasAdminStepUp(user)) {
         clearAdminStepUp();
-        window.location.replace(`admin-login.html?reason=${hasAdminEmail(user) ? 'admin-sign-in-required' : 'not-authorized'}`);
+        window.location.replace(`admin-login.html?reason=${isAdmin ? 'admin-sign-in-required' : 'not-authorized'}`);
         return null;
     }
     return user;
@@ -81,7 +77,7 @@ async function initializeAdminLogin() {
         });
 
         const signedInUser = await getAdminUser();
-        if (error || !(await isEchelonAdmin()) || !hasAdminEmail(signedInUser)) {
+        if (error || !(await isEchelonAdmin()) || !signedInUser) {
             await echelonAdminClient.auth.signOut();
             clearAdminStepUp();
             showAdminLoginFeedback(error
