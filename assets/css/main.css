@@ -2352,6 +2352,8 @@ MOBILE
     margin-bottom:34px;
 }
 
+.member-hub-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;padding:6px 0 8px}.member-hub-heading h1{max-width:680px}.member-email-badge{flex:0 0 auto;margin:0!important;padding:10px 13px;border:1px solid rgba(215,181,91,.34);background:rgba(215,181,91,.07);color:#d8d8d8!important;font-size:.68rem!important;letter-spacing:.08em;overflow-wrap:anywhere}.member-command-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;margin:0 0 20px;border:1px solid rgba(215,181,91,.36);background:rgba(215,181,91,.22)}.member-command-strip a{display:block;min-height:155px;padding:24px;background:linear-gradient(145deg,rgba(16,16,16,.97),rgba(6,6,6,.97));color:#fff;text-decoration:none;transition:background .25s ease}.member-command-strip a:hover{background:linear-gradient(145deg,rgba(215,181,91,.16),rgba(6,6,6,.97))}.member-command-strip span{display:block;color:var(--primary);font-size:.64rem;font-weight:700;letter-spacing:.14em}.member-command-strip strong{display:block;margin:14px 0 8px;font-family:var(--heading-font);font-size:1.35rem;letter-spacing:.04em}.member-command-strip p{margin:0;color:#aaa;font-size:.74rem;line-height:1.55}
+
 .member-portal-grid{
 
     display:grid;
@@ -2876,6 +2878,7 @@ MOBILE
     gap:24px;
     align-items:start;
 }
+.coaching-panel-plan{grid-column:span 2}.coaching-compass-three{grid-template-columns:repeat(3,1fr)}.coaching-compass-three article:nth-child(3){border-right:0}.coaching-fuel-bridge{display:flex;align-items:center;justify-content:space-between;gap:22px;margin:-22px 0 24px;padding:18px 22px;border:1px solid rgba(215,181,91,.3);background:rgba(215,181,91,.055);color:#fff;text-decoration:none}.coaching-fuel-bridge span{color:var(--primary);font-size:.65rem;font-weight:700;letter-spacing:.13em}.coaching-fuel-bridge strong{max-width:690px;font-size:.76rem;line-height:1.55;text-align:right}.coaching-fuel-bridge em{margin-left:10px;color:var(--primary);font-style:normal;letter-spacing:.08em;white-space:nowrap}
 .coaching-hero{ padding:10px 0 20px; }
 .coaching-compass{
     display:grid;
@@ -3108,9 +3111,15 @@ MOBILE
     }
 
     .coaching-hub-grid{ grid-template-columns:1fr; }
+    .coaching-panel-plan{ grid-column:auto; }
     .coaching-compass{ grid-template-columns:repeat(2,1fr); }
     .coaching-compass article:nth-child(2){ border-right:0; }
     .coaching-compass article:nth-child(-n+2){ border-bottom:1px solid rgba(255,255,255,.12); }
+    .coaching-compass-three{ grid-template-columns:1fr; }
+    .coaching-compass-three article{ border-right:0; border-bottom:1px solid rgba(255,255,255,.12); }
+    .coaching-compass-three article:last-child{ border-bottom:0; }
+    .coaching-fuel-bridge{ align-items:flex-start; flex-direction:column; margin-top:-16px; }
+    .coaching-fuel-bridge strong{ text-align:left; }
 
     .admin-record{
 
@@ -3143,6 +3152,8 @@ MOBILE
         margin-bottom:12px;
     }
 }
+
+@media(max-width:720px){.member-hub-heading{align-items:flex-start;flex-direction:column}.member-command-strip{grid-template-columns:1fr}.member-command-strip a{min-height:unset}}
 
 .member-password-link{
 
