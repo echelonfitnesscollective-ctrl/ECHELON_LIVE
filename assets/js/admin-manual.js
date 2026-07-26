@@ -5,6 +5,7 @@ const EFC_MANUAL_SECTIONS = [
         ['Vercel', 'Hosting & deployments', 'https://vercel.com/dashboard', 'Hosts echelonfitness.co. Review the fresh deployment after every approved update.'],
         ['Supabase', 'Members, forms, admin data & site content', 'https://supabase.com/dashboard/project/plkdyvtriajpzcfgtwzp', 'Source of truth for member data, check-ins, goals, plans, messages, photos, the Admin Console, published Site Content, and the public Media Gallery.'],
         ['Formspree', 'Form delivery inbox', 'https://formspree.io/', 'Delivers contact and coaching application submissions to the Echelon inbox. Use it for fast notification, then track the actual follow-up in Coach Command.'],
+        ['Stripe', 'Payments & enrollment checkout', 'https://dashboard.stripe.com/', 'Processes secure group fitness and approved-coaching payments. Keep Stripe in test mode until the full applicant-to-invite flow has been tested once.'],
         ['Google Business Profile', 'Reviews & discovery', 'https://business.google.com/', 'Manage business details, verification, and the link used in Echelon review-request messages.'],
         ['Instagram', 'Social channel', 'https://www.instagram.com/EchelonFitness.co', 'Primary social presence and community touchpoint.'],
         ['TikTok', 'Social channel', 'https://tr.ee/pO3gLtovXy', 'Short-form content and discovery channel.'],
@@ -32,6 +33,14 @@ const EFC_MANUAL_SECTIONS = [
         ['Create the next action', 'Add a Coach Command follow-up task with their name, a due date, and the correct priority.'],
         ['Respond personally', 'Use your approved contact method. Update your private note with the important context and outcome.'],
         ['Move forward or close out', 'Keep the task open until there is a real next step. Mark it complete once the handoff or decision is final.']
+    ]},
+    { id: 'accepted-applicant', tag: 'ACCEPTED APPLICANT FLOW', title: 'FROM APPLICATION TO ACTIVE MEMBER', intro: 'The Admin Console now turns an approval into a clear, trackable handoff. Payment happens privately through Stripe; the Member Portal invitation only unlocks after Stripe confirms it.', steps: [
+        ['Applicant submits', 'Formspree delivers the application notification and Supabase saves the record. A NEW MEMBER LAUNCH project and its private checklist are created automatically.'],
+        ['Coach reviews', 'Open Leads → Coaching Applications. Read the application, select the aligned program and payment choice, then choose Create Payment Link. The checklist marks the review, program choice, and payment-link handoff complete.'],
+        ['Applicant pays', 'Use Copy Payment Link and Open Payment Email to send the applicant their private Stripe link. They see only their coaching selection and complete secure Stripe checkout. Do not collect card details yourself.'],
+        ['Stripe confirms', 'Stripe records the completed payment, changes the application to Paid — Ready to Invite, and completes the payment-verification step in the launch checklist. A failed or expired payment link stays inactive.'],
+        ['Admin activates access', 'Return to that application and select Invite to Member Portal. Supabase sends the member a secure password/setup email and grants their active Member Portal access.'],
+        ['Coach launches', 'Finish the remaining launch tasks: confirm onboarding and waiver, publish Week 1, set the check-in cadence, and confirm launch readiness. The member then sees their focused Coaching Hub first.']
     ]},
     { id: 'communication', tag: 'COMMUNICATION STANDARD', title: 'HOW ECHELON RESPONDS', intro: 'The Response Library in the Admin Console is the approved starting point for every outreach moment. It keeps the language warm, clear, and consistent while leaving space for a real personal reply.', notice: 'Never paste credentials, health details, payment details, or a member’s private information into an email, text, or public message. Do not guarantee a fitness outcome or provide medical advice. Use the Medical / High-Risk Question script when a concern falls outside coaching scope.', steps: [
         ['Acknowledge quickly', 'For contact requests, coaching applications, waitlist entries, and check-ins, send the matching acknowledgment immediately or as soon as you see it.'],

@@ -123,6 +123,63 @@ function createAdminRecord(columns) {
     return record;
 }
 
+function paymentOptionForApplication(application) {
+    const program = String(application.program_interest || '').toLowerCase();
+    if (program.includes('1-on-1') || program.includes('one-on-one') || program.includes('private')) return 'one_on_one_monthly';
+    return 'echelon_12_monthly';
+}
+
+function paymentEmailLink(application, paymentUrl, label) {
+    const subject = 'Your Echelon coaching next step';
+    const body = `Hi ${application.full_name || ''},\n\nThank you for sharing your goals with Echelon. I’d be glad to move forward with ${label}.\n\nYour private payment link is below. Once payment is confirmed, I’ll send your Member Portal invitation and onboarding next steps.\n\n${paymentUrl}\n\nRespectfully,\nEchelon Fitness Collective`;
+    return `mailto:${encodeURIComponent(application.email || '')}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
+
+function createApplicationRecord(item) {
+    const record = document.createElement('article');
+    record.className = 'admin-record application-record';
+    const top = document.createElement('div'); top.className = 'application-record-top';
+    const name = document.createElement('strong'); name.textContent = item.full_name;
+    const state = document.createElement('span'); state.className = `application-state ${item.payment_status === 'paid' ? 'is-paid' : ''}`; state.textContent = item.status || 'New';
+    top.append(name, state);
+    const details = document.createElement('span'); details.textContent = `${item.program_interest || 'Coaching'} · ${item.email || 'Email not provided'}`;
+    const reference = document.createElement('span'); reference.className = 'application-reference'; reference.textContent = item.application_reference ? `REFERENCE · ${item.application_reference}` : 'PRIVATE APPLICATION';
+    const actions = document.createElement('div'); actions.className = 'application-record-actions';
+    const choice = document.createElement('select'); choice.setAttribute('aria-label', `Payment option for ${item.full_name}`);
+    [['echelon_12_monthly', 'ECHELON 12 · $149 / MO'], ['echelon_12_paid_in_full', 'ECHELON 12 · $399 PAID IN FULL'], ['one_on_one_monthly', '1-ON-1 COACHING · MONTHLY']].forEach(([value, label]) => { const option = document.createElement('option'); option.value = value; option.textContent = label; choice.append(option); });
+    choice.value = paymentOptionForApplication(item);
+    const createOffer = document.createElement('button'); createOffer.type = 'button'; createOffer.className = 'btn-secondary'; createOffer.textContent = item.payment_status === 'paid' ? 'PAYMENT CONFIRMED' : 'CREATE PAYMENT LINK'; createOffer.disabled = item.payment_status === 'paid';
+    const paymentFeedback = document.createElement('p'); paymentFeedback.className = 'application-payment-feedback'; paymentFeedback.setAttribute('role', 'status');
+    createOffer.addEventListener('click', async () => {
+        createOffer.disabled = true; createOffer.textContent = 'CREATING…'; paymentFeedback.textContent = '';
+        const { data: sessionData } = await echelonAdminClient.auth.getSession();
+        const result = await fetch('/api/enrollment/create-offer', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionData.session?.access_token || ''}` }, body: JSON.stringify({ applicationId: item.id, paymentOption: choice.value }) });
+        const body = await result.json();
+        if (!result.ok || !body.paymentUrl) { paymentFeedback.textContent = body.error || 'The payment link could not be created.'; createOffer.disabled = false; createOffer.textContent = 'CREATE PAYMENT LINK'; return; }
+        paymentFeedback.textContent = 'Private payment link created. Send it from your email below.';
+        const copy = document.createElement('button'); copy.type = 'button'; copy.className = 'btn-secondary'; copy.textContent = 'COPY PAYMENT LINK'; copy.addEventListener('click', async () => { try { await navigator.clipboard.writeText(body.paymentUrl); copy.textContent = 'LINK COPIED'; } catch (_) { window.prompt('Copy this private payment link:', body.paymentUrl); } });
+        const email = document.createElement('a'); email.className = 'btn-primary'; email.textContent = 'OPEN PAYMENT EMAIL'; email.href = paymentEmailLink(item, body.paymentUrl, body.label);
+        actions.append(copy, email); choice.disabled = true; createOffer.remove();
+        initializeOperationsConsole(); initializeCoachCommand();
+    });
+    actions.append(choice, createOffer);
+    if (item.payment_status === 'paid') {
+        const invite = document.createElement('button'); invite.type = 'button'; invite.className = 'btn-primary'; invite.textContent = item.invited_at ? 'INVITATION SENT' : 'INVITE TO MEMBER PORTAL'; invite.disabled = Boolean(item.invited_at);
+        invite.addEventListener('click', async () => {
+            if (!window.confirm(`Send ${item.full_name} their secure Member Portal invitation now?`)) return;
+            invite.disabled = true; invite.textContent = 'SENDING…';
+            const { data: sessionData } = await echelonAdminClient.auth.getSession();
+            const result = await fetch('/api/enrollment/activate-member', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionData.session?.access_token || ''}` }, body: JSON.stringify({ applicationId: item.id }) });
+            const body = await result.json();
+            if (!result.ok) { paymentFeedback.textContent = body.error || 'The invite could not be sent.'; invite.disabled = false; invite.textContent = 'INVITE TO MEMBER PORTAL'; return; }
+            paymentFeedback.textContent = body.message; invite.textContent = 'INVITATION SENT'; initializeOperationsConsole(); initializeCoachCommand();
+        });
+        actions.append(invite);
+    }
+    record.append(top, details, reference, actions, paymentFeedback);
+    return record;
+}
+
 function coachTaskDate(value) {
     if (!value) return 'No due date';
     const date = new Date(`${value}T12:00:00`);
@@ -146,6 +203,8 @@ function createCoachTask(task) {
     detail.className = 'coach-task-detail';
     detail.textContent = task.description || `${task.priority} priority`;
     copy.append(title, metadata, detail);
+    const actions = document.createElement('div');
+    actions.className = 'coach-task-actions';
     const action = document.createElement('button');
     action.type = 'button';
     action.className = 'coach-task-complete';
@@ -157,7 +216,19 @@ function createCoachTask(task) {
         if (!error) initializeCoachCommand();
         else action.disabled = false;
     });
-    article.append(copy, action);
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'coach-task-delete';
+    remove.textContent = 'REMOVE';
+    remove.addEventListener('click', async () => {
+        if (!window.confirm(`Remove “${task.title}” from the Coach Command queue?`)) return;
+        remove.disabled = true;
+        const { error } = await echelonAdminClient.from('coach_tasks').delete().eq('id', task.id);
+        if (!error) initializeCoachCommand();
+        else { remove.disabled = false; window.alert('That task could not be removed. Please try again.'); }
+    });
+    actions.append(action, remove);
+    article.append(copy, actions);
     return article;
 }
 
@@ -222,7 +293,7 @@ async function initializeOperationsConsole() {
     if (!applicationsList) return;
 
     const [applicationsResult, leadsResult, checkinsResult, resourcesResult] = await Promise.all([
-        echelonAdminClient.from('coaching_applications').select('full_name, email, program_interest, status, created_at').order('created_at', { ascending: false }).limit(25),
+        echelonAdminClient.from('coaching_applications').select('id, full_name, email, program_interest, status, application_reference, application_status, payment_status, invited_at, created_at').order('created_at', { ascending: false }).limit(25),
         echelonAdminClient.from('website_leads').select('full_name, email, lead_type, category, status, created_at').order('created_at', { ascending: false }).limit(25),
         echelonAdminClient.from('session_checkins').select('full_name, email, program, status, checked_in_at').order('checked_in_at', { ascending: false }).limit(25),
         echelonAdminClient.from('trainer_resources').select('title, category, resource_url, notes, created_at').order('created_at', { ascending: false })
@@ -232,16 +303,12 @@ async function initializeOperationsConsole() {
     const leads = leadsResult.data || [];
     const checkins = checkinsResult.data || [];
     const resources = resourcesResult.data || [];
-    document.getElementById('admin-application-count').textContent = applications.filter((item) => item.status === 'New').length;
+    document.getElementById('admin-application-count').textContent = applications.filter((item) => item.status === 'New' || item.application_status === 'submitted').length;
     document.getElementById('admin-checkin-count').textContent = checkins.filter((item) => new Date(item.checked_in_at).toDateString() === new Date().toDateString()).length;
 
     const applicationsStatus = document.getElementById('admin-applications-status');
     applicationsStatus.textContent = applicationsResult.error ? 'Unable to load applications.' : `${applications.length} recent application${applications.length === 1 ? '' : 's'}`;
-    renderAdminRecords(applicationsList, applications, 'Applications will appear here when submitted.', (item) => createAdminRecord([
-        { text: item.full_name, strong: true },
-        { text: `${item.program_interest} · ${item.email}` },
-        { text: item.status }
-    ]));
+    renderAdminRecords(applicationsList, applications, 'Applications will appear here when submitted.', createApplicationRecord);
 
     const leadsStatus = document.getElementById('admin-leads-status');
     leadsStatus.textContent = leadsResult.error ? 'Unable to load website leads.' : `${leads.length} recent site lead${leads.length === 1 ? '' : 's'}`;
@@ -854,11 +921,11 @@ We’ll follow up by [date/timeframe] with either a recommended next step or a f
 Respectfully,
 [Your Name]
 Echelon Fitness Collective` },
-    { tag: '03 · NEXT STEP', title: 'COACHING ACCEPTANCE', description: 'Invite the right-fit applicant into onboarding.', subject: 'Your Echelon coaching next step', body: `Hi [First Name],
+    { tag: '03 · NEXT STEP', title: 'COACHING ACCEPTANCE + PAYMENT', description: 'Send only after creating their private payment link in Leads.', subject: 'Your Echelon coaching next step', body: `Hi [First Name],
 
 Thank you for sharing your goals with us. Based on what you shared, I’d be glad to move forward with [Echelon 12 / 1-on-1 Coaching].
 
-Your next step is [booking link / payment step / consultation time]. Once that is complete, I’ll send your welcome sequence, onboarding checklist, and first training date.
+Your next step is to complete your private enrollment through our secure Stripe link: [payment link]. Once payment is confirmed, I’ll send your Member Portal invitation, onboarding checklist, and first training date.
 
 I’m looking forward to building this with intention.
 
@@ -1014,5 +1081,6 @@ function initializeAdminTabs() {
     };
 
     tabs.forEach((tab) => tab.addEventListener('click', () => selectTab(tab.dataset.adminTab)));
+    document.querySelectorAll('[data-admin-open]').forEach((link) => link.addEventListener('click', () => selectTab(link.dataset.adminOpen)));
     selectTab('today');
 }

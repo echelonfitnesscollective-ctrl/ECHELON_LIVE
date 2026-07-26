@@ -2352,7 +2352,51 @@ MOBILE
     margin-bottom:34px;
 }
 
-.member-hub-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;padding:6px 0 8px}.member-hub-heading h1{max-width:680px}.member-email-badge{flex:0 0 auto;margin:0!important;padding:10px 13px;border:1px solid rgba(215,181,91,.34);background:rgba(215,181,91,.07);color:#d8d8d8!important;font-size:.68rem!important;letter-spacing:.08em;overflow-wrap:anywhere}.member-command-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;margin:0 0 20px;border:1px solid rgba(215,181,91,.36);background:rgba(215,181,91,.22)}.member-command-strip a{display:block;min-height:155px;padding:24px;background:linear-gradient(145deg,rgba(16,16,16,.97),rgba(6,6,6,.97));color:#fff;text-decoration:none;transition:background .25s ease}.member-command-strip a:hover{background:linear-gradient(145deg,rgba(215,181,91,.16),rgba(6,6,6,.97))}.member-command-strip span{display:block;color:var(--primary);font-size:.64rem;font-weight:700;letter-spacing:.14em}.member-command-strip strong{display:block;margin:14px 0 8px;font-family:var(--heading-font);font-size:1.35rem;letter-spacing:.04em}.member-command-strip p{margin:0;color:#aaa;font-size:.74rem;line-height:1.55}
+.member-hub-heading{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:24px;
+    padding:6px 0 8px;
+}
+
+.member-hub-heading h1{ max-width:680px; }
+
+.member-email-badge{
+    flex:0 0 auto;
+    margin:0!important;
+    padding:10px 13px;
+    border:1px solid rgba(215,181,91,.34);
+    background:rgba(215,181,91,.07);
+    color:#d8d8d8!important;
+    font-size:.68rem!important;
+    letter-spacing:.08em;
+    overflow-wrap:anywhere;
+}
+
+.member-command-strip{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:1px;
+    margin:0 0 20px;
+    border:1px solid rgba(215,181,91,.36);
+    background:rgba(215,181,91,.22);
+}
+
+.member-command-strip a{
+    display:block;
+    min-height:155px;
+    padding:24px;
+    background:linear-gradient(145deg,rgba(16,16,16,.97),rgba(6,6,6,.97));
+    color:#fff;
+    text-decoration:none;
+    transition:background .25s ease;
+}
+
+.member-command-strip a:hover{ background:linear-gradient(145deg,rgba(215,181,91,.16),rgba(6,6,6,.97)); }
+.member-command-strip span{ display:block; color:var(--primary); font-size:.64rem; font-weight:700; letter-spacing:.14em; }
+.member-command-strip strong{ display:block; margin:14px 0 8px; font-family:var(--heading-font); font-size:1.35rem; letter-spacing:.04em; }
+.member-command-strip p{ margin:0; color:#aaa; font-size:.74rem; line-height:1.55; }
 
 .member-portal-grid{
 
@@ -2878,7 +2922,13 @@ MOBILE
     gap:24px;
     align-items:start;
 }
-.coaching-panel-plan{grid-column:span 2}.coaching-compass-three{grid-template-columns:repeat(3,1fr)}.coaching-compass-three article:nth-child(3){border-right:0}.coaching-fuel-bridge{display:flex;align-items:center;justify-content:space-between;gap:22px;margin:-22px 0 24px;padding:18px 22px;border:1px solid rgba(215,181,91,.3);background:rgba(215,181,91,.055);color:#fff;text-decoration:none}.coaching-fuel-bridge span{color:var(--primary);font-size:.65rem;font-weight:700;letter-spacing:.13em}.coaching-fuel-bridge strong{max-width:690px;font-size:.76rem;line-height:1.55;text-align:right}.coaching-fuel-bridge em{margin-left:10px;color:var(--primary);font-style:normal;letter-spacing:.08em;white-space:nowrap}
+.coaching-panel-plan{ grid-column:span 2; }
+.coaching-compass-three{ grid-template-columns:repeat(3,1fr); }
+.coaching-compass-three article:nth-child(3){ border-right:0; }
+.coaching-fuel-bridge{ display:flex; align-items:center; justify-content:space-between; gap:22px; margin:-22px 0 24px; padding:18px 22px; border:1px solid rgba(215,181,91,.3); background:rgba(215,181,91,.055); color:#fff; text-decoration:none; }
+.coaching-fuel-bridge span{ color:var(--primary); font-size:.65rem; font-weight:700; letter-spacing:.13em; }
+.coaching-fuel-bridge strong{ max-width:690px; font-size:.76rem; line-height:1.55; text-align:right; }
+.coaching-fuel-bridge em{ margin-left:10px; color:var(--primary); font-style:normal; letter-spacing:.08em; white-space:nowrap; }
 .coaching-hero{ padding:10px 0 20px; }
 .coaching-compass{
     display:grid;
@@ -2914,7 +2964,14 @@ MOBILE
 .photo-timeline figure:hover img{ transform:scale(1.025); border-color:var(--primary); }
 .photo-timeline figcaption{ margin-top:5px; color:#aaa; font-size:.65rem; line-height:1.3; }
 .message-thread{ min-height:180px; max-height:360px; overflow:auto; display:flex; flex-direction:column; gap:10px; padding:4px; }
-.message-separator{ display:flex; align-items:center; gap:10px; margin:12px 0 2px; color:#898989; font-size:.62rem; font-weight:700; letter-spacing:.13em; }.message-separator::before,.message-separator::after{ content:''; height:1px; flex:1; background:rgba(255,255,255,.15); }.message-separator.from-member{ color:var(--primary); }.message-separator.from-member::before,.message-separator.from-member::after{ background:rgba(215,181,91,.35); }.message-bubble{ max-width:85%; padding:12px 14px; color:#fff; font-size:.8rem; line-height:1.5; }.message-bubble p{ margin:7px 0 0; white-space:pre-wrap; }.message-meta{ display:block; opacity:.68; font-size:.58rem; font-weight:700; letter-spacing:.09em; }.message-bubble.from-member .message-meta{ opacity:.78; }
+.message-separator{ display:flex; align-items:center; gap:10px; margin:12px 0 2px; color:#898989; font-size:.62rem; font-weight:700; letter-spacing:.13em; }
+.message-separator::before,.message-separator::after{ content:''; height:1px; flex:1; background:rgba(255,255,255,.15); }
+.message-separator.from-member{ color:var(--primary); }
+.message-separator.from-member::before,.message-separator.from-member::after{ background:rgba(215,181,91,.35); }
+.message-bubble{ max-width:85%; padding:12px 14px; color:#fff; font-size:.8rem; line-height:1.5; }
+.message-bubble p{ margin:7px 0 0; white-space:pre-wrap; }
+.message-meta{ display:block; opacity:.68; font-size:.58rem; font-weight:700; letter-spacing:.09em; }
+.message-bubble.from-member .message-meta{ opacity:.78; }
 .message-bubble.from-member{ align-self:flex-end; background:var(--primary); color:#111; }
 .message-bubble.from-coach{ align-self:flex-start; background:#242424; border:1px solid rgba(255,255,255,.15); }
 
@@ -3153,7 +3210,11 @@ MOBILE
     }
 }
 
-@media(max-width:720px){.member-hub-heading{align-items:flex-start;flex-direction:column}.member-command-strip{grid-template-columns:1fr}.member-command-strip a{min-height:unset}}
+@media(max-width:720px){
+    .member-hub-heading{ align-items:flex-start; flex-direction:column; }
+    .member-command-strip{ grid-template-columns:1fr; }
+    .member-command-strip a{ min-height:unset; }
+}
 
 .member-password-link{
 
@@ -5211,6 +5272,10 @@ MOBILE
 
 /* Preserve the focused console order after adding the Site Content workspace. */
 .admin-console-layout>.admin-content-section{order:10}.admin-console-layout>.communications-section{order:11}.admin-console-layout>.admin-member-vault-section{order:12}.admin-console-layout>.admin-trainer-resources-section{order:13}
+
+/* Accepted applicant flow: preserved operational data, clearer staged handoff. */
+.admin-command-strip{display:flex;align-items:center;justify-content:space-between;gap:28px;margin:-4px 0 24px;padding:24px 26px;border:1px solid rgba(215,181,91,.42);background:linear-gradient(110deg,rgba(215,181,91,.16),rgba(255,255,255,.025))}.admin-command-strip strong{display:block;margin:8px 0;color:#fff;font:400 clamp(1.5rem,3vw,2.15rem)/1 var(--heading-font);letter-spacing:.05em}.admin-command-strip p{max-width:650px;margin:0;color:#c2c2c2;font-size:.76rem;line-height:1.6}.admin-command-strip .btn-primary{flex:0 0 auto;margin:0}@media(max-width:600px){.admin-command-strip{align-items:flex-start;flex-direction:column}}
+.coach-task-actions{display:flex;flex-direction:column;align-items:stretch;gap:8px;min-width:126px}.coach-task-delete{border:1px solid rgba(255,255,255,.18);background:transparent;color:#a8a8a8;padding:9px 11px;font:700 .61rem 'Montserrat',sans-serif;letter-spacing:.1em;cursor:pointer}.coach-task-delete:hover{border-color:rgba(215,181,91,.65);color:var(--primary)}.application-record{gap:8px!important;padding:22px!important;background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(0,0,0,.2))!important}.application-record-top{display:flex;align-items:center;justify-content:space-between;gap:14px}.application-state{border:1px solid rgba(215,181,91,.45);padding:5px 8px;color:#d8c185;font:700 .59rem 'Montserrat',sans-serif;letter-spacing:.08em;text-transform:uppercase}.application-state.is-paid{border-color:rgba(113,201,152,.6);color:#91d6aa}.application-reference{color:#848484!important;font-size:.62rem!important;letter-spacing:.1em}.application-record-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.application-record-actions select{min-width:205px;max-width:100%;margin:0;padding:11px;border:1px solid rgba(255,255,255,.17);background:#111;color:#d8d8d8;font:600 .65rem 'Montserrat',sans-serif;letter-spacing:.04em}.application-record-actions .btn-primary,.application-record-actions .btn-secondary{display:inline-flex;align-items:center;justify-content:center;margin:0;padding:12px 14px;font-size:.62rem}.application-payment-feedback{min-height:1em;margin:2px 0 0!important;color:#d7bb70!important;font-size:.72rem!important}.enrollment-checkout-page{min-height:100vh;display:grid;place-items:center;background:radial-gradient(circle at 78% 14%,rgba(215,181,91,.15),transparent 31%),linear-gradient(145deg,#030303,#11100d)}.enrollment-checkout-card{max-width:650px;margin:40px auto;padding:60px;border:1px solid rgba(215,181,91,.55);background:linear-gradient(145deg,rgba(215,181,91,.1),rgba(8,8,8,.92));box-shadow:0 30px 90px rgba(0,0,0,.45)}.enrollment-checkout-card h1{margin:13px 0;font-size:clamp(3.2rem,10vw,6rem);line-height:.86}.enrollment-checkout-card h1 span{color:var(--primary)}.enrollment-checkout-card>p{max-width:530px;color:#c7c7c7;line-height:1.7}.enrollment-offer{margin:26px 0;padding:18px;border-left:3px solid var(--primary);background:rgba(255,255,255,.06);color:#fff;font:700 .78rem 'Montserrat',sans-serif;letter-spacing:.08em}.enrollment-checkout-card .btn-primary{margin-top:10px}.enrollment-fine-print{margin-top:24px;color:#929292!important;font-size:.72rem;line-height:1.6!important}@media(max-width:600px){.coach-task-actions{width:100%;flex-direction:row}.coach-task-actions>*{flex:1}.application-record-actions>*{width:100%}.application-record-actions .btn-primary,.application-record-actions .btn-secondary{width:100%}.enrollment-checkout-card{margin:18px 0;padding:36px 26px}}
 
 /* Media Manager */
 .admin-console-layout>.admin-media-section{order:11}.admin-console-layout>.communications-section{order:12}.admin-console-layout>.admin-member-vault-section{order:13}.admin-console-layout>.admin-trainer-resources-section{order:14}.media-manager-intro{margin-bottom:18px}.media-content-list{max-height:820px}.media-content-item{grid-template-columns:104px minmax(0,1fr) auto;align-items:center}.media-manager-preview{width:104px;height:94px;object-fit:cover;border:1px solid rgba(215,181,91,.32);background:#080808}.site-content-form input[type=file]{padding:12px;background:rgba(255,255,255,.03);font-size:.7rem}.site-content-form input[type=file]::file-selector-button{margin-right:12px;padding:8px 10px;border:1px solid rgba(215,181,91,.45);background:rgba(215,181,91,.1);color:#d7b55b;font:700 .58rem 'Montserrat',sans-serif;letter-spacing:.08em;cursor:pointer}@media(max-width:700px){.media-content-item{grid-template-columns:78px minmax(0,1fr)}.media-manager-preview{width:78px;height:78px}.media-content-item .cms-content-actions{grid-column:1/-1;flex-direction:row;flex-wrap:wrap}.media-content-item .cms-content-actions button{flex:1;min-width:100px}}
