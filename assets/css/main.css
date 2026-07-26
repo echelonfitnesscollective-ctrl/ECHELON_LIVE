@@ -2914,7 +2914,7 @@ MOBILE
 .photo-timeline figure:hover img{ transform:scale(1.025); border-color:var(--primary); }
 .photo-timeline figcaption{ margin-top:5px; color:#aaa; font-size:.65rem; line-height:1.3; }
 .message-thread{ min-height:180px; max-height:360px; overflow:auto; display:flex; flex-direction:column; gap:10px; padding:4px; }
-.message-bubble{ max-width:85%; padding:12px 14px; color:#fff; font-size:.8rem; line-height:1.5; }
+.message-separator{ display:flex; align-items:center; gap:10px; margin:12px 0 2px; color:#898989; font-size:.62rem; font-weight:700; letter-spacing:.13em; }.message-separator::before,.message-separator::after{ content:''; height:1px; flex:1; background:rgba(255,255,255,.15); }.message-separator.from-member{ color:var(--primary); }.message-separator.from-member::before,.message-separator.from-member::after{ background:rgba(215,181,91,.35); }.message-bubble{ max-width:85%; padding:12px 14px; color:#fff; font-size:.8rem; line-height:1.5; }.message-bubble p{ margin:7px 0 0; white-space:pre-wrap; }.message-meta{ display:block; opacity:.68; font-size:.58rem; font-weight:700; letter-spacing:.09em; }.message-bubble.from-member .message-meta{ opacity:.78; }
 .message-bubble.from-member{ align-self:flex-end; background:var(--primary); color:#111; }
 .message-bubble.from-coach{ align-self:flex-start; background:#242424; border:1px solid rgba(255,255,255,.15); }
 
