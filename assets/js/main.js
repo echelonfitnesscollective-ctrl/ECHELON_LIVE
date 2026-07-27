@@ -62,7 +62,7 @@ function installSharedFooter() {
                 <p class="footer-tagline">Building Strength Through Structure.</p>
                 <div class="footer-socials"><a href="https://www.instagram.com/EchelonFitness.co" target="_blank" rel="noopener">INSTAGRAM</a><a href="https://tr.ee/pO3gLtovXy" target="_blank" rel="noopener">TIKTOK</a></div>
             </div>
-            <div class="footer-links-row"><a href="${prefix}index.html">HOME</a><a href="${prefix}index.html#about">ABOUT</a><a href="${prefix}index.html#training">TRAINING</a><a href="${prefix}index.html#resources">RESOURCES</a><a href="${prefix}index.html#shop">SHOP</a><a href="${prefix}index.html#reviews">REVIEWS</a><a href="${prefix}index.html#contact">CONTACT</a></div>
+            <div class="footer-links-row"><a href="${prefix}index.html">HOME</a><a href="${prefix}index.html#about">ABOUT</a><a href="${prefix}index.html#training">TRAINING</a><a href="${prefix}index.html#resources">RESOURCES</a><a href="${prefix}index.html#shop">SHOP</a><a href="${prefix}index.html#contact">CONTACT</a></div>
             <div class="footer-opportunities" aria-label="Work with Echelon"><span>WORK WITH ECHELON</span><a href="${prefix}index.html?inquiry=sponsor#contact">APPLY TO BE A SPONSOR</a><a href="${prefix}index.html?inquiry=coach#contact">APPLY TO COACH</a></div>
             <div class="footer-actions"><a href="${prefix}pages/member-login.html" class="btn-primary">MEMBER PORTAL</a><a href="${prefix}pages/admin-login.html" class="btn-secondary">ADMIN PORTAL</a></div>
         </div>
