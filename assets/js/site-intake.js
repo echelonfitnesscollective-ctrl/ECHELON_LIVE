@@ -6,6 +6,42 @@ function formValues(form) {
     return Object.fromEntries(new FormData(form).entries());
 }
 
+function setCheckinValue(form, fieldName, value) {
+    const field = form.elements[fieldName];
+    if (field && value && !field.value) field.value = value;
+}
+
+async function prefillMemberCheckin(form) {
+    const memberNote = document.getElementById('member-checkin-note');
+    const requestedProgram = new URLSearchParams(window.location.search).get('program');
+    if (requestedProgram && form.elements.program) {
+        const matchingOption = Array.from(form.elements.program.options)
+            .find((option) => option.value.toLowerCase() === requestedProgram.toLowerCase());
+        if (matchingOption) form.elements.program.value = matchingOption.value;
+    }
+
+    const { data: { user } } = await echelonSiteClient.auth.getUser();
+    if (!user) return;
+
+    const [profileResult, onboardingResult] = await Promise.all([
+        echelonSiteClient.from('member_profiles').select('full_name, email, phone').eq('user_id', user.id).maybeSingle(),
+        echelonSiteClient.from('member_onboarding').select('health_history').eq('user_id', user.id).maybeSingle()
+    ]);
+    const profile = profileResult.data || {};
+    const healthHistory = onboardingResult.data?.health_history || {};
+
+    setCheckinValue(form, 'full_name', profile.full_name || user.user_metadata?.full_name);
+    setCheckinValue(form, 'email', profile.email || user.email);
+    setCheckinValue(form, 'phone', profile.phone || user.phone || user.user_metadata?.phone);
+    setCheckinValue(form, 'emergency_contact', healthHistory.emergency_contact);
+    if (form.elements.first_time && !form.elements.first_time.value) form.elements.first_time.value = "No I've trained before!";
+
+    if (memberNote) {
+        memberNote.hidden = false;
+        memberNote.textContent = 'MEMBER DETAILS LOADED — confirm your session information, then submit your check-in.';
+    }
+}
+
 async function sendFormspreeCopy(form) {
     try {
         await fetch(form.action, {
@@ -57,6 +93,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (checkinForm) {
         const success = document.getElementById('success-message');
         const submitButton = checkinForm.querySelector('button[type="submit"]');
+        prefillMemberCheckin(checkinForm).catch(() => {
+            // Public guests can still submit when no member profile is available.
+        });
         checkinForm.addEventListener('submit', async (event) => {
             event.preventDefault();
             submitButton.disabled = true;
@@ -82,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             checkinForm.reset();
             checkinForm.style.display = 'none';
-            showEchelonSuccess(success, 'CHECK-IN COMPLETE', 'You are confirmed for today. Arrive ready to work — your coach will take it from here.', { onDismiss: () => { checkinForm.style.display = ''; } });
+            showEchelonSuccess(success, 'CHECK-IN COMPLETE', 'You are confirmed for today. Arrive ready to work — your coach will take it from here.', { onDismiss: () => { checkinForm.style.display = ''; submitButton.disabled = false; submitButton.textContent = 'COMPLETE CHECK-IN'; } });
         });
     }
 
@@ -144,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             waitlistForm.reset();
             waitlistForm.style.display = 'none';
-            showEchelonSuccess(success, 'YOU’RE ON THE LIST', 'Your place is secured. You will be among the first to hear about new Echelon opportunities.', { onDismiss: () => { waitlistForm.style.display = ''; } });
+            showEchelonSuccess(success, 'YOU’RE ON THE LIST', 'Your place is secured. You will be among the first to hear about new Echelon opportunities.', { onDismiss: () => { waitlistForm.style.display = ''; submitButton.disabled = false; submitButton.textContent = 'JOIN THE WAITLIST'; } });
         });
     }
 });
