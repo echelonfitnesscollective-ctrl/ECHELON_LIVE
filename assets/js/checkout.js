@@ -15,6 +15,8 @@
                 });
                 const data = await result.json();
                 if (!result.ok || !data.url) throw new Error(data.error || 'Checkout could not be started.');
+                const offer = button.dataset.checkoutOffer;
+                window.efcTrack?.(offer === 'group_drop_in' ? 'drop_in_purchase' : 'checkout_started', { offer });
                 window.location.assign(data.url);
             } catch (error) {
                 button.disabled = false;

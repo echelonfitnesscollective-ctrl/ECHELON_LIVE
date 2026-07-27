@@ -35,6 +35,7 @@
 <script src="assets/js/shop-showcase.js" defer></script>
 <script src="assets/js/site-content-feed.js" defer></script>
 <script src="assets/js/media-carousel.js" defer></script>
+<script src="assets/js/analytics.js" defer></script>
 <script src="assets/js/site-intake.js" defer></script>
 <script src="assets/js/checkout.js" defer></script>
 </head>
@@ -111,11 +112,14 @@
 
 </div>
 
-        <img
-            src="assets/images/hero-main.png"
-            alt="Echelon Fitness Collective"
-            class="hero-logo"
-        >
+        <picture>
+            <source srcset="assets/images/hero-main.webp" type="image/webp">
+            <img
+                src="assets/images/hero-main.png"
+                alt="Echelon Fitness Collective"
+                class="hero-logo"
+            >
+        </picture>
 
         <h1>
             BUILDING STRENGTH THROUGH STRUCTURE
@@ -187,9 +191,12 @@
 
             <div class="coach-image">
 
-                <img
-                    src="assets/images/coach.jpg"
-                    alt="Coach Luther of Echelon Fitness Collective" loading="eager">
+                <picture>
+                    <source srcset="assets/images/coach.webp" type="image/webp">
+                    <img
+                        src="assets/images/coach.jpg"
+                        alt="Coach Luther of Echelon Fitness Collective" loading="lazy">
+                </picture>
 
             </div>
 

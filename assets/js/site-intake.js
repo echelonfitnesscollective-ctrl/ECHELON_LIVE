@@ -82,6 +82,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             await sendFormspreeCopy(coachingForm);
+            const isPrivateGroup = values.program_interest === 'Private Group Training / Organization Wellness';
+            window.efcTrack?.(isPrivateGroup ? 'private_group_inquiry_submit' : 'coaching_application_submit', { program_interest: values.program_interest });
             coachingForm.reset();
             showEchelonSuccess(feedback, 'APPLICATION RECEIVED', 'Your request is securely with Echelon. We will personally review it and reach out within 24–72 hours.');
             submitButton.disabled = false;
@@ -121,6 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             checkinForm.reset();
             checkinForm.style.display = 'none';
+            window.efcTrack?.('checkin_complete', { program: values.program });
             showEchelonSuccess(success, 'CHECK-IN COMPLETE', 'You are confirmed for today. Arrive ready to work — your coach will take it from here.', { onDismiss: () => { checkinForm.style.display = ''; submitButton.disabled = false; submitButton.textContent = 'COMPLETE CHECK-IN'; } });
         });
     }
@@ -183,6 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             waitlistForm.reset();
             waitlistForm.style.display = 'none';
+            window.efcTrack?.('waitlist_join', { interest: values.interest });
             showEchelonSuccess(success, 'YOU’RE ON THE LIST', 'Your place is secured. You will be among the first to hear about new Echelon opportunities.', { onDismiss: () => { waitlistForm.style.display = ''; submitButton.disabled = false; submitButton.textContent = 'JOIN THE WAITLIST'; } });
         });
     }

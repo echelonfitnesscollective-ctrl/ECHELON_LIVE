@@ -58,7 +58,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (item.type === 'video') {
             const video = document.createElement('video'); video.src = item.src; video.poster = item.poster || ''; video.controls = true; video.preload = 'metadata'; video.playsInline = true; media.append(video);
         } else {
-            const image = document.createElement('img'); image.src = item.src; image.alt = item.label; image.loading = 'lazy'; media.append(image);
+            const picture = document.createElement('picture');
+            const webpMatch = item.src.match(/\.(jpe?g|png)$/i);
+            if (webpMatch) {
+                const source = document.createElement('source');
+                source.srcset = item.src.slice(0, -webpMatch[0].length) + '.webp';
+                source.type = 'image/webp';
+                picture.append(source);
+            }
+            const image = document.createElement('img'); image.src = item.src; image.alt = item.label; image.loading = 'lazy'; picture.append(image);
+            media.append(picture);
         }
         tag.textContent = item.label; heading.textContent = item.caption;
         count.textContent = `${String(active + 1).padStart(2, '0')} / ${String(items.length).padStart(2, '0')}`;
