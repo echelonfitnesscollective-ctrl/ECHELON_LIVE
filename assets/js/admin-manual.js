@@ -6,6 +6,7 @@ const EFC_MANUAL_SECTIONS = [
         ['Supabase', 'Members, forms, admin data & site content', 'https://supabase.com/dashboard/project/plkdyvtriajpzcfgtwzp', 'Source of truth for member data, check-ins, goals, plans, messages, photos, the Admin Console, published Site Content, and the public Media Gallery.'],
         ['Formspree', 'Form delivery inbox', 'https://formspree.io/', 'Delivers contact and coaching application submissions to the Echelon inbox. Use it for fast notification, then track the actual follow-up in Coach Command.'],
         ['Stripe', 'Payments & enrollment checkout', 'https://dashboard.stripe.com/', 'Processes secure group fitness and approved-coaching payments. Keep Stripe in test mode until the full applicant-to-invite flow has been tested once.'],
+        ['Calendly', 'Protected scheduling · activation pending', 'https://calendly.com/', 'Use for unlisted 1-on-1, private-group, and discovery-call booking links. Connect it to both the Burn-shift calendar and Echelon calendar before adding the URLs to assets/js/calendar-config.js.'],
         ['Google Business Profile', 'Reviews & discovery', 'https://business.google.com/', 'Manage business details, verification, and the link used in Echelon review-request messages.'],
         ['Instagram', 'Social channel', 'https://www.instagram.com/EchelonFitness.co', 'Primary social presence and community touchpoint.'],
         ['TikTok', 'Social channel', 'https://tr.ee/pO3gLtovXy', 'Short-form content and discovery channel.'],
@@ -28,6 +29,14 @@ const EFC_MANUAL_SECTIONS = [
         ['Comms', 'Use the collapsed Response Library categories for approved scripts. Open only the situation you need, copy it, personalize every bracketed detail, then send.'],
         ['Library', 'Manage the member vault and private trainer resources. Use this for publishing guides and storing coach education, not for daily follow-ups.']
     ]},
+    { id: 'offerings', tag: 'TRAINING HUB', title: 'RUN A FOCUSED OFFERING STACK', intro: 'The public Training Hub now presents six distinct programs. Keep Faith & Favor Mobility and VL Body Lab as their own cards; they are not one combined future-program offering. Launch a program only when its staff coverage, delivery plan, and calendar capacity are real.', steps: [
+        ['Group Fitness · live', '$20 drop-in or $59/month unlimited. Use a fixed, published session schedule. Active 12-Week and 1-on-1 Hybrid clients are included; one class each month is free and open to the public.'],
+        ['Private Group Training · now booking', 'For 3–15 people: friends, families, teams, organizations, celebrations, or wellness sessions. Start at $199 for up to five participants, then $25 per additional participant. Offer one-time or recurring groups only in designated event windows.'],
+        ['Echelon 12 · live', 'A structured 12-week coaching system. Use the completed Echelon 12 Coach Playbook, then publish Week 1, nutrition baseline, and the check-in cadence after payment and onboarding.'],
+        ['1-on-1 Coaching · live', 'Limited, high-touch coaching. Approval is required. Release only the windows you can honor around your Burn schedule and Echelon capacity.'],
+        ['Faith & Favor Mobility · in development', 'A 45-minute small-group mobility, posture, core-stability, and active-recovery class. Keep it on the interest list until coverage and a sustainable recurring slot are confirmed.'],
+        ['VL Body Lab · in development', 'A 50-minute strength, speed, and athletic-conditioning group experience. Keep it on the interest list until coverage and a sustainable recurring slot are confirmed.']
+    ]},
     { id: 'new-lead', tag: 'LEAD FLOW', title: 'WHEN A NEW LEAD COMES IN', steps: [
         ['Find the lead', 'Open Coaching Applications or Contact & Waitlist in the Admin Console.'],
         ['Create the next action', 'Add a Coach Command follow-up task with their name, a due date, and the correct priority.'],
@@ -41,6 +50,14 @@ const EFC_MANUAL_SECTIONS = [
         ['Stripe confirms', 'Stripe records the completed payment, changes the application to Paid — Ready to Invite, and completes the payment-verification step in the launch checklist. A failed or expired payment link stays inactive.'],
         ['Admin activates access', 'Return to that application and select Invite to Member Portal. Supabase sends the member a secure password/setup email and grants their active Member Portal access.'],
         ['Coach launches', 'Finish the remaining launch tasks: confirm onboarding and waiver, publish Week 1, set the check-in cadence, and confirm launch readiness. The member then sees their focused Coaching Hub first.']
+    ]},
+    { id: 'calendar', tag: 'SCHEDULING OPERATIONS', title: 'PROTECT YOUR COACHING WINDOWS', intro: 'Echelon scheduling is built to work around the coach’s Burn shifts instead of pretending there is unlimited availability. Booking links are private and should show only confirmed Echelon windows.', notice: 'Calendly is not activated until its three unlisted event URLs are added to assets/js/calendar-config.js. Until then, the Echelon Scheduling page intentionally tells clients that their approved booking link will be sent by Echelon.', steps: [
+        ['Build the availability source', 'In Calendly, connect both the Burn-shift calendar and the Echelon calendar. Let busy events block availability automatically. Create one unlisted event each for 1-on-1 coaching, Private Group Training, and discovery calls.'],
+        ['Set real rules', 'Use a minimum 24-hour notice, buffers before and after sessions, a daily session limit, and only the time blocks you can coach consistently. Reserve designated event windows for private groups.'],
+        ['Activate the links', 'Paste the three Calendly URLs into assets/js/calendar-config.js: oneOnOneUrl, privateGroupUrl, and discoveryCallUrl. Commit the update to GitHub main and confirm Vercel shows a Ready production deployment.'],
+        ['Send links at the right moment', 'For 1-on-1: after approval and payment. For Private Group Training: after the organizer is approved, payment or deposit is confirmed, and group details are aligned. For discovery calls: after a qualified inquiry needs a live conversation.'],
+        ['Use the scheduling page', 'Send the appropriate /pages/booking.html?type= link rather than a raw Calendly URL when possible. It keeps the Echelon context, explains availability rules, and opens the matching private booking action once activated.'],
+        ['Review each week', 'Compare the coming week against Burn commitments, active clients, group events, and recovery time. Close or adjust Calendly windows before they become a conflict.']
     ]},
     { id: 'communication', tag: 'COMMUNICATION STANDARD', title: 'HOW ECHELON RESPONDS', intro: 'The Response Library in the Admin Console is the approved starting point for every outreach moment. It keeps the language warm, clear, and consistent while leaving space for a real personal reply.', notice: 'Never paste credentials, health details, payment details, or a member’s private information into an email, text, or public message. Do not guarantee a fitness outcome or provide medical advice. Use the Medical / High-Risk Question script when a concern falls outside coaching scope.', steps: [
         ['Acknowledge quickly', 'For contact requests, coaching applications, waitlist entries, and check-ins, send the matching acknowledgment immediately or as soon as you see it.'],
@@ -70,7 +87,7 @@ const EFC_MANUAL_SECTIONS = [
         ['Work locally first', 'Make changes in the Echelon website folder and review them in your browser.'],
         ['Publish through GitHub', 'Commit the approved website changes to the ECHELON_LIVE main branch. Vercel automatically creates the production deployment.'],
         ['Review the deployment', 'Open Vercel after the GitHub update and confirm the production deployment is ready. The live domain then receives the new version.'],
-        ['Verify live essentials', 'Test the home page, a form, member login, admin login, and password reset on echelonfitness.co.']
+        ['Verify live essentials', 'Test the home page and all six Training Hub cards, a form, member login, admin login, password reset, a member-prefilled check-in, and the booking page on echelonfitness.co.']
     ]},
     { id: 'access', tag: 'CREDENTIAL DIRECTORY', title: 'SECURE ACCESS, NOT SHARED PASSWORDS', notice: 'Do not store passwords, recovery codes, or payment details in this website or in the Admin Console. Keep them in a dedicated password manager and grant each operator their own access.', steps: [
         ['Password manager record', 'For each system above, store the sign-in URL, account owner, recovery contact, 2FA method, and emergency recovery instructions.'],
