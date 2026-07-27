@@ -1,5 +1,6 @@
 // Replace this with your full Etsy storefront URL when it is ready.
-const EFC_ETSY_SHOP_URL = 'https://www.etsy.com/';
+// Leave blank to show a "notify me" state instead of a link to Etsy's generic homepage.
+const EFC_ETSY_SHOP_URL = '';
 
 document.addEventListener('DOMContentLoaded', () => {
     const shop = document.getElementById('shop');
@@ -31,7 +32,14 @@ document.addEventListener('DOMContentLoaded', () => {
     container.querySelectorAll('[data-etsy-link]').forEach(link => {
         if (EFC_ETSY_SHOP_URL.trim()) {
             link.href = EFC_ETSY_SHOP_URL.trim();
+            link.target = '_blank';
+            link.rel = 'noopener';
             link.textContent = 'SHOP ON ETSY →';
+        } else {
+            link.href = 'pages/waitlist.html';
+            link.removeAttribute('target');
+            link.removeAttribute('rel');
+            link.textContent = 'NOTIFY ME WHEN IT LAUNCHES →';
         }
     });
 
