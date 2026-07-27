@@ -1,4 +1,4 @@
--- Echelon member waiver records. Review the waiver wording with local counsel before production use.
+-- Echelon member waiver records.
 create table if not exists public.member_waivers (
     user_id uuid primary key references auth.users(id) on delete cascade,
     full_name text not null,

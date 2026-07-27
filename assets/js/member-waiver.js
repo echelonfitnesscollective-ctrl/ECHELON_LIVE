@@ -1,4 +1,4 @@
-const EFC_WAIVER_VERSION = 'EFC-waiver-v1.0-draft';
+const EFC_WAIVER_VERSION = 'EFC-waiver-v1.0';
 
 document.addEventListener('DOMContentLoaded', async () => {
     const form = document.getElementById('member-waiver-form');

@@ -44,12 +44,29 @@ async function requireMemberSession() {
         return null;
     }
 
+    const currentPage = window.location.pathname.split('/').pop();
+    if (!EFC_WAIVER_EXEMPT_PAGES.has(currentPage) && !(await hasSignedWaiver(member))) {
+        window.location.replace('member-waiver.html');
+        return null;
+    }
+
     return member;
 }
 
 async function hasMemberHubAccess() {
     const { data, error } = await echelonMemberClient.rpc('has_member_hub_access');
     return !error && data === true;
+}
+
+const EFC_WAIVER_EXEMPT_PAGES = new Set(['member-waiver.html', 'member-onboarding.html']);
+
+async function hasSignedWaiver(member) {
+    const { data, error } = await echelonMemberClient
+        .from('member_waivers')
+        .select('user_id')
+        .eq('user_id', member.id)
+        .maybeSingle();
+    return !error && Boolean(data);
 }
 
 async function initializeMemberLogin() {
