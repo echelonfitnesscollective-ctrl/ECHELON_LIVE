@@ -2,6 +2,20 @@ function performanceNumber(value) {
     return value === '' ? null : Number(value);
 }
 
+function computeCheckinStreak(rows) {
+    // rows must be sorted by week_of descending. Treats weeks within ~10 days
+    // of each other as consecutive, allowing some slack in check-in day.
+    if (!rows.length) return { count: 0, current: false };
+    let streak = 1;
+    for (let i = 0; i < rows.length - 1; i++) {
+        const diffDays = (new Date(rows[i].week_of) - new Date(rows[i + 1].week_of)) / 86400000;
+        if (diffDays <= 10) streak++;
+        else break;
+    }
+    const daysSinceLatest = (Date.now() - new Date(rows[0].week_of)) / 86400000;
+    return { count: streak, current: daysSinceLatest <= 10 };
+}
+
 function renderPerformanceList(container, records, emptyMessage, formatter) {
     container.replaceChildren();
     if (!records.length) {
@@ -27,10 +41,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     const submit = form.querySelector('button[type="submit"]');
     const [goalsResult, historyResult] = await Promise.all([
         echelonMemberClient.from('member_goals').select('goal, target_date, status').eq('user_id', member.id).eq('status', 'Active').order('created_at', { ascending: false }),
-        echelonMemberClient.from('member_weekly_checkins').select('week_of, body_weight, workouts_completed, nutrition_adherence').eq('user_id', member.id).order('week_of', { ascending: false }).limit(6)
+        echelonMemberClient.from('member_weekly_checkins').select('week_of, body_weight, workouts_completed, nutrition_adherence').eq('user_id', member.id).order('week_of', { ascending: false }).limit(52)
     ]);
     renderPerformanceList(document.getElementById('member-goals-list'), goalsResult.data || [], 'Your coach will add goals here.', (goal) => `${goal.goal}${goal.target_date ? ` · target ${goal.target_date}` : ''}`);
-    renderPerformanceList(document.getElementById('member-performance-history'), historyResult.data || [], 'Your submitted check-ins will appear here.', (item) => `${item.week_of} · ${item.workouts_completed ?? '—'} workouts · ${item.nutrition_adherence ?? '—'}/10 nutrition`);
+    const checkinHistory = historyResult.data || [];
+    renderPerformanceList(document.getElementById('member-performance-history'), checkinHistory.slice(0, 6), 'Your submitted check-ins will appear here.', (item) => `${item.week_of} · ${item.workouts_completed ?? '—'} workouts · ${item.nutrition_adherence ?? '—'}/10 nutrition`);
+
+    const streakBadge = document.getElementById('member-streak-badge');
+    const streak = computeCheckinStreak(checkinHistory);
+    if (streakBadge && streak.count > 1 && streak.current) {
+        streakBadge.hidden = false;
+        streakBadge.textContent = `${streak.count} WEEKS IN A ROW`;
+    }
 
     form.addEventListener('submit', async (event) => {
         event.preventDefault();

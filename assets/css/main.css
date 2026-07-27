@@ -2553,6 +2553,25 @@ MOBILE
     line-height:1.55;
 }
 
+.streak-badge{
+
+    display:inline-block;
+
+    margin-bottom:14px;
+
+    padding:6px 14px;
+
+    border:1px solid rgba(255,215,0,.4);
+
+    color:var(--primary);
+
+    font-family:var(--heading-font);
+
+    font-size:.95rem;
+
+    letter-spacing:1px;
+}
+
 .performance-list-item{
 
     padding:12px 0;
