@@ -56,7 +56,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             updated_at: new Date().toISOString()
         }, { onConflict: 'user_id,week_of' });
         if (error) feedback.textContent = 'We could not save this check-in. Please try again.';
-        else showEchelonSuccess(feedback, 'WEEKLY REVIEW SAVED', 'Your coach now has the context to guide your next week with precision.');
+        else {
+            form.reset();
+            form.elements.week_of.value = new Date().toISOString().slice(0, 10);
+            showEchelonSuccess(feedback, 'WEEKLY REVIEW SAVED', 'Your coach now has the context to guide your next week with precision.');
+        }
         submit.disabled = false;
         submit.textContent = 'SAVE WEEKLY CHECK-IN';
     });

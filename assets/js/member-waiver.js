@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        showEchelonSuccess(feedback, 'WAIVER COMPLETE', 'Your participation agreement is securely on file. You are one step closer to training with Echelon.');
+        showEchelonSuccess(feedback, 'WAIVER COMPLETE', 'Your participation agreement is securely on file. You are one step closer to training with Echelon.', { dismissLabel: 'RETURN TO MEMBER HUB', onDismiss: () => { window.location.href = 'member-portal.html'; } });
         submitButton.disabled = false;
         submitButton.textContent = 'SIGN & SAVE WAIVER';
     });

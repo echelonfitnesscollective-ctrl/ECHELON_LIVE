@@ -27,6 +27,14 @@ function initializePhilosophyToggle() {
 }
 
 function installLaunchBasics() {
+    if (!document.querySelector('link[href*="mobile.css"]')) {
+        const mobileStyles = document.createElement('link');
+        mobileStyles.rel = 'stylesheet';
+        mobileStyles.media = '(max-width: 600px)';
+        const stylePath = window.location.pathname.includes('/pages/') ? '../assets/css/mobile.css' : 'assets/css/mobile.css';
+        mobileStyles.href = stylePath;
+        document.head.append(mobileStyles);
+    }
     if (!document.querySelector('link[rel="icon"]')) {
         const icon = document.createElement('link');
         icon.rel = 'icon'; icon.type = 'image/svg+xml';
@@ -91,14 +99,26 @@ function configureContactInquiryFromLink() {
     window.setTimeout(() => form.querySelector('[name="name"]')?.focus(), 450);
 }
 
-function showEchelonSuccess(target, title, message) {
+function showEchelonSuccess(target, title, message, options = {}) {
     if (!target) return;
     target.className = 'submission-confirmation';
     target.replaceChildren();
     const mark = document.createElement('span'); mark.className = 'submission-confirmation-mark'; mark.textContent = '✓';
     const heading = document.createElement('h2'); heading.textContent = title;
     const copy = document.createElement('p'); copy.textContent = message;
-    target.append(mark, heading, copy);
+    const dismiss = document.createElement('button');
+    dismiss.type = 'button';
+    dismiss.className = 'submission-confirmation-dismiss';
+    dismiss.textContent = options.dismissLabel || 'DONE';
+    dismiss.addEventListener('click', () => {
+        target.hidden = true;
+        target.style.display = 'none';
+        target.className = 'form-success';
+        target.replaceChildren();
+        if (typeof options.onDismiss === 'function') return options.onDismiss();
+        (options.form || target.closest('form'))?.reset();
+    });
+    target.append(mark, heading, copy, dismiss);
     target.hidden = false;
     target.style.display = 'block';
     target.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -111,9 +131,20 @@ function showEchelonSuccess(target, title, message) {
 function initializeMobileMenu() {
 
     const toggle = document.querySelector(".mobile-toggle");
-    const menu = document.querySelector(".mobile-menu");
+    let menu = document.querySelector(".mobile-menu");
 
-    if (!toggle || !menu) return;
+    if (!toggle) return;
+
+    if (!menu) {
+        const links = [...document.querySelectorAll('.desktop-nav a')]
+            .map((link) => `<a href="${link.href}">${link.textContent}</a>`).join('');
+        if (!links) return;
+        menu = document.createElement('nav');
+        menu.className = 'mobile-menu';
+        menu.setAttribute('aria-label', 'Mobile navigation');
+        menu.innerHTML = links;
+        document.body.append(menu);
+    }
 
     toggle.addEventListener("click", () => {
 

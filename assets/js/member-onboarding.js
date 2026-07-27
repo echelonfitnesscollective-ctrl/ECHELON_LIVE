@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        showEchelonSuccess(feedback, 'ONBOARDING SAVED', 'Your information is securely on file. Your coach can now prepare for your first steps with Echelon.');
+        showEchelonSuccess(feedback, 'ONBOARDING SAVED', 'Your information is securely on file. Your coach can now prepare for your first steps with Echelon.', { dismissLabel: 'RETURN TO MEMBER HUB', onDismiss: () => { window.location.href = 'member-portal.html'; } });
         submitButton.disabled = false;
         submitButton.textContent = 'SAVE ONBOARDING';
     });

@@ -80,8 +80,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            checkinForm.reset();
             checkinForm.style.display = 'none';
-            showEchelonSuccess(success, 'CHECK-IN COMPLETE', 'You are confirmed for today. Arrive ready to work — your coach will take it from here.');
+            showEchelonSuccess(success, 'CHECK-IN COMPLETE', 'You are confirmed for today. Arrive ready to work — your coach will take it from here.', { onDismiss: () => { checkinForm.style.display = ''; } });
         });
     }
 
@@ -141,8 +142,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('We could not save your waitlist entry. Please try again.');
                 return;
             }
+            waitlistForm.reset();
             waitlistForm.style.display = 'none';
-            showEchelonSuccess(success, 'YOU’RE ON THE LIST', 'Your place is secured. You will be among the first to hear about new Echelon opportunities.');
+            showEchelonSuccess(success, 'YOU’RE ON THE LIST', 'Your place is secured. You will be among the first to hear about new Echelon opportunities.', { onDismiss: () => { waitlistForm.style.display = ''; } });
         });
     }
 });
