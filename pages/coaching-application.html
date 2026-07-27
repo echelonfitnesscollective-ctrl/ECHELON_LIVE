@@ -26,9 +26,14 @@
 document.addEventListener('DOMContentLoaded', () => {
     const programInterest = document.getElementById('program-interest');
     const selectedProgram = new URLSearchParams(window.location.search).get('program');
+    const programMap = {
+        '12-week-transformation': '12-Week Transformation',
+        'private-group-training': 'Private Group Training / Organization Wellness',
+        'organization-wellness': 'Private Group Training / Organization Wellness'
+    };
 
-    if (programInterest && selectedProgram === '12-week-transformation') {
-        programInterest.value = '12-Week Transformation';
+    if (programInterest && programMap[selectedProgram]) {
+        programInterest.value = programMap[selectedProgram];
     }
 });
 
@@ -179,6 +184,10 @@ function changeProductImage(imageId, newImage, dot){
                     12-Week Transformation
                 </option>
 
+                <option>
+                    Private Group Training / Organization Wellness
+                </option>
+
             </select>
 
             <!-- ==========================
@@ -210,6 +219,11 @@ function changeProductImage(imageId, newImage, dot){
                 name="phone"
                 placeholder="Phone Number"
                 required>
+
+            <textarea
+                name="group_experience_details"
+                rows="4"
+                placeholder="For private groups or organizations: tell us your group size (5–10), preferred date or monthly schedule, location, and what you want the experience to accomplish."></textarea>
 
             <input
                 type="text"
