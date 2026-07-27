@@ -4580,11 +4580,12 @@ MOBILE
     line-height: 1.6;
     font-size: 0.95rem;
     margin: 0;
+    min-height: calc(1.6em * 3);
 }
 
 #training .scarcity-tag {
     display: inline-block;
-    margin-top: 14px;
+    align-self: flex-start;
     padding: 6px 12px;
     border: 1px solid rgba(255, 215, 0, 0.35);
     color: var(--primary);
@@ -4603,38 +4604,24 @@ MOBILE
     font-weight: 700;
 }
 
-#training .status.live {
-    color: #ffffff;
-    display: inline-flex;
-    align-self: flex-end;
-    align-items: center;
-    gap: 8px;
-    padding: 5px 12px;
-    border: 1px solid var(--primary);
-}
-
+#training .status.live,
 #training .status.soon {
-    color: #888;
+    color: #8a8a8a;
     display: inline-flex;
     align-self: flex-end;
     align-items: center;
-    gap: 8px;
-    padding: 5px 12px;
-    border: 1px solid #3A3833;
+    gap: 6px;
+    padding: 4px 10px;
+    border: 1px solid #333129;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
 }
 
 #training .live-dot {
-    width: 10px; height: 10px;
+    width: 6px; height: 6px;
     border-radius: 50%;
-    background: #ff0000;
-    box-shadow: 0 0 8px #ff0000, 0 0 16px #ff0000;
-    animation: pulseLive 1.5s infinite;
-}
-
-@keyframes pulseLive {
-    0% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.4; transform: scale(0.85); }
-    100% { opacity: 1; transform: scale(1); }
+    background: #8a8a8a;
 }
 
 /* 6. Premium Accordion Details */
