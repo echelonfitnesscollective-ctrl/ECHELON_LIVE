@@ -4664,6 +4664,18 @@ MOBILE
 
 #training .detail-content p { color: #bbb; font-size: 0.9rem; }
 
+#training .refund-policy-link {
+    display: inline-block;
+    margin-top: -8px;
+    margin-bottom: 12px;
+    color: #8a8a8a;
+    font-size: 0.72rem;
+    text-decoration: underline;
+    letter-spacing: 0.5px;
+}
+
+#training .refund-policy-link:hover { color: var(--primary); }
+
 #training .training-card .btn-primary,
 #training .training-card .btn-secondary {
     width: 100%;
