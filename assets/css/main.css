@@ -398,15 +398,19 @@ textarea{
 
 .verse-text{
 
-    font-size:clamp(.95rem, 1.2vw, 1.15rem);
+    font-family:'Cormorant Garamond',serif;
 
-    line-height:1.9;
+    font-style:italic;
 
-    letter-spacing:.03em;
+    font-size:clamp(1.5rem, 3vw, 2.1rem);
 
-    color:rgba(255,255,255,.72);
+    line-height:1.5;
 
-    font-weight:400;
+    letter-spacing:.01em;
+
+    color:rgba(255,255,255,.88);
+
+    font-weight:500;
 
     text-align:center;
 
@@ -428,6 +432,7 @@ textarea{
     color:var(--primary);
 
     font-weight:600;
+    font-family:var(--body-font);
 }
 
 @media (max-width:768px){
@@ -446,9 +451,9 @@ textarea{
 
     .verse-text{
 
-        line-height:1.8;
+        line-height:1.45;
 
-        font-size:.95rem;
+        font-size:1.3rem;
     }
 
     .verse-reference{
