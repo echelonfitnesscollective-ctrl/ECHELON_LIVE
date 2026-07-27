@@ -288,7 +288,7 @@ textarea{
 
     position:relative;
 
-    min-height:100vh;
+    min-height:calc(100vh - 85px);
 
     display:flex;
 
@@ -303,6 +303,8 @@ textarea{
     background-size:cover;
 
     background-position:center;
+
+    padding:30px 0;
 }
 
 /* ==========================================
@@ -337,8 +339,6 @@ textarea{
     width:min(95%,1200px);
 
     text-align:center;
-
-    transform:translateY(-90px);
 }
 
 @media (prefers-reduced-motion: no-preference){
@@ -377,9 +377,9 @@ textarea{
 
     max-width:720px;
 
-    margin:0 auto 3rem;
+    margin:0 auto 1.75rem;
 
-    padding:1.75rem 0;
+    padding:1.25rem 0;
 
     position:relative;
 }
@@ -482,13 +482,13 @@ textarea{
 
 .hero-logo{
 
-    width:500px;
+    width:400px;
 
-    max-width:70vw;
+    max-width:55vw;
 
     display:block;
 
-    margin:0 auto 15px;
+    margin:0 auto 12px;
 
     padding:0px 24px;
 }
@@ -501,7 +501,7 @@ textarea{
 
     font-family:var(--heading-font);
 
-    font-size:clamp(1.5rem,6vw,5rem);
+    font-size:clamp(1.5rem,5.5vw,4.5rem);
 
     line-height:.95;
 
@@ -509,7 +509,7 @@ textarea{
 
     color:#fff;
 
-    margin-bottom:25px;
+    margin-bottom:16px;
 
     text-transform:uppercase;
 }
@@ -522,13 +522,13 @@ textarea{
 
     max-width:700px;
 
-    margin:0 auto 45px;
+    margin:0 auto 28px;
 
     color:#d4d4d4;
 
-    font-size:1.15rem;
+    font-size:1.1rem;
 
-    line-height:1.8;
+    line-height:1.65;
 }
 
 /* ==========================================
@@ -857,7 +857,15 @@ textarea{
 
     .hero-logo{
 
-        width:260px;
+        width:190px;
+
+        margin-bottom:6px;
+
+    }
+
+    .hero-buttons{
+
+        gap:12px;
 
     }
 
