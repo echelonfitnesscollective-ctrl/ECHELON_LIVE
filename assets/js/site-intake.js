@@ -66,16 +66,19 @@ document.addEventListener('DOMContentLoaded', () => {
             feedback.textContent = '';
 
             const values = formValues(coachingForm);
-            const { error } = await echelonSiteClient.from('coaching_applications').insert({
-                full_name: values.full_name,
-                email: values.email,
-                phone: values.phone,
-                program_interest: values.program_interest,
-                application_data: values
-            });
-
-            if (error) {
-                feedback.textContent = 'We could not save your application. Please try again.';
+            let submitResult;
+            try {
+                const response = await fetch('/api/coaching-application/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(values)
+                });
+                submitResult = await response.json();
+                if (!response.ok) throw new Error(submitResult.error || 'Submission failed.');
+            } catch (error) {
+                feedback.textContent = error.message === 'Too many requests. Please wait a minute and try again.'
+                    ? error.message
+                    : 'We could not save your application. Please try again.';
                 submitButton.disabled = false;
                 submitButton.textContent = 'SUBMIT APPLICATION';
                 return;
@@ -138,16 +141,18 @@ document.addEventListener('DOMContentLoaded', () => {
             submitButton.textContent = 'SENDING…';
             feedback.textContent = '';
             const values = formValues(contactForm);
-            const { error } = await echelonSiteClient.from('website_leads').insert({
-                lead_type: 'Contact request',
-                full_name: values.name,
-                email: values.email,
-                category: values.inquiry_type,
-                message: values.message,
-                source_data: values
-            });
-            if (error) {
-                feedback.textContent = 'We could not send your request. Please try again.';
+            try {
+                const response = await fetch('/api/contact/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(values)
+                });
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.error || 'Submission failed.');
+            } catch (error) {
+                feedback.textContent = error.message === 'Too many requests. Please wait a minute and try again.'
+                    ? error.message
+                    : 'We could not send your request. Please try again.';
                 submitButton.disabled = false;
                 submitButton.textContent = 'SUBMIT REQUEST';
                 return;

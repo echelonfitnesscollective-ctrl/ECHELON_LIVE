@@ -1,0 +1,13 @@
+{
+  "name": "echelon-backup",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Scheduled export of critical Supabase tables and progress photos to Google Sheets/Drive.",
+  "main": "run-backup.js",
+  "scripts": {
+    "backup": "node run-backup.js"
+  },
+  "dependencies": {
+    "googleapis": "^140.0.0"
+  }
+}
