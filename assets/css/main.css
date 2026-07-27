@@ -172,6 +172,17 @@ textarea{
     color:var(--primary);
 }
 
+.nav-portal-link{
+    opacity:.6;
+    font-size:.8rem !important;
+    padding-left:20px;
+    border-left:1px solid var(--border);
+}
+
+.nav-portal-link:hover{
+    opacity:1;
+}
+
 .mobile-toggle{
 
     display:none;
@@ -4619,6 +4630,18 @@ MOBILE
     line-height: 1.6;
     font-size: 0.95rem;
     margin: 0;
+}
+
+#training .scarcity-tag {
+    display: inline-block;
+    margin-top: 14px;
+    padding: 6px 12px;
+    border: 1px solid rgba(255, 215, 0, 0.35);
+    color: var(--primary);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
 }
 
 #training .status {
