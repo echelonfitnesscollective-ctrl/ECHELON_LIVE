@@ -905,9 +905,64 @@ document.addEventListener('DOMContentLoaded', () => {
         initializeSiteContentManager();
         initializeSiteMediaManager();
         initializeCommunicationsLibrary();
+        initializeProgramLaunches();
         initializeAdminTabs();
     });
 });
+
+function programLaunchStatusLabel(row) {
+    if (row.status !== 'launched' || !row.launch_at) return 'Status: In development';
+    const date = new Date(row.launch_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+    return new Date(row.launch_at) <= new Date() ? `Status: Launched — live since ${date}` : `Status: Scheduled — goes live ${date}`;
+}
+
+async function initializeProgramLaunches() {
+    const forms = document.querySelectorAll('.program-launch-card');
+    if (!forms.length) return;
+    const { data: rows } = await echelonAdminClient.from('program_launches').select('program_key, status, coach_name, launch_at');
+
+    forms.forEach((form) => {
+        const key = form.dataset.programKey;
+        const row = (rows || []).find((item) => item.program_key === key) || { status: 'in_development' };
+        const statusEl = form.querySelector('[data-launch-status]');
+        const revertBtn = form.querySelector('[data-revert]');
+        const feedback = form.querySelector('[data-launch-feedback]');
+
+        const render = (current) => {
+            statusEl.textContent = programLaunchStatusLabel(current);
+            revertBtn.hidden = current.status !== 'launched';
+            if (current.coach_name) form.elements.coach_name.value = current.coach_name;
+            if (current.launch_at) form.elements.launch_at.value = new Date(current.launch_at).toISOString().slice(0, 10);
+        };
+        render(row);
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const launchAt = form.elements.launch_at.value;
+            if (!launchAt) { feedback.textContent = 'Pick a launch date first.'; return; }
+            feedback.textContent = '';
+            const submitBtn = form.querySelector('button[type="submit"]');
+            submitBtn.disabled = true; submitBtn.textContent = 'LAUNCHING…';
+            const { error } = await echelonAdminClient.from('program_launches').update({
+                status: 'launched',
+                coach_name: form.elements.coach_name.value.trim() || null,
+                launch_at: launchAt,
+            }).eq('program_key', key);
+            submitBtn.disabled = false; submitBtn.textContent = 'LAUNCH PROGRAM';
+            if (error) { feedback.textContent = 'Could not save. Please try again.'; return; }
+            render({ status: 'launched', coach_name: form.elements.coach_name.value.trim(), launch_at: launchAt });
+            feedback.textContent = 'Saved. The public site reflects this automatically.';
+        });
+
+        revertBtn.addEventListener('click', async () => {
+            if (!window.confirm('Revert this program back to "In Development" on the public site?')) return;
+            const { error } = await echelonAdminClient.from('program_launches').update({ status: 'in_development', launch_at: null }).eq('program_key', key);
+            if (error) { feedback.textContent = 'Could not revert. Please try again.'; return; }
+            render({ status: 'in_development', coach_name: form.elements.coach_name.value });
+            feedback.textContent = 'Reverted to in development.';
+        });
+    });
+}
 
 const EFC_COMMUNICATION_TEMPLATES = [
     { tag: '01 · AUTOMATIC ACKNOWLEDGMENT', title: 'GENERAL INQUIRY RECEIVED', description: 'Use for every website contact request.', featured: true, subject: 'We received your message — Echelon Fitness Collective', body: `Hi [First Name],
