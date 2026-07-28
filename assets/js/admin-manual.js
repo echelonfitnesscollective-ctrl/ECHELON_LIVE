@@ -94,6 +94,18 @@ const EFC_MANUAL_SECTIONS = [
         ['Individual access only', 'Invite each operator to Vercel, Supabase, Formspree, and Etsy using their own email whenever that platform supports it.'],
         ['Handoff checklist', 'Before someone operates alone, have them complete a preview deployment, review a test lead, create a test task, and send a test member message.'],
         ['Offboarding', 'Remove their access from each system and your password manager as soon as their role ends.']
+    ]},
+    { id: 'overhaul-2026-07', tag: 'CHANGE LOG', title: 'SITE OVERHAUL — WHAT CHANGED', intro: 'A full site pass covering launch blockers, conversion, design, security, and compliance. Everything below is live in production. Keep this section until the next major update.', steps: [
+        ['Pricing is now public', '12-Week Transformation shows "$349 paid in full, or $149/month." 1-on-1 Coaching shows a floor only: "Coaching begins at $399/month" — full pricing stays behind the consultation on purpose. Both are hardcoded in index.html\'s Training Hub cards; update the text directly there if pricing changes.'],
+        ['1-on-1 scarcity line is manual', 'The "Accepting up to 6 new 1-on-1 clients this month" line near the 1-on-1 card is plain text in index.html, not pulled from the roster automatically. Update it by hand as your actual capacity changes.'],
+        ['Waiver now blocks Member Hub access', 'Member Portal, Coaching Hub, Nutrition, Performance, and the Member Vault all check for a signed member_waivers row before loading. A member with account access but no signed waiver is redirected to the waiver page automatically — nothing to check manually.'],
+        ['Member Login is in every header', 'Previously footer-only. Now a small "Member Login" link sits in the header nav (and mobile menu) on the homepage and every public page.'],
+        ['Standardize on "VL Body Lab"', 'Never use "VL Kinetic" in new copy, forms, or Formspree routing labels — it was a naming inconsistency that has been fully corrected site-wide.'],
+        ['Shop link is a single variable', 'EFC_ETSY_SHOP_URL at the top of assets/js/shop-showcase.js controls the "Shop the Collection" button. Leave it blank for the current "Notify Me" waitlist state, or set your real Etsy URL there once the storefront is live — one change updates the whole site.'],
+        ['Conversion tracking is wired but inactive', 'assets/js/analytics.js fires events for drop-in purchase, coaching application, private group inquiry, waitlist join, and check-in completion — but only once a GA4 Measurement ID is installed. It is currently a safe no-op.'],
+        ['Scheduled backup is built but not yet running', 'scripts/backup/ exports member profiles, waivers, progress photos, coaching applications, and other critical tables to a Google Sheet + Drive folder daily via GitHub Actions — but needs a one-time Google Cloud service account setup before its first run. See scripts/backup/README.md.'],
+        ['Security headers centralized', 'CSP, X-Frame-Options, and HSTS are all set in vercel.json. Contact and coaching application forms now go through rate-limited server routes (api/contact/submit.js, api/coaching-application/submit.js) instead of writing to Supabase directly from the browser.'],
+        ['Known open items', 'Waitlist confirmation email (needs a Formspree autoresponder or email API you set up), a lapsed-member re-engagement flow (flagged, not built, needs your sign-off), and the legal pages\' contact email domain (info@echelonfitnesscollective.com — doesn\'t match echelonfitness.co; confirm which is correct).']
     ]}
 ];
 

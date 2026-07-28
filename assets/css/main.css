@@ -4749,6 +4749,9 @@ MOBILE
 .accordion-header { width: 100%; background: none; border: none; color: white; padding: 25px; cursor: pointer; display: flex; justify-content: space-between; font-size: 1.1rem; text-transform: uppercase; }
 .accordion-body { padding: 0 25px 25px 25px; color: #888; display: none; }
 
+.resource-coming-soon { color: #777; }
+.resource-coming-soon em { color: #555; font-style: normal; font-size: 0.85em; letter-spacing: 0.5px; }
+
 /* Ensure hidden tabs stay hidden */
 .tab-content { display: none; }
 .tab-content.active { display: block; animation: fadeIn 0.5s; }
