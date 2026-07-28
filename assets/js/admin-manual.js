@@ -105,7 +105,8 @@ const EFC_MANUAL_SECTIONS = [
         ['Conversion tracking is wired but inactive', 'assets/js/analytics.js fires events for drop-in purchase, coaching application, private group inquiry, waitlist join, and check-in completion — but only once a GA4 Measurement ID is installed. It is currently a safe no-op.'],
         ['Scheduled backup is built but not yet running', 'scripts/backup/ exports member profiles, waivers, progress photos, coaching applications, and other critical tables to a Google Sheet + Drive folder daily via GitHub Actions — but needs a one-time Google Cloud service account setup before its first run. See scripts/backup/README.md.'],
         ['Security headers centralized', 'CSP, X-Frame-Options, and HSTS are all set in vercel.json. Contact and coaching application forms now go through rate-limited server routes (api/contact/submit.js, api/coaching-application/submit.js) instead of writing to Supabase directly from the browser.'],
-        ['Known open items', 'Waitlist confirmation email (needs a Formspree autoresponder or email API you set up), a lapsed-member re-engagement flow (flagged, not built, needs your sign-off), and the legal pages\' contact email domain (info@echelonfitnesscollective.com — doesn\'t match echelonfitness.co; confirm which is correct).']
+        ['Legal pages contact info fixed', 'Privacy, Terms, and Disclaimer pages now list echelonfitnesscollective@gmail.com and www.echelonfitness.co (previously showed a placeholder domain that never matched the live site).'],
+        ['Known open items', 'Waitlist confirmation email (needs a Formspree autoresponder or email API you set up), and a lapsed-member re-engagement flow (flagged, not built, needs your sign-off).']
     ]}
 ];
 
