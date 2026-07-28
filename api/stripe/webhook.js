@@ -39,10 +39,10 @@ async function processEnrollmentPayment(event) {
   if (!offerId || !process.env.SUPABASE_SERVICE_ROLE_KEY) return;
   const prior = await serviceRequest(`/rest/v1/stripe_payment_events?stripe_event_id=eq.${encodeURIComponent(event.id)}&select=stripe_event_id&limit=1`);
   if (Array.isArray(prior.body) && prior.body.length) return;
-  const offerResult = await serviceRequest(`/rest/v1/enrollment_offers?id=eq.${encodeURIComponent(offerId)}&select=id,project_id&limit=1`);
+  const offerResult = await serviceRequest(`/rest/v1/enrollment_offers?id=eq.${encodeURIComponent(offerId)}&select=id,project_id,payment_option&limit=1`);
   const offer = Array.isArray(offerResult.body) ? offerResult.body[0] : null;
   if (!offer) return;
-  const projectResult = await serviceRequest(`/rest/v1/onboarding_projects?id=eq.${encodeURIComponent(offer.project_id)}&select=id,application_id&limit=1`);
+  const projectResult = await serviceRequest(`/rest/v1/onboarding_projects?id=eq.${encodeURIComponent(offer.project_id)}&select=id,application_id,coaching_applications(full_name)&limit=1`);
   const project = Array.isArray(projectResult.body) ? projectResult.body[0] : null;
   if (!project) return;
   const paid = event.type === 'checkout.session.completed' || event.type === 'checkout.session.async_payment_succeeded';
@@ -54,6 +54,18 @@ async function processEnrollmentPayment(event) {
     await serviceRequest(`/rest/v1/onboarding_projects?id=eq.${encodeURIComponent(project.id)}`, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ payment_status: 'paid', membership_status: 'approved', onboarding_status: 'awaiting_admin' }) });
     await serviceRequest(`/rest/v1/coaching_applications?id=eq.${encodeURIComponent(project.application_id)}`, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ status: 'Paid — Ready to Invite', payment_status: 'paid' }) });
     await completeLaunchTask(project.id, 'Verify payment or approved exemption');
+    if (offer.payment_option === 'echelon_12_monthly' || offer.payment_option === 'echelon_12_paid_in_full') {
+      const clientName = project.coaching_applications?.full_name || 'this client';
+      const checkinDue = new Date(Date.now() + 84 * 24 * 60 * 60 * 1000).toISOString();
+      await serviceRequest('/rest/v1/coach_tasks', { method: 'POST', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({
+        title: `12-Week check-in: ${clientName}`,
+        description: `${clientName}'s 12-Week Transformation started today. Their plan keeps running until you or they change it — nothing auto-cancels. Reach out around week 12 to talk through what's next: renew, move to Group Unlimited, or upgrade to 1-on-1.`,
+        related_name: clientName,
+        task_type: 'Renewal check-in',
+        priority: 'Normal',
+        due_at: checkinDue,
+      }) });
+    }
   } else if (expired) {
     await serviceRequest(`/rest/v1/enrollment_offers?id=eq.${encodeURIComponent(offer.id)}`, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ status: 'expired', payment_status: 'expired' }) });
   }

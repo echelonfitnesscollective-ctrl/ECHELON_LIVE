@@ -1,17 +1,8 @@
 {
   "private": true,
   "name": "echelon-live",
-  "description": "Static storefront + Stripe checkout API (Express locally, Vercel serverless when deployed)",
+  "description": "Static storefront with Vercel serverless API routes (Stripe checkout, Supabase-backed forms).",
   "engines": {
     "node": ">=18"
-  },
-  "scripts": {
-    "dev": "npm --prefix server run dev",
-    "start": "npm --prefix server start",
-    "install:server": "npm --prefix server install",
-    "dev:vercel": "vercel dev"
-  },
-  "dependencies": {
-    "stripe": "^17.7.0"
   }
 }

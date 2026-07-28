@@ -5,6 +5,30 @@ const OFFERS = {
   group_unlimited: { priceEnv: 'STRIPE_PRICE_GROUP_UNLIMITED', mode: 'subscription', label: 'Echelon Group Fitness Unlimited' },
 };
 
+const inMemoryRateLimit = new Map();
+const WINDOW_MS = 60_000;
+const MAX_PER_WINDOW = 3;
+
+function clientIp(req) {
+  return String(req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'unknown').split(',')[0].trim();
+}
+
+function rateLimited(ip) {
+  const now = Date.now();
+  const entry = inMemoryRateLimit.get(ip) || { count: 0, windowStart: now };
+  if (now - entry.windowStart > WINDOW_MS) {
+    entry.count = 0;
+    entry.windowStart = now;
+  }
+  entry.count += 1;
+  inMemoryRateLimit.set(ip, entry);
+  if (inMemoryRateLimit.size > 1000) {
+    const cutoff = now - WINDOW_MS;
+    for (const [key, value] of inMemoryRateLimit) if (value.windowStart < cutoff) inMemoryRateLimit.delete(key);
+  }
+  return entry.count > MAX_PER_WINDOW;
+}
+
 function publicSiteUrl() {
   return String(process.env.SITE_URL || 'https://www.echelonfitness.co').trim().replace(/\/$/, '');
 }
@@ -20,6 +44,10 @@ module.exports = async function createGroupCheckout(req, res) {
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed.' });
   if (origin && origin !== siteUrl) return res.status(403).json({ error: 'This checkout request was not accepted.' });
+
+  if (rateLimited(clientIp(req))) {
+    return res.status(429).json({ error: 'Too many requests. Please wait a minute and try again.' });
+  }
 
   const offerKey = String(req.body && req.body.offer || '');
   const offer = OFFERS[offerKey];

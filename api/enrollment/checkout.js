@@ -1,5 +1,29 @@
 'use strict';
 
+const inMemoryRateLimit = new Map();
+const WINDOW_MS = 60_000;
+const MAX_PER_WINDOW = 10;
+
+function clientIp(request) {
+  return String(request.headers['x-forwarded-for'] || request.socket?.remoteAddress || 'unknown').split(',')[0].trim();
+}
+
+function rateLimited(ip) {
+  const now = Date.now();
+  const entry = inMemoryRateLimit.get(ip) || { count: 0, windowStart: now };
+  if (now - entry.windowStart > WINDOW_MS) {
+    entry.count = 0;
+    entry.windowStart = now;
+  }
+  entry.count += 1;
+  inMemoryRateLimit.set(ip, entry);
+  if (inMemoryRateLimit.size > 1000) {
+    const cutoff = now - WINDOW_MS;
+    for (const [key, value] of inMemoryRateLimit) if (value.windowStart < cutoff) inMemoryRateLimit.delete(key);
+  }
+  return entry.count > MAX_PER_WINDOW;
+}
+
 function siteUrl() { return String(process.env.SITE_URL || 'https://www.echelonfitness.co').replace(/\/$/, ''); }
 async function db(path, options = {}) {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -11,6 +35,7 @@ function safeOffer(offer) { return { program: offer.allowed_payment_options?.[0]
 
 module.exports = async function enrollmentCheckout(request, response) {
   response.setHeader('Cache-Control', 'no-store'); response.setHeader('X-Content-Type-Options', 'nosniff');
+  if (rateLimited(clientIp(request))) return response.status(429).json({ error: 'Too many requests. Please wait a minute and try again.' });
   const token = String((request.method === 'GET' ? request.query?.token : request.body?.token) || '');
   if (!token || !/^[a-f0-9]{48}$/i.test(token)) return response.status(400).json({ error: 'This payment link is not valid.' });
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) return response.status(503).json({ error: 'Secure checkout is being prepared.' });
