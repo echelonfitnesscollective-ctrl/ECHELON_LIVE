@@ -14,16 +14,21 @@ module.exports = async function enrollmentCheckout(request, response) {
   const token = String((request.method === 'GET' ? request.query?.token : request.body?.token) || '');
   if (!token || !/^[a-f0-9]{48}$/i.test(token)) return response.status(400).json({ error: 'This payment link is not valid.' });
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) return response.status(503).json({ error: 'Secure checkout is being prepared.' });
-  const offerQuery = `/rest/v1/enrollment_offers?checkout_token=eq.${encodeURIComponent(token)}&select=id,project_id,stripe_price_id,payment_option,allowed_payment_options,expires_at,status,payment_status,onboarding_projects!inner(application_id,prospective_clients(full_name,email))&limit=1`;
+  const offerQuery = `/rest/v1/enrollment_offers?checkout_token=eq.${encodeURIComponent(token)}&select=id,project_id,stripe_price_id,line_items,payment_option,allowed_payment_options,expires_at,status,payment_status,onboarding_projects!inner(application_id,prospective_clients(full_name,email))&limit=1`;
   const offerResult = await db(offerQuery); const offer = Array.isArray(offerResult.body) ? offerResult.body[0] : null;
   if (!offerResult.result.ok || !offer || offer.status !== 'sent' || offer.payment_status === 'paid' || (offer.expires_at && new Date(offer.expires_at) < new Date())) return response.status(410).json({ error: 'This payment link is no longer active. Please contact Echelon for a new one.' });
   if (request.method === 'GET') return response.status(200).json(safeOffer(offer));
   if (request.method !== 'POST') return response.status(405).json({ error: 'Method not allowed.' });
-  if (!process.env.STRIPE_SECRET_KEY || !offer.stripe_price_id) return response.status(503).json({ error: 'Secure checkout is being prepared.' });
+  const items = Array.isArray(offer.line_items) && offer.line_items.length ? offer.line_items : (offer.stripe_price_id ? [{ price: offer.stripe_price_id, quantity: 1 }] : []);
+  if (!process.env.STRIPE_SECRET_KEY || !items.length) return response.status(503).json({ error: 'Secure checkout is being prepared.' });
   const applicant = offer.onboarding_projects?.prospective_clients || {};
   const mode = offer.allowed_payment_options?.[0]?.mode || 'payment';
   const params = new URLSearchParams();
-  params.set('mode', mode); params.set('line_items[0][price]', offer.stripe_price_id); params.set('line_items[0][quantity]', '1');
+  params.set('mode', mode);
+  items.forEach((item, index) => {
+    params.set(`line_items[${index}][price]`, item.price);
+    params.set(`line_items[${index}][quantity]`, String(item.quantity || 1));
+  });
   params.set('success_url', `${siteUrl()}/pages/checkout-success.html?enrollment=1`); params.set('cancel_url', `${siteUrl()}/pages/enrollment-checkout.html?token=${token}`);
   params.set('client_reference_id', offer.id); params.set('metadata[offer_id]', offer.id); params.set('metadata[project_id]', offer.project_id);
   if (applicant.email) params.set('customer_email', applicant.email);

@@ -59,6 +59,22 @@ async function processEnrollmentPayment(event) {
   }
 }
 
+const GROUP_FITNESS_OFFER_KEYS = new Set(['group_drop_in', 'group_unlimited']);
+
+async function processGroupFitnessPayment(event) {
+  const object = event.data && event.data.object;
+  const offerKey = object?.metadata?.offer_key;
+  if (!GROUP_FITNESS_OFFER_KEYS.has(offerKey) || !process.env.SUPABASE_SERVICE_ROLE_KEY) return;
+  const paid = event.type === 'checkout.session.completed' || event.type === 'checkout.session.async_payment_succeeded';
+  if (!paid) return;
+  const prior = await serviceRequest(`/rest/v1/stripe_payment_events?stripe_event_id=eq.${encodeURIComponent(event.id)}&select=stripe_event_id&limit=1`);
+  if (Array.isArray(prior.body) && prior.body.length) return;
+  const email = object?.customer_details?.email || object?.customer_email || '';
+  const name = object?.customer_details?.name || 'Group Fitness customer';
+  await serviceRequest('/rest/v1/stripe_payment_events', { method: 'POST', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ stripe_event_id: event.id, event_type: event.type, payload: { checkout_session_id: object?.id || null, offer_key: offerKey, mode: object?.mode || null, amount_total: object?.amount_total ?? null } }) });
+  await serviceRequest('/rest/v1/website_leads', { method: 'POST', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ lead_type: 'Group fitness purchase', full_name: name, email, category: object?.metadata?.offer_label || offerKey, message: '', source_data: { checkout_session_id: object?.id || null, offer_key: offerKey, mode: object?.mode || null, amount_total: object?.amount_total ?? null } }) });
+}
+
 module.exports = async function stripeWebhook(request, response) {
   response.setHeader('X-Content-Type-Options', 'nosniff');
   response.setHeader('Cache-Control', 'no-store');
@@ -70,6 +86,7 @@ module.exports = async function stripeWebhook(request, response) {
     const event = JSON.parse(body.toString('utf8'));
     console.info('Verified Stripe event', event.type, event.id);
     await processEnrollmentPayment(event);
+    await processGroupFitnessPayment(event);
     return response.status(200).json({ received: true });
   } catch (error) {
     console.error('Stripe webhook error', error && error.message);

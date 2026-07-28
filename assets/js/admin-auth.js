@@ -125,7 +125,8 @@ function createAdminRecord(columns) {
 
 function paymentOptionForApplication(application) {
     const program = String(application.program_interest || '').toLowerCase();
-    if (program.includes('1-on-1') || program.includes('one-on-one') || program.includes('private')) return 'one_on_one_monthly';
+    if (program.includes('private') || program.includes('group')) return 'private_group_training';
+    if (program.includes('1-on-1') || program.includes('one-on-one')) return 'one_on_one_monthly';
     return 'echelon_12_monthly';
 }
 
@@ -146,23 +147,29 @@ function createApplicationRecord(item) {
     const reference = document.createElement('span'); reference.className = 'application-reference'; reference.textContent = item.application_reference ? `REFERENCE · ${item.application_reference}` : 'PRIVATE APPLICATION';
     const actions = document.createElement('div'); actions.className = 'application-record-actions';
     const choice = document.createElement('select'); choice.setAttribute('aria-label', `Payment option for ${item.full_name}`);
-    [['echelon_12_monthly', 'ECHELON 12 · $149 / MO'], ['echelon_12_paid_in_full', 'ECHELON 12 · $399 PAID IN FULL'], ['one_on_one_monthly', '1-ON-1 COACHING · MONTHLY']].forEach(([value, label]) => { const option = document.createElement('option'); option.value = value; option.textContent = label; choice.append(option); });
+    [['echelon_12_monthly', 'ECHELON 12 · $149 / MO'], ['echelon_12_paid_in_full', 'ECHELON 12 · $399 PAID IN FULL'], ['one_on_one_monthly', '1-ON-1 COACHING · MONTHLY'], ['private_group_training', 'PRIVATE GROUP TRAINING · BY SIZE']].forEach(([value, label]) => { const option = document.createElement('option'); option.value = value; option.textContent = label; choice.append(option); });
     choice.value = paymentOptionForApplication(item);
+    const groupSizeInput = document.createElement('input'); groupSizeInput.type = 'number'; groupSizeInput.min = '3'; groupSizeInput.max = '15'; groupSizeInput.placeholder = 'GROUP SIZE (3–15)'; groupSizeInput.setAttribute('aria-label', `Group size for ${item.full_name}`); groupSizeInput.hidden = choice.value !== 'private_group_training';
+    choice.addEventListener('change', () => { groupSizeInput.hidden = choice.value !== 'private_group_training'; });
     const createOffer = document.createElement('button'); createOffer.type = 'button'; createOffer.className = 'btn-secondary'; createOffer.textContent = item.payment_status === 'paid' ? 'PAYMENT CONFIRMED' : 'CREATE PAYMENT LINK'; createOffer.disabled = item.payment_status === 'paid';
     const paymentFeedback = document.createElement('p'); paymentFeedback.className = 'application-payment-feedback'; paymentFeedback.setAttribute('role', 'status');
     createOffer.addEventListener('click', async () => {
+        const groupSize = Number(groupSizeInput.value);
+        if (choice.value === 'private_group_training' && (!Number.isInteger(groupSize) || groupSize < 3 || groupSize > 15)) { paymentFeedback.textContent = 'Enter a group size between 3 and 15.'; return; }
         createOffer.disabled = true; createOffer.textContent = 'CREATING…'; paymentFeedback.textContent = '';
         const { data: sessionData } = await echelonAdminClient.auth.getSession();
-        const result = await fetch('/api/enrollment/create-offer', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionData.session?.access_token || ''}` }, body: JSON.stringify({ applicationId: item.id, paymentOption: choice.value }) });
+        const payload = { applicationId: item.id, paymentOption: choice.value };
+        if (choice.value === 'private_group_training') payload.groupSize = groupSize;
+        const result = await fetch('/api/enrollment/create-offer', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionData.session?.access_token || ''}` }, body: JSON.stringify(payload) });
         const body = await result.json();
         if (!result.ok || !body.paymentUrl) { paymentFeedback.textContent = body.error || 'The payment link could not be created.'; createOffer.disabled = false; createOffer.textContent = 'CREATE PAYMENT LINK'; return; }
         paymentFeedback.textContent = 'Private payment link created. Send it from your email below.';
         const copy = document.createElement('button'); copy.type = 'button'; copy.className = 'btn-secondary'; copy.textContent = 'COPY PAYMENT LINK'; copy.addEventListener('click', async () => { try { await navigator.clipboard.writeText(body.paymentUrl); copy.textContent = 'LINK COPIED'; } catch (_) { window.prompt('Copy this private payment link:', body.paymentUrl); } });
         const email = document.createElement('a'); email.className = 'btn-primary'; email.textContent = 'OPEN PAYMENT EMAIL'; email.href = paymentEmailLink(item, body.paymentUrl, body.label);
-        actions.append(copy, email); choice.disabled = true; createOffer.remove();
+        actions.append(copy, email); choice.disabled = true; groupSizeInput.disabled = true; createOffer.remove();
         initializeOperationsConsole(); initializeCoachCommand();
     });
-    actions.append(choice, createOffer);
+    actions.append(choice, groupSizeInput, createOffer);
     if (item.payment_status === 'paid') {
         const invite = document.createElement('button'); invite.type = 'button'; invite.className = 'btn-primary'; invite.textContent = item.invited_at ? 'INVITATION SENT' : 'INVITE TO MEMBER PORTAL'; invite.disabled = Boolean(item.invited_at);
         invite.addEventListener('click', async () => {
