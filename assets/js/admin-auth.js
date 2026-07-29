@@ -905,63 +905,193 @@ document.addEventListener('DOMContentLoaded', () => {
         initializeSiteContentManager();
         initializeSiteMediaManager();
         initializeCommunicationsLibrary();
-        initializeProgramLaunches();
+        initializeSectionControl();
         initializeAdminTabs();
     });
 });
 
-function programLaunchStatusLabel(row) {
+function sectionControlStatusLabel(row) {
+    if (!row || row.status === 'hidden') return 'Status: Empty · not shown on the site';
     if (row.status !== 'launched' || !row.launch_at) return 'Status: In development';
-    const date = new Date(row.launch_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-    return new Date(row.launch_at) <= new Date() ? `Status: Launched — live since ${date}` : `Status: Scheduled — goes live ${date}`;
+    const launchDate = new Date(row.launch_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+    if (new Date(row.launch_at) > new Date()) return `Status: Scheduled — goes live ${launchDate}`;
+    if (row.expires_at) {
+        const expiresDate = new Date(row.expires_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+        if (new Date(row.expires_at) <= new Date()) return `Status: Expired — was live until ${expiresDate}`;
+        return `Status: Live since ${launchDate} — expires ${expiresDate}`;
+    }
+    return `Status: Live since ${launchDate}`;
 }
 
-async function initializeProgramLaunches() {
-    const forms = document.querySelectorAll('.program-launch-card');
-    if (!forms.length) return;
-    const { data: rows } = await echelonAdminClient.from('program_launches').select('program_key, status, coach_name, launch_at');
+function renderDetailRows(container, details) {
+    container.innerHTML = '';
+    (details || []).forEach((item) => addDetailRow(container, item?.label || '', item?.value || ''));
+}
+
+function addDetailRow(container, label = '', value = '') {
+    const row = document.createElement('div');
+    row.className = 'detail-row';
+    row.innerHTML = `
+        <input type="text" class="detail-row-label" placeholder="Label" value="${label.replace(/"/g, '&quot;')}">
+        <input type="text" class="detail-row-value" placeholder="Value" value="${value.replace(/"/g, '&quot;')}">
+        <button type="button" class="detail-row-remove" data-remove-row aria-label="Remove row">×</button>
+    `;
+    row.querySelector('[data-remove-row]').addEventListener('click', () => row.remove());
+    container.appendChild(row);
+}
+
+function collectDetailRows(container) {
+    return Array.from(container.querySelectorAll('.detail-row'))
+        .map((row) => ({
+            label: row.querySelector('.detail-row-label').value.trim(),
+            value: row.querySelector('.detail-row-value').value.trim(),
+        }))
+        .filter((item) => item.label && item.value);
+}
+
+async function initializeSectionControl() {
+    const grid = document.querySelector('[data-section-control-grid]');
+    const forms = document.querySelectorAll('.section-control-card');
+    if (!grid || !forms.length) return;
+
+    const { data: rows } = await echelonAdminClient
+        .from('training_programs')
+        .select('program_key, name, subtitle, description, note, details, status, launch_at, expires_at, sort_order');
+    let currentRows = rows || [];
+
+    const findRow = (key) => currentRows.find((item) => item.program_key === key) || { program_key: key, status: 'in_development', sort_order: 0, details: [] };
+
+    const renderForm = (form) => {
+        const key = form.dataset.programKey;
+        const row = findRow(key);
+        form.elements.name.value = row.name || '';
+        form.elements.subtitle.value = row.subtitle || '';
+        form.elements.description.value = row.description || '';
+        form.elements.note.value = row.note || '';
+        renderDetailRows(form.querySelector('[data-detail-rows]'), row.details);
+
+        const statusEl = form.querySelector('[data-launch-status]');
+        if (statusEl) statusEl.textContent = sectionControlStatusLabel(row);
+
+        if (form.dataset.gated) {
+            if (row.launch_at) form.elements.launch_at.value = new Date(row.launch_at).toISOString().slice(0, 10);
+            else form.elements.launch_at.value = '';
+            if (form.elements.expires_at) {
+                form.elements.expires_at.value = row.expires_at ? new Date(row.expires_at).toISOString().slice(0, 10) : '';
+            }
+            const revertBtn = form.querySelector('[data-revert]');
+            revertBtn.hidden = row.status === 'hidden' || (form.dataset.specialEvent !== 'true' && row.status !== 'launched');
+        }
+    };
+
+    const reorderGrid = () => {
+        currentRows
+            .slice()
+            .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+            .forEach((row) => {
+                const form = Array.from(forms).find((f) => f.dataset.programKey === row.program_key);
+                if (form) grid.appendChild(form);
+            });
+    };
 
     forms.forEach((form) => {
-        const key = form.dataset.programKey;
-        const row = (rows || []).find((item) => item.program_key === key) || { status: 'in_development' };
-        const statusEl = form.querySelector('[data-launch-status]');
-        const revertBtn = form.querySelector('[data-revert]');
-        const feedback = form.querySelector('[data-launch-feedback]');
+        renderForm(form);
 
-        const render = (current) => {
-            statusEl.textContent = programLaunchStatusLabel(current);
-            revertBtn.hidden = current.status !== 'launched';
-            if (current.coach_name) form.elements.coach_name.value = current.coach_name;
-            if (current.launch_at) form.elements.launch_at.value = new Date(current.launch_at).toISOString().slice(0, 10);
-        };
-        render(row);
+        form.querySelector('[data-add-detail-row]').addEventListener('click', () => {
+            addDetailRow(form.querySelector('[data-detail-rows]'));
+        });
+
+        const feedback = form.querySelector('[data-launch-feedback]');
+        const key = form.dataset.programKey;
 
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
-            const launchAt = form.elements.launch_at.value;
-            if (!launchAt) { feedback.textContent = 'Pick a launch date first.'; return; }
             feedback.textContent = '';
+            const payload = {
+                name: form.elements.name.value.trim(),
+                subtitle: form.elements.subtitle.value.trim() || null,
+                description: form.elements.description.value.trim(),
+                note: form.elements.note.value.trim() || null,
+                details: collectDetailRows(form.querySelector('[data-detail-rows]')),
+            };
+
+            if (form.dataset.gated) {
+                const launchAt = form.elements.launch_at.value;
+                if (launchAt) {
+                    payload.status = 'launched';
+                    payload.launch_at = launchAt;
+                    if (form.elements.expires_at) {
+                        payload.expires_at = form.elements.expires_at.value || null;
+                    }
+                }
+                // No launch date yet: save content only, leave status/launch_at untouched
+                // so editing a still-unlaunched card never force-launches it.
+            }
+
             const submitBtn = form.querySelector('button[type="submit"]');
-            submitBtn.disabled = true; submitBtn.textContent = 'LAUNCHING…';
-            const { error } = await echelonAdminClient.from('program_launches').update({
-                status: 'launched',
-                coach_name: form.elements.coach_name.value.trim() || null,
-                launch_at: launchAt,
-            }).eq('program_key', key);
-            submitBtn.disabled = false; submitBtn.textContent = 'LAUNCH PROGRAM';
+            const originalLabel = submitBtn.textContent;
+            submitBtn.disabled = true; submitBtn.textContent = 'SAVING…';
+            const { error } = await echelonAdminClient.from('training_programs').update(payload).eq('program_key', key);
+            submitBtn.disabled = false; submitBtn.textContent = originalLabel;
             if (error) { feedback.textContent = 'Could not save. Please try again.'; return; }
-            render({ status: 'launched', coach_name: form.elements.coach_name.value.trim(), launch_at: launchAt });
+
+            currentRows = currentRows.map((row) => (row.program_key === key ? { ...row, ...payload } : row));
+            renderForm(form);
             feedback.textContent = 'Saved. The public site reflects this automatically.';
         });
 
-        revertBtn.addEventListener('click', async () => {
-            if (!window.confirm('Revert this program back to "In Development" on the public site?')) return;
-            const { error } = await echelonAdminClient.from('program_launches').update({ status: 'in_development', launch_at: null }).eq('program_key', key);
-            if (error) { feedback.textContent = 'Could not revert. Please try again.'; return; }
-            render({ status: 'in_development', coach_name: form.elements.coach_name.value });
-            feedback.textContent = 'Reverted to in development.';
-        });
+        const revertBtn = form.querySelector('[data-revert]');
+        if (revertBtn) {
+            revertBtn.addEventListener('click', async () => {
+                const isSpecialEvent = form.dataset.specialEvent === 'true';
+                const confirmMsg = isSpecialEvent
+                    ? 'Clear this special event slot? This removes it from the public site and blanks the form.'
+                    : 'Revert this program back to "In Development" on the public site?';
+                if (!window.confirm(confirmMsg)) return;
+
+                const payload = isSpecialEvent
+                    ? { name: '', subtitle: null, description: '', note: null, details: [], status: 'hidden', launch_at: null, expires_at: null }
+                    : { status: 'in_development', launch_at: null };
+
+                const { error } = await echelonAdminClient.from('training_programs').update(payload).eq('program_key', key);
+                if (error) { feedback.textContent = 'Could not revert. Please try again.'; return; }
+
+                currentRows = currentRows.map((row) => (row.program_key === key ? { ...row, ...payload } : row));
+                renderForm(form);
+                feedback.textContent = isSpecialEvent ? 'Slot cleared.' : 'Reverted to in development.';
+            });
+        }
+
+        const moveUp = form.querySelector('[data-move-up]');
+        const moveDown = form.querySelector('[data-move-down]');
+        const move = async (direction) => {
+            const sorted = currentRows.slice().sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+            const index = sorted.findIndex((row) => row.program_key === key);
+            const swapIndex = direction === 'up' ? index - 1 : index + 1;
+            if (swapIndex < 0 || swapIndex >= sorted.length) return;
+
+            const a = sorted[index];
+            const b = sorted[swapIndex];
+            const aOrder = a.sort_order ?? 0;
+            const bOrder = b.sort_order ?? 0;
+
+            await Promise.all([
+                echelonAdminClient.from('training_programs').update({ sort_order: bOrder }).eq('program_key', a.program_key),
+                echelonAdminClient.from('training_programs').update({ sort_order: aOrder }).eq('program_key', b.program_key),
+            ]);
+
+            currentRows = currentRows.map((row) => {
+                if (row.program_key === a.program_key) return { ...row, sort_order: bOrder };
+                if (row.program_key === b.program_key) return { ...row, sort_order: aOrder };
+                return row;
+            });
+            reorderGrid();
+        };
+        moveUp.addEventListener('click', () => move('up'));
+        moveDown.addEventListener('click', () => move('down'));
     });
+
+    reorderGrid();
 }
 
 const EFC_COMMUNICATION_TEMPLATES = [
@@ -996,16 +1126,16 @@ Respectfully,
 Echelon Fitness Collective` },
     { tag: '04 · GENTLE CLOSE', title: 'NOT YET / WAITLIST', description: 'Keep the relationship warm and the answer clear.', subject: 'Your place with Echelon', body: `Hi [First Name],
 
-Thank you again for your interest in Echelon. [The current coaching roster is full / I recommend beginning with a Fitness Intro before private coaching].
+Thank you again for your interest in Echelon. [The current coaching roster is full / I recommend beginning with a Free Class before private coaching].
 
 I’ve added you to the [program] waitlist, and I’ll personally reach out when the next opening or appropriate starting point is available. In the meantime, you can explore our complimentary training resources here: [link].
 
 Respectfully,
 [Your Name]
 Echelon Fitness Collective` },
-    { tag: '05 · EXPERIENCE', title: 'FITNESS INTRO CONFIRMATION', description: 'Set a polished first-visit expectation.', subject: 'Your Echelon Fitness Intro is confirmed', body: `Hi [First Name],
+    { tag: '05 · EXPERIENCE', title: 'FREE CLASS CONFIRMATION', description: 'Set a polished first-visit expectation.', subject: 'Your Echelon Free Class is confirmed', body: `Hi [First Name],
 
-Your Fitness Intro is confirmed for [day, date] at [time]. We’ll use this time to talk through your goals, movement history, and the most aligned path forward.
+Your Free Class is confirmed for [day, date] at [time]. We’ll use this time to talk through your goals, movement history, and the most aligned path forward.
 
 Please arrive [10] minutes early, wear comfortable training clothes, and bring water. If anything changes, reply here and we’ll help you adjust your reservation.
 
