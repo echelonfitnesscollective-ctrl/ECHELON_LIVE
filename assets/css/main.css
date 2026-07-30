@@ -3678,7 +3678,7 @@ gap:15px;
 .footer-bottom p{
 
 
-color:#777;
+color:#aaa;
 
 
 }
@@ -3695,7 +3695,7 @@ gap:20px;
 .footer-legal a{
 
 
-color:#777;
+color:#aaa;
 text-decoration:none;
 
 
@@ -3813,7 +3813,7 @@ WAIVER
 
 }
 
-.waiver-header h4{
+.waiver-header h3{
 
     font-family:var(--heading-font);
 
@@ -4805,8 +4805,8 @@ MOBILE
 .accordion-header { width: 100%; background: none; border: none; color: white; padding: 25px; cursor: pointer; display: flex; justify-content: space-between; font-size: 1.1rem; text-transform: uppercase; }
 .accordion-body { padding: 0 25px 25px 25px; color: #888; display: none; }
 
-.resource-coming-soon { color: #777; }
-.resource-coming-soon em { color: #555; font-style: normal; font-size: 0.85em; letter-spacing: 0.5px; }
+.resource-coming-soon { color: #aaa; }
+.resource-coming-soon em { color: #aaa; font-style: normal; font-size: 0.85em; letter-spacing: 0.5px; }
 
 /* Ensure hidden tabs stay hidden */
 .tab-content { display: none; }
@@ -5131,7 +5131,7 @@ PARTNERS
 
     letter-spacing:4px;
 
-    color:#777;
+    color:#aaa;
 
     margin-bottom:30px;
 
@@ -5205,7 +5205,7 @@ LEGAL
 
 .footer-bottom p{
 
-    color:#666;
+    color:#aaa;
 
     font-size:.85rem;
 
@@ -5345,12 +5345,12 @@ MOBILE
 
 /* Mirroring Waitlist Portal Spacing/Typography */
 .form-section-header { margin: 30px 0 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
-.form-section-header h3 { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; color: #FFD700; }
+.form-section-header h2, .form-section-header h3 { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; color: #FFD700; }
 .group-experience-fields{margin:2px 0 22px}.group-experience-fields[hidden]{display:none}.group-experience-fields label{display:block;margin:0 0 9px;color:#d7b55b;font-size:.67rem;font-weight:700;letter-spacing:.12em}.group-experience-fields textarea{margin:0}
 .form-helper-text { margin: -4px 0 22px; max-width: 680px; color: #b9b5ab; font-size: .88rem; line-height: 1.65; }
 .waiver-box { background: #0D0D0C; border: 1px solid #333; border-radius: 4px; margin: 25px 0; }
 .waiver-header { background: #0D0D0C; padding: 15px; color: #0D0D0C; }
-.waiver-header h4 { font-family: 'Bebas Neue'; margin: 0; }
+.waiver-header h3 { font-family: 'Bebas Neue'; margin: 0; }
 .waiver-content { padding: 20px; height: 200px; overflow-y: auto; font-size: 0.9rem; color: #AAA; line-height: 1.6; }
 .waiver-agreement { display: flex; align-items: flex-start; gap: 10px; margin: 20px 0; font-size: 0.9rem; }
 #checkin-success { padding: 40px; text-align: center; }
