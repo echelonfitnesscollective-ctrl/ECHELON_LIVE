@@ -71,6 +71,8 @@ function changeProductImage(imageId, newImage, dot){
 </script>
 
 <body>
+<a href="#main-content" class="skip-link">Skip to content</a>
+
 
 <!-- NAVIGATION -->
 
@@ -129,7 +131,7 @@ function changeProductImage(imageId, newImage, dot){
      COACHING APPLICATION HEADER
 ========================== -->
 
-<header class="checkin-header">
+<header class="checkin-header" id="main-content">
 
 
 <div class="container">
@@ -186,7 +188,7 @@ function changeProductImage(imageId, newImage, dot){
             <select
                 id="program-interest"
                 name="program_interest"
-                required>
+                required aria-label="Select a Coaching Option">
 
                 <option value="">
                     Select a Coaching Option
@@ -222,19 +224,19 @@ function changeProductImage(imageId, newImage, dot){
                 type="text"
                 name="full_name"
                 placeholder="First & Last Name"
-                required>
+                required aria-label="First & Last Name">
 
             <input
                 type="email"
                 name="email"
                 placeholder="Email Address"
-                required>
+                required aria-label="Email Address">
 
             <input
                 type="tel"
                 name="phone"
                 placeholder="Phone Number"
-                required>
+                required aria-label="Phone Number">
 
             <div id="group-experience-fields" class="group-experience-fields" hidden>
                 <label for="group-experience-details">PRIVATE GROUP / ORGANIZATION DETAILS</label>
@@ -248,7 +250,7 @@ function changeProductImage(imageId, newImage, dot){
             <input
                 type="text"
                 name="instagram_handle"
-                placeholder="Instagram Handle (Optional)">
+                placeholder="Instagram Handle (Optional)" aria-label="Instagram Handle">
 
             <!-- ==========================
                  FITNESS PROFILE
@@ -264,7 +266,7 @@ function changeProductImage(imageId, newImage, dot){
 
             <select
                 name="fitness_level"
-                required>
+                required aria-label="Current Fitness Level">
 
                 <option value="">
                     Current Fitness Level
@@ -286,7 +288,7 @@ function changeProductImage(imageId, newImage, dot){
 
             <select
                 name="primary_goal"
-                required>
+                required aria-label="Primary Goal">
 
                 <option value="">
                     Primary Goal
@@ -318,11 +320,11 @@ function changeProductImage(imageId, newImage, dot){
                 type="text"
                 name="training_days_per_week"
                 placeholder="How many days per week can you realistically train?"
-                required>
+                required aria-label="How many days per week can you realistically train?">
 
             <select
                 name="commitment_level"
-                required>
+                required aria-label="Commitment Level (1-10)">
 
                 <option value="">
                     Commitment Level (1-10)
@@ -357,35 +359,35 @@ function changeProductImage(imageId, newImage, dot){
                 name="goal_and_why"
                 rows="5"
                 placeholder="What is your primary goal and why is it important to you?"
-                required></textarea>
+                required aria-label="What is your primary goal and why is it important to you?"></textarea>
 
             <input
                 type="text"
                 name="goal_timeline"
-                placeholder="When would you like to reach this goal?">
+                placeholder="When would you like to reach this goal?" aria-label="When would you like to reach this goal?">
 
             <textarea
                 name="past_attempts"
                 rows="5"
                 placeholder="What have you tried in the past that didn't work?"
-                required></textarea>
+                required aria-label="What have you tried in the past that didn't work?"></textarea>
 
             <textarea
                 name="current_barriers"
                 rows="5"
                 placeholder="What is currently holding you back from reaching your goals?"
-                required></textarea>
+                required aria-label="What is currently holding you back from reaching your goals?"></textarea>
 
             <textarea
                 name="six_month_success"
                 rows="5"
                 placeholder="What would success look like for you 6 months from now?"
-                required></textarea>
+                required aria-label="What would success look like for you 6 months from now?"></textarea>
 
             <textarea
                 name="support_system"
                 rows="4"
-                placeholder="Who, if anyone, is supporting you in reaching this goal?"></textarea>
+                placeholder="Who, if anyone, is supporting you in reaching this goal?" aria-label="Who, if anyone, is supporting you in reaching this goal?"></textarea>
 
             <!-- ==========================
                  LIFESTYLE
@@ -401,7 +403,7 @@ function changeProductImage(imageId, newImage, dot){
 
             <select
                 name="activity_level"
-                required>
+                required aria-label="Current Activity Level">
 
                 <option value="">
                     Current Activity Level
@@ -427,7 +429,7 @@ function changeProductImage(imageId, newImage, dot){
 
             <select
                 name="nutrition_rating"
-                required>
+                required aria-label="How would you rate your nutrition?">
 
                 <option value="">
                     How would you rate your nutrition?
@@ -454,7 +456,7 @@ function changeProductImage(imageId, newImage, dot){
             <input
                 type="text"
                 name="sleep_hours"
-                placeholder="Average Hours of Sleep Per Night">
+                placeholder="Average Hours of Sleep Per Night" aria-label="Average Hours of Sleep Per Night">
 
             <!-- ==========================
                  COACHING READINESS
@@ -472,11 +474,11 @@ function changeProductImage(imageId, newImage, dot){
                 name="coaching_why"
                 rows="5"
                 placeholder="Why do you believe coaching will help you succeed where you've struggled before?"
-                required></textarea>
+                required aria-label="Why do you believe coaching will help you succeed where you've struggled before?"></textarea>
 
             <select
                 name="structured_program_ready"
-                required>
+                required aria-label="Are you prepared to follow a structured coaching program?">
 
                 <option value="">
                     Are you prepared to follow a structured coaching program?

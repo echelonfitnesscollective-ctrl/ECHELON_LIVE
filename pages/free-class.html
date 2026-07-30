@@ -19,6 +19,8 @@
 
 </head>
 
+<a href="#main-content" class="skip-link">Skip to content</a>
+
 
 <!-- ==========================
      NAVIGATION
@@ -75,7 +77,7 @@
 <!-- ==========================
      FREE CLASS HEADER
 ========================== -->
-<header class="checkin-header">
+<header class="checkin-header" id="main-content">
     <div class="container">
         <span class="checkin-tag">NEW HERE?</span>
         <h1>TRY YOUR FIRST CLASS FREE</h1>
@@ -95,10 +97,10 @@
                 <p id="free-class-note" class="member-checkin-note" hidden role="status"></p>
 
                 <div class="form-section-header"><h3>YOUR INFORMATION</h3></div>
-                <input type="text" name="name" placeholder="First & Last Name" required>
-                <input type="email" name="email" placeholder="Email Address" required>
-                <input type="tel" name="phone" placeholder="Phone Number" required>
-                <input type="text" name="preferred_day" placeholder="Preferred Day / Time (optional)">
+                <input type="text" name="name" placeholder="First & Last Name" required aria-label="First & Last Name">
+                <input type="email" name="email" placeholder="Email Address" required aria-label="Email Address">
+                <input type="tel" name="phone" placeholder="Phone Number" required aria-label="Phone Number">
+                <input type="text" name="preferred_day" placeholder="Preferred Day / Time (optional)" aria-label="Preferred Day / Time">
 
                 <button type="submit" class="btn-primary">REQUEST MY FREE CLASS</button>
             </form>

@@ -19,6 +19,8 @@
 
 </head>
 
+<a href="#main-content" class="skip-link">Skip to content</a>
+
 
 <!-- ==========================
      NAVIGATION
@@ -79,7 +81,7 @@
 <!-- ==========================
      CHECK-IN HEADER
 ========================== -->
-<header class="checkin-header">
+<header class="checkin-header" id="main-content">
     <div class="container">
         <span class="checkin-tag">MEMBER ACCESS</span>
         <h1>SESSION CHECK-IN</h1>
@@ -100,13 +102,13 @@
 
                 <!-- PERSONAL INFORMATION -->
                 <div class="form-section-header"><h3>PERSONAL INFORMATION</h3></div>
-                <input type="text" name="full_name" placeholder="First & Last Name" required>
-                <input type="email" name="email" placeholder="Email Address" required>
-                <input type="tel" name="phone" placeholder="Phone Number" required>
+                <input type="text" name="full_name" placeholder="First & Last Name" required aria-label="First & Last Name">
+                <input type="email" name="email" placeholder="Email Address" required aria-label="Email Address">
+                <input type="tel" name="phone" placeholder="Phone Number" required aria-label="Phone Number">
 
                 <!-- SESSION INFORMATION -->
                 <div class="form-section-header"><h3>SESSION INFORMATION</h3></div>
-                <select name="program" required>
+                <select name="program" required aria-label="Select Program">
                     <option value="">Select Program</option>
                     <option value="Group Fitness">Group Fitness</option>
                     <option value="1-On-1 Coaching">1-On-1 Coaching</option>
@@ -117,17 +119,17 @@
                     <option value="Open Gym">Open Gym</option>
                 </select>
 
-                <select name="first_time" required>
+                <select name="first_time" required aria-label="First Time Training With Echelon?">
                     <option value="">First Time Training With Echelon?</option>
                     <option value="Yes it's my first time!">Yes it's my first time!</option>
                     <option value="No I've trained before!">No I've trained before!</option>
                 </select>
 
-                <input type="text" name="emergency_contact" placeholder="Emergency Contact Name & Number" required>
+                <input type="text" name="emergency_contact" placeholder="Emergency Contact Name & Number" required aria-label="Emergency Contact Name & Number">
 
                 <!-- COACH NOTES -->
                 <div class="form-section-header"><h3>COACH NOTES</h3></div>
-                <textarea name="coach_note" rows="6" placeholder="Anything your coach should know before today's session?"></textarea>
+                <textarea name="coach_note" rows="6" placeholder="Anything your coach should know before today's session?" aria-label="Anything your coach should know before today's session?"></textarea>
 
                 <!-- LIABILITY WAIVER -->
                 <div class="waiver-box">

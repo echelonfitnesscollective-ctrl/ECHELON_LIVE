@@ -19,6 +19,8 @@
 
 </head>
 
+<a href="#main-content" class="skip-link">Skip to content</a>
+
 
 <!-- ==========================
      NAVIGATION
@@ -75,7 +77,7 @@
 <!-- ==========================
      PARTNERSHIPS HEADER
 ========================== -->
-<header class="checkin-header">
+<header class="checkin-header" id="main-content">
     <div class="container">
         <span class="checkin-tag">FOR PROPERTIES &amp; EMPLOYERS</span>
         <h1>ON-SITE GROUP FITNESS FOR YOUR COMMUNITY</h1>
@@ -124,15 +126,15 @@
 
                 <p id="partnership-note" class="member-checkin-note" hidden role="status"></p>
 
-                <input type="text" name="organization" placeholder="Property / Company Name" required>
-                <input type="text" name="contact_name" placeholder="Your Name" required>
-                <input type="email" name="email" placeholder="Email Address" required>
-                <input type="tel" name="phone" placeholder="Phone Number" required>
-                <input type="text" name="address" placeholder="Property / Office Address">
-                <input type="text" name="size" placeholder="Approx. Units / Employees">
-                <input type="text" name="space" placeholder="On-site space available (clubhouse, gym room, courtyard, etc.)">
-                <input type="text" name="preferred_day" placeholder="Preferred Day / Time (optional)">
-                <textarea name="message" rows="4" placeholder="Anything else we should know?"></textarea>
+                <input type="text" name="organization" placeholder="Property / Company Name" required aria-label="Property / Company Name">
+                <input type="text" name="contact_name" placeholder="Your Name" required aria-label="Your Name">
+                <input type="email" name="email" placeholder="Email Address" required aria-label="Email Address">
+                <input type="tel" name="phone" placeholder="Phone Number" required aria-label="Phone Number">
+                <input type="text" name="address" placeholder="Property / Office Address" aria-label="Property / Office Address">
+                <input type="text" name="size" placeholder="Approx. Units / Employees" aria-label="Approx. Units / Employees">
+                <input type="text" name="space" placeholder="On-site space available (clubhouse, gym room, courtyard, etc.)" aria-label="On-site space available (clubhouse, gym room, courtyard, etc.)">
+                <input type="text" name="preferred_day" placeholder="Preferred Day / Time (optional)" aria-label="Preferred Day / Time">
+                <textarea name="message" rows="4" placeholder="Anything else we should know?" aria-label="Anything else we should know?"></textarea>
 
                 <button type="submit" class="btn-primary">REQUEST A PROPOSAL</button>
             </form>

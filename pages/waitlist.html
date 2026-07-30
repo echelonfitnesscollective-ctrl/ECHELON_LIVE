@@ -44,6 +44,8 @@ function changeProductImage(imageId, newImage, dot){
 </script>
 
 <body>
+<a href="#main-content" class="skip-link">Skip to content</a>
+
 
 <!-- NAVIGATION -->
 
@@ -100,7 +102,7 @@ function changeProductImage(imageId, newImage, dot){
      WAITLIST HEADER
 ========================== -->
 
-<header class="checkin-header">
+<header class="checkin-header" id="main-content">
 
 
 <div class="container">
@@ -156,19 +158,19 @@ function changeProductImage(imageId, newImage, dot){
                 type="text"
                 name="full_name"
                 placeholder="First & Last Name"
-                required>
+                required aria-label="First & Last Name">
 
             <input
                 type="email"
                 name="email"
                 placeholder="Email Address"
-                required>
+                required aria-label="Email Address">
 
             <input
                 type="tel"
                 name="phone"
                 placeholder="Phone Number"
-                required>
+                required aria-label="Phone Number">
 
             <!-- ==========================
                  INTERESTS
@@ -184,7 +186,7 @@ function changeProductImage(imageId, newImage, dot){
 
             <select
                 name="interest"
-                required>
+                required aria-label="Select Interest">
 
                 <option value="">
                     Select Interest
@@ -221,7 +223,7 @@ function changeProductImage(imageId, newImage, dot){
             </select>
 
             <select
-                name="referral_source">
+                name="referral_source" aria-label="How did you hear about Echelon?">
 
                 <option value="">
                     How did you hear about Echelon?
@@ -272,7 +274,7 @@ function changeProductImage(imageId, newImage, dot){
             <textarea
                 name="notes"
                 rows="6"
-                placeholder="Anything else you'd like us to know? Goals, questions, interests, or specific programs you're waiting for.">
+                placeholder="Anything else you'd like us to know? Goals, questions, interests, or specific programs you're waiting for." aria-label="Anything else you'd like us to know? Goals, questions, interests, or specific programs you're waiting for.">
             </textarea>
 
             <!-- ==========================

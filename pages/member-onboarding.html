@@ -15,6 +15,8 @@
     <script src="../assets/js/member-onboarding.js" defer></script>
 </head>
 <body>
+<a href="#main-content" class="skip-link">Skip to content</a>
+
     <header class="site-header">
         <div class="container">
             <a href="../index.html" class="logo">ECHELON <span>FITNESS COLLECTIVE</span></a>
@@ -29,7 +31,7 @@
         </div>
     </header>
 
-    <main class="portal-section onboarding-page">
+    <main class="portal-section onboarding-page" id="main-content">
         <div class="container">
             <div class="portal-card onboarding-card">
                 <span class="checkin-tag">MEMBER ONBOARDING</span>
@@ -62,13 +64,13 @@
 
                     <div class="form-section-header"><h3>FOCUSED HEALTH HISTORY</h3></div>
 
-                    <textarea id="current-injuries" name="current_injuries_or_limitations" rows="4" placeholder="Current injuries, pain, or movement limitations"></textarea>
-                    <textarea id="medications" name="medications_or_conditions" rows="4" placeholder="Relevant medications or diagnosed conditions"></textarea>
-                    <textarea id="allergies" name="allergies" rows="3" placeholder="Allergies or other safety considerations"></textarea>
-                    <textarea id="surgeries" name="surgeries_or_hospitalizations" rows="3" placeholder="Recent surgeries or hospitalizations"></textarea>
-                    <select id="pregnancy" name="pregnancy_or_postpartum"><option value="">Pregnancy or postpartum considerations (if applicable)</option><option>Yes</option><option>No</option><option>Not applicable</option></select>
-                    <input id="emergency-contact" name="emergency_contact" type="text" placeholder="Emergency contact name and phone number" required>
-                    <textarea id="health-notes" name="health_notes" rows="4" placeholder="Anything else your Echelon coach should know for safe training?"></textarea>
+                    <textarea id="current-injuries" name="current_injuries_or_limitations" rows="4" placeholder="Current injuries, pain, or movement limitations" aria-label="Current injuries, pain, or movement limitations"></textarea>
+                    <textarea id="medications" name="medications_or_conditions" rows="4" placeholder="Relevant medications or diagnosed conditions" aria-label="Relevant medications or diagnosed conditions"></textarea>
+                    <textarea id="allergies" name="allergies" rows="3" placeholder="Allergies or other safety considerations" aria-label="Allergies or other safety considerations"></textarea>
+                    <textarea id="surgeries" name="surgeries_or_hospitalizations" rows="3" placeholder="Recent surgeries or hospitalizations" aria-label="Recent surgeries or hospitalizations"></textarea>
+                    <select id="pregnancy" name="pregnancy_or_postpartum" aria-label="Pregnancy or postpartum considerations (if applicable)"><option value="">Pregnancy or postpartum considerations (if applicable)</option><option>Yes</option><option>No</option><option>Not applicable</option></select>
+                    <input id="emergency-contact" name="emergency_contact" type="text" placeholder="Emergency contact name and phone number" required aria-label="Emergency contact name and phone number">
+                    <textarea id="health-notes" name="health_notes" rows="4" placeholder="Anything else your Echelon coach should know for safe training?" aria-label="Anything else your Echelon coach should know for safe training?"></textarea>
 
                     <label class="waiver-agreement">
                         <input name="health_acknowledgment" type="checkbox" required>
