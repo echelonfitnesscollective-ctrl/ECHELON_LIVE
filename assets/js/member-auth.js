@@ -1,6 +1,13 @@
 const EFC_SUPABASE_URL = 'https://plkdyvtriajpzcfgtwzp.supabase.co';
 const EFC_SUPABASE_KEY = 'sb_publishable_CwFNrWSrhLKURZIk_-yt1A_ZVpFHEwf';
 const EFC_MEMBER_STEP_UP_KEY = 'efc_member_step_up_user';
+const EFC_MEMBER_LAST_ACTIVITY_KEY = 'efc_member_last_activity';
+// 30 minutes of no clicks/keys/scrolling on a member page signs the session
+// out and sends the member back to the login form. This is separate from the
+// browser's own saved-password/Face-ID autofill, which still works normally
+// on the next sign-in, it just is not treated as "still signed in."
+const EFC_MEMBER_IDLE_TIMEOUT_MS = 30 * 60 * 1000;
+const EFC_MEMBER_IDLE_CHECK_INTERVAL_MS = 60 * 1000;
 const EFC_MEMBER_PAGES = new Set([
     'member-portal.html', 'member-coaching.html', 'member-nutrition.html',
     'member-performance.html', 'member-library.html', 'member-onboarding.html',
@@ -27,17 +34,61 @@ function hasRequiredMemberSignIn(member) {
 }
 
 function markMemberSignIn(member) {
-    if (member) window.sessionStorage.setItem(EFC_MEMBER_STEP_UP_KEY, member.id);
+    if (!member) return;
+    window.sessionStorage.setItem(EFC_MEMBER_STEP_UP_KEY, member.id);
+    recordMemberActivity();
 }
 
 function clearMemberSignIn() {
     window.sessionStorage.removeItem(EFC_MEMBER_STEP_UP_KEY);
+    window.sessionStorage.removeItem(EFC_MEMBER_LAST_ACTIVITY_KEY);
+}
+
+function recordMemberActivity() {
+    window.sessionStorage.setItem(EFC_MEMBER_LAST_ACTIVITY_KEY, String(Date.now()));
+}
+
+function isMemberSessionIdle() {
+    const last = Number(window.sessionStorage.getItem(EFC_MEMBER_LAST_ACTIVITY_KEY));
+    return !last || (Date.now() - last) > EFC_MEMBER_IDLE_TIMEOUT_MS;
+}
+
+async function signOutIdleMember() {
+    clearMemberSignIn();
+    await echelonMemberClient.auth.signOut();
+    window.location.replace('member-login.html?timeout=1');
+}
+
+let efcMemberIdleWatchStarted = false;
+function startMemberIdleWatch() {
+    if (efcMemberIdleWatchStarted) return;
+    efcMemberIdleWatchStarted = true;
+
+    let throttled = false;
+    const onActivity = () => {
+        if (throttled) return;
+        throttled = true;
+        window.setTimeout(() => { throttled = false; }, 30 * 1000);
+        recordMemberActivity();
+    };
+    ['click', 'keydown', 'scroll', 'touchstart', 'mousemove'].forEach((evt) =>
+        window.addEventListener(evt, onActivity, { passive: true })
+    );
+
+    window.setInterval(() => {
+        if (isMemberSessionIdle()) signOutIdleMember();
+    }, EFC_MEMBER_IDLE_CHECK_INTERVAL_MS);
 }
 
 async function requireMemberSession() {
     const member = await getAuthenticatedMember();
+    const timedOut = Boolean(member) && hasRequiredMemberSignIn(member) && isMemberSessionIdle();
 
-    if (!member || !hasRequiredMemberSignIn(member) || !(await hasMemberHubAccess())) {
+    if (!member || !hasRequiredMemberSignIn(member) || timedOut || !(await hasMemberHubAccess())) {
+        if (timedOut) {
+            await signOutIdleMember();
+            return null;
+        }
         window.location.replace(
             `member-login.html?next=${encodeURIComponent(window.location.pathname.split('/').pop())}`
         );
@@ -50,6 +101,8 @@ async function requireMemberSession() {
         return null;
     }
 
+    recordMemberActivity();
+    startMemberIdleWatch();
     return member;
 }
 
@@ -81,6 +134,10 @@ async function initializeMemberLogin() {
 
     const feedback = document.getElementById('member-login-feedback');
     const submitButton = form.querySelector('button[type="submit"]');
+
+    if (new URLSearchParams(window.location.search).get('timeout') === '1') {
+        feedback.textContent = 'You were signed out after a period of inactivity. Please sign in again.';
+    }
 
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
