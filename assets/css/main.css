@@ -2813,7 +2813,7 @@ MOBILE
 
 .admin-console-section[open] summary::after{
 
-    content:'—';
+    content:'−';
 }
 
 .admin-summary-grid{

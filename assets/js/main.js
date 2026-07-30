@@ -22,7 +22,7 @@ function initializePhilosophyToggle() {
     toggle.addEventListener('click', () => {
         const isOpen = panel.classList.toggle('active');
         toggle.setAttribute('aria-expanded', String(isOpen));
-        toggle.lastElementChild.textContent = isOpen ? '—' : '+';
+        toggle.lastElementChild.textContent = isOpen ? '−' : '+';
     });
 }
 

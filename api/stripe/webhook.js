@@ -52,14 +52,14 @@ async function processEnrollmentPayment(event) {
   if (paid) {
     await serviceRequest(`/rest/v1/enrollment_offers?id=eq.${encodeURIComponent(offer.id)}`, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ status: 'accepted', payment_status: 'paid', paid_at: now, stripe_checkout_session_id: object?.id || null }) });
     await serviceRequest(`/rest/v1/onboarding_projects?id=eq.${encodeURIComponent(project.id)}`, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ payment_status: 'paid', membership_status: 'approved', onboarding_status: 'awaiting_admin' }) });
-    await serviceRequest(`/rest/v1/coaching_applications?id=eq.${encodeURIComponent(project.application_id)}`, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ status: 'Paid — Ready to Invite', payment_status: 'paid' }) });
+    await serviceRequest(`/rest/v1/coaching_applications?id=eq.${encodeURIComponent(project.application_id)}`, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ status: 'Paid: Ready to Invite', payment_status: 'paid' }) });
     await completeLaunchTask(project.id, 'Verify payment or approved exemption');
     if (offer.payment_option === 'echelon_12_monthly' || offer.payment_option === 'echelon_12_paid_in_full') {
       const clientName = project.coaching_applications?.full_name || 'this client';
       const checkinDue = new Date(Date.now() + 84 * 24 * 60 * 60 * 1000).toISOString();
       await serviceRequest('/rest/v1/coach_tasks', { method: 'POST', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({
         title: `12-Week check-in: ${clientName}`,
-        description: `${clientName}'s 12-Week Transformation started today. Their plan keeps running until you or they change it — nothing auto-cancels. Reach out around week 12 to talk through what's next: renew, move to Group Unlimited, or upgrade to 1-on-1.`,
+        description: `${clientName}'s 12-Week Transformation started today. Their plan keeps running until you or they change it. Nothing auto-cancels. Reach out around week 12 to talk through what's next: renew, move to Group Unlimited, or upgrade to 1-on-1.`,
         related_name: clientName,
         task_type: 'Renewal check-in',
         priority: 'Normal',

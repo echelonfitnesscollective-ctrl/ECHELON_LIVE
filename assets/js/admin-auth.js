@@ -544,7 +544,7 @@ async function initializeSiteContentManager() {
         save.textContent = values.content_id.value ? 'SAVE CHANGES' : 'SAVE UPDATE';
         if (error) { feedback.textContent = 'Your update could not be saved. Please check the details and try again.'; return; }
         resetEditor();
-        feedback.textContent = payload.status === 'Published' ? 'Published — the site will refresh with this update.' : payload.status === 'Scheduled' ? 'Scheduled — it will publish automatically at the time you set.' : 'Saved as a private draft.';
+        feedback.textContent = payload.status === 'Published' ? 'Published. The site will refresh with this update.' : payload.status === 'Scheduled' ? 'Scheduled. It will publish automatically at the time you set.' : 'Saved as a private draft.';
         await refresh();
     });
     await refresh();
@@ -736,7 +736,7 @@ async function appendMemberTracker(detail, row, memberName) {
     performanceResult.data.forEach((checkin) => {
         const item = document.createElement('p');
         item.className = 'admin-detail-date';
-        item.textContent = `${checkin.week_of}: ${checkin.workouts_completed ?? '—'} workouts · nutrition ${checkin.nutrition_adherence ?? '—'}/10 · energy ${checkin.energy_score ?? '—'}/10${checkin.body_weight ? ` · ${checkin.body_weight} lb` : ''}`;
+        item.textContent = `${checkin.week_of}: ${checkin.workouts_completed ?? 'N/A'} workouts · nutrition ${checkin.nutrition_adherence ?? 'N/A'}/10 · energy ${checkin.energy_score ?? 'N/A'}/10${checkin.body_weight ? ` · ${checkin.body_weight} lb` : ''}`;
         tracker.append(item);
     });
 
@@ -914,11 +914,11 @@ function sectionControlStatusLabel(row) {
     if (!row || row.status === 'hidden') return 'Status: Empty · not shown on the site';
     if (row.status !== 'launched' || !row.launch_at) return 'Status: In development';
     const launchDate = new Date(row.launch_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-    if (new Date(row.launch_at) > new Date()) return `Status: Scheduled — goes live ${launchDate}`;
+    if (new Date(row.launch_at) > new Date()) return `Status: Scheduled, goes live ${launchDate}`;
     if (row.expires_at) {
         const expiresDate = new Date(row.expires_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-        if (new Date(row.expires_at) <= new Date()) return `Status: Expired — was live until ${expiresDate}`;
-        return `Status: Live since ${launchDate} — expires ${expiresDate}`;
+        if (new Date(row.expires_at) <= new Date()) return `Status: Expired, was live until ${expiresDate}`;
+        return `Status: Live since ${launchDate}, expires ${expiresDate}`;
     }
     return `Status: Live since ${launchDate}`;
 }
@@ -1095,7 +1095,7 @@ async function initializeSectionControl() {
 }
 
 const EFC_COMMUNICATION_TEMPLATES = [
-    { tag: '01 · AUTOMATIC ACKNOWLEDGMENT', title: 'GENERAL INQUIRY RECEIVED', description: 'Use for every website contact request.', featured: true, subject: 'We received your message — Echelon Fitness Collective', body: `Hi [First Name],
+    { tag: '01 · AUTOMATIC ACKNOWLEDGMENT', title: 'GENERAL INQUIRY RECEIVED', description: 'Use for every website contact request.', featured: true, subject: 'We received your message: Echelon Fitness Collective', body: `Hi [First Name],
 
 Thank you for reaching out to Echelon Fitness Collective. Your message is in, and we’re reviewing the details now.
 
@@ -1142,7 +1142,7 @@ Please arrive [10] minutes early, wear comfortable training clothes, and bring w
 Respectfully,
 [Your Name]
 Echelon Fitness Collective` },
-    { tag: '06 · ONBOARDING', title: 'WELCOME & REQUIRED FORMS', description: 'Use after a member has committed.', subject: 'Welcome to Echelon — your onboarding begins here', body: `Hi [First Name],
+    { tag: '06 · ONBOARDING', title: 'WELCOME & REQUIRED FORMS', description: 'Use after a member has committed.', subject: 'Welcome to Echelon: your onboarding begins here', body: `Hi [First Name],
 
 Welcome to Echelon. Before your program begins, please complete your Member Portal onboarding: [portal link]. This includes your readiness information, waiver acknowledgment, goals, and preferred training schedule.
 
@@ -1162,7 +1162,7 @@ Respectfully,
 Echelon Fitness Collective` },
     { tag: '08 · MEMBER CARE', title: 'MISSED CHECK-IN FOLLOW-UP', description: 'Bring the member back into rhythm.', subject: 'Let’s reset your Echelon rhythm', body: `Hi [First Name],
 
-I noticed we missed your weekly check-in. No pressure — I want to make sure you have what you need to keep moving forward.
+I noticed we missed your weekly check-in. No pressure. I want to make sure you have what you need to keep moving forward.
 
 Reply with a quick update on how the week went, or submit your check-in here: [portal link]. If your schedule, recovery, or goals have shifted, we’ll adjust the plan together.
 
@@ -1243,8 +1243,8 @@ function initializeCommunicationsLibrary() {
         const copy = document.createElement('button'); copy.className = 'template-copy'; copy.type = 'button'; copy.textContent = 'COPY SCRIPT';
         const feedback = document.createElement('p'); feedback.className = 'template-feedback'; feedback.setAttribute('aria-live', 'polite');
         copy.addEventListener('click', async () => {
-            try { await navigator.clipboard.writeText(script.value); feedback.textContent = 'Copied — personalize the bracketed details before sending.'; }
-            catch (error) { script.focus(); script.select(); feedback.textContent = 'Script selected — press Command + C to copy.'; }
+            try { await navigator.clipboard.writeText(script.value); feedback.textContent = 'Copied. Personalize the bracketed details before sending.'; }
+            catch (error) { script.focus(); script.select(); feedback.textContent = 'Script selected. Press Command + C to copy.'; }
         });
         card.append(tag, title, description, details, copy, feedback);
         grid.append(card);

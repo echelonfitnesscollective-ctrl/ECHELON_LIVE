@@ -1,5 +1,5 @@
 // Vercel serverless proxy for the B2B partnership inquiry form (apartment complexes,
-// employers). No Stripe involved — this is a lead-capture form for a sales
+// employers). No Stripe involved; this is a lead-capture form for a sales
 // conversation, not a self-serve purchase; the owner follows up manually.
 // Required Vercel environment variables: SUPABASE_URL, SUPABASE_ANON_KEY.
 
@@ -86,7 +86,7 @@ module.exports = async function submitPartnershipInquiry(req, res) {
       },
       body: JSON.stringify({
         lead_type: 'Partnership Inquiry',
-        full_name: `${organization} — ${contactName}`,
+        full_name: `${organization}: ${contactName}`,
         email,
         phone,
         category: 'B2B / On-Site Group Fitness',

@@ -38,7 +38,7 @@ async function prefillMemberCheckin(form) {
 
     if (memberNote) {
         memberNote.hidden = false;
-        memberNote.textContent = 'MEMBER DETAILS LOADED — confirm your session information, then submit your check-in.';
+        memberNote.textContent = 'MEMBER DETAILS LOADED. Confirm your session information, then submit your check-in.';
     }
 }
 
@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
             checkinForm.reset();
             checkinForm.style.display = 'none';
             window.efcTrack?.('checkin_complete', { program: values.program });
-            showEchelonSuccess(success, 'CHECK-IN COMPLETE', 'You are confirmed for today. Arrive ready to work — your coach will take it from here.', { onDismiss: () => { checkinForm.style.display = ''; submitButton.disabled = false; submitButton.textContent = 'COMPLETE CHECK-IN'; } });
+            showEchelonSuccess(success, 'CHECK-IN COMPLETE', 'You are confirmed for today. Arrive ready to work. Your coach will take it from here.', { onDismiss: () => { checkinForm.style.display = ''; submitButton.disabled = false; submitButton.textContent = 'COMPLETE CHECK-IN'; } });
         });
     }
 

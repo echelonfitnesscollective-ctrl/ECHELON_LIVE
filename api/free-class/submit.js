@@ -1,4 +1,4 @@
-// Vercel serverless proxy for the free-class request form. No Stripe involved —
+// Vercel serverless proxy for the free-class request form. No Stripe involved;
 // this is a lead-capture form; the coach follows up to confirm and schedule.
 // Required Vercel environment variables: SUPABASE_URL, SUPABASE_ANON_KEY.
 
@@ -74,7 +74,7 @@ module.exports = async function submitFreeClass(req, res) {
         full_name: name,
         email,
         phone,
-        category: 'Group Fitness — Free Class',
+        category: 'Group Fitness: Free Class',
         message: preferredDay ? `Preferred day/time: ${preferredDay}` : '',
         source_data: body,
       }),

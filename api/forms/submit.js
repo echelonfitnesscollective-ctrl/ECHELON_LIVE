@@ -1,12 +1,12 @@
 // Vercel serverless proxy for the check-in and waitlist forms
 // (pages/checkin.html, pages/waitlist.html). Previously these two forms wrote
-// directly to Supabase from the browser using the public anon key — no rate
+// directly to Supabase from the browser using the public anon key: no rate
 // limiting, no field length caps. This proxy brings both in line with every
 // other public form on the site.
 //
 // Combined into one function (dispatched by body.form) rather than two
 // separate files because Vercel's Hobby plan caps a deployment at 12
-// serverless functions — see database/supabase-echolon-operating-system.sql
+// serverless functions; see database/supabase-echolon-operating-system.sql
 // commit history / admin manual changelog "Security audit fixes" for context.
 // Required Vercel environment variables: SUPABASE_URL, SUPABASE_ANON_KEY.
 

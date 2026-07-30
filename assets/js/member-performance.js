@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     ]);
     renderPerformanceList(document.getElementById('member-goals-list'), goalsResult.data || [], 'Your coach will add goals here.', (goal) => `${goal.goal}${goal.target_date ? ` · target ${goal.target_date}` : ''}`);
     const checkinHistory = historyResult.data || [];
-    renderPerformanceList(document.getElementById('member-performance-history'), checkinHistory.slice(0, 6), 'Your submitted check-ins will appear here.', (item) => `${item.week_of} · ${item.workouts_completed ?? '—'} workouts · ${item.nutrition_adherence ?? '—'}/10 nutrition`);
+    renderPerformanceList(document.getElementById('member-performance-history'), checkinHistory.slice(0, 6), 'Your submitted check-ins will appear here.', (item) => `${item.week_of} · ${item.workouts_completed ?? 'N/A'} workouts · ${item.nutrition_adherence ?? 'N/A'}/10 nutrition`);
 
     const streakBadge = document.getElementById('member-streak-badge');
     const streak = computeCheckinStreak(checkinHistory);
