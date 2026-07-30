@@ -106,21 +106,23 @@ document.addEventListener('DOMContentLoaded', () => {
             submitButton.disabled = true;
             submitButton.textContent = 'SAVING…';
             const values = formValues(checkinForm);
-            const { error } = await echelonSiteClient.from('session_checkins').insert({
-                full_name: values.full_name,
-                email: values.email,
-                phone: values.phone,
-                program: values.program,
-                first_time: values.first_time,
-                emergency_contact: values.emergency_contact,
-                coach_note: values.coach_note,
-                waiver_agreed: values.waiver_agreed === 'YES'
-            });
+            let submitError = null;
+            try {
+                const response = await fetch('/api/checkin/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(values)
+                });
+                const result = await response.json();
+                if (!response.ok) submitError = result.error || 'Submission failed.';
+            } catch {
+                submitError = 'We could not save your check-in. Please try again.';
+            }
 
-            if (error) {
+            if (submitError) {
                 submitButton.disabled = false;
                 submitButton.textContent = 'COMPLETE CHECK-IN';
-                alert('We could not save your check-in. Please try again.');
+                alert(submitError);
                 return;
             }
 
@@ -174,19 +176,22 @@ document.addEventListener('DOMContentLoaded', () => {
             submitButton.disabled = true;
             submitButton.textContent = 'JOINING…';
             const values = formValues(waitlistForm);
-            const { error } = await echelonSiteClient.from('website_leads').insert({
-                lead_type: 'Waitlist',
-                full_name: values.full_name,
-                email: values.email,
-                phone: values.phone,
-                category: values.interest,
-                message: values.notes,
-                source_data: values
-            });
-            if (error) {
+            let submitError = null;
+            try {
+                const response = await fetch('/api/waitlist/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(values)
+                });
+                const result = await response.json();
+                if (!response.ok) submitError = result.error || 'Submission failed.';
+            } catch {
+                submitError = 'We could not save your waitlist entry. Please try again.';
+            }
+            if (submitError) {
                 submitButton.disabled = false;
                 submitButton.textContent = 'JOIN THE WAITLIST';
-                alert('We could not save your waitlist entry. Please try again.');
+                alert(submitError);
                 return;
             }
             waitlistForm.reset();

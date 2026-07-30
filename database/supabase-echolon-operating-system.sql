@@ -48,19 +48,25 @@ create table if not exists public.command_notifications (
   id uuid primary key default gen_random_uuid(), user_id uuid references auth.users(id) on delete cascade, title text not null, body text, kind text not null default 'system', read_at timestamptz, created_at timestamptz not null default now()
 );
 
+alter table public.prospective_clients enable row level security;
+alter table public.onboarding_task_templates enable row level security;
+alter table public.onboarding_task_template_items enable row level security;
 alter table public.onboarding_projects enable row level security;
 alter table public.onboarding_tasks enable row level security;
 alter table public.enrollment_offers enable row level security;
 alter table public.automation_events enable row level security;
 alter table public.audit_logs enable row level security;
 alter table public.command_notifications enable row level security;
+create policy "Admins manage prospective clients" on public.prospective_clients for all to authenticated using((select public.is_echelon_admin())) with check((select public.is_echelon_admin()));
+create policy "Admins manage onboarding task templates" on public.onboarding_task_templates for all to authenticated using((select public.is_echelon_admin())) with check((select public.is_echelon_admin()));
+create policy "Admins manage onboarding task template items" on public.onboarding_task_template_items for all to authenticated using((select public.is_echelon_admin())) with check((select public.is_echelon_admin()));
 create policy "Admins manage onboarding projects" on public.onboarding_projects for all to authenticated using((select public.is_echelon_admin())) with check((select public.is_echelon_admin()));
 create policy "Admins manage onboarding tasks" on public.onboarding_tasks for all to authenticated using((select public.is_echelon_admin())) with check((select public.is_echelon_admin()));
 create policy "Admins manage enrollment offers" on public.enrollment_offers for all to authenticated using((select public.is_echelon_admin())) with check((select public.is_echelon_admin()));
 create policy "Admins view automation events" on public.automation_events for select to authenticated using((select public.is_echelon_admin()));
 create policy "Admins view audit logs" on public.audit_logs for select to authenticated using((select public.is_echelon_admin()));
 create policy "Admins manage command notifications" on public.command_notifications for all to authenticated using((select public.is_echelon_admin())) with check((select public.is_echelon_admin()));
-grant select,insert,update,delete on public.onboarding_projects,public.onboarding_tasks,public.enrollment_offers,public.command_notifications to authenticated;
+grant select,insert,update,delete on public.prospective_clients,public.onboarding_task_templates,public.onboarding_task_template_items,public.onboarding_projects,public.onboarding_tasks,public.enrollment_offers,public.command_notifications to authenticated;
 grant select on public.automation_events,public.audit_logs to authenticated;
 
 insert into public.onboarding_task_templates(name,description) values('NEW MEMBER LAUNCH','Private operations checklist created from each submitted training application.') on conflict(name) do nothing;
