@@ -59,6 +59,8 @@
                 <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="media" data-step="06">MEDIA</button>
                 <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="communications" data-step="07">COMMS</button>
                 <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="library" data-step="08">LIBRARY</button>
+                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="equipment" data-step="09">EQUIPMENT</button>
+                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="workouts" data-step="10">WORKOUT LIBRARY</button>
             </nav>
 
             <details class="admin-intake-section admin-console-section admin-content-section admin-tab-panel" data-admin-panel="content">
@@ -367,6 +369,133 @@
                         <p id="trainer-resource-feedback" class="form-error" role="status"></p>
                     </form>
                     <div id="trainer-resources-list" class="admin-record-list"></div>
+                </div>
+            </details>
+        </div>
+
+        <div class="admin-tab-panel" data-admin-panel="equipment" hidden>
+            <details class="admin-intake-section admin-console-section" open>
+                <summary class="admin-section-heading">
+                    <div><span class="checkin-tag">INVENTORY</span><h2>EQUIPMENT</h2></div>
+                    <p>Track what you own, what it cost, and its condition. Internal only, not visible to members.</p>
+                </summary>
+                <div class="admin-resource-layout">
+                    <form id="equipment-form" class="echelon-form">
+                        <input name="name" type="text" placeholder="Equipment name" required aria-label="Equipment name">
+                        <input name="category" type="text" placeholder="Category (ex: Cardio, Free Weights, Bands)" aria-label="Category">
+                        <input name="price" type="number" step="0.01" min="0" placeholder="Price ($)" aria-label="Price">
+                        <input name="quantity" type="number" step="1" min="1" value="1" placeholder="Quantity" aria-label="Quantity">
+                        <input name="condition" type="text" placeholder="Condition (ex: New, Good, Needs Repair)" aria-label="Condition">
+                        <input name="purchase_date" type="date" aria-label="Purchase date">
+                        <textarea name="notes" rows="3" placeholder="Notes (optional)" aria-label="Notes"></textarea>
+                        <button type="submit" class="btn-secondary">ADD EQUIPMENT</button>
+                        <p id="equipment-feedback" class="form-error" role="status"></p>
+                    </form>
+                    <div id="equipment-list"></div>
+                </div>
+            </details>
+        </div>
+
+        <div class="admin-tab-panel" data-admin-panel="workouts" hidden>
+            <details class="admin-intake-section admin-console-section" open>
+                <summary class="admin-section-heading">
+                    <div><span class="checkin-tag">STEP 1 · BUILDING BLOCKS</span><h2>EXERCISE LIBRARY</h2></div>
+                    <p>Reusable exercises with form cues, coaching cues, and modifications. Publish an exercise before it can be added to a workout.</p>
+                </summary>
+                <div class="admin-resource-layout">
+                    <form id="exercise-form" class="echelon-form">
+                        <input type="hidden" name="id">
+                        <input name="name" type="text" placeholder="Exercise name" required aria-label="Exercise name">
+                        <input name="target_area" type="text" placeholder="Target area (ex: Chest, Triceps)" aria-label="Target area">
+                        <textarea name="description" rows="2" placeholder="Short description" aria-label="Description"></textarea>
+                        <textarea name="form_cues" rows="2" placeholder="Form cues" aria-label="Form cues"></textarea>
+                        <textarea name="coaching_cues" rows="2" placeholder="Coaching cues" aria-label="Coaching cues"></textarea>
+                        <textarea name="modification_up" rows="2" placeholder="Modification: harder / progression" aria-label="Modification up"></textarea>
+                        <textarea name="modification_down" rows="2" placeholder="Modification: easier / regression" aria-label="Modification down"></textarea>
+                        <textarea name="modification_pregnancy" rows="2" placeholder="Modification: pregnancy-safe" aria-label="Modification pregnancy"></textarea>
+                        <input name="video_url" type="url" placeholder="Video URL (optional)" aria-label="Video URL">
+                        <input name="equipment_needed" type="text" placeholder="Equipment needed (optional)" aria-label="Equipment needed">
+                        <select name="status" aria-label="Status">
+                            <option value="draft">Draft</option>
+                            <option value="published">Published</option>
+                        </select>
+                        <button type="submit" class="btn-secondary">SAVE EXERCISE</button>
+                        <button type="button" id="exercise-form-cancel" class="btn-secondary" hidden>CANCEL EDIT</button>
+                        <p id="exercise-feedback" class="form-error" role="status"></p>
+                    </form>
+                    <div id="exercise-list" class="admin-record-list"></div>
+                </div>
+            </details>
+
+            <details class="admin-intake-section admin-console-section">
+                <summary class="admin-section-heading">
+                    <div><span class="checkin-tag">STEP 2 · SESSIONS</span><h2>WORKOUTS</h2></div>
+                    <p>Assemble a session from published exercises with sets, reps, and rest.</p>
+                </summary>
+                <div class="admin-resource-layout">
+                    <form id="workout-form" class="echelon-form">
+                        <input type="hidden" name="id">
+                        <input name="title" type="text" placeholder="Workout title" required aria-label="Workout title">
+                        <input name="category" type="text" placeholder="Category (ex: Push, Pull, Legs, Full-Body, Mobility)" aria-label="Category">
+                        <textarea name="description" rows="2" placeholder="Short description" aria-label="Description"></textarea>
+                        <select name="status" aria-label="Status">
+                            <option value="draft">Draft</option>
+                            <option value="published">Published</option>
+                        </select>
+                        <button type="submit" class="btn-secondary">SAVE WORKOUT</button>
+                        <button type="button" id="workout-form-cancel" class="btn-secondary" hidden>CANCEL EDIT</button>
+                        <p id="workout-feedback" class="form-error" role="status"></p>
+                    </form>
+                    <div id="workout-list" class="admin-record-list"></div>
+
+                    <div id="workout-exercise-editor" hidden>
+                        <div class="form-section-header"><h3 id="workout-exercise-editor-title">EXERCISES IN THIS WORKOUT</h3></div>
+                        <form id="workout-exercise-form" class="echelon-form">
+                            <select name="exercise_id" required aria-label="Exercise"></select>
+                            <input name="sets" type="number" min="1" placeholder="Sets" aria-label="Sets">
+                            <input name="reps" type="text" placeholder="Reps (ex: 8-12, AMRAP)" aria-label="Reps">
+                            <input name="rest_seconds" type="number" min="0" placeholder="Rest (seconds)" aria-label="Rest seconds">
+                            <input name="notes" type="text" placeholder="Notes (optional)" aria-label="Notes">
+                            <button type="submit" class="btn-secondary">ADD EXERCISE TO WORKOUT</button>
+                        </form>
+                        <div id="workout-exercise-list" class="admin-record-list"></div>
+                    </div>
+                </div>
+            </details>
+
+            <details class="admin-intake-section admin-console-section">
+                <summary class="admin-section-heading">
+                    <div><span class="checkin-tag">STEP 3 · 12-WEEK PROGRAMS</span><h2>PROGRAM TEMPLATES</h2></div>
+                    <p>Base models for cutting, bulking, muscle, performance, and older-adult wellness. Assign workouts to a week/day, then personalize per client.</p>
+                </summary>
+                <div class="admin-resource-layout">
+                    <form id="program-template-form" class="echelon-form">
+                        <input type="hidden" name="id">
+                        <input name="title" type="text" placeholder="Program title" required aria-label="Program title">
+                        <input name="goal" type="text" placeholder="Goal (ex: cutting, bulking, muscle, performance, older-adult)" aria-label="Goal">
+                        <textarea name="description" rows="2" placeholder="Short description" aria-label="Description"></textarea>
+                        <input name="duration_weeks" type="number" min="1" value="12" placeholder="Duration (weeks)" aria-label="Duration weeks">
+                        <select name="status" aria-label="Status">
+                            <option value="draft">Draft</option>
+                            <option value="published">Published</option>
+                        </select>
+                        <button type="submit" class="btn-secondary">SAVE PROGRAM</button>
+                        <button type="button" id="program-template-form-cancel" class="btn-secondary" hidden>CANCEL EDIT</button>
+                        <p id="program-template-feedback" class="form-error" role="status"></p>
+                    </form>
+                    <div id="program-template-list" class="admin-record-list"></div>
+
+                    <div id="program-calendar-editor" hidden>
+                        <div class="form-section-header"><h3 id="program-calendar-editor-title">ASSIGN WORKOUTS TO WEEK / DAY</h3></div>
+                        <form id="program-calendar-form" class="echelon-form">
+                            <input name="week_number" type="number" min="1" placeholder="Week #" required aria-label="Week number">
+                            <input name="day_number" type="number" min="1" max="7" placeholder="Day # (1-7)" required aria-label="Day number">
+                            <select name="workout_id" required aria-label="Workout"></select>
+                            <input name="notes" type="text" placeholder="Notes (optional)" aria-label="Notes">
+                            <button type="submit" class="btn-secondary">ASSIGN</button>
+                        </form>
+                        <div id="program-calendar-list" class="admin-record-list"></div>
+                    </div>
                 </div>
             </details>
         </div>

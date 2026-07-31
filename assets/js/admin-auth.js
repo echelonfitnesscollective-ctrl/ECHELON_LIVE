@@ -442,6 +442,446 @@ async function initializeMemberLibraryManager() {
     });
 }
 
+async function initializeEquipmentManager() {
+    const form = document.getElementById('equipment-form');
+    if (!form) return;
+    const list = document.getElementById('equipment-list');
+    const feedback = document.getElementById('equipment-feedback');
+
+    async function refreshEquipment() {
+        const [{ data: items, error: itemsError }, { data: notes, error: notesError }] = await Promise.all([
+            echelonAdminClient.from('equipment_inventory').select('id, name, category, price, quantity, condition, purchase_date, notes').order('created_at', { ascending: false }),
+            echelonAdminClient.from('equipment_notes').select('id, equipment_id, note, created_at').order('created_at', { ascending: false })
+        ]);
+        if (itemsError) { list.textContent = 'Run the coaching content database update to activate this section.'; return; }
+        list.replaceChildren();
+        if (!items.length) { list.textContent = 'No equipment logged yet.'; return; }
+        items.forEach((item) => {
+            const record = document.createElement('details');
+            record.className = 'equipment-record';
+
+            const summary = document.createElement('summary');
+            const nameEl = document.createElement('strong'); nameEl.textContent = item.name;
+            const categoryEl = document.createElement('span'); categoryEl.textContent = item.category || '—';
+            const priceEl = document.createElement('span'); priceEl.textContent = item.price != null ? `$${Number(item.price).toFixed(2)}` : '—';
+            const qtyEl = document.createElement('span'); qtyEl.textContent = `Qty ${item.quantity}`;
+            const conditionEl = document.createElement('span'); conditionEl.textContent = item.condition || '—';
+            const deleteBtn = document.createElement('button'); deleteBtn.type = 'button'; deleteBtn.className = 'equipment-record-delete'; deleteBtn.textContent = 'DELETE';
+            deleteBtn.addEventListener('click', async (event) => {
+                event.preventDefault();
+                if (!window.confirm(`Remove "${item.name}" from equipment inventory?`)) return;
+                const { error } = await echelonAdminClient.from('equipment_inventory').delete().eq('id', item.id);
+                if (!error) refreshEquipment();
+            });
+            summary.append(nameEl, categoryEl, priceEl, qtyEl, conditionEl, deleteBtn);
+
+            const body = document.createElement('div');
+            body.className = 'equipment-record-body';
+            if (item.notes) {
+                const generalNote = document.createElement('p');
+                generalNote.textContent = item.notes;
+                body.append(generalNote);
+            }
+
+            const noteList = document.createElement('ul');
+            noteList.className = 'equipment-note-list';
+            const itemNotes = (notes || []).filter((note) => note.equipment_id === item.id);
+            if (itemNotes.length) {
+                itemNotes.forEach((note) => {
+                    const li = document.createElement('li');
+                    const text = document.createElement('span'); text.textContent = note.note;
+                    const time = document.createElement('time'); time.textContent = new Date(note.created_at).toLocaleString();
+                    li.append(text, time);
+                    noteList.append(li);
+                });
+            } else {
+                const empty = document.createElement('li');
+                empty.textContent = 'No notes yet.';
+                noteList.append(empty);
+            }
+            body.append(noteList);
+
+            const noteForm = document.createElement('form');
+            noteForm.className = 'equipment-note-form';
+            const noteInput = document.createElement('input');
+            noteInput.type = 'text'; noteInput.placeholder = 'Add a note (repair, reorder, condition update...)';
+            noteInput.setAttribute('aria-label', 'Add a note');
+            noteInput.required = true;
+            const noteSubmit = document.createElement('button');
+            noteSubmit.type = 'submit'; noteSubmit.className = 'btn-secondary'; noteSubmit.textContent = 'ADD NOTE';
+            noteForm.append(noteInput, noteSubmit);
+            noteForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const noteText = noteInput.value.trim();
+                if (!noteText) return;
+                const { data: userData } = await echelonAdminClient.auth.getUser();
+                const { error } = await echelonAdminClient.from('equipment_notes').insert({ equipment_id: item.id, note: noteText, author_id: userData?.user?.id || null });
+                if (!error) refreshEquipment();
+            });
+            body.append(noteForm);
+
+            record.append(summary, body);
+            list.append(record);
+        });
+    }
+
+    await refreshEquipment();
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        feedback.textContent = '';
+        const { error } = await echelonAdminClient.from('equipment_inventory').insert({
+            name: form.elements.name.value.trim(),
+            category: form.elements.category.value.trim() || null,
+            price: form.elements.price.value ? Number(form.elements.price.value) : null,
+            quantity: form.elements.quantity.value ? Number(form.elements.quantity.value) : 1,
+            condition: form.elements.condition.value.trim() || null,
+            purchase_date: form.elements.purchase_date.value || null,
+            notes: form.elements.notes.value.trim() || null
+        });
+        if (error) { feedback.textContent = 'We could not save that item. Please try again.'; return; }
+        form.reset();
+        feedback.textContent = 'Equipment added.';
+        refreshEquipment();
+    });
+}
+
+async function initializeWorkoutLibraryManager() {
+    const exerciseForm = document.getElementById('exercise-form');
+    if (!exerciseForm) return;
+
+    // ---- EXERCISES ----
+    const exerciseList = document.getElementById('exercise-list');
+    const exerciseFeedback = document.getElementById('exercise-feedback');
+    const exerciseCancelBtn = document.getElementById('exercise-form-cancel');
+    let exercises = [];
+
+    function loadExerciseIntoForm(item) {
+        exerciseForm.elements.id.value = item.id;
+        exerciseForm.elements.name.value = item.name || '';
+        exerciseForm.elements.target_area.value = item.target_area || '';
+        exerciseForm.elements.description.value = item.description || '';
+        exerciseForm.elements.form_cues.value = item.form_cues || '';
+        exerciseForm.elements.coaching_cues.value = item.coaching_cues || '';
+        exerciseForm.elements.modification_up.value = item.modification_up || '';
+        exerciseForm.elements.modification_down.value = item.modification_down || '';
+        exerciseForm.elements.modification_pregnancy.value = item.modification_pregnancy || '';
+        exerciseForm.elements.video_url.value = item.video_url || '';
+        exerciseForm.elements.equipment_needed.value = item.equipment_needed || '';
+        exerciseForm.elements.status.value = item.status || 'draft';
+        exerciseCancelBtn.hidden = false;
+        exerciseForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    async function refreshExercises() {
+        const { data, error } = await echelonAdminClient.from('exercise_library').select('*').order('created_at', { ascending: false });
+        if (error) { exerciseList.textContent = 'Run the coaching content database update to activate this section.'; return []; }
+        renderAdminRecords(exerciseList, data || [], 'No exercises yet.', (item) => {
+            const record = createAdminRecord([
+                { text: item.name, strong: true },
+                { text: item.target_area || '—' },
+                { text: item.status === 'published' ? 'Published' : 'Draft' }
+            ]);
+            record.style.cursor = 'pointer';
+            record.addEventListener('click', () => loadExerciseIntoForm(item));
+            return record;
+        });
+        return data || [];
+    }
+
+    exerciseCancelBtn.addEventListener('click', () => {
+        exerciseForm.reset();
+        exerciseForm.elements.id.value = '';
+        exerciseCancelBtn.hidden = true;
+    });
+
+    exerciseForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        exerciseFeedback.textContent = '';
+        const id = exerciseForm.elements.id.value;
+        const payload = {
+            name: exerciseForm.elements.name.value.trim(),
+            target_area: exerciseForm.elements.target_area.value.trim() || null,
+            description: exerciseForm.elements.description.value.trim() || null,
+            form_cues: exerciseForm.elements.form_cues.value.trim() || null,
+            coaching_cues: exerciseForm.elements.coaching_cues.value.trim() || null,
+            modification_up: exerciseForm.elements.modification_up.value.trim() || null,
+            modification_down: exerciseForm.elements.modification_down.value.trim() || null,
+            modification_pregnancy: exerciseForm.elements.modification_pregnancy.value.trim() || null,
+            video_url: exerciseForm.elements.video_url.value.trim() || null,
+            equipment_needed: exerciseForm.elements.equipment_needed.value.trim() || null,
+            status: exerciseForm.elements.status.value
+        };
+        const { error } = id
+            ? await echelonAdminClient.from('exercise_library').update(payload).eq('id', id)
+            : await echelonAdminClient.from('exercise_library').insert(payload);
+        if (error) { exerciseFeedback.textContent = 'We could not save that exercise. Please try again.'; return; }
+        exerciseForm.reset();
+        exerciseForm.elements.id.value = '';
+        exerciseCancelBtn.hidden = true;
+        exerciseFeedback.textContent = 'Saved.';
+        exercises = await refreshExercises();
+        populateExerciseSelect();
+    });
+
+    // ---- WORKOUTS ----
+    const workoutForm = document.getElementById('workout-form');
+    const workoutList = document.getElementById('workout-list');
+    const workoutFeedback = document.getElementById('workout-feedback');
+    const workoutCancelBtn = document.getElementById('workout-form-cancel');
+    const workoutExerciseEditor = document.getElementById('workout-exercise-editor');
+    const workoutExerciseEditorTitle = document.getElementById('workout-exercise-editor-title');
+    const workoutExerciseForm = document.getElementById('workout-exercise-form');
+    const workoutExerciseList = document.getElementById('workout-exercise-list');
+    let activeWorkoutId = null;
+    let workouts = [];
+
+    function populateExerciseSelect() {
+        const select = workoutExerciseForm.elements.exercise_id;
+        select.replaceChildren();
+        exercises.filter((e) => e.status === 'published').forEach((e) => {
+            const opt = document.createElement('option');
+            opt.value = e.id; opt.textContent = e.name;
+            select.append(opt);
+        });
+    }
+
+    function loadWorkoutIntoForm(item) {
+        workoutForm.elements.id.value = item.id;
+        workoutForm.elements.title.value = item.title || '';
+        workoutForm.elements.category.value = item.category || '';
+        workoutForm.elements.description.value = item.description || '';
+        workoutForm.elements.status.value = item.status || 'draft';
+        workoutCancelBtn.hidden = false;
+    }
+
+    async function refreshWorkoutExercises() {
+        if (!activeWorkoutId) return;
+        const { data, error } = await echelonAdminClient
+            .from('workout_exercises')
+            .select('id, sort_order, sets, reps, rest_seconds, notes, exercise_library(name)')
+            .eq('workout_id', activeWorkoutId)
+            .order('sort_order', { ascending: true });
+        if (error) { workoutExerciseList.textContent = 'Could not load exercises for this workout.'; return; }
+        renderAdminRecords(workoutExerciseList, data || [], 'No exercises added to this workout yet.', (row) => {
+            const record = createAdminRecord([
+                { text: row.exercise_library?.name || 'Unknown exercise', strong: true },
+                { text: `${row.sets ?? '—'} sets x ${row.reps || '—'}${row.rest_seconds ? ` · ${row.rest_seconds}s rest` : ''}` },
+                { text: row.notes || '' }
+            ]);
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button'; removeBtn.className = 'equipment-record-delete'; removeBtn.textContent = 'REMOVE';
+            removeBtn.addEventListener('click', async () => {
+                const { error: delError } = await echelonAdminClient.from('workout_exercises').delete().eq('id', row.id);
+                if (!delError) refreshWorkoutExercises();
+            });
+            record.append(removeBtn);
+            return record;
+        });
+    }
+
+    async function openWorkoutExerciseEditor(workout) {
+        activeWorkoutId = workout.id;
+        loadWorkoutIntoForm(workout);
+        workoutExerciseEditor.hidden = false;
+        workoutExerciseEditorTitle.textContent = `EXERCISES IN "${(workout.title || '').toUpperCase()}"`;
+        await refreshWorkoutExercises();
+    }
+
+    async function refreshWorkouts() {
+        const { data, error } = await echelonAdminClient.from('workouts').select('*').order('created_at', { ascending: false });
+        if (error) { workoutList.textContent = 'Run the coaching content database update to activate this section.'; return []; }
+        renderAdminRecords(workoutList, data || [], 'No workouts yet.', (item) => {
+            const record = createAdminRecord([
+                { text: item.title, strong: true },
+                { text: item.category || '—' },
+                { text: item.status === 'published' ? 'Published' : 'Draft' }
+            ]);
+            record.style.cursor = 'pointer';
+            record.addEventListener('click', () => openWorkoutExerciseEditor(item));
+            return record;
+        });
+        return data || [];
+    }
+
+    workoutExerciseForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (!activeWorkoutId) return;
+        const { data: existing } = await echelonAdminClient.from('workout_exercises').select('sort_order').eq('workout_id', activeWorkoutId).order('sort_order', { ascending: false }).limit(1);
+        const nextSort = existing && existing.length ? existing[0].sort_order + 1 : 0;
+        const { error } = await echelonAdminClient.from('workout_exercises').insert({
+            workout_id: activeWorkoutId,
+            exercise_id: workoutExerciseForm.elements.exercise_id.value,
+            sort_order: nextSort,
+            sets: workoutExerciseForm.elements.sets.value ? Number(workoutExerciseForm.elements.sets.value) : null,
+            reps: workoutExerciseForm.elements.reps.value.trim() || null,
+            rest_seconds: workoutExerciseForm.elements.rest_seconds.value ? Number(workoutExerciseForm.elements.rest_seconds.value) : null,
+            notes: workoutExerciseForm.elements.notes.value.trim() || null
+        });
+        if (!error) { workoutExerciseForm.reset(); refreshWorkoutExercises(); }
+    });
+
+    workoutCancelBtn.addEventListener('click', () => {
+        workoutForm.reset();
+        workoutForm.elements.id.value = '';
+        workoutCancelBtn.hidden = true;
+        workoutExerciseEditor.hidden = true;
+        activeWorkoutId = null;
+    });
+
+    workoutForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        workoutFeedback.textContent = '';
+        const id = workoutForm.elements.id.value;
+        const payload = {
+            title: workoutForm.elements.title.value.trim(),
+            category: workoutForm.elements.category.value.trim() || null,
+            description: workoutForm.elements.description.value.trim() || null,
+            status: workoutForm.elements.status.value
+        };
+        const { error } = id
+            ? await echelonAdminClient.from('workouts').update(payload).eq('id', id)
+            : await echelonAdminClient.from('workouts').insert(payload);
+        if (error) { workoutFeedback.textContent = 'We could not save that workout. Please try again.'; return; }
+        workoutForm.reset();
+        workoutForm.elements.id.value = '';
+        workoutCancelBtn.hidden = true;
+        workoutFeedback.textContent = 'Saved.';
+        workouts = await refreshWorkouts();
+        populateWorkoutSelect();
+    });
+
+    // ---- PROGRAM TEMPLATES ----
+    const programForm = document.getElementById('program-template-form');
+    const programList = document.getElementById('program-template-list');
+    const programFeedback = document.getElementById('program-template-feedback');
+    const programCancelBtn = document.getElementById('program-template-form-cancel');
+    const programCalendarEditor = document.getElementById('program-calendar-editor');
+    const programCalendarEditorTitle = document.getElementById('program-calendar-editor-title');
+    const programCalendarForm = document.getElementById('program-calendar-form');
+    const programCalendarList = document.getElementById('program-calendar-list');
+    let activeProgramId = null;
+
+    function populateWorkoutSelect() {
+        const select = programCalendarForm.elements.workout_id;
+        select.replaceChildren();
+        workouts.filter((w) => w.status === 'published').forEach((w) => {
+            const opt = document.createElement('option');
+            opt.value = w.id; opt.textContent = w.title;
+            select.append(opt);
+        });
+    }
+
+    function loadProgramIntoForm(item) {
+        programForm.elements.id.value = item.id;
+        programForm.elements.title.value = item.title || '';
+        programForm.elements.goal.value = item.goal || '';
+        programForm.elements.description.value = item.description || '';
+        programForm.elements.duration_weeks.value = item.duration_weeks || 12;
+        programForm.elements.status.value = item.status || 'draft';
+        programCancelBtn.hidden = false;
+    }
+
+    async function refreshProgramCalendar() {
+        if (!activeProgramId) return;
+        const { data, error } = await echelonAdminClient
+            .from('program_template_workouts')
+            .select('id, week_number, day_number, notes, workouts(title)')
+            .eq('program_template_id', activeProgramId)
+            .order('week_number', { ascending: true })
+            .order('day_number', { ascending: true });
+        if (error) { programCalendarList.textContent = "Could not load this program's calendar."; return; }
+        renderAdminRecords(programCalendarList, data || [], 'No workouts assigned yet.', (row) => {
+            const record = createAdminRecord([
+                { text: `Week ${row.week_number}, Day ${row.day_number}`, strong: true },
+                { text: row.workouts?.title || 'Unknown workout' },
+                { text: row.notes || '' }
+            ]);
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button'; removeBtn.className = 'equipment-record-delete'; removeBtn.textContent = 'REMOVE';
+            removeBtn.addEventListener('click', async () => {
+                const { error: delError } = await echelonAdminClient.from('program_template_workouts').delete().eq('id', row.id);
+                if (!delError) refreshProgramCalendar();
+            });
+            record.append(removeBtn);
+            return record;
+        });
+    }
+
+    async function openProgramCalendarEditor(program) {
+        activeProgramId = program.id;
+        loadProgramIntoForm(program);
+        programCalendarEditor.hidden = false;
+        programCalendarEditorTitle.textContent = `ASSIGN WORKOUTS · "${(program.title || '').toUpperCase()}"`;
+        await refreshProgramCalendar();
+    }
+
+    async function refreshPrograms() {
+        const { data, error } = await echelonAdminClient.from('program_templates').select('*').order('created_at', { ascending: false });
+        if (error) { programList.textContent = 'Run the coaching content database update to activate this section.'; return; }
+        renderAdminRecords(programList, data || [], 'No program templates yet.', (item) => {
+            const record = createAdminRecord([
+                { text: item.title, strong: true },
+                { text: item.goal || '—' },
+                { text: `${item.duration_weeks} wks · ${item.status === 'published' ? 'Published' : 'Draft'}` }
+            ]);
+            record.style.cursor = 'pointer';
+            record.addEventListener('click', () => openProgramCalendarEditor(item));
+            return record;
+        });
+    }
+
+    programCalendarForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (!activeProgramId) return;
+        const { error } = await echelonAdminClient.from('program_template_workouts').upsert({
+            program_template_id: activeProgramId,
+            week_number: Number(programCalendarForm.elements.week_number.value),
+            day_number: Number(programCalendarForm.elements.day_number.value),
+            workout_id: programCalendarForm.elements.workout_id.value,
+            notes: programCalendarForm.elements.notes.value.trim() || null
+        }, { onConflict: 'program_template_id,week_number,day_number' });
+        if (!error) { programCalendarForm.reset(); refreshProgramCalendar(); }
+    });
+
+    programCancelBtn.addEventListener('click', () => {
+        programForm.reset();
+        programForm.elements.id.value = '';
+        programCancelBtn.hidden = true;
+        programCalendarEditor.hidden = true;
+        activeProgramId = null;
+    });
+
+    programForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        programFeedback.textContent = '';
+        const id = programForm.elements.id.value;
+        const payload = {
+            title: programForm.elements.title.value.trim(),
+            goal: programForm.elements.goal.value.trim() || null,
+            description: programForm.elements.description.value.trim() || null,
+            duration_weeks: Number(programForm.elements.duration_weeks.value) || 12,
+            status: programForm.elements.status.value
+        };
+        const { error } = id
+            ? await echelonAdminClient.from('program_templates').update(payload).eq('id', id)
+            : await echelonAdminClient.from('program_templates').insert(payload);
+        if (error) { programFeedback.textContent = 'We could not save that program. Please try again.'; return; }
+        programForm.reset();
+        programForm.elements.id.value = '';
+        programCancelBtn.hidden = true;
+        programFeedback.textContent = 'Saved.';
+        await refreshPrograms();
+    });
+
+    // ---- initial load (order matters: exercises before workouts before programs) ----
+    exercises = await refreshExercises();
+    workouts = await refreshWorkouts();
+    await refreshPrograms();
+    populateExerciseSelect();
+    populateWorkoutSelect();
+}
+
 function cmsDateForInput(value) {
     const date = value ? new Date(value) : new Date();
     date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
@@ -963,6 +1403,8 @@ document.addEventListener('DOMContentLoaded', () => {
         initializeSiteMediaManager();
         initializeCommunicationsLibrary();
         initializeSectionControl();
+        initializeEquipmentManager();
+        initializeWorkoutLibraryManager();
         initializeAdminTabs();
     });
 });
