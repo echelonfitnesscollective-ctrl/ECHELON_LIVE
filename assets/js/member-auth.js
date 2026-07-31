@@ -2,11 +2,11 @@ const EFC_SUPABASE_URL = 'https://plkdyvtriajpzcfgtwzp.supabase.co';
 const EFC_SUPABASE_KEY = 'sb_publishable_CwFNrWSrhLKURZIk_-yt1A_ZVpFHEwf';
 const EFC_MEMBER_STEP_UP_KEY = 'efc_member_step_up_user';
 const EFC_MEMBER_LAST_ACTIVITY_KEY = 'efc_member_last_activity';
-// 30 minutes of no clicks/keys/scrolling on a member page signs the session
+// 15 minutes of no clicks/keys/scrolling on a member page signs the session
 // out and sends the member back to the login form. This is separate from the
 // browser's own saved-password/Face-ID autofill, which still works normally
 // on the next sign-in, it just is not treated as "still signed in."
-const EFC_MEMBER_IDLE_TIMEOUT_MS = 30 * 60 * 1000;
+const EFC_MEMBER_IDLE_TIMEOUT_MS = 15 * 60 * 1000;
 const EFC_MEMBER_IDLE_CHECK_INTERVAL_MS = 60 * 1000;
 const EFC_MEMBER_PAGES = new Set([
     'member-portal.html', 'member-coaching.html', 'member-nutrition.html',

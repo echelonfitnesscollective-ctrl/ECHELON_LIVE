@@ -1,6 +1,13 @@
 const EFC_ADMIN_SUPABASE_URL = 'https://plkdyvtriajpzcfgtwzp.supabase.co';
 const EFC_ADMIN_SUPABASE_KEY = 'sb_publishable_CwFNrWSrhLKURZIk_-yt1A_ZVpFHEwf';
 const EFC_ADMIN_STEP_UP_KEY = 'efc_admin_step_up_user';
+const EFC_ADMIN_LAST_ACTIVITY_KEY = 'efc_admin_last_activity';
+// 15 minutes of no clicks/keys/scrolling in the Admin Console signs the
+// session out and sends the admin back to the login form. This does not
+// affect the browser or phone's own saved-password/Face-ID autofill, which
+// still works normally on the next sign-in.
+const EFC_ADMIN_IDLE_TIMEOUT_MS = 15 * 60 * 1000;
+const EFC_ADMIN_IDLE_CHECK_INTERVAL_MS = 60 * 1000;
 
 const echelonAdminClient = window.supabase.createClient(
     EFC_ADMIN_SUPABASE_URL,
@@ -17,11 +24,50 @@ function hasAdminStepUp(user) {
 }
 
 function markAdminStepUp(user) {
-    if (user) window.sessionStorage.setItem(EFC_ADMIN_STEP_UP_KEY, user.id);
+    if (!user) return;
+    window.sessionStorage.setItem(EFC_ADMIN_STEP_UP_KEY, user.id);
+    recordAdminActivity();
 }
 
 function clearAdminStepUp() {
     window.sessionStorage.removeItem(EFC_ADMIN_STEP_UP_KEY);
+    window.sessionStorage.removeItem(EFC_ADMIN_LAST_ACTIVITY_KEY);
+}
+
+function recordAdminActivity() {
+    window.sessionStorage.setItem(EFC_ADMIN_LAST_ACTIVITY_KEY, String(Date.now()));
+}
+
+function isAdminSessionIdle() {
+    const last = Number(window.sessionStorage.getItem(EFC_ADMIN_LAST_ACTIVITY_KEY));
+    return !last || (Date.now() - last) > EFC_ADMIN_IDLE_TIMEOUT_MS;
+}
+
+async function signOutIdleAdmin() {
+    clearAdminStepUp();
+    await echelonAdminClient.auth.signOut();
+    window.location.replace('admin-login.html?reason=timeout');
+}
+
+let efcAdminIdleWatchStarted = false;
+function startAdminIdleWatch() {
+    if (efcAdminIdleWatchStarted) return;
+    efcAdminIdleWatchStarted = true;
+
+    let throttled = false;
+    const onActivity = () => {
+        if (throttled) return;
+        throttled = true;
+        window.setTimeout(() => { throttled = false; }, 30 * 1000);
+        recordAdminActivity();
+    };
+    ['click', 'keydown', 'scroll', 'touchstart', 'mousemove'].forEach((evt) =>
+        window.addEventListener(evt, onActivity, { passive: true })
+    );
+
+    window.setInterval(() => {
+        if (isAdminSessionIdle()) signOutIdleAdmin();
+    }, EFC_ADMIN_IDLE_CHECK_INTERVAL_MS);
 }
 
 async function isEchelonAdmin() {
@@ -34,11 +80,20 @@ async function isEchelonAdmin() {
 async function requireAdminSession() {
     const user = await getAdminUser();
     const isAdmin = user && await isEchelonAdmin();
-    if (!user || !isAdmin || !hasAdminStepUp(user)) {
+    const timedOut = Boolean(user) && hasAdminStepUp(user) && isAdminSessionIdle();
+
+    if (!user || !isAdmin || !hasAdminStepUp(user) || timedOut) {
+        if (timedOut) {
+            await signOutIdleAdmin();
+            return null;
+        }
         clearAdminStepUp();
         window.location.replace(`admin-login.html?reason=${isAdmin ? 'admin-sign-in-required' : 'not-authorized'}`);
         return null;
     }
+
+    recordAdminActivity();
+    startAdminIdleWatch();
     return user;
 }
 
@@ -56,6 +111,8 @@ async function initializeAdminLogin() {
         showAdminLoginFeedback('This account is not authorized for the Echelon Admin Console.');
     } else if (reason === 'admin-sign-in-required') {
         showAdminLoginFeedback('Enter your admin password to access the Echelon Admin Console.');
+    } else if (reason === 'timeout') {
+        showAdminLoginFeedback('You were signed out after a period of inactivity. Please sign in again.');
     }
 
     const currentUser = await getAdminUser();
