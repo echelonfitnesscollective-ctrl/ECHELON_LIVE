@@ -15,11 +15,66 @@ document.addEventListener('DOMContentLoaded', async () => {
         try { const response = await fetch('https://formspree.io/f/mykrpvaz', { method: 'POST', body: notification, headers: { Accept: 'application/json' } }); return response.ok; } catch { return false; }
     }
 
+    async function loadTodaysWork() {
+        const list = document.getElementById('todays-work-list');
+        if (!list) return;
+        const { data, error } = await echelonMemberClient
+            .from('member_daily_workouts')
+            .select('id, assigned_date, status, coach_note, workouts(title, category, description, workout_exercises(sort_order, sets, reps, rest_seconds, notes, exercise_library(name, target_area, form_cues, coaching_cues, modification_up, modification_down, modification_pregnancy, video_url)))')
+            .eq('user_id', member.id)
+            .gte('assigned_date', today)
+            .order('assigned_date', { ascending: true })
+            .order('sort_order', { foreignTable: 'workouts.workout_exercises', ascending: true })
+            .limit(3);
+        list.replaceChildren();
+        if (error || !(data || []).length) { list.textContent = "Your coach hasn't assigned today's work yet."; return; }
+        data.forEach(assignment => {
+            const day = document.createElement('article'); day.className = 'todays-work-day';
+            const heading = document.createElement('h3');
+            heading.textContent = `${assignment.assigned_date} · ${assignment.workouts?.title || 'Workout'}`;
+            day.append(heading);
+            if (assignment.workouts?.description) { const desc = document.createElement('p'); desc.className = 'todays-work-day-desc'; desc.textContent = assignment.workouts.description; day.append(desc); }
+            if (assignment.coach_note) { const note = document.createElement('p'); note.className = 'todays-work-coach-note'; note.textContent = `Coach note: ${assignment.coach_note}`; day.append(note); }
+            (assignment.workouts?.workout_exercises || []).forEach(row => {
+                const exercise = row.exercise_library;
+                if (!exercise) return;
+                const card = document.createElement('article'); card.className = 'todays-work-exercise';
+                const name = document.createElement('h4'); name.textContent = exercise.name; card.append(name);
+                const prescription = document.createElement('p'); prescription.className = 'todays-work-prescription';
+                prescription.textContent = `${row.sets ?? '—'} sets x ${row.reps || '—'}${row.rest_seconds ? ` · ${row.rest_seconds}s rest` : ''}`;
+                card.append(prescription);
+                if (exercise.target_area) { const target = document.createElement('p'); target.className = 'todays-work-target'; target.textContent = `Targets: ${exercise.target_area}`; card.append(target); }
+                if (exercise.form_cues) { const cues = document.createElement('p'); cues.textContent = exercise.form_cues; card.append(cues); }
+                if (exercise.coaching_cues) { const cues = document.createElement('p'); cues.textContent = exercise.coaching_cues; card.append(cues); }
+                if (row.notes) { const notes = document.createElement('p'); notes.className = 'todays-work-coach-note'; notes.textContent = row.notes; card.append(notes); }
+                if (exercise.modification_up || exercise.modification_down || exercise.modification_pregnancy || exercise.video_url) {
+                    const details = document.createElement('details'); details.className = 'todays-work-mods';
+                    const summary = document.createElement('summary'); summary.textContent = 'View Modifications'; details.append(summary);
+                    if (exercise.modification_up) { const p = document.createElement('p'); p.innerHTML = `<strong>Up:</strong> `; p.append(exercise.modification_up); details.append(p); }
+                    if (exercise.modification_down) { const p = document.createElement('p'); p.innerHTML = `<strong>Down:</strong> `; p.append(exercise.modification_down); details.append(p); }
+                    if (exercise.modification_pregnancy) { const p = document.createElement('p'); p.innerHTML = `<strong>Pregnancy-safe:</strong> `; p.append(exercise.modification_pregnancy); details.append(p); }
+                    if (exercise.video_url) { const p = document.createElement('p'); const a = document.createElement('a'); a.href = exercise.video_url; a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'Watch demo video'; p.append(a); details.append(p); }
+                    card.append(details);
+                }
+                day.append(card);
+            });
+            if (assignment.status === 'completed') {
+                const done = document.createElement('p'); done.className = 'todays-work-status-done'; done.textContent = 'Marked complete'; day.append(done);
+            } else if (assignment.assigned_date === today) {
+                const completeButton = document.createElement('button'); completeButton.type = 'button'; completeButton.className = 'btn-secondary'; completeButton.textContent = 'MARK COMPLETE';
+                completeButton.addEventListener('click', async () => { const { error: updateError } = await echelonMemberClient.from('member_daily_workouts').update({ status: 'completed' }).eq('id', assignment.id); if (!updateError) loadTodaysWork(); });
+                day.append(completeButton);
+            }
+            list.append(day);
+        });
+    }
+
     async function loadHub() {
         const [plans, photos, messages] = await Promise.all([
             echelonMemberClient.from('member_workout_plans').select('title, coach_note, plan_text, week_of, status, created_at').eq('user_id', member.id).eq('status', 'Active').order('created_at', { ascending: false }).limit(3),
             echelonMemberClient.from('member_progress_photos').select('storage_path, caption, taken_on, created_at').eq('user_id', member.id).order('taken_on', { ascending: false }).limit(12),
-            echelonMemberClient.from('coach_messages').select('sender_id, message, created_at').or(`sender_id.eq.${member.id},recipient_id.eq.${member.id}`).order('created_at', { ascending: true }).limit(50)
+            echelonMemberClient.from('coach_messages').select('sender_id, message, created_at').or(`sender_id.eq.${member.id},recipient_id.eq.${member.id}`).order('created_at', { ascending: true }).limit(50),
+            loadTodaysWork()
         ]);
         const planList = document.getElementById('member-workout-plans'); planList.replaceChildren();
         (plans.data || []).forEach(plan => { const item = document.createElement('article'); item.className = 'workout-plan-card'; const heading = document.createElement('h3'); heading.textContent = plan.title; const note = document.createElement('p'); note.textContent = plan.coach_note || ''; const text = document.createElement('pre'); text.textContent = plan.plan_text; item.append(heading, note, text); planList.append(item); });

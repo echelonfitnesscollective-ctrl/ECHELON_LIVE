@@ -3156,6 +3156,7 @@ MOBILE
     align-items:start;
 }
 .coaching-panel-plan{ grid-column:span 2; }
+.coaching-panel-today{ grid-column:span 2; }
 .coaching-compass-three{ grid-template-columns:repeat(3,1fr); }
 .coaching-compass-three article:nth-child(3){ border-right:0; }
 .coaching-fuel-bridge{ display:flex; align-items:center; justify-content:space-between; gap:22px; margin:-22px 0 24px; padding:18px 22px; border:1px solid rgba(215,181,91,.3); background:rgba(215,181,91,.055); color:#fff; text-decoration:none; }
@@ -3191,6 +3192,23 @@ MOBILE
 .workout-plan-card h3{ margin:0 0 8px; color:var(--primary); font-size:1.2rem; }
 .workout-plan-card p{ color:#ccc; font-size:.8rem; line-height:1.5; }
 .workout-plan-card pre{ white-space:pre-wrap; font:400 .82rem/1.65 'Montserrat',sans-serif; color:#fff; }
+
+.todays-work-list{ margin-top:22px; }
+.todays-work-day{ margin-bottom:26px; }
+.todays-work-day:last-child{ margin-bottom:0; }
+.todays-work-day > h3{ margin:0 0 6px; color:var(--primary); font-size:1.15rem; }
+.todays-work-day-desc{ margin:0 0 14px; color:#aaa; font-size:.78rem; line-height:1.5; }
+.todays-work-exercise{ padding:16px 18px; margin-bottom:10px; border:1px solid rgba(255,255,255,.13); background:rgba(255,255,255,.03); }
+.todays-work-exercise h4{ margin:0 0 6px; color:#fff; font-size:1rem; }
+.todays-work-exercise p{ margin:4px 0; color:#ccc; font-size:.78rem; line-height:1.5; }
+.todays-work-prescription{ color:var(--primary)!important; font-weight:700; letter-spacing:.03em; }
+.todays-work-target{ color:#e5d3a0!important; }
+.todays-work-coach-note{ font-style:italic; }
+.todays-work-mods{ margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,.1); }
+.todays-work-mods summary{ color:var(--primary); font-size:.68rem; font-weight:700; letter-spacing:.1em; cursor:pointer; }
+.todays-work-mods p{ margin:8px 0 0; }
+.todays-work-mods a{ color:var(--primary); }
+.todays-work-status-done{ color:#8fd18f; font-size:.75rem; font-weight:700; letter-spacing:.05em; }
 .photo-timeline{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
 .photo-timeline figure{ margin:0; }
 .photo-timeline img{ width:100%; aspect-ratio:1; object-fit:cover; border:1px solid rgba(255,255,255,.18); transition:transform .3s ease,border-color .3s ease; }
@@ -3402,6 +3420,7 @@ MOBILE
 
     .coaching-hub-grid{ grid-template-columns:1fr; }
     .coaching-panel-plan{ grid-column:auto; }
+    .coaching-panel-today{ grid-column:auto; }
     .coaching-compass{ grid-template-columns:repeat(2,1fr); }
     .coaching-compass article:nth-child(2){ border-right:0; }
     .coaching-compass article:nth-child(-n+2){ border-bottom:1px solid rgba(255,255,255,.12); }

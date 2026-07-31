@@ -1282,18 +1282,38 @@ async function appendMemberCoachingControls(detail, row, memberName) {
     section.append(heading, summary);
     detail.append(section);
     const admin = await getAdminUser();
-    const [plansResult, messagesResult] = await Promise.all([
-        echelonAdminClient.from('member_workout_plans').select('title, week_of, status').eq('user_id', row.user_id).order('created_at', { ascending: false }).limit(4),
+    const [assignmentsResult, workoutsResult, messagesResult] = await Promise.all([
+        echelonAdminClient.from('member_daily_workouts').select('id, assigned_date, status, coach_note, workouts(title)').eq('user_id', row.user_id).order('assigned_date', { ascending: false }).limit(4),
+        echelonAdminClient.from('workouts').select('id, title').eq('status', 'published').order('title', { ascending: true }),
         echelonAdminClient.from('coach_messages').select('sender_id, message, created_at').or(`sender_id.eq.${row.user_id},recipient_id.eq.${row.user_id}`).order('created_at', { ascending: false }).limit(6)
     ]);
-    if (plansResult.error || messagesResult.error || !admin) { summary.textContent = 'Coaching Hub will be ready after its database update is run.'; return; }
-    summary.textContent = `${plansResult.data.length} plan(s) · ${messagesResult.data.length} recent message(s)`;
-    const planForm = document.createElement('form'); planForm.className = 'echelon-form';
-    const planTitle = document.createElement('input'); planTitle.placeholder = 'Workout plan title'; planTitle.required = true;
-    const planText = document.createElement('textarea'); planText.rows = 5; planText.placeholder = 'Write the program here: days, exercises, sets, reps, and instructions.'; planText.required = true;
-    const planButton = document.createElement('button'); planButton.type = 'submit'; planButton.className = 'btn-secondary'; planButton.textContent = 'PUBLISH TRAINING PLAN';
-    planForm.append(planTitle, planText, planButton);
-    planForm.addEventListener('submit', async event => { event.preventDefault(); const { error } = await echelonAdminClient.from('member_workout_plans').insert({ user_id: row.user_id, title: planTitle.value.trim(), plan_text: planText.value.trim(), status: 'Active' }); if (!error) renderIntakeDetail(row); });
+    if (assignmentsResult.error || workoutsResult.error || messagesResult.error || !admin) { summary.textContent = 'Coaching Hub will be ready after its database update is run.'; return; }
+    summary.textContent = `${assignmentsResult.data.length} recent assignment(s) · ${messagesResult.data.length} recent message(s)`;
+
+    const assignForm = document.createElement('form'); assignForm.className = 'echelon-form';
+    const workoutSelect = document.createElement('select'); workoutSelect.required = true; workoutSelect.setAttribute('aria-label', "Today's Work workout");
+    if (!workoutsResult.data.length) {
+        const opt = document.createElement('option'); opt.textContent = 'Publish a workout in the Workout Library first'; opt.value = ''; workoutSelect.append(opt); workoutSelect.disabled = true;
+    } else {
+        workoutsResult.data.forEach(w => { const opt = document.createElement('option'); opt.value = w.id; opt.textContent = w.title; workoutSelect.append(opt); });
+    }
+    const dateInput = document.createElement('input'); dateInput.type = 'date'; dateInput.required = true; dateInput.setAttribute('aria-label', 'Assigned date'); dateInput.valueAsDate = new Date();
+    const noteInput = document.createElement('textarea'); noteInput.rows = 2; noteInput.placeholder = "Coach note for this workout (optional)"; noteInput.setAttribute('aria-label', 'Coach note');
+    const assignButton = document.createElement('button'); assignButton.type = 'submit'; assignButton.className = 'btn-secondary'; assignButton.textContent = "ASSIGN TODAY'S WORK";
+    assignForm.append(workoutSelect, dateInput, noteInput, assignButton);
+    assignForm.addEventListener('submit', async event => {
+        event.preventDefault();
+        const { error } = await echelonAdminClient.from('member_daily_workouts').insert({ user_id: row.user_id, workout_id: workoutSelect.value, assigned_date: dateInput.value, coach_note: noteInput.value.trim() || null });
+        if (!error) renderIntakeDetail(row);
+    });
+
+    const history = document.createElement('div'); history.className = 'coaching-history';
+    assignmentsResult.data.forEach(item => {
+        const line = document.createElement('p'); line.className = 'admin-detail-date';
+        line.textContent = `${item.assigned_date} · ${item.workouts?.title || 'Unknown workout'} · ${item.status === 'completed' ? 'Completed' : 'Assigned'}`;
+        history.append(line);
+    });
+
     const messages = document.createElement('div'); messages.className = 'coaching-history';
     messagesResult.data.forEach(item => { const line = document.createElement('p'); line.className = 'admin-detail-date'; line.textContent = `${item.sender_id === row.user_id ? memberName : 'You'}: ${item.message}`; messages.append(line); });
     const messageForm = document.createElement('form'); messageForm.className = 'echelon-form';
@@ -1301,7 +1321,7 @@ async function appendMemberCoachingControls(detail, row, memberName) {
     const messageButton = document.createElement('button'); messageButton.type = 'submit'; messageButton.className = 'btn-secondary'; messageButton.textContent = 'SEND MEMBER MESSAGE';
     messageForm.append(messageInput, messageButton);
     messageForm.addEventListener('submit', async event => { event.preventDefault(); const { error } = await echelonAdminClient.from('coach_messages').insert({ sender_id: admin.id, recipient_id: row.user_id, message: messageInput.value.trim() }); if (!error) renderIntakeDetail(row); });
-    section.append(planForm, messages, messageForm);
+    section.append(assignForm, history, messages, messageForm);
 }
 
 async function initializeAdminDashboard() {
