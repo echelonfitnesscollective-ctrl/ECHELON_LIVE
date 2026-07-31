@@ -546,6 +546,12 @@ async function initializeEquipmentManager() {
     });
 }
 
+function workoutSettingLabel(setting) {
+    if (setting === 'mobile') return 'Mobile';
+    if (setting === 'both') return 'Gym or Mobile';
+    return 'Gym';
+}
+
 async function initializeWorkoutLibraryManager() {
     const exerciseForm = document.getElementById('exercise-form');
     if (!exerciseForm) return;
@@ -651,6 +657,7 @@ async function initializeWorkoutLibraryManager() {
         workoutForm.elements.title.value = item.title || '';
         workoutForm.elements.category.value = item.category || '';
         workoutForm.elements.description.value = item.description || '';
+        workoutForm.elements.setting.value = item.setting || 'gym';
         workoutForm.elements.status.value = item.status || 'draft';
         workoutCancelBtn.hidden = false;
     }
@@ -694,7 +701,7 @@ async function initializeWorkoutLibraryManager() {
         renderAdminRecords(workoutList, data || [], 'No workouts yet.', (item) => {
             const record = createAdminRecord([
                 { text: item.title, strong: true },
-                { text: item.category || '—' },
+                { text: `${item.category || '—'} · ${workoutSettingLabel(item.setting)}` },
                 { text: item.status === 'published' ? 'Published' : 'Draft' }
             ]);
             record.style.cursor = 'pointer';
@@ -737,6 +744,7 @@ async function initializeWorkoutLibraryManager() {
             title: workoutForm.elements.title.value.trim(),
             category: workoutForm.elements.category.value.trim() || null,
             description: workoutForm.elements.description.value.trim() || null,
+            setting: workoutForm.elements.setting.value,
             status: workoutForm.elements.status.value
         };
         const { error } = id
@@ -1282,24 +1290,64 @@ async function appendMemberCoachingControls(detail, row, memberName) {
     section.append(heading, summary);
     detail.append(section);
     const admin = await getAdminUser();
-    const [assignmentsResult, workoutsResult, messagesResult] = await Promise.all([
-        echelonAdminClient.from('member_daily_workouts').select('id, assigned_date, status, coach_note, workouts(title)').eq('user_id', row.user_id).order('assigned_date', { ascending: false }).limit(4),
-        echelonAdminClient.from('workouts').select('id, title').eq('status', 'published').order('title', { ascending: true }),
+    const [assignmentsResult, workoutsResult, programsResult, enrollmentResult, messagesResult] = await Promise.all([
+        echelonAdminClient.from('member_daily_workouts').select('id, assigned_date, status, coach_note, workouts(title)').eq('user_id', row.user_id).order('assigned_date', { ascending: false }).limit(6),
+        echelonAdminClient.from('workouts').select('id, title, setting').eq('status', 'published').order('title', { ascending: true }),
+        echelonAdminClient.from('program_templates').select('id, title, duration_weeks').eq('status', 'published').order('title', { ascending: true }),
+        echelonAdminClient.from('member_program_enrollments').select('start_date, status, program_templates(title)').eq('user_id', row.user_id).eq('status', 'active').order('start_date', { ascending: false }).limit(1),
         echelonAdminClient.from('coach_messages').select('sender_id, message, created_at').or(`sender_id.eq.${row.user_id},recipient_id.eq.${row.user_id}`).order('created_at', { ascending: false }).limit(6)
     ]);
     if (assignmentsResult.error || workoutsResult.error || messagesResult.error || !admin) { summary.textContent = 'Coaching Hub will be ready after its database update is run.'; return; }
     summary.textContent = `${assignmentsResult.data.length} recent assignment(s) · ${messagesResult.data.length} recent message(s)`;
+
+    if (!enrollmentResult.error && enrollmentResult.data.length) {
+        const active = enrollmentResult.data[0];
+        const enrolledNote = document.createElement('p'); enrolledNote.className = 'admin-detail-date';
+        enrolledNote.textContent = `Currently enrolled: ${active.program_templates?.title || 'Unknown program'} · started ${active.start_date}`;
+        section.append(enrolledNote);
+    }
+
+    const enrollForm = document.createElement('form'); enrollForm.className = 'echelon-form';
+    const programSelect = document.createElement('select'); programSelect.required = true; programSelect.setAttribute('aria-label', 'Program to enroll in');
+    if (!programsResult.error && programsResult.data.length) {
+        programsResult.data.forEach(p => { const opt = document.createElement('option'); opt.value = p.id; opt.textContent = `${p.title} (${p.duration_weeks} wks)`; programSelect.append(opt); });
+    } else {
+        const opt = document.createElement('option'); opt.textContent = 'Publish a program template first'; opt.value = ''; programSelect.append(opt); programSelect.disabled = true;
+    }
+    const enrollDateInput = document.createElement('input'); enrollDateInput.type = 'date'; enrollDateInput.required = true; enrollDateInput.setAttribute('aria-label', 'Program start date'); enrollDateInput.valueAsDate = new Date();
+    const enrollButton = document.createElement('button'); enrollButton.type = 'submit'; enrollButton.className = 'btn-secondary'; enrollButton.textContent = 'ENROLL IN PROGRAM';
+    const enrollFeedback = document.createElement('p'); enrollFeedback.className = 'form-error'; enrollFeedback.setAttribute('role', 'status');
+    enrollForm.append(programSelect, enrollDateInput, enrollButton, enrollFeedback);
+    enrollForm.addEventListener('submit', async event => {
+        event.preventDefault();
+        enrollFeedback.textContent = '';
+        const { data: templateWorkouts, error: fetchError } = await echelonAdminClient
+            .from('program_template_workouts')
+            .select('week_number, day_number, workout_id, notes')
+            .eq('program_template_id', programSelect.value);
+        if (fetchError || !templateWorkouts.length) { enrollFeedback.textContent = 'This program has no workouts assigned yet.'; return; }
+        const start = new Date(`${enrollDateInput.value}T00:00:00`);
+        const rows = templateWorkouts.map(tw => {
+            const date = new Date(start);
+            date.setDate(date.getDate() + (tw.week_number - 1) * 7 + (tw.day_number - 1));
+            return { user_id: row.user_id, workout_id: tw.workout_id, assigned_date: date.toISOString().slice(0, 10), coach_note: tw.notes || null };
+        });
+        const { error: insertError } = await echelonAdminClient.from('member_daily_workouts').insert(rows);
+        if (insertError) { enrollFeedback.textContent = 'We could not enroll this member. Please try again.'; return; }
+        await echelonAdminClient.from('member_program_enrollments').insert({ user_id: row.user_id, program_template_id: programSelect.value, start_date: enrollDateInput.value });
+        renderIntakeDetail(row);
+    });
 
     const assignForm = document.createElement('form'); assignForm.className = 'echelon-form';
     const workoutSelect = document.createElement('select'); workoutSelect.required = true; workoutSelect.setAttribute('aria-label', "Today's Work workout");
     if (!workoutsResult.data.length) {
         const opt = document.createElement('option'); opt.textContent = 'Publish a workout in the Workout Library first'; opt.value = ''; workoutSelect.append(opt); workoutSelect.disabled = true;
     } else {
-        workoutsResult.data.forEach(w => { const opt = document.createElement('option'); opt.value = w.id; opt.textContent = w.title; workoutSelect.append(opt); });
+        workoutsResult.data.forEach(w => { const opt = document.createElement('option'); opt.value = w.id; opt.textContent = `${w.title} (${workoutSettingLabel(w.setting)})`; workoutSelect.append(opt); });
     }
     const dateInput = document.createElement('input'); dateInput.type = 'date'; dateInput.required = true; dateInput.setAttribute('aria-label', 'Assigned date'); dateInput.valueAsDate = new Date();
     const noteInput = document.createElement('textarea'); noteInput.rows = 2; noteInput.placeholder = "Coach note for this workout (optional)"; noteInput.setAttribute('aria-label', 'Coach note');
-    const assignButton = document.createElement('button'); assignButton.type = 'submit'; assignButton.className = 'btn-secondary'; assignButton.textContent = "ASSIGN TODAY'S WORK";
+    const assignButton = document.createElement('button'); assignButton.type = 'submit'; assignButton.className = 'btn-secondary'; assignButton.textContent = "ASSIGN A SINGLE DAY";
     assignForm.append(workoutSelect, dateInput, noteInput, assignButton);
     assignForm.addEventListener('submit', async event => {
         event.preventDefault();
@@ -1310,7 +1358,10 @@ async function appendMemberCoachingControls(detail, row, memberName) {
     const history = document.createElement('div'); history.className = 'coaching-history';
     assignmentsResult.data.forEach(item => {
         const line = document.createElement('p'); line.className = 'admin-detail-date';
-        line.textContent = `${item.assigned_date} · ${item.workouts?.title || 'Unknown workout'} · ${item.status === 'completed' ? 'Completed' : 'Assigned'}`;
+        line.textContent = `${item.assigned_date} · ${item.workouts?.title || 'Unknown workout'} · ${item.status === 'completed' ? 'Completed' : 'Assigned'} `;
+        const removeBtn = document.createElement('button'); removeBtn.type = 'button'; removeBtn.className = 'equipment-record-delete'; removeBtn.textContent = 'REMOVE';
+        removeBtn.addEventListener('click', async () => { const { error: delError } = await echelonAdminClient.from('member_daily_workouts').delete().eq('id', item.id); if (!delError) renderIntakeDetail(row); });
+        line.append(removeBtn);
         history.append(line);
     });
 
@@ -1321,7 +1372,7 @@ async function appendMemberCoachingControls(detail, row, memberName) {
     const messageButton = document.createElement('button'); messageButton.type = 'submit'; messageButton.className = 'btn-secondary'; messageButton.textContent = 'SEND MEMBER MESSAGE';
     messageForm.append(messageInput, messageButton);
     messageForm.addEventListener('submit', async event => { event.preventDefault(); const { error } = await echelonAdminClient.from('coach_messages').insert({ sender_id: admin.id, recipient_id: row.user_id, message: messageInput.value.trim() }); if (!error) renderIntakeDetail(row); });
-    section.append(assignForm, history, messages, messageForm);
+    section.append(enrollForm, assignForm, history, messages, messageForm);
 }
 
 async function initializeAdminDashboard() {

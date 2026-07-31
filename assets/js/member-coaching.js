@@ -20,19 +20,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!list) return;
         const { data, error } = await echelonMemberClient
             .from('member_daily_workouts')
-            .select('id, assigned_date, status, coach_note, workouts(title, category, description, workout_exercises(sort_order, sets, reps, rest_seconds, notes, exercise_library(name, target_area, form_cues, coaching_cues, modification_up, modification_down, modification_pregnancy, video_url)))')
+            .select('id, assigned_date, status, coach_note, workouts(title, category, description, setting, workout_exercises(sort_order, sets, reps, rest_seconds, notes, exercise_library(name, target_area, form_cues, coaching_cues, modification_up, modification_down, modification_pregnancy, video_url)))')
             .eq('user_id', member.id)
             .gte('assigned_date', today)
             .order('assigned_date', { ascending: true })
             .order('sort_order', { foreignTable: 'workouts.workout_exercises', ascending: true })
-            .limit(3);
+            .limit(14);
         list.replaceChildren();
-        if (error || !(data || []).length) { list.textContent = "Your coach hasn't assigned today's work yet."; return; }
+        if (error || !(data || []).length) { list.textContent = "Your coach hasn't assigned any upcoming work yet."; return; }
         data.forEach(assignment => {
-            const day = document.createElement('article'); day.className = 'todays-work-day';
+            const day = document.createElement('article'); day.className = 'todays-work-day' + (assignment.assigned_date === today ? ' is-today' : '');
             const heading = document.createElement('h3');
-            heading.textContent = `${assignment.assigned_date} · ${assignment.workouts?.title || 'Workout'}`;
+            const isToday = assignment.assigned_date === today;
+            heading.textContent = `${isToday ? 'TODAY' : assignment.assigned_date} · ${assignment.workouts?.title || 'Workout'}`;
             day.append(heading);
+            const setting = assignment.workouts?.setting;
+            if (setting && setting !== 'gym') {
+                const settingTag = document.createElement('span'); settingTag.className = 'todays-work-setting';
+                settingTag.textContent = setting === 'mobile' ? 'MOBILE SESSION' : 'GYM OR MOBILE';
+                day.append(settingTag);
+            }
             if (assignment.workouts?.description) { const desc = document.createElement('p'); desc.className = 'todays-work-day-desc'; desc.textContent = assignment.workouts.description; day.append(desc); }
             if (assignment.coach_note) { const note = document.createElement('p'); note.className = 'todays-work-coach-note'; note.textContent = `Coach note: ${assignment.coach_note}`; day.append(note); }
             (assignment.workouts?.workout_exercises || []).forEach(row => {

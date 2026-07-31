@@ -3194,10 +3194,12 @@ MOBILE
 .workout-plan-card pre{ white-space:pre-wrap; font:400 .82rem/1.65 'Montserrat',sans-serif; color:#fff; }
 
 .todays-work-list{ margin-top:22px; }
-.todays-work-day{ margin-bottom:26px; }
+.todays-work-day{ padding:18px; margin-bottom:16px; border:1px solid rgba(255,255,255,.08); }
 .todays-work-day:last-child{ margin-bottom:0; }
+.todays-work-day.is-today{ border-color:rgba(215,181,91,.5); background:rgba(215,181,91,.04); }
 .todays-work-day > h3{ margin:0 0 6px; color:var(--primary); font-size:1.15rem; }
 .todays-work-day-desc{ margin:0 0 14px; color:#aaa; font-size:.78rem; line-height:1.5; }
+.todays-work-setting{ display:inline-block; margin:0 0 14px; padding:4px 9px; border:1px solid rgba(255,255,255,.15); color:#ccc; font-size:.62rem; font-weight:700; letter-spacing:.08em; }
 .todays-work-exercise{ padding:16px 18px; margin-bottom:10px; border:1px solid rgba(255,255,255,.13); background:rgba(255,255,255,.03); }
 .todays-work-exercise h4{ margin:0 0 6px; color:#fff; font-size:1rem; }
 .todays-work-exercise p{ margin:4px 0; color:#ccc; font-size:.78rem; line-height:1.5; }
