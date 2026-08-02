@@ -5378,7 +5378,9 @@ DESIGN CREDIT
 
     padding:9px 20px;
 
-    border:1px solid rgba(212,175,55,.4);
+    background:rgba(8,10,12,.6);
+
+    border:1px solid rgba(0,255,252,.35);
 
     border-radius:999px;
 
@@ -5408,7 +5410,7 @@ DESIGN CREDIT
 
 .footer-credit strong{
 
-    color:#D4AF37;
+    color:#00FFFC;
 
     font-weight:700;
 
@@ -5418,17 +5420,19 @@ DESIGN CREDIT
 
 .footer-credit:hover{
 
-    border-color:#D4AF37;
+    border-color:#00FFFC;
 
-    background:rgba(212,175,55,.09);
+    background:rgba(0,255,252,.08);
 
     color:#f0f0f0;
+
+    box-shadow:0 0 16px rgba(0,255,252,.25);
 
 }
 
 .footer-credit:hover strong{
 
-    color:#FFD700;
+    color:#5CFFFC;
 
 }
 
