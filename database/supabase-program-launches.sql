@@ -1,6 +1,6 @@
 -- Echelon Program Launches: lets an admin flip "Faith & Favor Mobility" and
 -- "VL Body Lab" from IN DEVELOPMENT to LIVE by picking a date and clicking a
--- button in the Admin Console — no code changes, no redeploy. The public site
+-- button in the Admin Console. No code changes, no redeploy. The public site
 -- checks launch_at on page load and swaps the card automatically once that
 -- date passes.
 --

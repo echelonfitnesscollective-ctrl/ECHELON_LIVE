@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const card = document.createElement('article'); card.className = 'todays-work-exercise';
                 const name = document.createElement('h4'); name.textContent = exercise.name; card.append(name);
                 const prescription = document.createElement('p'); prescription.className = 'todays-work-prescription';
-                prescription.textContent = `${row.sets ?? '—'} sets x ${row.reps || '—'}${row.rest_seconds ? ` · ${row.rest_seconds}s rest` : ''}`;
+                prescription.textContent = `${row.sets ?? 'N/A'} sets x ${row.reps || 'N/A'}${row.rest_seconds ? ` · ${row.rest_seconds}s rest` : ''}`;
                 card.append(prescription);
                 if (exercise.target_area) { const target = document.createElement('p'); target.className = 'todays-work-target'; target.textContent = `Targets: ${exercise.target_area}`; card.append(target); }
                 if (exercise.form_cues) { const cues = document.createElement('p'); cues.textContent = exercise.form_cues; card.append(cues); }

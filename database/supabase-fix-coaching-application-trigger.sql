@@ -24,7 +24,7 @@ begin
   select exists(select 1 from public.onboarding_projects p join public.prospective_clients c on c.id=p.prospective_client_id where c.email=lower(new.email) and p.created_at > now()-interval '15 minutes') into recent_project;
   if not recent_project then
     select user_id into admin_id from public.admin_users limit 1;
-    insert into public.onboarding_projects(application_id,prospective_client_id,title,owner_id) values(new.id,new.prospective_client_id,'NEW MEMBER LAUNCH — '||new.full_name,admin_id) returning id into project_id;
+    insert into public.onboarding_projects(application_id,prospective_client_id,title,owner_id) values(new.id,new.prospective_client_id,'NEW MEMBER LAUNCH: '||new.full_name,admin_id) returning id into project_id;
     select id into launch_template_id from public.onboarding_task_templates where name='NEW MEMBER LAUNCH';
     insert into public.onboarding_tasks(project_id,template_item_id,title,description,stage,required,assigned_to)
       select project_id,i.id,i.title,i.description,i.stage,i.required,admin_id from public.onboarding_task_template_items i where i.template_id=launch_template_id order by i.sort_order;

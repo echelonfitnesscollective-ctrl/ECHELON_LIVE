@@ -1,12 +1,12 @@
-# Designed with INTENT — Universal Footer Watermark
+# Designed with INTENT: Universal Footer Watermark
 
-A self-contained credit badge for the bottom of any site Intent designs or builds. Drop the block below at the end of the page's footer (right before `</footer>`, or right before `</body>` if there's no footer wrapper). It needs no other files, no build step, and no site-specific CSS — everything is inline so it looks identical no matter what site it's dropped into.
+A self-contained credit badge for the bottom of any site Intent designs or builds. Drop the block below at the end of the page's footer (right before `</footer>`, or right before `</body>` if there's no footer wrapper). It needs no other files, no build step, and no site-specific CSS, everything is inline so it looks identical no matter what site it's dropped into.
 
 ## Why it's built this way
 
-- **Brand color is fixed, not themed.** Intent's mark is `#00FFFC`, an electric cyan pulled directly from the logo file. That color stays the same on every site regardless of that site's own palette — a pink site (VL Body Lab), a gold site (Echelon), a blue site, whatever. The point of a signature watermark is that it reads as *Intent's* mark first, consistent everywhere, not blended into the host brand.
-- **Self-contained.** The logo is embedded as a base64 SVG data URI directly in the `src` attribute — no separate image file to upload, no broken link risk, no path guessing across different site structures.
-- **Own background chip.** The badge carries its own dark, semi-transparent backdrop and border so it stays legible whether it sits on a black footer, a white one, or a photo background — you don't need to adjust it per site.
+- **Brand color is fixed, not themed.** Intent's mark is `#00FFFC`, an electric cyan pulled directly from the logo file. That color stays the same on every site regardless of that site's own palette, a pink site (VL Body Lab), a gold site (Echelon), a blue site, whatever. The point of a signature watermark is that it reads as *Intent's* mark first, consistent everywhere, not blended into the host brand.
+- **Self-contained.** The logo is embedded as a base64 SVG data URI directly in the `src` attribute, no separate image file to upload, no broken link risk, no path guessing across different site structures.
+- **Own background chip.** The badge carries its own dark, semi-transparent backdrop and border so it stays legible whether it sits on a black footer, a white one, or a photo background, you don't need to adjust it per site.
 - **Scoped class names** (`intent-credit-*`) so it won't collide with existing site styles.
 
 ## The snippet
@@ -53,11 +53,11 @@ A self-contained credit badge for the bottom of any site Intent designs or build
 ## Placement notes
 
 - **Position:** last element in the footer, after any legal/copyright line. It should read as the final word on the page, not compete with the site's own branding above it.
-- **Spacing:** the wrap already includes its own top/bottom padding. If the host footer has a hard edge or a divider line above it, you can add `border-top: 1px solid` in whatever muted tone matches that site — that divider is the *host site's* styling choice and is fine to theme; the badge itself inside it should not be re-colored.
-- **Dark or light pages:** the badge's own background chip (`rgba(8,10,12,.6)`) keeps it legible on both dark and light hosts without changes. If a page is very light and the chip reads too dark/heavy, that's the one thing worth revisiting per-site — everything else (the cyan, the border, the glow) stays fixed.
-- **Do not** swap `#00FFFC` for a host site's accent color (gold, pink, whatever) — that defeats the purpose of a consistent, recognizable signature across every Intent-built site.
+- **Spacing:** the wrap already includes its own top/bottom padding. If the host footer has a hard edge or a divider line above it, you can add `border-top: 1px solid` in whatever muted tone matches that site, that divider is the *host site's* styling choice and is fine to theme; the badge itself inside it should not be re-colored.
+- **Dark or light pages:** the badge's own background chip (`rgba(8,10,12,.6)`) keeps it legible on both dark and light hosts without changes. If a page is very light and the chip reads too dark/heavy, that's the one thing worth revisiting per-site, everything else (the cyan, the border, the glow) stays fixed.
+- **Do not** swap `#00FFFC` for a host site's accent color (gold, pink, whatever), that defeats the purpose of a consistent, recognizable signature across every Intent-built site.
 
 ## Reference
 
 - Live example: the footer at [echelonfitness.co](https://echelonfitness.co) (scroll to the very bottom).
-- Source of the color: `assets/images/intent-logo-i1.svg` in the Echelon Fitness Collective codebase — the dominant color extracted directly from the logo mark is `#00FFFC`.
+- Source of the color: `assets/images/intent-logo-i1.svg` in the Echelon Fitness Collective codebase, the dominant color extracted directly from the logo mark is `#00FFFC`.

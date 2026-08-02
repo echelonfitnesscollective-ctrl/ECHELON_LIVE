@@ -1,9 +1,9 @@
-# ECHELON 12-WEEK BASE MODEL — MUSCLE (HYPERTROPHY)
+# ECHELON 12-WEEK BASE MODEL: MUSCLE (HYPERTROPHY)
 
-**Goal:** Precision muscle growth at maintenance-to-slight-surplus calories — a refined hypertrophy approach for a client who already carries decent muscle and wants targeted growth without the fat-gain tradeoff of a full Bulking block. Higher exercise variety and intentional muscle-group targeting versus Bulking's simpler heavy-compound focus.
+**Goal:** Precision muscle growth at maintenance-to-slight-surplus calories, a refined hypertrophy approach for a client who already carries decent muscle and wants targeted growth without the fat-gain tradeoff of a full Bulking block. Higher exercise variety and intentional muscle-group targeting versus Bulking's simpler heavy-compound focus.
 **Audience:** Intermediate+ clients with solid technique on major lifts already, cleared through intake.
 **Format:** 5-day body-part-emphasis split (Push / Pull / Legs / Upper / Lower), moderate-to-high volume, shorter rest than Bulking to prioritize metabolic stress and time-under-tension.
-**Status:** Base model — personalize load and exercise selection per client.
+**Status:** Base model, personalize load and exercise selection per client.
 
 ---
 
@@ -25,16 +25,16 @@
 
 | Phase | Weeks | Rep Range | Rest | Intensity (RPE) | Focus |
 |---|---|---|---|---|---|
-| 1 — Volume Base | 1–4 | 10–15 | 60–75s | 6–7 | Establish mind-muscle connection, moderate volume |
-| 2 — Overreach | 5–8 | 8–12 | 60s | 7–8 | Add sets progressively, push closer to failure on isolation work |
-| 3 — Intensity Techniques | 9–11 | 8–12 | 45–60s | 8–9 | Drop sets, rest-pause, and slowed eccentrics introduced on final sets |
+| 1: Volume Base | 1–4 | 10–15 | 60–75s | 6–7 | Establish mind-muscle connection, moderate volume |
+| 2: Overreach | 5–8 | 8–12 | 60s | 7–8 | Add sets progressively, push closer to failure on isolation work |
+| 3: Intensity Techniques | 9–11 | 8–12 | 45–60s | 8–9 | Drop sets, rest-pause, and slowed eccentrics introduced on final sets |
 | Deload | 12 | 12–15 | 75–90s | 5–6 | Volume cut ~40%, reassess physique and lift quality |
 
-**Progression rule (double progression + intensity techniques):** add reps within the range first, then load. In Phase 3, the last set of each exercise can use one intensity technique (drop set, rest-pause, or a 4-second eccentric) to push past straight-set fatigue without adding more total sets — appropriate for a client who's already carrying volume well from Phases 1–2.
+**Progression rule (double progression + intensity techniques):** add reps within the range first, then load. In Phase 3, the last set of each exercise can use one intensity technique (drop set, rest-pause, or a 4-second eccentric) to push past straight-set fatigue without adding more total sets, appropriate for a client who's already carrying volume well from Phases 1–2.
 
 ---
 
-## 3. Day 1 — Push (Chest, Shoulders, Triceps)
+## 3. Day 1: Push (Chest, Shoulders, Triceps)
 
 | Exercise | Sets x Reps | Rest | Targets |
 |---|---|---|---|
@@ -46,13 +46,13 @@
 | Overhead Tricep Extension | 3 x 12–15 | 45s | Triceps |
 | Rope Tricep Pushdown | 2 x 15 | 30s | Triceps |
 
-**Coaching cues:** "Feel the muscle move the weight" — this program leans on mind-muscle connection more than Bulking's load-focused cueing.
+**Coaching cues:** "Feel the muscle move the weight", this program leans on mind-muscle connection more than Bulking's load-focused cueing.
 **Modification down:** Machine chest press and machine shoulder press if free-weight stabilization is fatiguing before the target muscle.
-**Modification (pregnancy):** Standing or seated supported press variations only after first trimester; avoid supine flat press — sub incline or standing cable press; keep RPE capped at 6–7.
+**Modification (pregnancy):** Standing or seated supported press variations only after first trimester; avoid supine flat press, sub incline or standing cable press; keep RPE capped at 6–7.
 
 ---
 
-## 4. Day 2 — Pull (Back, Biceps)
+## 4. Day 2: Pull (Back, Biceps)
 
 | Exercise | Sets x Reps | Rest | Targets |
 |---|---|---|---|
@@ -68,7 +68,7 @@
 
 ---
 
-## 5. Day 3 — Legs (Quad-Emphasis)
+## 5. Day 3: Legs (Quad-Emphasis)
 
 | Exercise | Sets x Reps | Rest | Targets |
 |---|---|---|---|
@@ -83,7 +83,7 @@
 
 ---
 
-## 6. Day 5 — Upper (Balanced Push/Pull)
+## 6. Day 5: Upper (Balanced Push/Pull)
 
 | Exercise | Sets x Reps | Rest | Targets |
 |---|---|---|---|
@@ -96,7 +96,7 @@
 
 ---
 
-## 7. Day 6 — Legs (Posterior-Emphasis)
+## 7. Day 6: Legs (Posterior-Emphasis)
 
 | Exercise | Sets x Reps | Rest | Targets |
 |---|---|---|---|
@@ -114,6 +114,6 @@
 ## 8. Coach Notes
 
 - **Weekly check-in:** weight trend (should be slow, near-flat to slight increase), circumference measurements on target muscle groups, progress photos, session RPE and pump quality self-rating.
-- **This program's edge over Bulking is precision** — coach clients to genuinely feel the target muscle working each set rather than just moving load, and to actually use the intensity techniques in Phase 3 rather than skipping them because they're uncomfortable.
+- **This program's edge over Bulking is precision:** coach clients to genuinely feel the target muscle working each set rather than just moving load, and to actually use the intensity techniques in Phase 3 rather than skipping them because they're uncomfortable.
 - **Personalization starting points:** swap exercise variety within a muscle group freely (this template is a starting menu, not a fixed prescription) based on what a client responds to and what equipment is available.
-- Pain during any exercise is coached as "stop, and see a clinician" — never worked through or diagnosed on the spot.
+- Pain during any exercise is coached as "stop, and see a clinician", never worked through or diagnosed on the spot.

@@ -6,7 +6,7 @@ table in a Google Sheet, and copies each progress photo file to a Google
 Drive folder, recording the Drive link back in the `member_progress_photos`
 tab.
 
-## One-time setup (you'll need to do this yourself — it requires your own
+## One-time setup (you'll need to do this yourself: it requires your own
 Google account and GitHub repo settings)
 
 ### 1. Create a Google Cloud service account
@@ -14,7 +14,7 @@ Google account and GitHub repo settings)
 2. Enable the **Google Sheets API** and **Google Drive API** for that project (APIs & Services → Library).
 3. Go to APIs & Services → Credentials → Create Credentials → Service Account.
 4. Give it any name (e.g. `echelon-backup`). No special roles needed.
-5. Open the new service account → Keys → Add Key → Create new key → JSON. This downloads a `.json` file — **keep it private, never commit it to the repo.**
+5. Open the new service account → Keys → Add Key → Create new key → JSON. This downloads a `.json` file, **keep it private, never commit it to the repo.**
 6. Note the service account's email address (looks like `echelon-backup@your-project.iam.gserviceaccount.com`).
 
 ### 2. Create the destination Sheet and Drive folder
@@ -23,7 +23,7 @@ Google account and GitHub repo settings)
 3. **Share both** the Sheet and the Drive folder with the service account's email (from step 1.6) as an **Editor**.
 
 ### 3. Add secrets to GitHub
-In the `ECHELON_LIVE` repo on GitHub: Settings → Secrets and variables → Actions → New repository secret. Add each of these (run `gh secret set NAME` yourself in a terminal, or use the GitHub web UI — the value is never shared with anyone else this way):
+In the `ECHELON_LIVE` repo on GitHub: Settings → Secrets and variables → Actions → New repository secret. Add each of these (run `gh secret set NAME` yourself in a terminal, or use the GitHub web UI, the value is never shared with anyone else this way):
 
 | Secret name | Value |
 | --- | --- |
@@ -38,6 +38,6 @@ Once secrets are set, go to the repo's Actions tab → "Scheduled Supabase backu
 
 ## What this does and does not cover
 - Covers: the tables listed in `TABLES` in `run-backup.js` (member profiles, waivers, progress photos, coaching applications, coach messages, workout plans, weekly check-ins, session check-ins, website leads, enrollment offers, Stripe payment events, account access, admin roster).
-- Does not cover: actual payment processing data beyond what's mirrored into `stripe_payment_events` — Stripe itself remains the source of truth for full payment/transaction records (see your Stripe Dashboard's own data export tools for that).
-- Each run fully replaces the previous snapshot in each tab (not versioned history) — the `_backup_log` tab is the only append-only record of run times.
+- Does not cover: actual payment processing data beyond what's mirrored into `stripe_payment_events`, Stripe itself remains the source of truth for full payment/transaction records (see your Stripe Dashboard's own data export tools for that).
+- Each run fully replaces the previous snapshot in each tab (not versioned history), the `_backup_log` tab is the only append-only record of run times.
 - Add more tables to `TABLES` in `run-backup.js` any time; no other changes needed.

@@ -27,7 +27,7 @@ Stripe logic and prices live in **[`lib/stripe-checkout.js`](../lib/stripe-check
 
 | Variable | Example |
 |-----------|---------|
-| `PUBLIC_SITE_BASE` | `https://your-domain.com` — **no trailing slash**, scheme + host only |
+| `PUBLIC_SITE_BASE` | `https://your-domain.com`, **no trailing slash**, scheme + host only |
 
 If omitted, redirects use **`x-forwarded-proto`** + **`x-forwarded-host`** from each request (works on `*.vercel.app` previews; `PUBLIC_SITE_BASE` is safest for production + custom domains).
 
@@ -42,7 +42,7 @@ If omitted, redirects use **`x-forwarded-proto`** + **`x-forwarded-host`** from 
 
 ## 3. Frontend checkout URL
 
-[`js/echelon-config.js`](../js/echelon-config.js) uses **`window.ECHELON_CHECKOUT_API = ''`** so production calls **`/api/create-checkout-session`** on the same hostname as the site—no duplicate API domain.
+[`js/echelon-config.js`](../js/echelon-config.js) uses **`window.ECHELON_CHECKOUT_API = ''`** so production calls **`/api/create-checkout-session`** on the same hostname as the site, no duplicate API domain.
 
 ## 4. Verify after deploy
 

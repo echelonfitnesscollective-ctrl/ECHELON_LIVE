@@ -1,4 +1,4 @@
-# Echelon Fitness Collective — Security Review
+# Echelon Fitness Collective: Security Review
 
 Reviewed: July 26, 2026
 

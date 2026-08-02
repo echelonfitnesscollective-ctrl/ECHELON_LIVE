@@ -1,4 +1,4 @@
-# Echelon — Stripe Checkout
+# Echelon: Stripe Checkout
 
 Pricing is **never** taken from unchecked client input: **`lib/catalog.js`** maps **SKUs** to amounts or optional **Stripe Price IDs** (`STRIPE_PRICE_TRAINING_TEE`). Session creation logic lives in **`lib/stripe-checkout.js`**.
 
@@ -6,12 +6,12 @@ Two ways to expose the API:
 
 | Target | Notes |
 |---------|-------|
-| **Vercel** (recommended prod) | Serverless **`api/*.js`** — see **[VERCEL.md](VERCEL.md)** |
+| **Vercel** (recommended prod) | Serverless **`api/*.js`**, see **[VERCEL.md](VERCEL.md)** |
 | **Express** (`server/`) | `npm run dev` from repo root or `server/` |
 
 ## Prerequisites
 
-1. **Serve storefront over HTTP(S)** (`file://` has no workable origin — use Live Server, `npx serve`, or Vercel).
+1. **Serve storefront over HTTP(S)** (`file://` has no workable origin, use Live Server, `npx serve`, or Vercel).
 2. A **Stripe** account ([dashboard](https://dashboard.stripe.com/test/apikeys)).
 
 ## Vercel (production)

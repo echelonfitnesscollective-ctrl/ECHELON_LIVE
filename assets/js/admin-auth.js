@@ -462,10 +462,10 @@ async function initializeEquipmentManager() {
 
             const summary = document.createElement('summary');
             const nameEl = document.createElement('strong'); nameEl.textContent = item.name;
-            const categoryEl = document.createElement('span'); categoryEl.textContent = item.category || '—';
-            const priceEl = document.createElement('span'); priceEl.textContent = item.price != null ? `$${Number(item.price).toFixed(2)}` : '—';
+            const categoryEl = document.createElement('span'); categoryEl.textContent = item.category || 'N/A';
+            const priceEl = document.createElement('span'); priceEl.textContent = item.price != null ? `$${Number(item.price).toFixed(2)}` : 'N/A';
             const qtyEl = document.createElement('span'); qtyEl.textContent = `Qty ${item.quantity}`;
-            const conditionEl = document.createElement('span'); conditionEl.textContent = item.condition || '—';
+            const conditionEl = document.createElement('span'); conditionEl.textContent = item.condition || 'N/A';
             const deleteBtn = document.createElement('button'); deleteBtn.type = 'button'; deleteBtn.className = 'equipment-record-delete'; deleteBtn.textContent = 'DELETE';
             deleteBtn.addEventListener('click', async (event) => {
                 event.preventDefault();
@@ -585,7 +585,7 @@ async function initializeWorkoutLibraryManager() {
         renderAdminRecords(exerciseList, data || [], 'No exercises yet.', (item) => {
             const record = createAdminRecord([
                 { text: item.name, strong: true },
-                { text: item.target_area || '—' },
+                { text: item.target_area || 'N/A' },
                 { text: item.status === 'published' ? 'Published' : 'Draft' }
             ]);
             record.style.cursor = 'pointer';
@@ -673,7 +673,7 @@ async function initializeWorkoutLibraryManager() {
         renderAdminRecords(workoutExerciseList, data || [], 'No exercises added to this workout yet.', (row) => {
             const record = createAdminRecord([
                 { text: row.exercise_library?.name || 'Unknown exercise', strong: true },
-                { text: `${row.sets ?? '—'} sets x ${row.reps || '—'}${row.rest_seconds ? ` · ${row.rest_seconds}s rest` : ''}` },
+                { text: `${row.sets ?? 'N/A'} sets x ${row.reps || 'N/A'}${row.rest_seconds ? ` · ${row.rest_seconds}s rest` : ''}` },
                 { text: row.notes || '' }
             ]);
             const removeBtn = document.createElement('button');
@@ -701,7 +701,7 @@ async function initializeWorkoutLibraryManager() {
         renderAdminRecords(workoutList, data || [], 'No workouts yet.', (item) => {
             const record = createAdminRecord([
                 { text: item.title, strong: true },
-                { text: `${item.category || '—'} · ${workoutSettingLabel(item.setting)}` },
+                { text: `${item.category || 'N/A'} · ${workoutSettingLabel(item.setting)}` },
                 { text: item.status === 'published' ? 'Published' : 'Draft' }
             ]);
             record.style.cursor = 'pointer';
@@ -830,7 +830,7 @@ async function initializeWorkoutLibraryManager() {
         renderAdminRecords(programList, data || [], 'No program templates yet.', (item) => {
             const record = createAdminRecord([
                 { text: item.title, strong: true },
-                { text: item.goal || '—' },
+                { text: item.goal || 'N/A' },
                 { text: `${item.duration_weeks} wks · ${item.status === 'published' ? 'Published' : 'Draft'}` }
             ]);
             record.style.cursor = 'pointer';

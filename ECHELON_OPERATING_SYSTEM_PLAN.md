@@ -1,4 +1,4 @@
-# Echelon Operating System — Build Plan
+# Echelon Operating System: Build Plan
 
 ## What already exists
 
@@ -10,7 +10,7 @@
 
 1. A connected applicant record, onboarding project, reusable launch-task template, notifications, and audit trail.
 2. Separate application, payment, account, onboarding, and membership statuses.
-3. Centralized programs and price configuration—no price is repeated across pages.
+3. Centralized programs and price configuration, no price is repeated across pages.
 4. A premium member welcome experience and a visible starting-path checklist.
 5. Server-only Stripe Checkout, webhook, invitation, and billing actions once secrets are configured.
 

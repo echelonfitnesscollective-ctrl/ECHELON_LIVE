@@ -1,7 +1,7 @@
 -- Section Control: lets an admin edit name/subtitle/description/detail-rows
 -- for every Training Hub card, reorder the cards, and flip Faith & Favor
 -- Mobility / VL Body Lab / a one-off Special Event slot from hidden or
--- "in development" to live by picking a date — all from the Admin Console,
+-- "in development" to live by picking a date, all from the Admin Console,
 -- no code changes, no redeploy.
 --
 -- Reference only: this table was created live via the Supabase Table Editor
@@ -51,11 +51,11 @@ values
      '[{"label":"Access","value":"$23 drop-in · $89/month for unlimited access to all scheduled Echelon Group Fitness sessions."},{"label":"Schedule","value":"Group sessions run on a fixed published schedule, so members always know when to train and the coaching standard stays high."},{"label":"Included","value":"Complimentary for active Echelon 12-Week Transformation and 1-on-1 Hybrid Coaching clients."},{"label":"Community","value":"One session each month is free and open to the public."}]'::jsonb,
      null, 'live', 10),
     ('private-group-training', 'PRIVATE GROUP TRAINING', 'Your People · Your Purpose',
-     'A customized Echelon experience for 3–15 friends, families, teams, or organizations—built around your group, goals, and energy.',
-     '[{"label":"Designed for your group","value":"Private workouts, team wellness sessions, celebrations, community groups, and organization programming tailored to your needs."},{"label":"Flexible format","value":"Start at $199 for up to five people, then add $25 for each additional participant—up to 15 total. One-time experiences and recurring monthly groups are offered in designated Echelon event windows."},{"label":"Built around real availability","value":"Share your group size, preferred date, location, and goal. Approved organizers receive a private booking link with only the designated Echelon event slots that are available—so every session is intentional, prepared, and on schedule."}]'::jsonb,
+     'A customized Echelon experience for 3–15 friends, families, teams, or organizations, built around your group, goals, and energy.',
+     '[{"label":"Designed for your group","value":"Private workouts, team wellness sessions, celebrations, community groups, and organization programming tailored to your needs."},{"label":"Flexible format","value":"Start at $199 for up to five people, then add $25 for each additional participant, up to 15 total. One-time experiences and recurring monthly groups are offered in designated Echelon event windows."},{"label":"Built around real availability","value":"Share your group size, preferred date, location, and goal. Approved organizers receive a private booking link with only the designated Echelon event slots that are available, so every session is intentional, prepared, and on schedule."}]'::jsonb,
      null, 'live', 20),
     ('12-week-transformation', '12-WEEK TRANSFORMATION', 'Collective Programming',
-     'A coached 12-week system for building strength, consistency, and measurable momentum—without guessing what to do next.',
+     'A coached 12-week system for building strength, consistency, and measurable momentum, without guessing what to do next.',
      '[{"label":"Focus","value":"Habit building, progressive overload, nutrition support, and weekly review."},{"label":"Format","value":"A structured 12-week coaching system through the Echelon Member Portal, with weekly review and a shared progression framework."},{"label":"Investment","value":"$399 paid in full, or $149/month."},{"label":"Access","value":"Application required · choose 12-Week Transformation when applying."}]'::jsonb,
      null, 'live', 30),
     ('1-on-1-coaching', '1-ON-1 COACHING', 'Coach: Luther',
