@@ -1156,6 +1156,7 @@ function renderIntakeDetail(row) {
 
     appendMemberProfileEditor(detail, row, email);
     appendMemberTracker(detail, row, memberName);
+    appendMemberTrainingProfile(detail, row);
     appendMemberCoachingControls(detail, row, memberName);
 
     [['PAR-Q READINESS', row.parq], ['HEALTH & CONTACT NOTES', row.health_history]].forEach(([title, values]) => {
@@ -1278,6 +1279,97 @@ async function appendMemberTracker(detail, row, memberName) {
         renderIntakeDetail(row);
     });
     tracker.append(goalForm, noteForm);
+}
+
+function trainingProfileSelect(label, options, value) {
+    const select = document.createElement('select');
+    select.setAttribute('aria-label', label);
+    const blank = document.createElement('option'); blank.value = ''; blank.textContent = label; select.append(blank);
+    options.forEach((opt) => {
+        const option = document.createElement('option');
+        option.value = opt; option.textContent = opt;
+        if (opt === value) option.selected = true;
+        select.append(option);
+    });
+    return select;
+}
+
+const TRAINING_PROFILE_DELIVERY_SETTINGS = ['Group Fitness', 'Private Group Training', '1-on-1 Coaching', '12-Week Transformation', 'VL Body Lab', 'Faith & Favor Mobility'];
+const TRAINING_PROFILE_GOALS = ['Cutting', 'Weight Loss', 'Bulking', 'Muscle (Hypertrophy)', 'Performance', 'Older-Adult Wellness'];
+const TRAINING_PROFILE_EXPERIENCE = ['New to training', 'Beginner (under 6 months)', 'Intermediate (6 months-2 years)', 'Advanced (2+ years)'];
+const TRAINING_PROFILE_EQUIPMENT = ['Full gym', 'Home gym - dumbbells/bands', 'Bodyweight only', 'Mobile - coach brings equipment'];
+const TRAINING_PROFILE_ACTIVITY = ['Sedentary', 'Lightly active', 'Moderately active', 'Very active'];
+const TRAINING_PROFILE_CLEARANCE = ['Cleared - no restrictions', 'Cleared with restrictions', 'Pending clearance', 'Not yet discussed'];
+
+async function appendMemberTrainingProfile(detail, row) {
+    const section = document.createElement('section');
+    const heading = document.createElement('h4');
+    heading.textContent = 'TRAINING PROFILE';
+    const summary = document.createElement('p');
+    summary.className = 'admin-detail-date';
+    summary.textContent = 'Loading intake…';
+    section.append(heading, summary);
+    detail.append(section);
+
+    const { data: profile, error } = await echelonAdminClient
+        .from('member_training_profiles')
+        .select('*')
+        .eq('user_id', row.user_id)
+        .maybeSingle();
+    if (error) { summary.textContent = 'Training Profile will be ready after its database update is run.'; return; }
+    summary.textContent = profile ? `Last updated ${new Date(profile.updated_at).toLocaleDateString()}` : 'No intake on file yet - the fields below personalize which base program and modifications this member gets.';
+
+    const form = document.createElement('form'); form.className = 'echelon-form';
+    const deliverySelect = trainingProfileSelect('Delivery setting', TRAINING_PROFILE_DELIVERY_SETTINGS, profile?.delivery_setting);
+    const primaryGoalSelect = trainingProfileSelect('Primary goal', TRAINING_PROFILE_GOALS, profile?.primary_goal);
+    const secondaryGoalSelect = trainingProfileSelect('Secondary goal', TRAINING_PROFILE_GOALS, profile?.secondary_goal);
+    const ageInput = document.createElement('input'); ageInput.type = 'number'; ageInput.min = '13'; ageInput.max = '100'; ageInput.placeholder = 'Age'; ageInput.setAttribute('aria-label', 'Age'); ageInput.value = profile?.age ?? '';
+    const experienceSelect = trainingProfileSelect('Training experience', TRAINING_PROFILE_EXPERIENCE, profile?.training_experience);
+    const daysInput = document.createElement('input'); daysInput.type = 'number'; daysInput.min = '1'; daysInput.max = '7'; daysInput.placeholder = 'Training days available per week'; daysInput.setAttribute('aria-label', 'Training days available per week'); daysInput.value = profile?.training_days_available ?? '';
+    const durationInput = document.createElement('input'); durationInput.type = 'number'; durationInput.min = '10'; durationInput.max = '180'; durationInput.placeholder = 'Session duration (minutes)'; durationInput.setAttribute('aria-label', 'Session duration in minutes'); durationInput.value = profile?.session_duration_minutes ?? '';
+    const equipmentSelect = trainingProfileSelect('Equipment access', TRAINING_PROFILE_EQUIPMENT, profile?.equipment_access);
+    const activitySelect = trainingProfileSelect('Current activity level', TRAINING_PROFILE_ACTIVITY, profile?.current_activity_level);
+    const injuriesInput = document.createElement('textarea'); injuriesInput.rows = 2; injuriesInput.placeholder = 'Injuries, pain, surgeries, pregnancy/postpartum status, or medical conditions'; injuriesInput.setAttribute('aria-label', 'Injuries, pain, surgeries, pregnancy or postpartum status, or medical conditions'); injuriesInput.value = profile?.injuries_conditions || '';
+    const clearanceSelect = trainingProfileSelect('Medical clearance', TRAINING_PROFILE_CLEARANCE, profile?.medical_clearance);
+    const preferencesInput = document.createElement('textarea'); preferencesInput.rows = 2; preferencesInput.placeholder = 'Exercise preferences (likes, dislikes, movements to avoid)'; preferencesInput.setAttribute('aria-label', 'Exercise preferences'); preferencesInput.value = profile?.exercise_preferences || '';
+    const sleepStressInput = document.createElement('textarea'); sleepStressInput.rows = 2; sleepStressInput.placeholder = 'Sleep and stress'; sleepStressInput.setAttribute('aria-label', 'Sleep and stress'); sleepStressInput.value = profile?.sleep_stress || '';
+    const barrierInput = document.createElement('textarea'); barrierInput.rows = 2; barrierInput.placeholder = 'Biggest consistency barrier'; barrierInput.setAttribute('aria-label', 'Biggest consistency barrier'); barrierInput.value = profile?.consistency_barrier || '';
+    const saveButton = document.createElement('button'); saveButton.type = 'submit'; saveButton.className = 'btn-secondary'; saveButton.textContent = profile ? 'UPDATE TRAINING PROFILE' : 'SAVE TRAINING PROFILE';
+    const feedback = document.createElement('p'); feedback.className = 'form-error'; feedback.setAttribute('role', 'status');
+
+    form.append(
+        deliverySelect, primaryGoalSelect, secondaryGoalSelect, ageInput, experienceSelect,
+        daysInput, durationInput, equipmentSelect, activitySelect, injuriesInput,
+        clearanceSelect, preferencesInput, sleepStressInput, barrierInput, saveButton, feedback
+    );
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        feedback.textContent = '';
+        const payload = {
+            user_id: row.user_id,
+            delivery_setting: deliverySelect.value || null,
+            primary_goal: primaryGoalSelect.value || null,
+            secondary_goal: secondaryGoalSelect.value || null,
+            age: ageInput.value ? Number(ageInput.value) : null,
+            training_experience: experienceSelect.value || null,
+            training_days_available: daysInput.value ? Number(daysInput.value) : null,
+            session_duration_minutes: durationInput.value ? Number(durationInput.value) : null,
+            equipment_access: equipmentSelect.value || null,
+            current_activity_level: activitySelect.value || null,
+            injuries_conditions: injuriesInput.value.trim() || null,
+            medical_clearance: clearanceSelect.value || null,
+            exercise_preferences: preferencesInput.value.trim() || null,
+            sleep_stress: sleepStressInput.value.trim() || null,
+            consistency_barrier: barrierInput.value.trim() || null
+        };
+        const { error: saveError } = await echelonAdminClient.from('member_training_profiles').upsert(payload, { onConflict: 'user_id' });
+        if (saveError) { feedback.textContent = 'We could not save this profile. Please try again.'; return; }
+        feedback.textContent = 'Saved.';
+        renderIntakeDetail(row);
+    });
+
+    section.append(form);
 }
 
 async function appendMemberCoachingControls(detail, row, memberName) {
