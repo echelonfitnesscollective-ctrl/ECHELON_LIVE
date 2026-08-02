@@ -5355,6 +5355,84 @@ LEGAL
 }
 
 /* ==========================================
+DESIGN CREDIT
+========================================== */
+
+.footer-credit-wrap{
+
+    padding:22px 20px 30px;
+
+    text-align:center;
+
+    border-top:1px solid rgba(212,175,55,.22);
+
+}
+
+.footer-credit{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    padding:9px 20px;
+
+    border:1px solid rgba(212,175,55,.4);
+
+    border-radius:999px;
+
+    text-decoration:none;
+
+    color:#ccc;
+
+    font-size:.72rem;
+
+    letter-spacing:.1em;
+
+    text-transform:uppercase;
+
+    transition:.3s;
+
+}
+
+.footer-credit img{
+
+    height:18px;
+
+    width:auto;
+
+    display:block;
+
+}
+
+.footer-credit strong{
+
+    color:#D4AF37;
+
+    font-weight:700;
+
+    letter-spacing:.13em;
+
+}
+
+.footer-credit:hover{
+
+    border-color:#D4AF37;
+
+    background:rgba(212,175,55,.09);
+
+    color:#f0f0f0;
+
+}
+
+.footer-credit:hover strong{
+
+    color:#FFD700;
+
+}
+
+/* ==========================================
 MOBILE
 ========================================== */
 
