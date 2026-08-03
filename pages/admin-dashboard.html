@@ -12,6 +12,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../assets/js/main.js" defer></script>
     <script src="../assets/js/admin-auth.js" defer></script>
+    <script src="../assets/js/admin-coaching-playbook.js" defer></script>
 </head>
 <body>
 <a href="#main-content" class="skip-link">Skip to content</a>
@@ -61,6 +62,7 @@
                 <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="library" data-step="08">LIBRARY</button>
                 <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="equipment" data-step="09">EQUIPMENT</button>
                 <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="workouts" data-step="10">WORKOUT LIBRARY</button>
+                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="playbook" data-step="11">COACHING PLAYBOOK</button>
             </nav>
 
             <details class="admin-intake-section admin-console-section admin-content-section admin-tab-panel" data-admin-panel="content">
@@ -503,6 +505,28 @@
                     </div>
                 </div>
             </details>
+        </div>
+
+        <div class="admin-tab-panel" data-admin-panel="playbook" hidden>
+            <div class="admin-section-heading">
+                <div><span class="checkin-tag">REFERENCE</span><h2>COACHING PLAYBOOK</h2></div>
+                <p>Every base program, blueprint, template, and per-goal education + delivery-format guide in one browsable reference. Read-only here: edit the source files in the codebase to change content.</p>
+            </div>
+            <div class="playbook-layout">
+                <nav class="playbook-nav" id="playbook-nav" aria-label="Coaching playbook contents">
+                    <input type="search" id="playbook-search" class="playbook-search" placeholder="Filter by title&hellip;" aria-label="Filter playbook by title">
+                    <div id="playbook-nav-groups"></div>
+                </nav>
+                <div class="playbook-reading-pane">
+                    <div class="playbook-topbar">
+                        <span class="playbook-chip" id="playbook-chip"></span>
+                        <span class="playbook-doc-title" id="playbook-title"></span>
+                    </div>
+                    <div id="playbook-body" class="playbook-body">
+                        <p class="playbook-empty">Select a document from the list to the left.</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 </body>

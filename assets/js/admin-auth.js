@@ -1568,6 +1568,7 @@ document.addEventListener('DOMContentLoaded', () => {
         initializeSectionControl();
         initializeEquipmentManager();
         initializeWorkoutLibraryManager();
+        initializeCoachingPlaybook();
         initializeAdminTabs();
     });
 });

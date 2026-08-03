@@ -2994,6 +2994,239 @@ MOBILE
     border:1px solid var(--primary);
 }
 
+/* ==========================================
+COACHING PLAYBOOK
+========================================== */
+
+.playbook-layout{
+    display:grid;
+    grid-template-columns:300px 1fr;
+    gap:0;
+    border:1px solid rgba(255,255,255,.13);
+    background:#0D0D0C;
+    min-height:640px;
+    max-height:80vh;
+}
+
+.playbook-nav{
+    border-right:1px solid rgba(255,255,255,.13);
+    padding:18px;
+    overflow-y:auto;
+}
+
+.playbook-search{
+    width:100%;
+    margin-bottom:16px;
+    padding:9px 12px;
+    background:#1A1917;
+    border:1px solid rgba(255,255,255,.15);
+    color:#eee;
+    font:400 .78rem 'Montserrat',sans-serif;
+}
+
+.playbook-group{
+    margin-bottom:18px;
+}
+
+.playbook-group-label{
+    margin:0 0 8px;
+    color:#777;
+    font:700 .62rem 'Montserrat',sans-serif;
+    letter-spacing:.11em;
+    text-transform:uppercase;
+}
+
+.playbook-list{
+    list-style:none;
+    margin:0;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+}
+
+.playbook-item{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    padding:8px 9px;
+    cursor:pointer;
+    border:1px solid transparent;
+}
+
+.playbook-item:hover{
+    background:rgba(255,255,255,.04);
+}
+
+.playbook-item.active{
+    background:rgba(215,181,91,.1);
+    border-color:rgba(215,181,91,.4);
+}
+
+.playbook-dot{
+    width:6px;
+    height:6px;
+    min-width:6px;
+    border-radius:50%;
+    background:#888;
+}
+
+.playbook-dot-program{ background:var(--primary); }
+.playbook-dot-blueprint{ background:#7fb3a3; }
+.playbook-dot-template{ background:#d69173; }
+.playbook-dot-education{ background:#93a8d6; }
+.playbook-dot-delivery{ background:#c99bd6; }
+
+.playbook-item-title{
+    color:#ccc;
+    font-size:.76rem;
+    line-height:1.35;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.playbook-item.active .playbook-item-title{ color:var(--primary); }
+
+.playbook-reading-pane{
+    display:flex;
+    flex-direction:column;
+    min-width:0;
+}
+
+.playbook-topbar{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:16px 26px;
+    border-bottom:1px solid rgba(255,255,255,.13);
+    position:sticky;
+    top:0;
+    background:#0D0D0C;
+}
+
+.playbook-chip{
+    font:700 .6rem 'Montserrat',sans-serif;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    padding:4px 9px;
+    border-radius:4px;
+    background:#333;
+    color:#fff;
+    white-space:nowrap;
+}
+
+.playbook-chip-program{ background:var(--primary); color:#3a2e0f; }
+.playbook-chip-blueprint{ background:#7fb3a3; color:#0f2d26; }
+.playbook-chip-template{ background:#d69173; color:#3a1c0f; }
+.playbook-chip-education{ background:#93a8d6; color:#131d38; }
+.playbook-chip-delivery{ background:#c99bd6; color:#2c123a; }
+
+.playbook-doc-title{
+    color:#fff;
+    font:700 .82rem 'Montserrat',sans-serif;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.playbook-body{
+    padding:28px 30px 40px;
+    overflow-y:auto;
+}
+
+.playbook-empty{
+    color:#777;
+    font-size:.82rem;
+}
+
+.playbook-body h2{
+    margin:28px 0 12px;
+    color:var(--primary);
+    font-family:var(--heading-font);
+    font-size:1.5rem;
+}
+
+.playbook-body h2:first-child{ margin-top:0; }
+
+.playbook-body h3{
+    margin:20px 0 8px;
+    color:#fff;
+    font:700 .82rem 'Montserrat',sans-serif;
+    letter-spacing:.02em;
+}
+
+.playbook-body p{
+    margin:0 0 14px;
+    color:#ccc;
+    font-size:.85rem;
+    line-height:1.7;
+    max-width:70ch;
+}
+
+.playbook-body strong{ color:#fff; }
+.playbook-body em{ color:#aaa; }
+
+.playbook-body hr{
+    border:none;
+    border-top:1px solid rgba(255,255,255,.12);
+    margin:24px 0;
+}
+
+.playbook-body ul,
+.playbook-body ol{
+    margin:0 0 14px;
+    padding-left:20px;
+    max-width:70ch;
+}
+
+.playbook-body li{
+    color:#ccc;
+    font-size:.85rem;
+    line-height:1.65;
+    margin-bottom:6px;
+}
+
+.playbook-body .table-scroll{
+    overflow-x:auto;
+    margin:0 0 18px;
+    border:1px solid rgba(255,255,255,.13);
+}
+
+.playbook-body table{
+    border-collapse:collapse;
+    width:100%;
+    font-size:.76rem;
+}
+
+.playbook-body thead th{
+    text-align:left;
+    padding:9px 12px;
+    background:#1A1917;
+    color:#d7b55b;
+    border-bottom:1px solid rgba(255,255,255,.13);
+    white-space:nowrap;
+}
+
+.playbook-body tbody td{
+    padding:8px 12px;
+    color:#ccc;
+    border-bottom:1px solid rgba(255,255,255,.08);
+    vertical-align:top;
+}
+
+@media(max-width:900px){
+    .playbook-layout{
+        grid-template-columns:1fr;
+        max-height:none;
+    }
+    .playbook-nav{
+        border-right:0;
+        border-bottom:1px solid rgba(255,255,255,.13);
+        max-height:300px;
+    }
+}
+
 .admin-resource-layout{
 
     display:grid;
