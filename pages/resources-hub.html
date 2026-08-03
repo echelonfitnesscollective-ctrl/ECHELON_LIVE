@@ -18,8 +18,8 @@
 <link rel="stylesheet" href="../assets/css/resources-flow.css">
 
 <script src="../assets/js/main.js" defer></script>
+<script src="../assets/js/resource-hub-downloads.js" defer></script>
 <script src="../assets/js/resource-hub.js" defer></script>
-<script src="../assets/js/resource-slider.js" defer></script>
 </head>
 
 <script>
@@ -134,327 +134,56 @@ function changeProductImage(imageId, newImage, dot){
 
 <div class="container">
 
-    <div class="portal-card resource-portal-card">
+    <div class="resource-portal-card">
 
-        <!-- ==========================
-             RESOURCE NAVIGATION
-        ========================== -->
-
-        <nav class="hub-tabs">
-
-            <button
-                class="tab-btn active"
-                data-target="learn">
-
-                LEARN
-
-            </button>
-
-            <button class="tab-btn" data-target="vault">MEMBER VAULT</button>
-
-            <button
-                class="tab-btn"
-                data-target="fuel">
-
-                FUEL
-
-            </button>
-
-        </nav>
-
-        <!-- ==========================
-             LEARN
-        ========================== -->
-
-        <section
-            id="learn"
-            class="tab-content active">
-
-            <div class="form-section-header">
-
-                <h2>
-                    EDUCATION & DEVELOPMENT
-                </h2>
-
+        <section class="resource-command" id="free-library">
+            <div class="resource-command-copy">
+                <span class="checkin-tag">YOUR OPEN-ACCESS PATH</span>
+                <h2>START WITH<br><span>WHAT YOU NEED.</span></h2>
+                <p>21 focused guides across quick-start tools and all six coaching goals. Nothing dumped on you at once, open the one you need, read it or download it, then come back for the next.</p>
             </div>
-
-            <div class="accordion-item">
-
-                <button class="accordion-header">
-
-                    Reading Lists
-
-                    <span>+</span>
-
-                </button>
-
-                <div class="accordion-body">
-
-                    <ul class="resource-list">
-
-                        <li>
-                            <a href="member-login.html">Member Vault: Muscle Manual</a>
-                        </li>
-
-                        <li>
-                            <a href="member-login.html">Member Vault: Muscle Building 101</a>
-                        </li>
-
-                        <li class="resource-coming-soon">
-                            Discipline &amp; Consistency Framework <em>(Coming Soon)</em>
-                        </li>
-
-                        <li class="resource-coming-soon">
-                            Leadership Development Resources <em>(Coming Soon)</em>
-                        </li>
-
-                    </ul>
-
-                </div>
-
-            </div>
-
-            <div class="accordion-item">
-
-                <button class="accordion-header">
-
-                    Video Library
-
-                    <span>+</span>
-
-                </button>
-
-                <div class="accordion-body">
-
-                    <div class="resource-placeholder">
-
-                        Exercise Tutorials<br>
-                        Coaching Lessons<br>
-                        Educational Content
-
-                    </div>
-
-                </div>
-
-            </div>
-
-            <div class="accordion-item">
-
-                <button class="accordion-header">
-
-                    Success Frameworks
-
-                    <span>+</span>
-
-                </button>
-
-                <div class="accordion-body">
-
-                    <ul class="resource-list">
-
-                        <li>Goal Setting Systems</li>
-                        <li>Habit Tracking Frameworks</li>
-                        <li>Accountability Worksheets</li>
-                        <li>Weekly Reflection Templates</li>
-
-                    </ul>
-
-                </div>
-
-            </div>
-
+            <ol class="resource-command-steps">
+                <li><span>01</span><strong>CHOOSE A LANE</strong><p>Nutrition, training, consistency, or jump straight to your goal.</p></li>
+                <li><span>02</span><strong>OPEN ONE GUIDE</strong><p>Read it here, or download the branded PDF to keep.</p></li>
+                <li><span>03</span><strong>BUILD YOUR RHYTHM</strong><p>Return when you are ready to personalize.</p></li>
+            </ol>
         </section>
 
-        <!-- ==========================
-             MEMBER VAULT
-        ========================== -->
-
-        <section
-            id="vault"
-            class="tab-content">
-
-            <div class="form-section-header">
-
-                <h2>
-                    READY FOR MORE?
-                </h2>
-
-            </div>
-
-            <div class="accordion-item">
-
-                <button class="accordion-header">
-
-                    MEMBER-ONLY COACHING TOOLS
-
-                    <span>+</span>
-
-                </button>
-
-                <div class="accordion-body">
-
-                    <p>Your workout plan, progress photos, weekly check-ins, private messages, and premium guides live inside the Echelon Member Vault.</p>
-                    <a href="member-login.html" class="btn-primary">ENTER MEMBER PORTAL</a>
-
+        <section class="resource-library-section">
+            <div class="resource-section-heading">
+                <div>
+                    <span class="checkin-tag">FREE STARTER LIBRARY</span>
+                    <h2>PICK A CATEGORY,<br>OPEN ONE GUIDE.</h2>
                 </div>
-
+                <p>Jump to a category below. Every card opens just that one guide, nothing else on the page moves.</p>
             </div>
-
-            <div class="accordion-item">
-
-                <button class="accordion-header">
-
-                    PREMIUM EDUCATION
-
-                    <span>+</span>
-
-                </button>
-
-                <div class="accordion-body">
-
-                    <p>Member-only training guides, nutrition blueprints, and downloadable tools are added by your coach as you progress.</p>
-
-                </div>
-
-            </div>
-
-            <div class="accordion-item">
-
-                <button class="accordion-header">
-
-                    PERSONALIZED SUPPORT
-
-                    <span>+</span>
-
-                </button>
-
-                <div class="accordion-body">
-
-                    <p>Members receive a coaching experience that is built around their goals, not a one-size-fits-all library.</p>
-
-                </div>
-
-            </div>
-
+            <nav class="resource-library-nav" id="resource-hub-nav" aria-label="Free resource categories"></nav>
+            <div id="resource-grid-root"></div>
+            <noscript><p style="color:#aaa">Enable JavaScript to browse the free resource library.</p></noscript>
         </section>
 
-        <!-- ==========================
-             FUEL
-        ========================== -->
-
-        <section
-            id="fuel"
-            class="tab-content">
-
-            <div class="form-section-header">
-
-                <h2>
-                    NUTRITION HUB
-                </h2>
-
+        <section class="resource-principles">
+            <span class="checkin-tag">THE ECHELON STANDARD</span>
+            <div>
+                <article><strong>TRAIN WITH INTENT.</strong><p>Choose the smallest plan you can execute consistently before chasing the most complicated one.</p></article>
+                <article><strong>FUEL THE WORK.</strong><p>Build meals around protein, produce, hydration, and the schedule you actually live.</p></article>
+                <article><strong>REVIEW, THEN ADJUST.</strong><p>Progress comes from noticing what works and making the next week more precise.</p></article>
             </div>
+        </section>
 
-            <div class="accordion-item">
-
-                <button class="accordion-header">
-
-                    Meal Blueprints
-
-                    <span>+</span>
-
-                </button>
-
-                <div class="accordion-body">
-
-                    <ul class="resource-list">
-
-                        <li class="resource-coming-soon">
-                            Fat Loss Blueprint <em>(Coming Soon)</em>
-                        </li>
-
-                        <li class="resource-coming-soon">
-                            Muscle Gain Blueprint <em>(Coming Soon)</em>
-                        </li>
-
-                        <li class="resource-coming-soon">
-                            Maintenance Blueprint <em>(Coming Soon)</em>
-                        </li>
-
-                    </ul>
-
-                </div>
-
+        <section class="resource-vault-bridge">
+            <div>
+                <span class="checkin-tag">WHEN YOU WANT MORE</span>
+                <h2>THE MEMBER VAULT<br><span>MAKES IT PERSONAL.</span></h2>
+                <p>The free library gives you a strong place to start. Membership brings the coach, plan, feedback, and tracking that connect it to your goals.</p>
             </div>
-
-            <div class="accordion-item">
-
-                <button class="accordion-header">
-
-                    Meal Guides
-
-                    <span>+</span>
-
-                </button>
-
-                <div class="accordion-body">
-
-                    <ul class="resource-list">
-
-                         <li>
-                            <a href="../assets/images/5-Meals-Under-5-Min-Breakfast-Pt2B.png">
-                                5 Minute Breakfast 1
-                            </a>
-                        </li>
-
-                        <li>
-                            <a href="../assets/images/5-Meals-Under-5-Min-Breakfast-Pt2B.png">
-                                5 Minute Breakfast 2
-                            </a>
-                        </li>
-
-                        <li>
-                            <a href="../assets/images/5-Meals-Under-5-Min-Lunch-Pt1B.png">
-                                5 Minute Lunch 1
-                            </a>
-                        </li>
-
-                        <li>
-                            <a href="../assets/images/5-Meals-Under-5-Min-Lunch-Pt2B.png">
-                                5 Minute Lunch 2
-                            </a>
-                        </li>
-
-
-                    </ul>
-
-                </div>
-
+            <div class="resource-vault-list">
+                <p><span>01</span> YOUR CURRENT TRAINING PLAN</p>
+                <p><span>02</span> FUEL TRACKING &amp; PERSONAL TARGETS</p>
+                <p><span>03</span> WEEKLY REVIEW &amp; PROGRESS DATA</p>
+                <p><span>04</span> PRIVATE COACH SUPPORT</p>
+                <a href="member-login.html" class="btn-primary">ENTER MEMBER VAULT →</a>
             </div>
-
-            <div class="accordion-item">
-
-                <button class="accordion-header">
-
-                    Supplement Education
-
-                    <span>+</span>
-
-                </button>
-
-                <div class="accordion-body">
-
-                    <p>
-
-                        Learn what supplements may help,
-                        when to use them,
-                        and how to avoid wasting money.
-
-                    </p>
-
-                </div>
-
-            </div>
-
         </section>
 
     </div>
