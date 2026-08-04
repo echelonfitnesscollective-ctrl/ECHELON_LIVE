@@ -40,6 +40,9 @@
 .resource-card-foot{margin-top:auto;padding-top:18px;display:flex;align-items:center;gap:10px;width:100%}
 .resource-card-cta{color:var(--primary);font:700 .66rem 'Montserrat',sans-serif;letter-spacing:.1em}
 .resource-pdf-flag{padding:3px 7px;border:1px solid rgba(215,181,91,.5);color:#d7b55b;font:700 .58rem 'Montserrat',sans-serif;letter-spacing:.08em}
+.resource-exclusive-flag{padding:3px 7px;border:1px solid var(--primary);background:var(--primary);color:#0d0d0c;font:700 .58rem 'Montserrat',sans-serif;letter-spacing:.08em}
+.resource-card-badge .resource-exclusive-flag{margin-left:8px}
+.resource-category-block[data-cat="member-general"] .resource-card-tile{border-color:rgba(215,181,91,.35)}
 
 /* Reading modal: only the clicked item's content is ever shown */
 .resource-modal-overlay{position:fixed;inset:0;z-index:200;display:flex;align-items:flex-start;justify-content:center;padding:6vh 20px;background:rgba(5,5,5,.86);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .18s ease}
