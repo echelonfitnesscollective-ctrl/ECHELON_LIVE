@@ -354,6 +354,15 @@
             <details class="admin-intake-section admin-console-section admin-member-vault-section admin-tab-panel" data-admin-panel="library">
                 <summary class="admin-section-heading"><div><span class="checkin-tag">MEMBER VAULT</span><h2>PRIVATE RESOURCE LIBRARY</h2></div><p>Upload guides and publish them only to signed-in members.</p></summary>
                 <div class="admin-resource-layout"><form id="member-library-form" class="echelon-form"><input name="title" type="text" placeholder="Resource title" required aria-label="Resource title"><select name="category" required aria-label="Goal category, so this groups correctly next to the matching free guides in the Member Vault"><option value="" disabled selected>Goal category (for Member Vault grouping)</option><option value="Weight Loss">Weight Loss</option><option value="Cutting">Cutting</option><option value="Bulking">Bulking</option><option value="Muscle">Muscle</option><option value="Performance">Performance</option><option value="Older-Adult Wellness">Older-Adult Wellness</option><option value="Fuel">Fuel (general, not goal-specific)</option><option value="Training">Training (general, not goal-specific)</option><option value="General">General / Other</option></select><textarea name="description" rows="3" placeholder="Short member-facing description" aria-label="Short member-facing description"></textarea><input name="resource_file" type="file" accept="application/pdf,image/png,image/jpeg" required aria-label="Resource File"><button type="submit" class="btn-secondary">PUBLISH TO MEMBER VAULT</button><p id="member-library-feedback" class="form-error" role="status"></p></form><div id="member-library-admin-list" class="admin-record-list"></div></div>
+
+                <div class="admin-bulk-upload">
+                    <h3>Publish several at once</h3>
+                    <p>Select all your premium PDFs together (like the 18 goal-education PDFs). Title and category are guessed from each filename, review and fix any before publishing.</p>
+                    <input type="file" id="member-library-bulk-files" multiple accept="application/pdf" aria-label="Select multiple PDF files to bulk publish to the Member Vault">
+                    <div id="member-library-bulk-preview" class="admin-bulk-preview"></div>
+                    <button type="button" id="member-library-bulk-submit" class="btn-secondary" hidden>PUBLISH ALL TO MEMBER VAULT</button>
+                    <p id="member-library-bulk-feedback" class="form-error" role="status"></p>
+                </div>
             </details>
 
             <details class="admin-intake-section admin-console-section admin-trainer-resources-section admin-tab-panel" data-admin-panel="library">

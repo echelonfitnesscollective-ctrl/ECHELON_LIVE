@@ -440,6 +440,97 @@ async function initializeMemberLibraryManager() {
         if (error) { await echelonAdminClient.storage.from('member-library').remove([path]); feedback.textContent = 'The file uploaded, but could not be published.'; return; }
         form.reset(); feedback.textContent = 'Published to the Member Vault.'; refreshLibrary();
     });
+    initializeBulkLibraryUpload(refreshLibrary);
+}
+
+function bulkLibraryDeriveCategory(filename) {
+    const n = filename.toLowerCase();
+    if (n.includes('cutting')) return 'Cutting';
+    if (n.includes('bulking')) return 'Bulking';
+    if (n.includes('muscle') || n.includes('hypertrophy')) return 'Muscle';
+    if (n.includes('performance')) return 'Performance';
+    if (n.includes('older') || n.includes('senior') || n.includes('wellness')) return 'Older-Adult Wellness';
+    return 'Weight Loss';
+}
+
+function bulkLibraryDeriveTitle(filename) {
+    let title = filename.replace(/\.pdf$/i, '').replace(/^Echelon\s*-\s*/i, '');
+    const categoryPrefixes = ['Weight Loss', 'Cutting', 'Bulking', 'Muscle', 'Performance', 'Older-Adult Wellness', 'Older-Adult'];
+    categoryPrefixes.forEach(prefix => {
+        const re = new RegExp('^' + prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*-\\s*', 'i');
+        title = title.replace(re, '');
+    });
+    return title.trim() || filename;
+}
+
+function initializeBulkLibraryUpload(refreshLibrary) {
+    const filesInput = document.getElementById('member-library-bulk-files');
+    const preview = document.getElementById('member-library-bulk-preview');
+    const submitBtn = document.getElementById('member-library-bulk-submit');
+    const feedback = document.getElementById('member-library-bulk-feedback');
+    if (!filesInput || !preview || !submitBtn) return;
+
+    const categoryOptions = ['Weight Loss', 'Cutting', 'Bulking', 'Muscle', 'Performance', 'Older-Adult Wellness', 'Fuel', 'Training', 'General'];
+
+    filesInput.addEventListener('change', () => {
+        preview.replaceChildren();
+        const files = Array.from(filesInput.files || []);
+        if (!files.length) { submitBtn.hidden = true; return; }
+        files.forEach((file, index) => {
+            const row = document.createElement('div');
+            row.className = 'admin-bulk-row';
+            const titleInput = document.createElement('input');
+            titleInput.type = 'text'; titleInput.value = bulkLibraryDeriveTitle(file.name);
+            titleInput.dataset.bulkTitle = String(index);
+            titleInput.setAttribute('aria-label', `Title for ${file.name}`);
+            const categorySelect = document.createElement('select');
+            categorySelect.dataset.bulkCategory = String(index);
+            categorySelect.setAttribute('aria-label', `Goal category for ${file.name}`);
+            const guessed = bulkLibraryDeriveCategory(file.name);
+            categoryOptions.forEach(opt => {
+                const o = document.createElement('option'); o.value = opt; o.textContent = opt;
+                if (opt === guessed) o.selected = true;
+                categorySelect.append(o);
+            });
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'admin-bulk-filename'; nameSpan.textContent = file.name;
+            row.append(nameSpan, titleInput, categorySelect);
+            preview.append(row);
+        });
+        submitBtn.hidden = false;
+        feedback.textContent = '';
+    });
+
+    submitBtn.addEventListener('click', async () => {
+        const files = Array.from(filesInput.files || []);
+        if (!files.length) return;
+        submitBtn.disabled = true;
+        let published = 0;
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            if (file.size > 15 * 1024 * 1024) { feedback.textContent = `Skipped ${file.name}: over 15 MB.`; continue; }
+            feedback.textContent = `Publishing ${i + 1} of ${files.length}: ${file.name}...`;
+            const titleInput = preview.querySelector(`[data-bulk-title="${i}"]`);
+            const categorySelect = preview.querySelector(`[data-bulk-category="${i}"]`);
+            const title = (titleInput?.value || file.name).trim();
+            const category = categorySelect?.value || 'General';
+            const safeName = file.name.toLowerCase().replace(/[^a-z0-9.]+/g, '-');
+            const path = `${Date.now()}-${i}-${safeName}`;
+            const upload = await echelonAdminClient.storage.from('member-library').upload(path, file, { contentType: file.type, upsert: false });
+            if (upload.error) { feedback.textContent = `Failed to upload ${file.name}, stopped there.`; break; }
+            const { error } = await echelonAdminClient.from('member_library_resources').insert({ title, category, description: null, storage_path: path, published: true });
+            if (error) { await echelonAdminClient.storage.from('member-library').remove([path]); feedback.textContent = `${file.name} uploaded but could not be published, stopped there.`; break; }
+            published++;
+        }
+        submitBtn.disabled = false;
+        if (published === files.length) {
+            feedback.textContent = `Published all ${published} resources to the Member Vault.`;
+            filesInput.value = ''; preview.replaceChildren(); submitBtn.hidden = true;
+        } else if (published > 0) {
+            feedback.textContent += ` (${published} of ${files.length} published before stopping.)`;
+        }
+        refreshLibrary();
+    });
 }
 
 async function initializeEquipmentManager() {
