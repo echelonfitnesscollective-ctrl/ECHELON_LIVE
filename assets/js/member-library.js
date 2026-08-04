@@ -104,6 +104,37 @@ const MEMBER_CATEGORY_LABELS = {
     'fuel-general': '01 &middot; FUEL'
 };
 
+function markYourGoalPill(catId) {
+    const navRoot = document.getElementById('resource-hub-nav');
+    if (!navRoot) return;
+    const btn = navRoot.querySelector(`button[data-cat="${catId}"]`);
+    if (!btn || btn.querySelector('.resource-your-goal-flag')) return;
+    const flag = document.createElement('span');
+    flag.className = 'resource-your-goal-flag';
+    flag.textContent = 'YOUR GOAL';
+    btn.appendChild(flag);
+}
+
+async function personalizeToMemberGoal(userId, status) {
+    const { data, error } = await echelonMemberClient
+        .from('member_training_profiles')
+        .select('primary_goal')
+        .eq('user_id', userId)
+        .maybeSingle();
+    if (error || !data?.primary_goal) return;
+
+    const catId = matchGoalCategory(data.primary_goal);
+    if (!catId || catId === 'fuel-general' || catId === 'training') return;
+    const block = document.querySelector(`.resource-category-block[data-cat="${catId}"]`);
+    if (!block) return;
+
+    setActiveResourceCategory(catId, false);
+    markYourGoalPill(catId);
+    if (status) {
+        status.textContent = `Starting with your goal, ${MEMBER_CATEGORY_LABELS[catId] || catId}, since that is what your coach has you focused on. Every other guide is still one click away.`;
+    }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     const gridRoot = document.getElementById('resource-grid-root');
     const status = document.getElementById('member-library-status');
@@ -124,21 +155,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (error) {
         if (status) status.textContent = 'The member library will be available shortly.';
-        return;
+    } else if (data && data.length) {
+        data.forEach(resource => {
+            const goal = matchGoalCategory(resource.category);
+            const catId = goal === 'fuel-general' ? 'fuel' : goal;
+            let block = catId ? gridRoot.querySelector(`.resource-category-block[data-cat="${catId}"]`) : null;
+            if (!block) block = ensureGeneralCategoryBlock();
+            if (!block) return;
+
+            const grid = block.querySelector('.resource-card-grid');
+            if (!grid) return;
+            const catLabel = MEMBER_CATEGORY_LABELS[catId] || 'MEMBER RESOURCE';
+            const card = buildPremiumCard(resource, catLabel.replace(/&middot;/g, '·'), () => openPremiumModal(resource, catLabel.replace(/&middot;/g, '·')));
+            grid.appendChild(card);
+        });
     }
-    if (!data || !data.length) return;
 
-    data.forEach(resource => {
-        const goal = matchGoalCategory(resource.category);
-        const catId = goal === 'fuel-general' ? 'fuel' : goal;
-        let block = catId ? gridRoot.querySelector(`.resource-category-block[data-cat="${catId}"]`) : null;
-        if (!block) block = ensureGeneralCategoryBlock();
-        if (!block) return;
-
-        const grid = block.querySelector('.resource-card-grid');
-        if (!grid) return;
-        const catLabel = MEMBER_CATEGORY_LABELS[catId] || 'MEMBER RESOURCE';
-        const card = buildPremiumCard(resource, catLabel.replace(/&middot;/g, '·'), () => openPremiumModal(resource, catLabel.replace(/&middot;/g, '·')));
-        grid.appendChild(card);
-    });
+    await personalizeToMemberGoal(member.id, status);
 });
