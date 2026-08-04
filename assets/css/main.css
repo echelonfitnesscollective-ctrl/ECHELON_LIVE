@@ -4304,7 +4304,7 @@ WAIVER
     font-size:1rem;
 }
 .checkin-header{
-    padding:80px 0 40px;
+    padding:64px 0 32px;
     text-align:center;
 }
 
@@ -4349,11 +4349,15 @@ WAIVER
 @media(max-width:768px){
 
     .checkin-header{
-        padding:60px 0 40px;
+        padding:36px 0 22px;
     }
 
     .checkin-header h1{
-        font-size:3rem;
+        font-size:2.3rem;
+    }
+
+    .checkin-header p{
+        font-size:.88rem;
     }
 
 }
