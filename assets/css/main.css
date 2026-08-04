@@ -3004,8 +3004,9 @@ COACHING PLAYBOOK
     gap:0;
     border:1px solid rgba(255,255,255,.13);
     background:#0D0D0C;
+    height:min(80vh,800px);
     min-height:640px;
-    max-height:80vh;
+    overflow:hidden;
 }
 
 .playbook-nav{
@@ -3092,6 +3093,8 @@ COACHING PLAYBOOK
     display:flex;
     flex-direction:column;
     min-width:0;
+    min-height:0;
+    height:100%;
 }
 
 .playbook-topbar{
@@ -3133,6 +3136,8 @@ COACHING PLAYBOOK
 .playbook-body{
     padding:28px 30px 40px;
     overflow-y:auto;
+    flex:1;
+    min-height:0;
 }
 
 .playbook-empty{
@@ -3218,7 +3223,13 @@ COACHING PLAYBOOK
 @media(max-width:900px){
     .playbook-layout{
         grid-template-columns:1fr;
+        height:auto;
         max-height:none;
+        overflow:visible;
+    }
+    .playbook-reading-pane{
+        height:auto;
+        min-height:400px;
     }
     .playbook-nav{
         border-right:0;
