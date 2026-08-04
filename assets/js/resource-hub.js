@@ -313,6 +313,8 @@ function closeResourceModal() {
     overlay.classList.remove('active');
     overlay.setAttribute('aria-hidden', 'true');
     document.body.classList.remove('resource-modal-open');
+    const panel = document.getElementById('resource-modal-panel');
+    if (panel) panel.classList.remove('resource-modal-panel-wide');
 }
 
 function setActiveResourceCategory(catId, scrollIntoView) {

@@ -67,6 +67,9 @@ body.resource-modal-open{overflow:hidden}
 .resource-modal-footer{margin-top:26px;padding-top:22px;border-top:1px solid rgba(255,255,255,.13)}
 .resource-download-btn{display:inline-block}
 .resource-download-pending{color:#777;font:700 .68rem 'Montserrat',sans-serif;letter-spacing:.08em}
+.resource-modal-panel-wide{width:min(900px,100%)}
+.resource-pdf-viewer{width:100%;height:70vh;border:1px solid rgba(255,255,255,.13);background:#1a1a1a}
+.resource-modal-image{width:100%;height:auto;display:block;border:1px solid rgba(255,255,255,.13)}
 
 .resource-principles{padding:38px;border-top:1px solid rgba(255,255,255,.13);border-bottom:1px solid rgba(255,255,255,.13)}
 .resource-principles>div{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:24px}
@@ -96,5 +99,6 @@ body.resource-modal-open{overflow:hidden}
     .resource-card-grid{grid-template-columns:1fr}
     .resource-vault-bridge{margin-top:56px}
     .resource-modal-panel{padding:60px 22px 28px}
+    .resource-pdf-viewer{height:55vh}
     .resource-modal-overlay{padding:0}
 }

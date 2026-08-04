@@ -60,12 +60,13 @@ function openPremiumModal(resource, catLabel) {
     const panel = document.getElementById('resource-modal-panel');
     if (!overlay || !panel) return;
 
+    panel.classList.add('resource-modal-panel-wide');
     panel.innerHTML = `
         <button type="button" class="resource-modal-close" aria-label="Close">&times;</button>
         <span class="resource-card-badge">${catLabel} <span class="resource-exclusive-flag">MEMBER ONLY</span></span>
         <h2>${resource.title}</h2>
-        <div class="resource-modal-body"><p>${resource.description || 'This member-exclusive resource was added by your coach.'}</p></div>
-        <div class="resource-modal-footer"><span class="resource-download-pending">Preparing your secure download&hellip;</span></div>
+        <div class="resource-modal-body"><p class="resource-download-pending">Loading your resource&hellip;</p></div>
+        <div class="resource-modal-footer" hidden></div>
     `;
     panel.querySelector('.resource-modal-close').addEventListener('click', closeResourceModal);
     overlay.classList.add('active');
@@ -74,14 +75,24 @@ function openPremiumModal(resource, catLabel) {
     panel.scrollTop = 0;
     panel.querySelector('.resource-modal-close').focus();
 
+    const isPdf = /\.pdf($|\?)/i.test(resource.storage_path);
+
     echelonMemberClient.storage.from('member-library').createSignedUrl(resource.storage_path, 3600).then(signed => {
+        const body = panel.querySelector('.resource-modal-body');
         const footer = panel.querySelector('.resource-modal-footer');
-        if (!footer) return;
-        if (signed.data?.signedUrl) {
-            footer.innerHTML = `<a class="btn-primary resource-download-btn" href="${signed.data.signedUrl}" target="_blank" rel="noopener">DOWNLOAD RESOURCE &darr;</a>`;
-        } else {
-            footer.innerHTML = '<span class="resource-download-pending">This resource is temporarily unavailable, try again shortly.</span>';
+        if (!body || !footer) return;
+        if (!signed.data?.signedUrl) {
+            body.innerHTML = '<p class="resource-download-pending">This resource is temporarily unavailable, try again shortly.</p>';
+            return;
         }
+        const url = signed.data.signedUrl;
+        if (isPdf) {
+            body.innerHTML = `<iframe src="${url}" class="resource-pdf-viewer" title="${resource.title}"></iframe>`;
+        } else {
+            body.innerHTML = `<img src="${url}" alt="${resource.title}" class="resource-modal-image">`;
+        }
+        footer.hidden = false;
+        footer.innerHTML = `<a class="btn-primary resource-download-btn" href="${url}" target="_blank" rel="noopener" download>DOWNLOAD RESOURCE &darr;</a>`;
     });
 }
 
