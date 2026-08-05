@@ -257,8 +257,9 @@ async function fetchExistingOfferForApplication(applicationId) {
 }
 
 function renderPaymentLinkButtons(actions, item, paymentUrl, label) {
-    const copy = document.createElement('button'); copy.type = 'button'; copy.className = 'btn-secondary'; copy.textContent = 'COPY PAYMENT LINK'; copy.addEventListener('click', async () => { try { await navigator.clipboard.writeText(paymentUrl); copy.textContent = 'LINK COPIED'; setTimeout(() => { copy.textContent = 'COPY PAYMENT LINK'; }, 2000); } catch (_) { window.prompt('Copy this private payment link:', paymentUrl); } });
-    const email = document.createElement('a'); email.className = 'btn-primary'; email.textContent = 'OPEN PAYMENT EMAIL'; email.href = paymentEmailLink(item, paymentUrl, label);
+    actions.querySelectorAll('[data-payment-link-button]').forEach((el) => el.remove());
+    const copy = document.createElement('button'); copy.type = 'button'; copy.className = 'btn-secondary'; copy.dataset.paymentLinkButton = '1'; copy.textContent = 'COPY PAYMENT LINK'; copy.addEventListener('click', async () => { try { await navigator.clipboard.writeText(paymentUrl); copy.textContent = 'LINK COPIED'; setTimeout(() => { copy.textContent = 'COPY PAYMENT LINK'; }, 2000); } catch (_) { window.prompt('Copy this private payment link:', paymentUrl); } });
+    const email = document.createElement('a'); email.className = 'btn-primary'; email.dataset.paymentLinkButton = '1'; email.textContent = 'OPEN PAYMENT EMAIL'; email.href = paymentEmailLink(item, paymentUrl, label);
     actions.append(copy, email);
 }
 
