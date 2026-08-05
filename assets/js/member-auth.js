@@ -1,3 +1,9 @@
+// Supabase's client strips the auth hash from the URL shortly after load, so
+// capture whether this link was an invite (first-ever password set) before
+// that happens. Used to route brand-new members to a welcome page instead of
+// straight to the portal, without affecting ordinary "forgot password" resets.
+const EFC_AUTH_HASH_TYPE = new URLSearchParams(window.location.hash.replace(/^#/, '')).get('type');
+
 const EFC_SUPABASE_URL = 'https://plkdyvtriajpzcfgtwzp.supabase.co';
 const EFC_SUPABASE_KEY = 'sb_publishable_CwFNrWSrhLKURZIk_-yt1A_ZVpFHEwf';
 const EFC_MEMBER_STEP_UP_KEY = 'efc_member_step_up_user';
@@ -254,13 +260,39 @@ async function initializeMemberPasswordReset() {
             return;
         }
 
-        updateFeedback.textContent = 'Password updated. Taking you to your member portal…';
-        window.setTimeout(() => window.location.replace('member-portal.html'), 900);
+        const destination = EFC_AUTH_HASH_TYPE === 'invite' ? 'member-welcome.html' : 'member-portal.html';
+        updateFeedback.textContent = destination === 'member-welcome.html'
+            ? 'Password set. Welcome to Echelon…'
+            : 'Password updated. Taking you to your member portal…';
+        window.setTimeout(() => window.location.replace(destination), 900);
     });
+}
+
+async function initializeMemberWelcome() {
+    const nameEl = document.getElementById('member-welcome-name');
+    const programEl = document.getElementById('member-welcome-program');
+    if (!nameEl || !programEl) return;
+
+    const member = await getAuthenticatedMember();
+    if (!member) {
+        window.location.replace('member-login.html');
+        return;
+    }
+
+    const firstName = String(member.user_metadata?.full_name || '').trim().split(/\s+/)[0];
+    nameEl.textContent = firstName || 'there';
+
+    const { data } = await echelonMemberClient
+        .from('account_access')
+        .select('program')
+        .eq('user_id', member.id)
+        .maybeSingle();
+    programEl.textContent = data?.program || member.user_metadata?.program || 'Echelon Coaching';
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     initializeMemberLogin();
     initializeMemberPortal();
     initializeMemberPasswordReset();
+    initializeMemberWelcome();
 });
