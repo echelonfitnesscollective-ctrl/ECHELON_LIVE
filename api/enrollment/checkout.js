@@ -62,7 +62,10 @@ module.exports = async function enrollmentCheckout(request, response) {
   try {
     const stripe = await fetch('https://api.stripe.com/v1/checkout/sessions', { method: 'POST', headers: { Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}`, 'Content-Type': 'application/x-www-form-urlencoded' }, body: params.toString() });
     const session = await stripe.json();
-    if (!stripe.ok || !session.url) return response.status(502).json({ error: 'We could not begin checkout. Please try again.' });
+    if (!stripe.ok || !session.url) {
+      console.error('Enrollment checkout Stripe error', { offerId: offer.id, priceId: offer.stripe_price_id, lineItems: offer.line_items, mode, stripeError: session.error });
+      return response.status(502).json({ error: 'We could not begin checkout. Please try again.' });
+    }
     await db(`/rest/v1/enrollment_offers?id=eq.${encodeURIComponent(offer.id)}`, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ stripe_checkout_session_id: session.id, payment_status: 'pending' }) });
     return response.status(200).json({ url: session.url });
   } catch (error) { console.error('Enrollment checkout error', error && error.message); return response.status(503).json({ error: 'Checkout is temporarily unavailable.' }); }
