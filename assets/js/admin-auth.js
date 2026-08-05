@@ -193,6 +193,75 @@ function paymentEmailLink(application, paymentUrl, label) {
     return `mailto:${encodeURIComponent(application.email || '')}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
+const APPLICATION_DETAIL_FIELDS = [
+    ['primary_goal', 'Primary Goal'],
+    ['fitness_level', 'Current Fitness Level'],
+    ['training_days_per_week', 'Training Days Per Week'],
+    ['commitment_level', 'Commitment Level (1-10)'],
+    ['goal_and_why', 'Goal & Why It Matters'],
+    ['goal_timeline', 'Goal Timeline'],
+    ['past_attempts', "What They've Tried Before"],
+    ['current_barriers', 'Current Barriers'],
+    ['six_month_success', '6-Month Success Vision'],
+    ['support_system', 'Support System'],
+    ['activity_level', 'Current Activity Level'],
+    ['nutrition_rating', 'Nutrition Rating'],
+    ['sleep_hours', 'Average Sleep (Hours)'],
+    ['coaching_why', 'Why Coaching Will Help'],
+    ['structured_program_ready', 'Ready for a Structured Program?'],
+    ['group_experience_details', 'Private Group / Organization Details'],
+    ['instagram_handle', 'Instagram Handle']
+];
+
+function buildApplicationDetailPanel(item) {
+    const panel = document.createElement('div');
+    panel.className = 'application-detail-panel';
+    panel.hidden = true;
+
+    const dl = document.createElement('dl');
+    dl.className = 'application-detail-list';
+    if (item.phone) {
+        const dt = document.createElement('dt'); dt.textContent = 'Phone';
+        const dd = document.createElement('dd'); dd.textContent = item.phone;
+        dl.append(dt, dd);
+    }
+    const data = item.application_data && typeof item.application_data === 'object' ? item.application_data : {};
+    APPLICATION_DETAIL_FIELDS.forEach(([key, label]) => {
+        const value = data[key];
+        if (value === undefined || value === null || String(value).trim() === '') return;
+        const dt = document.createElement('dt'); dt.textContent = label;
+        const dd = document.createElement('dd'); dd.textContent = String(value);
+        dl.append(dt, dd);
+    });
+    if (!dl.children.length) {
+        const empty = document.createElement('p'); empty.className = 'application-detail-empty'; empty.textContent = 'No additional application details were submitted.';
+        panel.append(empty);
+    } else {
+        panel.append(dl);
+    }
+    if (item.admin_notes) {
+        const notesLabel = document.createElement('p'); notesLabel.className = 'application-detail-notes-label'; notesLabel.textContent = 'COACH NOTES';
+        const notes = document.createElement('p'); notes.className = 'application-detail-notes'; notes.textContent = item.admin_notes;
+        panel.append(notesLabel, notes);
+    }
+    return panel;
+}
+
+async function fetchExistingOfferForApplication(applicationId) {
+    const projectResult = await echelonAdminClient.from('onboarding_projects').select('id').eq('application_id', applicationId).limit(1).maybeSingle();
+    if (!projectResult.data) return null;
+    const offerResult = await echelonAdminClient.from('enrollment_offers').select('checkout_token, allowed_payment_options').eq('project_id', projectResult.data.id).eq('status', 'sent').order('created_at', { ascending: false }).limit(1).maybeSingle();
+    if (!offerResult.data?.checkout_token) return null;
+    const label = offerResult.data.allowed_payment_options?.[0]?.label || 'your coaching program';
+    return { paymentUrl: `${window.location.origin}/pages/enrollment-checkout.html?token=${offerResult.data.checkout_token}`, label };
+}
+
+function renderPaymentLinkButtons(actions, item, paymentUrl, label) {
+    const copy = document.createElement('button'); copy.type = 'button'; copy.className = 'btn-secondary'; copy.textContent = 'COPY PAYMENT LINK'; copy.addEventListener('click', async () => { try { await navigator.clipboard.writeText(paymentUrl); copy.textContent = 'LINK COPIED'; setTimeout(() => { copy.textContent = 'COPY PAYMENT LINK'; }, 2000); } catch (_) { window.prompt('Copy this private payment link:', paymentUrl); } });
+    const email = document.createElement('a'); email.className = 'btn-primary'; email.textContent = 'OPEN PAYMENT EMAIL'; email.href = paymentEmailLink(item, paymentUrl, label);
+    actions.append(copy, email);
+}
+
 function createApplicationRecord(item) {
     const record = document.createElement('article');
     record.className = 'admin-record application-record';
@@ -202,31 +271,60 @@ function createApplicationRecord(item) {
     top.append(name, state);
     const details = document.createElement('span'); details.textContent = `${item.program_interest || 'Coaching'} · ${item.email || 'Email not provided'}`;
     const reference = document.createElement('span'); reference.className = 'application-reference'; reference.textContent = item.application_reference ? `REFERENCE · ${item.application_reference}` : 'PRIVATE APPLICATION';
-    const actions = document.createElement('div'); actions.className = 'application-record-actions';
-    const choice = document.createElement('select'); choice.setAttribute('aria-label', `Payment option for ${item.full_name}`);
-    [['echelon_12_monthly', 'ECHELON 12 · $149 / MO'], ['echelon_12_paid_in_full', 'ECHELON 12 · $399 PAID IN FULL'], ['one_on_one_monthly', '1-ON-1 COACHING · MONTHLY'], ['private_group_training', 'PRIVATE GROUP TRAINING · BY SIZE']].forEach(([value, label]) => { const option = document.createElement('option'); option.value = value; option.textContent = label; choice.append(option); });
-    choice.value = paymentOptionForApplication(item);
-    const groupSizeInput = document.createElement('input'); groupSizeInput.type = 'number'; groupSizeInput.min = '3'; groupSizeInput.max = '15'; groupSizeInput.placeholder = 'GROUP SIZE (3–15)'; groupSizeInput.setAttribute('aria-label', `Group size for ${item.full_name}`); groupSizeInput.hidden = choice.value !== 'private_group_training';
-    choice.addEventListener('change', () => { groupSizeInput.hidden = choice.value !== 'private_group_training'; });
-    const createOffer = document.createElement('button'); createOffer.type = 'button'; createOffer.className = 'btn-secondary'; createOffer.textContent = item.payment_status === 'paid' ? 'PAYMENT CONFIRMED' : 'CREATE PAYMENT LINK'; createOffer.disabled = item.payment_status === 'paid';
-    const paymentFeedback = document.createElement('p'); paymentFeedback.className = 'application-payment-feedback'; paymentFeedback.setAttribute('role', 'status');
-    createOffer.addEventListener('click', async () => {
-        const groupSize = Number(groupSizeInput.value);
-        if (choice.value === 'private_group_training' && (!Number.isInteger(groupSize) || groupSize < 3 || groupSize > 15)) { paymentFeedback.textContent = 'Enter a group size between 3 and 15.'; return; }
-        createOffer.disabled = true; createOffer.textContent = 'CREATING…'; paymentFeedback.textContent = '';
-        const { data: sessionData } = await echelonAdminClient.auth.getSession();
-        const payload = { applicationId: item.id, paymentOption: choice.value };
-        if (choice.value === 'private_group_training') payload.groupSize = groupSize;
-        const result = await fetch('/api/enrollment/create-offer', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionData.session?.access_token || ''}` }, body: JSON.stringify(payload) });
-        const body = await result.json();
-        if (!result.ok || !body.paymentUrl) { paymentFeedback.textContent = body.error || 'The payment link could not be created.'; createOffer.disabled = false; createOffer.textContent = 'CREATE PAYMENT LINK'; return; }
-        paymentFeedback.textContent = 'Private payment link created. Send it from your email below.';
-        const copy = document.createElement('button'); copy.type = 'button'; copy.className = 'btn-secondary'; copy.textContent = 'COPY PAYMENT LINK'; copy.addEventListener('click', async () => { try { await navigator.clipboard.writeText(body.paymentUrl); copy.textContent = 'LINK COPIED'; } catch (_) { window.prompt('Copy this private payment link:', body.paymentUrl); } });
-        const email = document.createElement('a'); email.className = 'btn-primary'; email.textContent = 'OPEN PAYMENT EMAIL'; email.href = paymentEmailLink(item, body.paymentUrl, body.label);
-        actions.append(copy, email); choice.disabled = true; groupSizeInput.disabled = true; createOffer.remove();
-        initializeOperationsConsole(); initializeCoachCommand();
+    const detailPanel = buildApplicationDetailPanel(item);
+    const detailToggle = document.createElement('button'); detailToggle.type = 'button'; detailToggle.className = 'btn-secondary application-detail-toggle'; detailToggle.textContent = 'VIEW DETAILS';
+    detailToggle.addEventListener('click', () => {
+        detailPanel.hidden = !detailPanel.hidden;
+        detailToggle.textContent = detailPanel.hidden ? 'VIEW DETAILS' : 'HIDE DETAILS';
     });
-    actions.append(choice, groupSizeInput, createOffer);
+    const actions = document.createElement('div'); actions.className = 'application-record-actions';
+    actions.append(detailToggle);
+    const paymentFeedback = document.createElement('p'); paymentFeedback.className = 'application-payment-feedback'; paymentFeedback.setAttribute('role', 'status');
+
+    function buildCreateOfferForm(reopenLabel) {
+        const choice = document.createElement('select'); choice.setAttribute('aria-label', `Payment option for ${item.full_name}`);
+        [['echelon_12_monthly', 'ECHELON 12 · $149 / MO'], ['echelon_12_paid_in_full', 'ECHELON 12 · $399 PAID IN FULL'], ['one_on_one_monthly', '1-ON-1 COACHING · MONTHLY'], ['private_group_training', 'PRIVATE GROUP TRAINING · BY SIZE']].forEach(([value, label]) => { const option = document.createElement('option'); option.value = value; option.textContent = label; choice.append(option); });
+        choice.value = paymentOptionForApplication(item);
+        const groupSizeInput = document.createElement('input'); groupSizeInput.type = 'number'; groupSizeInput.min = '3'; groupSizeInput.max = '15'; groupSizeInput.placeholder = 'GROUP SIZE (3–15)'; groupSizeInput.setAttribute('aria-label', `Group size for ${item.full_name}`); groupSizeInput.hidden = choice.value !== 'private_group_training';
+        choice.addEventListener('change', () => { groupSizeInput.hidden = choice.value !== 'private_group_training'; });
+        const createOffer = document.createElement('button'); createOffer.type = 'button'; createOffer.className = 'btn-secondary'; createOffer.textContent = reopenLabel || 'CREATE PAYMENT LINK';
+        createOffer.addEventListener('click', async () => {
+            const groupSize = Number(groupSizeInput.value);
+            if (choice.value === 'private_group_training' && (!Number.isInteger(groupSize) || groupSize < 3 || groupSize > 15)) { paymentFeedback.textContent = 'Enter a group size between 3 and 15.'; return; }
+            createOffer.disabled = true; createOffer.textContent = 'CREATING…'; paymentFeedback.textContent = '';
+            const { data: sessionData } = await echelonAdminClient.auth.getSession();
+            const payload = { applicationId: item.id, paymentOption: choice.value };
+            if (choice.value === 'private_group_training') payload.groupSize = groupSize;
+            const result = await fetch('/api/enrollment/create-offer', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionData.session?.access_token || ''}` }, body: JSON.stringify(payload) });
+            const body = await result.json();
+            if (!result.ok || !body.paymentUrl) { paymentFeedback.textContent = body.error || 'The payment link could not be created.'; createOffer.disabled = false; createOffer.textContent = reopenLabel || 'CREATE PAYMENT LINK'; return; }
+            paymentFeedback.textContent = 'Private payment link created. Send it from your email below.';
+            choice.remove(); groupSizeInput.remove(); createOffer.remove();
+            renderPaymentLinkButtons(actions, item, body.paymentUrl, body.label);
+            initializeCoachCommand();
+        });
+        actions.append(choice, groupSizeInput, createOffer);
+    }
+
+    if (item.payment_status === 'awaiting_payment') {
+        const loading = document.createElement('span'); loading.className = 'application-payment-feedback'; loading.textContent = 'Loading your payment link…';
+        actions.append(loading);
+        fetchExistingOfferForApplication(item.id).then((offer) => {
+            loading.remove();
+            if (offer) {
+                renderPaymentLinkButtons(actions, item, offer.paymentUrl, offer.label);
+                const change = document.createElement('button'); change.type = 'button'; change.className = 'btn-secondary application-change-plan'; change.textContent = 'CHOOSE A DIFFERENT PLAN INSTEAD';
+                change.addEventListener('click', () => { change.remove(); buildCreateOfferForm('CREATE NEW PAYMENT LINK'); });
+                actions.append(change);
+            } else {
+                paymentFeedback.textContent = 'A payment link was started earlier but could not be found, create a new one below.';
+                buildCreateOfferForm();
+            }
+        });
+    } else if (item.payment_status !== 'paid') {
+        buildCreateOfferForm();
+    }
+
     if (item.payment_status === 'paid') {
         const invite = document.createElement('button'); invite.type = 'button'; invite.className = 'btn-primary'; invite.textContent = item.invited_at ? 'INVITATION SENT' : 'INVITE TO MEMBER PORTAL'; invite.disabled = Boolean(item.invited_at);
         invite.addEventListener('click', async () => {
@@ -240,7 +338,7 @@ function createApplicationRecord(item) {
         });
         actions.append(invite);
     }
-    record.append(top, details, reference, actions, paymentFeedback);
+    record.append(top, details, reference, actions, detailPanel, paymentFeedback);
     return record;
 }
 
@@ -357,7 +455,7 @@ async function initializeOperationsConsole() {
     if (!applicationsList) return;
 
     const [applicationsResult, leadsResult, checkinsResult, resourcesResult] = await Promise.all([
-        echelonAdminClient.from('coaching_applications').select('id, full_name, email, program_interest, status, application_reference, application_status, payment_status, invited_at, created_at').order('created_at', { ascending: false }).limit(25),
+        echelonAdminClient.from('coaching_applications').select('id, full_name, email, phone, program_interest, application_data, status, application_reference, application_status, payment_status, invited_at, admin_notes, created_at').order('created_at', { ascending: false }).limit(25),
         echelonAdminClient.from('website_leads').select('full_name, email, lead_type, category, status, created_at').order('created_at', { ascending: false }).limit(25),
         echelonAdminClient.from('session_checkins').select('full_name, email, program, status, checked_in_at').order('checked_in_at', { ascending: false }).limit(25),
         echelonAdminClient.from('trainer_resources').select('title, category, resource_url, notes, created_at').order('created_at', { ascending: false })
