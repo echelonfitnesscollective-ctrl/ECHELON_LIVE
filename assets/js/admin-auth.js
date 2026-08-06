@@ -247,6 +247,35 @@ function buildApplicationDetailPanel(item) {
     return panel;
 }
 
+function buildApplicationContactEditor(item, onSaved) {
+    const section = document.createElement('div');
+    section.className = 'application-contact-editor';
+    const heading = document.createElement('p'); heading.className = 'application-contact-editor-label'; heading.textContent = 'EDIT NAME, EMAIL & PHONE';
+    const form = document.createElement('form'); form.className = 'echelon-form';
+    const nameInput = document.createElement('input'); nameInput.type = 'text'; nameInput.placeholder = 'Full name'; nameInput.value = item.full_name || ''; nameInput.setAttribute('aria-label', 'Full name');
+    const emailInput = document.createElement('input'); emailInput.type = 'email'; emailInput.placeholder = 'Email'; emailInput.value = item.email || ''; emailInput.setAttribute('aria-label', 'Email');
+    const phoneInput = document.createElement('input'); phoneInput.type = 'tel'; phoneInput.placeholder = 'Phone'; phoneInput.value = item.phone || ''; phoneInput.setAttribute('aria-label', 'Phone');
+    const save = document.createElement('button'); save.type = 'submit'; save.className = 'btn-secondary'; save.textContent = 'SAVE CONTACT INFO';
+    const feedback = document.createElement('p'); feedback.className = 'form-error'; feedback.setAttribute('role', 'status');
+    form.append(nameInput, emailInput, phoneInput, save, feedback);
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        feedback.textContent = '';
+        const updated = { full_name: nameInput.value.trim(), email: emailInput.value.trim() || null, phone: phoneInput.value.trim() || null };
+        if (!updated.full_name) { feedback.textContent = 'Name is required.'; return; }
+
+        save.disabled = true; save.textContent = 'SAVING…';
+        const { error } = await echelonAdminClient.from('coaching_applications').update(updated).eq('id', item.id);
+        save.disabled = false; save.textContent = 'SAVE CONTACT INFO';
+        if (error) { feedback.textContent = 'Could not save. Please try again.'; return; }
+
+        feedback.textContent = 'Saved.';
+        onSaved(updated);
+    });
+    section.append(heading, form);
+    return section;
+}
+
 async function fetchExistingOfferForApplication(applicationId) {
     const projectResult = await echelonAdminClient.from('onboarding_projects').select('id').eq('application_id', applicationId).limit(1).maybeSingle();
     if (!projectResult.data) return null;
@@ -273,6 +302,13 @@ function createApplicationRecord(item) {
     const details = document.createElement('span'); details.textContent = `${item.program_interest || 'Coaching'} · ${item.email || 'Email not provided'}`;
     const reference = document.createElement('span'); reference.className = 'application-reference'; reference.textContent = item.application_reference ? `REFERENCE · ${item.application_reference}` : 'PRIVATE APPLICATION';
     const detailPanel = buildApplicationDetailPanel(item);
+    detailPanel.prepend(buildApplicationContactEditor(item, (updated) => {
+        item.full_name = updated.full_name;
+        item.email = updated.email;
+        item.phone = updated.phone;
+        name.textContent = item.full_name;
+        details.textContent = `${item.program_interest || 'Coaching'} · ${item.email || 'Email not provided'}`;
+    }));
     const detailToggle = document.createElement('button'); detailToggle.type = 'button'; detailToggle.className = 'btn-secondary application-detail-toggle'; detailToggle.textContent = 'VIEW DETAILS';
     detailToggle.addEventListener('click', () => {
         detailPanel.hidden = !detailPanel.hidden;
