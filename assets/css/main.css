@@ -4980,7 +4980,9 @@ MOBILE
     scroll-behavior: smooth; /* Smooth gliding when arrows are clicked */
     padding: 20px 0 40px 0;
     scrollbar-width: none;
-    align-items: stretch;
+    /* flex-start (not stretch): expanding one card's "+ VIEW DETAILS"
+       must only grow that card, never the whole row. */
+    align-items: flex-start;
 }
 
 #training .training-carousel::-webkit-scrollbar {
@@ -5097,13 +5099,12 @@ MOBILE
     align-self: flex-start;
     box-sizing: border-box;
     min-height: 54px;
-    padding: 6px 12px;
-    border: 1px solid rgba(255, 215, 0, 0.35);
-    color: var(--primary);
+    padding: 0;
+    color: #a99a6b;
     font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: 0.3px;
 }
 
 #training .status {
@@ -5171,6 +5172,10 @@ MOBILE
     margin-top: 15px; margin-bottom: 4px;
     font-size: 0.8rem; text-transform: uppercase;
     letter-spacing: 1px;
+}
+
+#training .detail-content strong:first-child {
+    margin-top: 0;
 }
 
 #training .detail-content p { color: #bbb; font-size: 0.9rem; }
