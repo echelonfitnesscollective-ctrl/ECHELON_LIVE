@@ -37,9 +37,8 @@ function installLaunchBasics() {
     }
     if (!document.querySelector('link[rel="icon"]')) {
         const icon = document.createElement('link');
-        icon.rel = 'icon'; icon.type = 'image/svg+xml';
-        const iconPath = window.location.pathname.includes('/pages/') ? '../assets/images/' : 'assets/images/';
-        icon.href = `${iconPath}${window.matchMedia('(prefers-color-scheme: dark)').matches ? 'favicon-dark.svg?v=7' : 'favicon-light.svg?v=7'}`;
+        icon.rel = 'icon'; icon.type = 'image/png';
+        icon.href = '/assets/images/favicon.png?v=8';
         document.head.append(icon);
     }
     document.querySelectorAll('a[target="_blank"]').forEach((link) => {

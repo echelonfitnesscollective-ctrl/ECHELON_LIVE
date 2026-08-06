@@ -60,12 +60,12 @@ function openPremiumModal(resource, catLabel) {
     const panel = document.getElementById('resource-modal-panel');
     if (!overlay || !panel) return;
 
-    panel.classList.add('resource-modal-panel-wide');
+    panel.classList.remove('resource-modal-panel-wide');
     panel.innerHTML = `
         <button type="button" class="resource-modal-close" aria-label="Close">&times;</button>
         <span class="resource-card-badge">${catLabel} <span class="resource-exclusive-flag">MEMBER ONLY</span></span>
         <h2>${resource.title}</h2>
-        <div class="resource-modal-body"><p class="resource-download-pending">Loading your resource&hellip;</p></div>
+        <div class="resource-modal-body"><p>${resource.description || 'A member-only Echelon resource, added by your coach.'}</p><p class="resource-download-pending">Preparing your download&hellip;</p></div>
         <div class="resource-modal-footer" hidden></div>
     `;
     panel.querySelector('.resource-modal-close').addEventListener('click', closeResourceModal);
@@ -81,15 +81,16 @@ function openPremiumModal(resource, catLabel) {
         const body = panel.querySelector('.resource-modal-body');
         const footer = panel.querySelector('.resource-modal-footer');
         if (!body || !footer) return;
+        const pending = body.querySelector('.resource-download-pending');
         if (!signed.data?.signedUrl) {
-            body.innerHTML = '<p class="resource-download-pending">This resource is temporarily unavailable, try again shortly.</p>';
+            if (pending) pending.textContent = 'This resource is temporarily unavailable, try again shortly.';
             return;
         }
         const url = signed.data.signedUrl;
         if (isPdf) {
-            body.innerHTML = `<iframe src="${url}" class="resource-pdf-viewer" title="${resource.title}"></iframe>`;
+            if (pending) pending.remove();
         } else {
-            body.innerHTML = `<img src="${url}" alt="${resource.title}" class="resource-modal-image">`;
+            body.innerHTML += `<img src="${url}" alt="${resource.title}" class="resource-modal-image">`;
         }
         footer.hidden = false;
         footer.innerHTML = `<a class="btn-primary resource-download-btn" href="${url}" target="_blank" rel="noopener" download>DOWNLOAD RESOURCE &darr;</a>`;

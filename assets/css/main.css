@@ -5253,6 +5253,7 @@ MOBILE
 
 .portal-card { background: #0D0D0C; padding: 50px; border: 1px solid #1A1917; max-width: 700px; margin: 0 auto; }
 .echelon-form { display: flex; flex-direction: column; gap: 20px; }
+.echelon-form[hidden] { display: none !important; }
 .form-group { display: flex; flex-direction: column; gap: 15px; margin-bottom: 30px; }
 .form-group h3 { color: var(--primary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
 
