@@ -56,10 +56,10 @@ async function processEnrollmentPayment(event) {
     await completeLaunchTask(project.id, 'Verify payment or approved exemption');
     if (offer.payment_option === 'echelon_12_monthly' || offer.payment_option === 'echelon_12_paid_in_full') {
       const clientName = project.coaching_applications?.full_name || 'this client';
-      const checkinDue = new Date(Date.now() + 84 * 24 * 60 * 60 * 1000).toISOString();
+      const checkinDue = new Date(Date.now() + 70 * 24 * 60 * 60 * 1000).toISOString();
       await serviceRequest('/rest/v1/coach_tasks', { method: 'POST', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({
-        title: `12-Week check-in: ${clientName}`,
-        description: `${clientName}'s 12-Week Transformation started today. Their plan keeps running until you or they change it. Nothing auto-cancels. Reach out around week 12 to talk through what's next: renew, move to Group Unlimited, or upgrade to 1-on-1.`,
+        title: `Week 10 Progress Review: ${clientName}`,
+        description: `${clientName}'s 12-Week Transformation started today. Their plan keeps running until you or they change it, nothing auto-cancels. Around week 10-11, sit down for a real Progress Review: pull up their progress photos and weekly check-in history from the Coaching Hub, walk through wins and what to improve, then present the 3 ways to continue. Group Fitness, $79/month for 3 sessions a week. Coaching Membership, $149/month for ongoing personalized coaching. 1-on-1 Coaching, $399/month, the highest-touch option. Use the GENERATE CHECKOUT LINK button on their Members profile for whichever they choose.`,
         related_name: clientName,
         task_type: 'Renewal check-in',
         priority: 'Normal',
