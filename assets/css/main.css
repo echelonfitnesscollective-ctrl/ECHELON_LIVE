@@ -2949,6 +2949,10 @@ MOBILE
     content:'−';
 }
 
+.exercise-category summary::after{
+    content:none;
+}
+
 .exercise-category-count{
     color:#9a9a9a;
     font-size:.68rem;
