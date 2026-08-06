@@ -65,6 +65,7 @@
                 <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="equipment" data-step="09">EQUIPMENT</button>
                 <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="workouts" data-step="10">WORKOUT LIBRARY</button>
                 <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="playbook" data-step="11">COACHING PLAYBOOK</button>
+                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="calendar" data-step="12">CALENDAR</button>
             </nav>
 
             <details class="admin-intake-section admin-console-section admin-content-section admin-tab-panel" data-admin-panel="content">
@@ -545,6 +546,24 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <div class="admin-tab-panel" data-admin-panel="calendar" hidden>
+            <details class="admin-intake-section admin-console-section" open>
+                <summary class="admin-section-heading">
+                    <div><span class="checkin-tag">SCHEDULE</span><h2>CALENDAR</h2></div>
+                    <p>Link an external calendar (Google Calendar, Notion, or similar) for the 12-Week group session and any other standing sessions. Internal only, not shown to members yet.</p>
+                </summary>
+                <div class="admin-resource-layout">
+                    <form id="calendar-settings-form" class="echelon-form">
+                        <input name="label" type="text" placeholder="Label (ex: 12-Week Group Session)" aria-label="Calendar label">
+                        <input name="embed_url" type="url" placeholder="Embed or share URL (Google Calendar, Notion, etc.)" aria-label="Calendar embed URL">
+                        <button type="submit" class="btn-secondary">SAVE CALENDAR</button>
+                        <p id="calendar-settings-feedback" class="form-error" role="status"></p>
+                    </form>
+                    <div id="calendar-preview" class="calendar-preview"></div>
+                </div>
+            </details>
         </div>
     </main>
 </body>

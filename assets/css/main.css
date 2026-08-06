@@ -3264,6 +3264,9 @@ COACHING PLAYBOOK
     margin:0;
 }
 
+.calendar-preview{min-height:600px;color:#8f8f8f;font-size:.85rem}
+.calendar-preview iframe{width:100%;height:600px;border:1px solid #2A2822;background:#fff}
+
 .admin-bulk-upload{
     grid-column:1 / -1;
     margin-top:20px;

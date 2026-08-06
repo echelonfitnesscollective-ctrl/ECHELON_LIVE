@@ -1817,9 +1817,53 @@ document.addEventListener('DOMContentLoaded', () => {
         initializeEquipmentManager();
         initializeWorkoutLibraryManager();
         initializeCoachingPlaybook();
+        initializeCalendarSettings();
         initializeAdminTabs();
     });
 });
+
+async function initializeCalendarSettings() {
+    const form = document.getElementById('calendar-settings-form');
+    if (!form) return;
+    const feedback = document.getElementById('calendar-settings-feedback');
+    const preview = document.getElementById('calendar-preview');
+
+    function renderPreview(url) {
+        preview.innerHTML = '';
+        if (!url) {
+            preview.textContent = 'No calendar linked yet.';
+            return;
+        }
+        const iframe = document.createElement('iframe');
+        iframe.src = url;
+        iframe.loading = 'lazy';
+        iframe.title = 'Linked calendar';
+        preview.append(iframe);
+    }
+
+    const { data, error } = await echelonAdminClient.from('console_calendar_settings').select('label, embed_url').eq('id', 1).maybeSingle();
+    if (!error && data) {
+        form.elements.label.value = data.label || '';
+        form.elements.embed_url.value = data.embed_url || '';
+        renderPreview(data.embed_url);
+    } else {
+        preview.textContent = 'Run the console calendar database update to activate this section.';
+    }
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        feedback.textContent = '';
+        const label = form.elements.label.value.trim();
+        const embedUrl = form.elements.embed_url.value.trim();
+        const { error: saveError } = await echelonAdminClient.from('console_calendar_settings').upsert({ id: 1, label, embed_url: embedUrl, updated_at: new Date().toISOString() });
+        if (saveError) {
+            feedback.textContent = 'Could not save. Please try again.';
+            return;
+        }
+        feedback.textContent = 'Calendar saved.';
+        renderPreview(embedUrl);
+    });
+}
 
 function sectionControlStatusLabel(row) {
     if (!row || row.status === 'hidden') return 'Status: Empty · not shown on the site';
