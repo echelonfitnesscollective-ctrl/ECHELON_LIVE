@@ -4998,7 +4998,10 @@ MOBILE
     /* PEEK LAYOUT: 85vw on mobile guarantees the next card peeks out */
     flex: 0 0 85vw;
     max-width: 360px; /* Caps the width on desktop */
-    min-height: 600px;
+    /* Matches Group Fitness's natural height (2 buttons + a link), the
+       tallest card at rest, so every card's outer frame lines up
+       without tying resting height to whichever card is expanded. */
+    min-height: 770px;
     background: #1A1917;
     border: 1px solid #2A2822;
     padding: 40px 35px;
