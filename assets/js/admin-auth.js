@@ -248,32 +248,53 @@ function buildApplicationDetailPanel(item) {
 }
 
 function buildApplicationContactEditor(item, onSaved) {
-    const section = document.createElement('div');
-    section.className = 'application-contact-editor';
-    const heading = document.createElement('p'); heading.className = 'application-contact-editor-label'; heading.textContent = 'EDIT NAME, EMAIL & PHONE';
-    const form = document.createElement('form'); form.className = 'echelon-form';
-    const nameInput = document.createElement('input'); nameInput.type = 'text'; nameInput.placeholder = 'Full name'; nameInput.value = item.full_name || ''; nameInput.setAttribute('aria-label', 'Full name');
+    const wrap = document.createElement('span');
+    wrap.className = 'application-contact-editor';
+
+    const editBtn = document.createElement('button');
+    editBtn.type = 'button';
+    editBtn.className = 'application-contact-edit-btn';
+    editBtn.setAttribute('aria-label', 'Edit name, email, and phone');
+    editBtn.textContent = '✎';
+
+    const form = document.createElement('form');
+    form.className = 'application-contact-form';
+    form.hidden = true;
+    const nameInput = document.createElement('input'); nameInput.type = 'text'; nameInput.placeholder = 'Name'; nameInput.value = item.full_name || ''; nameInput.setAttribute('aria-label', 'Full name');
     const emailInput = document.createElement('input'); emailInput.type = 'email'; emailInput.placeholder = 'Email'; emailInput.value = item.email || ''; emailInput.setAttribute('aria-label', 'Email');
     const phoneInput = document.createElement('input'); phoneInput.type = 'tel'; phoneInput.placeholder = 'Phone'; phoneInput.value = item.phone || ''; phoneInput.setAttribute('aria-label', 'Phone');
-    const save = document.createElement('button'); save.type = 'submit'; save.className = 'btn-secondary'; save.textContent = 'SAVE CONTACT INFO';
-    const feedback = document.createElement('p'); feedback.className = 'form-error'; feedback.setAttribute('role', 'status');
-    form.append(nameInput, emailInput, phoneInput, save, feedback);
+    const save = document.createElement('button'); save.type = 'submit'; save.className = 'application-contact-save'; save.textContent = 'SAVE';
+    const cancel = document.createElement('button'); cancel.type = 'button'; cancel.className = 'application-contact-cancel'; cancel.textContent = 'CANCEL';
+    const feedback = document.createElement('span'); feedback.className = 'application-contact-feedback'; feedback.setAttribute('role', 'status');
+    form.append(nameInput, emailInput, phoneInput, save, cancel, feedback);
+
+    const closeForm = () => { form.hidden = true; editBtn.hidden = false; };
+
+    editBtn.addEventListener('click', () => { form.hidden = false; editBtn.hidden = true; nameInput.focus(); });
+    cancel.addEventListener('click', () => {
+        nameInput.value = item.full_name || '';
+        emailInput.value = item.email || '';
+        phoneInput.value = item.phone || '';
+        feedback.textContent = '';
+        closeForm();
+    });
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
         feedback.textContent = '';
         const updated = { full_name: nameInput.value.trim(), email: emailInput.value.trim() || null, phone: phoneInput.value.trim() || null };
-        if (!updated.full_name) { feedback.textContent = 'Name is required.'; return; }
+        if (!updated.full_name) { feedback.textContent = 'Name required.'; return; }
 
-        save.disabled = true; save.textContent = 'SAVING…';
+        save.disabled = true;
         const { error } = await echelonAdminClient.from('coaching_applications').update(updated).eq('id', item.id);
-        save.disabled = false; save.textContent = 'SAVE CONTACT INFO';
-        if (error) { feedback.textContent = 'Could not save. Please try again.'; return; }
+        save.disabled = false;
+        if (error) { feedback.textContent = 'Could not save.'; return; }
 
-        feedback.textContent = 'Saved.';
         onSaved(updated);
+        closeForm();
     });
-    section.append(heading, form);
-    return section;
+
+    wrap.append(editBtn, form);
+    return wrap;
 }
 
 async function fetchExistingOfferForApplication(applicationId) {
@@ -299,16 +320,17 @@ function createApplicationRecord(item) {
     const name = document.createElement('strong'); name.textContent = item.full_name;
     const state = document.createElement('span'); state.className = `application-state ${item.payment_status === 'paid' ? 'is-paid' : ''}`; state.textContent = item.status || 'New';
     top.append(name, state);
-    const details = document.createElement('span'); details.textContent = `${item.program_interest || 'Coaching'} · ${item.email || 'Email not provided'}`;
-    const reference = document.createElement('span'); reference.className = 'application-reference'; reference.textContent = item.application_reference ? `REFERENCE · ${item.application_reference}` : 'PRIVATE APPLICATION';
-    const detailPanel = buildApplicationDetailPanel(item);
-    detailPanel.prepend(buildApplicationContactEditor(item, (updated) => {
+    const details = document.createElement('span');
+    const detailsText = document.createElement('span'); detailsText.textContent = `${item.program_interest || 'Coaching'} · ${item.email || 'Email not provided'}`;
+    details.append(detailsText, buildApplicationContactEditor(item, (updated) => {
         item.full_name = updated.full_name;
         item.email = updated.email;
         item.phone = updated.phone;
         name.textContent = item.full_name;
-        details.textContent = `${item.program_interest || 'Coaching'} · ${item.email || 'Email not provided'}`;
+        detailsText.textContent = `${item.program_interest || 'Coaching'} · ${item.email || 'Email not provided'}`;
     }));
+    const reference = document.createElement('span'); reference.className = 'application-reference'; reference.textContent = item.application_reference ? `REFERENCE · ${item.application_reference}` : 'PRIVATE APPLICATION';
+    const detailPanel = buildApplicationDetailPanel(item);
     const detailToggle = document.createElement('button'); detailToggle.type = 'button'; detailToggle.className = 'btn-secondary application-detail-toggle'; detailToggle.textContent = 'VIEW DETAILS';
     detailToggle.addEventListener('click', () => {
         detailPanel.hidden = !detailPanel.hidden;
