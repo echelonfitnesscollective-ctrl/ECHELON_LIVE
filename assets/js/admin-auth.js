@@ -827,19 +827,59 @@ async function initializeWorkoutLibraryManager() {
         exerciseForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
-    async function refreshExercises() {
-        const { data, error } = await echelonAdminClient.from('exercise_library').select('*').order('created_at', { ascending: false });
-        if (error) { exerciseList.textContent = 'Run the coaching content database update to activate this section.'; return []; }
-        renderAdminRecords(exerciseList, data || [], 'No exercises yet.', (item) => {
-            const record = createAdminRecord([
-                { text: item.name, strong: true },
-                { text: item.target_area || 'N/A' },
-                { text: item.status === 'published' ? 'Published' : 'Draft' }
-            ]);
-            record.style.cursor = 'pointer';
-            record.addEventListener('click', () => loadExerciseIntoForm(item));
-            return record;
+    const EXERCISE_CATEGORY_ORDER = ['Hinge', 'Push', 'Pull', 'Squat', 'Lunge', 'Locomotion', 'Core', 'Isolation/Activation', 'SAQ (Speed, Agility, Quickness)'];
+
+    function renderGroupedExercises(container, records) {
+        container.replaceChildren();
+        if (!records.length) { container.textContent = 'No exercises yet.'; return; }
+        const groups = new Map();
+        records.forEach((item) => {
+            const key = (item.target_area || '').trim() || 'Uncategorized';
+            if (!groups.has(key)) groups.set(key, []);
+            groups.get(key).push(item);
         });
+        const sortedKeys = Array.from(groups.keys()).sort((a, b) => {
+            const ai = EXERCISE_CATEGORY_ORDER.indexOf(a);
+            const bi = EXERCISE_CATEGORY_ORDER.indexOf(b);
+            if (ai !== -1 && bi !== -1) return ai - bi;
+            if (ai !== -1) return -1;
+            if (bi !== -1) return 1;
+            return a.localeCompare(b);
+        });
+        sortedKeys.forEach((key) => {
+            const items = groups.get(key);
+            const details = document.createElement('details');
+            details.className = 'exercise-category';
+            const summary = document.createElement('summary');
+            summary.className = 'exercise-category-summary';
+            const label = document.createElement('span');
+            label.textContent = key;
+            const count = document.createElement('span');
+            count.className = 'exercise-category-count';
+            count.textContent = `${items.length} exercise${items.length === 1 ? '' : 's'}`;
+            summary.append(label, count);
+            details.append(summary);
+            const list = document.createElement('div');
+            list.className = 'admin-record-list';
+            renderAdminRecords(list, items, 'No exercises yet.', (item) => {
+                const record = createAdminRecord([
+                    { text: item.name, strong: true },
+                    { text: item.status === 'published' ? 'Published' : 'Draft' },
+                    { text: item.video_url ? 'Video linked' : 'No video yet' }
+                ]);
+                record.style.cursor = 'pointer';
+                record.addEventListener('click', () => loadExerciseIntoForm(item));
+                return record;
+            });
+            details.append(list);
+            container.append(details);
+        });
+    }
+
+    async function refreshExercises() {
+        const { data, error } = await echelonAdminClient.from('exercise_library').select('*').order('target_area', { ascending: true }).order('name', { ascending: true });
+        if (error) { exerciseList.textContent = 'Run the coaching content database update to activate this section.'; return []; }
+        renderGroupedExercises(exerciseList, data || []);
         return data || [];
     }
 
