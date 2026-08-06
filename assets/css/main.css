@@ -4986,6 +4986,10 @@ MOBILE
 }
 
 /* 3. Premium Card Styles (Peek Layout) */
+#training .training-card[hidden] {
+    display: none !important;
+}
+
 #training .training-card {
     /* PEEK LAYOUT: 85vw on mobile guarantees the next card peeks out */
     flex: 0 0 85vw;
