@@ -2,7 +2,8 @@
 
 const OFFERS = {
   group_drop_in: { priceEnv: 'STRIPE_PRICE_GROUP_DROP_IN', mode: 'payment', label: 'Echelon Group Fitness Drop-In' },
-  group_unlimited: { priceEnv: 'STRIPE_PRICE_GROUP_UNLIMITED', mode: 'subscription', label: 'Echelon Group Fitness Unlimited' },
+  group_unlimited: { priceEnv: 'STRIPE_PRICE_GROUP_UNLIMITED', mode: 'subscription', label: 'Echelon Group Fitness Membership' },
+  coaching_membership_monthly: { priceEnv: 'STRIPE_PRICE_COACHING_MEMBERSHIP_MONTHLY', mode: 'subscription', label: 'Echelon Coaching Membership' },
 };
 
 const inMemoryRateLimit = new Map();

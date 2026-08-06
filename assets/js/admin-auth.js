@@ -1647,6 +1647,29 @@ async function appendMemberCoachingControls(detail, row, memberName) {
         section.append(enrolledNote);
     }
 
+    const membershipBlock = document.createElement('div'); membershipBlock.className = 'echelon-form';
+    const membershipHeading = document.createElement('h5'); membershipHeading.textContent = 'Coaching Membership, $149/month';
+    const membershipButton = document.createElement('button'); membershipButton.type = 'button'; membershipButton.className = 'btn-secondary'; membershipButton.textContent = 'GENERATE CHECKOUT LINK';
+    const membershipOutput = document.createElement('input'); membershipOutput.type = 'text'; membershipOutput.readOnly = true; membershipOutput.setAttribute('aria-label', 'Coaching Membership checkout link'); membershipOutput.placeholder = `Send this to ${row.profile?.email || memberName} once generated`;
+    const membershipFeedback = document.createElement('p'); membershipFeedback.className = 'form-error'; membershipFeedback.setAttribute('role', 'status');
+    membershipButton.addEventListener('click', async () => {
+        membershipFeedback.textContent = '';
+        membershipButton.disabled = true; membershipButton.textContent = 'GENERATING…';
+        try {
+            const response = await fetch('/api/checkout/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ offer: 'coaching_membership_monthly' }) });
+            const body = await response.json();
+            if (!response.ok || !body.url) { membershipFeedback.textContent = body.error || 'Could not generate a link. Please try again.'; return; }
+            membershipOutput.value = body.url;
+            membershipOutput.select();
+        } catch (_) {
+            membershipFeedback.textContent = 'Could not generate a link. Please try again.';
+        } finally {
+            membershipButton.disabled = false; membershipButton.textContent = 'GENERATE CHECKOUT LINK';
+        }
+    });
+    membershipBlock.append(membershipHeading, membershipButton, membershipOutput, membershipFeedback);
+    section.append(membershipBlock);
+
     const enrollForm = document.createElement('form'); enrollForm.className = 'echelon-form';
     const programSelect = document.createElement('select'); programSelect.required = true; programSelect.setAttribute('aria-label', 'Program to enroll in');
     if (!programsResult.error && programsResult.data.length) {
