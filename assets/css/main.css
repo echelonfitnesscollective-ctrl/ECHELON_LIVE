@@ -2950,7 +2950,7 @@ MOBILE
 }
 
 .exercise-category summary::after{
-    content:none;
+    content:none!important;
 }
 
 .exercise-category-count{
