@@ -111,8 +111,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             const row = data.find((item) => item.program_key === card.dataset.programKey);
             if (!row) return;
             applyProgramContent(card, row);
+
+            if (row.status === 'hidden') {
+                card.setAttribute('hidden', '');
+                return;
+            }
+
             if (card.querySelector('[data-program-status]') || card.hasAttribute('hidden')) {
                 applyProgramGate(card, row);
+            } else {
+                card.removeAttribute('hidden');
             }
         });
 

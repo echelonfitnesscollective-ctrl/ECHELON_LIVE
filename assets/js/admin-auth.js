@@ -1826,6 +1826,9 @@ async function initializeSectionControl() {
         const statusEl = form.querySelector('[data-launch-status]');
         if (statusEl) statusEl.textContent = sectionControlStatusLabel(row);
 
+        const toggleHiddenBtn = form.querySelector('[data-toggle-hidden]');
+        if (toggleHiddenBtn) toggleHiddenBtn.textContent = row.status === 'hidden' ? 'SHOW ON SITE' : 'HIDE FROM SITE';
+
         if (form.dataset.gated) {
             if (row.launch_at) form.elements.launch_at.value = new Date(row.launch_at).toISOString().slice(0, 10);
             else form.elements.launch_at.value = '';
@@ -1912,6 +1915,25 @@ async function initializeSectionControl() {
                 currentRows = currentRows.map((row) => (row.program_key === key ? { ...row, ...payload } : row));
                 renderForm(form);
                 feedback.textContent = isSpecialEvent ? 'Slot cleared.' : 'Reverted to in development.';
+            });
+        }
+
+        const toggleHiddenBtn = form.querySelector('[data-toggle-hidden]');
+        if (toggleHiddenBtn) {
+            toggleHiddenBtn.addEventListener('click', async () => {
+                const row = findRow(key);
+                const nextStatus = row.status === 'hidden'
+                    ? (form.dataset.gated && !row.launch_at ? 'in_development' : 'launched')
+                    : 'hidden';
+
+                toggleHiddenBtn.disabled = true;
+                const { error } = await echelonAdminClient.from('training_programs').update({ status: nextStatus }).eq('program_key', key);
+                toggleHiddenBtn.disabled = false;
+                if (error) { feedback.textContent = 'Could not update visibility. Please try again.'; return; }
+
+                currentRows = currentRows.map((r) => (r.program_key === key ? { ...r, status: nextStatus } : r));
+                renderForm(form);
+                feedback.textContent = nextStatus === 'hidden' ? 'Hidden from the public site.' : 'Visible on the public site again.';
             });
         }
 
