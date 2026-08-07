@@ -6,6 +6,7 @@ function matchGoalCategory(rawCategory) {
     if (c.includes('muscle') || c.includes('hypertrophy')) return 'muscle';
     if (c.includes('perform')) return 'performance';
     if (c.includes('older') || c.includes('senior') || c.includes('wellness')) return 'older-adult';
+    if (c.includes('pregnan') || c.includes('preconception') || c.includes('prenatal') || c.includes('postpartum')) return 'pregnancy';
     if (c.includes('fuel') || c.includes('nutrition')) return 'fuel-general';
     if (c.includes('train')) return 'training';
     return null;
@@ -102,6 +103,7 @@ const MEMBER_CATEGORY_LABELS = {
     'fuel-weight-loss': 'FUEL &middot; WEIGHT LOSS', 'fuel-cutting': 'FUEL &middot; CUTTING', 'fuel-bulking': 'FUEL &middot; BULKING',
     'fuel-muscle': 'FUEL &middot; MUSCLE', 'fuel-performance': 'FUEL &middot; PERFORMANCE', 'fuel-older-adult': 'FUEL &middot; OLDER-ADULT',
     'weight-loss': 'WEIGHT LOSS', 'cutting': 'CUTTING', 'bulking': 'BULKING', 'muscle': 'MUSCLE', 'performance': 'PERFORMANCE', 'older-adult': 'OLDER-ADULT',
+    'pregnancy': 'PREGNANCY',
     'fuel-general': '01 &middot; FUEL'
 };
 
