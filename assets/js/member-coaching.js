@@ -5,6 +5,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     const photoForm = document.getElementById('progress-photo-form');
     photoForm.elements.taken_on.value = today;
 
+    let showPregnancyMods = false;
+    const pregnancyToggle = document.getElementById('pregnancy-toggle-input');
+    if (pregnancyToggle) {
+        const { data: profile } = await echelonMemberClient.from('member_training_profiles').select('pregnant_or_postpartum').eq('user_id', member.id).maybeSingle();
+        showPregnancyMods = !!profile?.pregnant_or_postpartum;
+        pregnancyToggle.checked = showPregnancyMods;
+        pregnancyToggle.addEventListener('change', async () => {
+            showPregnancyMods = pregnancyToggle.checked;
+            await echelonMemberClient.from('member_training_profiles').upsert({ user_id: member.id, pregnant_or_postpartum: showPregnancyMods }, { onConflict: 'user_id' });
+            loadTodaysWork();
+        });
+    }
+
     async function forwardMemberMessage(message) {
         const notification = new FormData();
         notification.append('_subject', 'New Echelon Member Hub message');
@@ -18,6 +31,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function loadTodaysWork() {
         const list = document.getElementById('todays-work-list');
         if (!list) return;
+        const scrollY = window.scrollY;
         const { data, error } = await echelonMemberClient
             .from('member_daily_workouts')
             .select('id, assigned_date, status, coach_note, workouts(title, category, description, setting, workout_exercises(sort_order, sets, reps, rest_seconds, notes, exercise_library(name, target_area, form_cues, coaching_cues, modification_up, modification_down, modification_pregnancy, video_url)))')
@@ -27,7 +41,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             .order('sort_order', { foreignTable: 'workouts.workout_exercises', ascending: true })
             .limit(14);
         list.replaceChildren();
-        if (error || !(data || []).length) { list.textContent = "Your coach hasn't assigned any upcoming work yet."; return; }
+        if (error || !(data || []).length) { list.textContent = "Your coach hasn't assigned any upcoming work yet."; window.scrollTo(0, scrollY); return; }
         data.forEach(assignment => {
             const day = document.createElement('article'); day.className = 'todays-work-day' + (assignment.assigned_date === today ? ' is-today' : '');
             const heading = document.createElement('h3');
@@ -54,12 +68,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (exercise.form_cues) { const cues = document.createElement('p'); cues.textContent = exercise.form_cues; card.append(cues); }
                 if (exercise.coaching_cues) { const cues = document.createElement('p'); cues.textContent = exercise.coaching_cues; card.append(cues); }
                 if (row.notes) { const notes = document.createElement('p'); notes.className = 'todays-work-coach-note'; notes.textContent = row.notes; card.append(notes); }
-                if (exercise.modification_up || exercise.modification_down || exercise.modification_pregnancy || exercise.video_url) {
+                const showUpDown = !showPregnancyMods;
+                if ((showUpDown && (exercise.modification_up || exercise.modification_down)) || (showPregnancyMods && exercise.modification_pregnancy) || exercise.video_url) {
                     const details = document.createElement('details'); details.className = 'todays-work-mods';
-                    const summary = document.createElement('summary'); summary.textContent = 'View Modifications'; details.append(summary);
-                    if (exercise.modification_up) { const p = document.createElement('p'); p.innerHTML = `<strong>Up:</strong> `; p.append(exercise.modification_up); details.append(p); }
-                    if (exercise.modification_down) { const p = document.createElement('p'); p.innerHTML = `<strong>Down:</strong> `; p.append(exercise.modification_down); details.append(p); }
-                    if (exercise.modification_pregnancy) { const p = document.createElement('p'); p.innerHTML = `<strong>Pregnancy-safe:</strong> `; p.append(exercise.modification_pregnancy); details.append(p); }
+                    const summary = document.createElement('summary'); summary.textContent = showPregnancyMods ? 'View Pregnancy-Safe Modification' : 'View Modifications'; details.append(summary);
+                    if (showPregnancyMods) {
+                        if (exercise.modification_pregnancy) { const p = document.createElement('p'); p.innerHTML = `<strong>Pregnancy-safe:</strong> `; p.append(exercise.modification_pregnancy); details.append(p); }
+                        else { const p = document.createElement('p'); p.textContent = 'No pregnancy-specific modification on file for this exercise yet, message your coach before loading it.'; details.append(p); }
+                    } else {
+                        if (exercise.modification_up) { const p = document.createElement('p'); p.innerHTML = `<strong>Up:</strong> `; p.append(exercise.modification_up); details.append(p); }
+                        if (exercise.modification_down) { const p = document.createElement('p'); p.innerHTML = `<strong>Down:</strong> `; p.append(exercise.modification_down); details.append(p); }
+                    }
                     if (exercise.video_url) { const p = document.createElement('p'); const a = document.createElement('a'); a.href = exercise.video_url; a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'Watch demo video'; p.append(a); details.append(p); }
                     card.append(details);
                 }
@@ -74,6 +93,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             list.append(day);
         });
+        requestAnimationFrame(() => window.scrollTo(0, scrollY));
     }
 
     async function loadHub() {
