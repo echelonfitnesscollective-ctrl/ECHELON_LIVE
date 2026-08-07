@@ -2,6 +2,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('member-login-form');
     if (!form) return;
 
+    const emailField = form.elements.email;
+    const passwordField = form.elements.password;
+    if (!emailField || !passwordField) return;
+
     const overlay = document.createElement('div');
     overlay.className = 'zamiyah-overlay';
     overlay.setAttribute('aria-hidden', 'true');
@@ -17,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const heartsLayer = overlay.querySelector('.zamiyah-hearts');
     const heartEmojis = ['💗', '💕', '💖', '💓', '💞', '🩷'];
+    let triggered = false;
 
     function spawnHearts() {
         heartsLayer.innerHTML = '';
@@ -38,16 +43,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     overlay.addEventListener('click', closeOverlay);
 
-    form.addEventListener('submit', (event) => {
-        const email = (form.elements.email.value || '').trim().toLowerCase();
-        const password = form.elements.password.value || '';
+    function checkMagicWords() {
+        const email = emailField.value.trim().toLowerCase();
+        const password = passwordField.value;
         if (email === 'lulu' && password === 'melon') {
-            event.preventDefault();
-            event.stopImmediatePropagation();
-            form.reset();
+            if (triggered) return;
+            triggered = true;
             spawnHearts();
             overlay.classList.add('active');
             overlay.setAttribute('aria-hidden', 'false');
+        } else {
+            triggered = false;
+        }
+    }
+
+    emailField.addEventListener('input', checkMagicWords);
+    passwordField.addEventListener('input', checkMagicWords);
+
+    form.addEventListener('submit', (event) => {
+        const email = emailField.value.trim().toLowerCase();
+        const password = passwordField.value;
+        if (email === 'lulu' && password === 'melon') {
+            event.preventDefault();
+            event.stopImmediatePropagation();
         }
     });
 });
