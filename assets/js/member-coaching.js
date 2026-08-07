@@ -5,18 +5,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const photoForm = document.getElementById('progress-photo-form');
     photoForm.elements.taken_on.value = today;
 
-    let showPregnancyMods = false;
-    const pregnancyToggle = document.getElementById('pregnancy-toggle-input');
-    if (pregnancyToggle) {
-        const { data: profile } = await echelonMemberClient.from('member_training_profiles').select('pregnant_or_postpartum').eq('user_id', member.id).maybeSingle();
-        showPregnancyMods = !!profile?.pregnant_or_postpartum;
-        pregnancyToggle.checked = showPregnancyMods;
-        pregnancyToggle.addEventListener('change', async () => {
-            showPregnancyMods = pregnancyToggle.checked;
-            await echelonMemberClient.from('member_training_profiles').upsert({ user_id: member.id, pregnant_or_postpartum: showPregnancyMods }, { onConflict: 'user_id' });
-            loadTodaysWork();
-        });
-    }
+    // Set only by the coach, from the admin Training Profile. Not a member-facing control.
+    const { data: trainingProfile } = await echelonMemberClient.from('member_training_profiles').select('pregnant_or_postpartum').eq('user_id', member.id).maybeSingle();
+    const showPregnancyMods = !!trainingProfile?.pregnant_or_postpartum;
 
     async function forwardMemberMessage(message) {
         const notification = new FormData();
