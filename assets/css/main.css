@@ -3198,6 +3198,7 @@ COACHING PLAYBOOK
 .playbook-dot-template{ background:#d69173; }
 .playbook-dot-education{ background:#93a8d6; }
 .playbook-dot-delivery{ background:#c99bd6; }
+.playbook-dot-welcome-pack{ background:#e0a45c; }
 
 .playbook-item-title{
     color:#ccc;
@@ -3245,6 +3246,13 @@ COACHING PLAYBOOK
 .playbook-chip-template{ background:#d69173; color:#3a1c0f; }
 .playbook-chip-education{ background:#93a8d6; color:#131d38; }
 .playbook-chip-delivery{ background:#c99bd6; color:#2c123a; }
+.playbook-chip-welcome-pack{ background:#e0a45c; color:#3a2408; }
+
+.playbook-pdf-download{
+    margin-top:24px;
+    padding-top:20px;
+    border-top:1px solid rgba(215,181,91,.2);
+}
 
 .playbook-doc-title{
     color:#fff;
