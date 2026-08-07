@@ -57,6 +57,7 @@
 <script src="assets/js/shop-showcase.js" defer></script>
 <script src="assets/js/site-content-feed.js" defer></script>
 <script src="assets/js/section-control.js" defer></script>
+<script src="assets/js/training-card-modal.js" defer></script>
 <script src="assets/js/media-carousel.js" defer></script>
 <script src="assets/js/analytics.js" defer></script>
 <script src="assets/js/site-intake.js" defer></script>
@@ -387,16 +388,14 @@
                     </div>
                     <div class="training-card-footer">
                         <div class="training-card-tag-slot"></div>
-                        <details>
-                            <summary>+ View Membership Details</summary>
-                            <div class="detail-content" data-program-details>
+                        <button type="button" class="training-card-details-btn" data-open-details>+ View Membership Details</button>
+                            <div class="detail-content" data-program-details hidden>
                                 <strong>Access</strong><p>$20 drop-in · $79/month for up to 3 scheduled Echelon Group Fitness sessions per week.</p>
                                 <strong>Schedule</strong><p>Group sessions run on a fixed published schedule, so members always know when to train and the coaching standard stays high.</p>
                                 <strong>Included</strong><p>Complimentary for active Echelon 12-Week Transformation and 1-on-1 Hybrid Coaching clients.</p>
                                 <strong>Community</strong><p>One session every two weeks is free and open to the public.</p>
                                 <a href="pages/terms.html#payments-refund-policy" class="refund-policy-link">Cancellation &amp; Refund Policy →</a>
                             </div>
-                        </details>
                         <div class="training-card-footer-spacer"></div>
                         <div class="training-card-actions">
                             <button type="button" class="btn-primary" data-checkout-offer="group_drop_in">$20 DROP-IN</button>
@@ -416,15 +415,13 @@
                     </div>
                     <div class="training-card-footer">
                         <div class="training-card-tag-slot"></div>
-                        <details>
-                            <summary>+ View Group Experience Details</summary>
-                            <div class="detail-content" data-program-details>
+                        <button type="button" class="training-card-details-btn" data-open-details>+ View Group Experience Details</button>
+                            <div class="detail-content" data-program-details hidden>
                                 <strong>Designed for your group</strong><p>Private workouts, team wellness sessions, celebrations, community groups, and organization programming tailored to your needs.</p>
                                 <strong>Flexible format</strong><p>Start at $199 for up to five people, then add $25 for each additional participant, up to 15 total. One-time experiences and recurring monthly groups are offered in designated Echelon event windows.</p>
                                 <strong>Built around real availability</strong><p>Share your group size, preferred date, location, and goal. Approved organizers receive a private booking link with only the designated Echelon event slots that are available, so every session is intentional, prepared, and on schedule.</p>
                                 <a href="pages/terms.html#payments-refund-policy" class="refund-policy-link">Cancellation &amp; Refund Policy →</a>
                             </div>
-                        </details>
                         <div class="training-card-footer-spacer"></div>
                         <a href="pages/coaching-application.html?program=private-group-training" class="btn-secondary">PLAN YOUR GROUP →</a>
                     </div>
@@ -440,16 +437,14 @@
                     </div>
                     <div class="training-card-footer">
                         <div class="training-card-tag-slot"></div>
-                        <details>
-                            <summary>+ View Program Details</summary>
-                            <div class="detail-content" data-program-details>
+                        <button type="button" class="training-card-details-btn" data-open-details>+ View Program Details</button>
+                            <div class="detail-content" data-program-details hidden>
                                 <strong>Focus</strong><p>Personalized workouts, nutrition support, habit coaching, and weekly check-ins, delivered one-on-one with your coach through the Member Portal.</p>
                                 <strong>Format</strong><p>This is a coaching relationship, not a class: your training and nutrition run all week through the Member Portal. Once a week, the full 12-Week group trains together in person, time confirmed with your coach after you enroll.</p>
                                 <strong>Investment</strong><p>$399 paid in full, or $149/month.</p>
                                 <strong>Access</strong><p>Application required · choose 12-Week Transformation when applying.</p>
                                 <a href="pages/terms.html#payments-refund-policy" class="refund-policy-link">Cancellation &amp; Refund Policy →</a>
                             </div>
-                        </details>
                         <div class="training-card-footer-spacer"></div>
                         <a href="pages/coaching-application.html?program=12-week-transformation" class="btn-secondary">APPLY FOR COACHING</a>
                     </div>
@@ -465,16 +460,14 @@
                     </div>
                     <div class="training-card-footer">
                         <div class="scarcity-tag" data-program-note>Accepting up to 7 new 1-on-1 clients this month</div>
-                        <details>
-                            <summary>+ View Session Details</summary>
-                            <div class="detail-content" data-program-details>
+                        <button type="button" class="training-card-details-btn" data-open-details>+ View Session Details</button>
+                            <div class="detail-content" data-program-details hidden>
                                 <strong>Focus</strong><p>Individual programming, movement coaching, lifestyle support, and long-term transformation.</p>
                                 <strong>Format</strong><p>Private coaching with in-person and hybrid options based on fit.</p>
                                 <strong>Investment</strong><p>Coaching is $399/month. Payment begins after your application and consultation are approved.</p>
                                 <strong>Access</strong><p>Limited roster · application and consultation required. Approved clients book inside Coach Luther’s released coaching windows.</p>
                                 <a href="pages/terms.html#payments-refund-policy" class="refund-policy-link">Cancellation &amp; Refund Policy →</a>
                             </div>
-                        </details>
                         <div class="training-card-footer-spacer"></div>
                         <a href="pages/coaching-application.html" class="btn-secondary">APPLY NOW</a>
                     </div>
@@ -490,14 +483,12 @@
                     </div>
                     <div class="training-card-footer">
                         <div class="training-card-tag-slot"></div>
-                        <details>
-                            <summary>+ View Program Details</summary>
-                            <div class="detail-content" data-program-details>
+                        <button type="button" class="training-card-details-btn" data-open-details>+ View Program Details</button>
+                            <div class="detail-content" data-program-details hidden>
                                 <strong>Focus</strong><p>Mobility, core stability, posture, and active recovery.</p>
                                 <strong>Format</strong><p>45-minute small-group session for all experience levels.</p>
                                 <strong>Launch standard</strong><p>Opens when coaching coverage and a sustainable recurring schedule are confirmed.</p>
                             </div>
-                        </details>
                         <div class="training-card-footer-spacer"></div>
                         <a href="pages/waitlist.html" class="btn-secondary" data-program-cta>JOIN THE INTEREST LIST</a>
                     </div>
@@ -513,14 +504,12 @@
                     </div>
                     <div class="training-card-footer">
                         <div class="training-card-tag-slot"></div>
-                        <details>
-                            <summary>+ View Program Details</summary>
-                            <div class="detail-content" data-program-details>
+                        <button type="button" class="training-card-details-btn" data-open-details>+ View Program Details</button>
+                            <div class="detail-content" data-program-details hidden>
                                 <strong>Focus</strong><p>Strength, speed, athletic conditioning, and total-body capacity.</p>
                                 <strong>Format</strong><p>50-minute group performance session that scales to different experience levels.</p>
                                 <strong>Launch standard</strong><p>Opens when coaching coverage and a sustainable recurring schedule are confirmed.</p>
                             </div>
-                        </details>
                         <div class="training-card-footer-spacer"></div>
                         <a href="pages/waitlist.html" class="btn-secondary" data-program-cta>JOIN THE INTEREST LIST</a>
                     </div>
@@ -536,10 +525,8 @@
                     </div>
                     <div class="training-card-footer">
                         <div class="training-card-tag-slot"></div>
-                        <details>
-                            <summary>+ View Event Details</summary>
-                            <div class="detail-content" data-program-details></div>
-                        </details>
+                        <button type="button" class="training-card-details-btn" data-open-details>+ View Event Details</button>
+                            <div class="detail-content" data-program-details hidden></div>
                         <div class="training-card-footer-spacer"></div>
                         <a href="pages/coaching-application.html?program=special-event" class="btn-secondary" data-program-cta>APPLY NOW</a>
                     </div>
