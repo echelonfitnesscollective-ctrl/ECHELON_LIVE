@@ -6037,3 +6037,86 @@ MOBILE
 
 /* Echelon media gallery */
 .media-section{background:linear-gradient(105deg,rgba(13, 13, 12,.82),rgba(13, 13, 12,.68)),url('../images/efc-studio-dawn.png') center/cover no-repeat;background:linear-gradient(105deg,rgba(13, 13, 12,.82),rgba(13, 13, 12,.68)),image-set(url('../images/efc-studio-dawn.webp') type('image/webp'), url('../images/efc-studio-dawn.png') type('image/png')) center/cover no-repeat}.media-heading{display:flex;align-items:end;justify-content:space-between;gap:32px;margin-bottom:36px}.media-heading h2{margin:10px 0 0}.media-heading h2 span{color:var(--primary)}.media-heading p{max-width:410px;margin:0;color:#c6c6c6;line-height:1.65}.media-carousel{border:1px solid rgba(255,255,255,.16);background:rgba(7,7,7,.76);box-shadow:0 24px 60px rgba(13, 13, 12,.3)}.media-frame{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(280px,.5fr);min-height:0}.media-visual{position:relative;height:clamp(340px,54vw,600px);min-height:0;background:#0D0D0C;overflow:hidden;border-right:1px solid rgba(215,181,91,.34)}.media-visual::after{content:'';position:absolute;inset:12px;border:1px solid rgba(215,181,91,.32);pointer-events:none;z-index:2}.media-visual::before{content:'';position:absolute;inset:0;z-index:3;pointer-events:none;opacity:.05;mix-blend-mode:overlay;background-image:radial-gradient(circle,#fff 1px,transparent 1px);background-size:3px 3px}.media-visual>picture,.media-visual>picture>img{width:100%;height:100%;display:block}.media-visual>img,.media-visual picture img,.media-visual video,.media-video-placeholder>img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;filter:saturate(.92) sepia(.06) contrast(1.02)}@media(prefers-reduced-motion:no-preference){.media-visual>img,.media-visual picture img{animation:mediaKenBurns 9s ease-out forwards}}@keyframes mediaKenBurns{from{transform:scale(1)}to{transform:scale(1.08)}}.media-visual video{position:absolute;inset:0}.media-copy{display:flex;flex-direction:column;justify-content:flex-end;padding:38px;border-left:1px solid rgba(255,255,255,.12);background:linear-gradient(145deg,rgba(215,181,91,.12),rgba(13, 13, 12,.24))}.media-copy h3{margin:12px 0;color:#fff;font-size:clamp(1.8rem,3vw,2.7rem);line-height:1.05}.media-count{margin-top:28px;color:#d7b55b;font:700 .7rem 'Montserrat',sans-serif;letter-spacing:.14em}.media-controls{display:flex;align-items:center;justify-content:center;gap:16px;padding:16px;border-top:1px solid rgba(255,255,255,.1)}.media-arrow{width:42px;height:42px;border:1px solid rgba(215,181,91,.65);background:transparent;color:#d7b55b;font-size:1.35rem;cursor:pointer}.media-arrow:hover{background:rgba(215,181,91,.15);color:#fff}.media-dots{display:flex;gap:9px}.media-dot{width:34px;height:2px;padding:0;border:0;background:rgba(255,255,255,.28);cursor:pointer}.media-dot.active{background:#d7b55b}.media-video-placeholder{position:absolute;inset:0;display:grid;place-items:center;overflow:hidden}.media-video-placeholder::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(13, 13, 12,.12),rgba(13, 13, 12,.72))}.media-video-placeholder span,.media-video-placeholder strong{position:relative;z-index:3}.media-video-placeholder span{display:grid;place-items:center;width:72px;height:72px;border:1px solid #d7b55b;border-radius:50%;background:rgba(13, 13, 12,.48);color:#d7b55b;font-size:1.45rem}.media-video-placeholder strong{position:absolute;bottom:34px;color:#fff;font:700 .65rem 'Montserrat',sans-serif;letter-spacing:.13em}@media(max-width:760px){.media-heading{align-items:flex-start;flex-direction:column}.media-frame{grid-template-columns:1fr}.media-visual{height:clamp(250px,72vw,360px);border-right:0;border-bottom:1px solid rgba(215,181,91,.34)}.media-copy{min-height:220px;border-top:1px solid rgba(255,255,255,.12);border-left:0;padding:28px}.media-copy h3{font-size:2rem}}@media(max-width:480px){.media-visual{height:250px}.media-copy{padding:24px}.media-video-placeholder strong{bottom:24px;font-size:.57rem}.media-dot{width:24px}}
+
+/* ZAMIYAH EASTER EGG */
+
+.zamiyah-overlay{
+    position:fixed;
+    inset:0;
+    z-index:99999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:radial-gradient(circle at center,#ff8fc7,#ff3d9a 55%,#c2005a 100%);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .6s ease;
+    overflow:hidden;
+    cursor:pointer;
+}
+
+.zamiyah-overlay.active{
+    opacity:1;
+    pointer-events:auto;
+}
+
+.zamiyah-message{
+    position:relative;
+    z-index:2;
+    text-align:center;
+    padding:0 24px;
+    transform:scale(.85);
+    transition:transform .6s cubic-bezier(.34,1.56,.64,1);
+}
+
+.zamiyah-overlay.active .zamiyah-message{
+    transform:scale(1);
+}
+
+.zamiyah-message h2{
+    font-family:var(--heading-font);
+    font-size:clamp(2.4rem,7vw,5rem);
+    color:#fff;
+    text-shadow:0 6px 30px rgba(194,0,90,.6);
+    letter-spacing:.02em;
+    margin:14px 0;
+    animation:zamiyahPulse 1.6s ease-in-out infinite;
+}
+
+.zamiyah-emoji-row{
+    font-size:clamp(1.6rem,4vw,2.6rem);
+    letter-spacing:.3em;
+}
+
+@keyframes zamiyahPulse{
+    0%,100%{ transform:scale(1); }
+    50%{ transform:scale(1.06); }
+}
+
+.zamiyah-hearts{
+    position:absolute;
+    inset:0;
+    z-index:1;
+    pointer-events:none;
+}
+
+.zamiyah-hearts span{
+    position:absolute;
+    bottom:-10%;
+    opacity:0;
+    animation-name:zamiyahFloat;
+    animation-timing-function:ease-in;
+    animation-iteration-count:infinite;
+}
+
+@keyframes zamiyahFloat{
+    0%{ transform:translateY(0) rotate(0deg); opacity:0; }
+    10%{ opacity:1; }
+    90%{ opacity:1; }
+    100%{ transform:translateY(-110vh) rotate(25deg); opacity:0; }
+}
+
+@media(prefers-reduced-motion:reduce){
+    .zamiyah-message h2{ animation:none; }
+    .zamiyah-hearts span{ animation:none; opacity:0; }
+}
