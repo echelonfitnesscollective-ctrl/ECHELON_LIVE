@@ -1074,6 +1074,8 @@ async function initializeWorkoutLibraryManager() {
         programForm.elements.goal.value = item.goal || '';
         programForm.elements.description.value = item.description || '';
         programForm.elements.duration_weeks.value = item.duration_weeks || 12;
+        programForm.elements.deload_week.value = item.deload_week || '';
+        programForm.elements.progression_notes.value = item.progression_notes || '';
         programForm.elements.status.value = item.status || 'draft';
         programCancelBtn.hidden = false;
     }
@@ -1109,6 +1111,9 @@ async function initializeWorkoutLibraryManager() {
         loadProgramIntoForm(program);
         programCalendarEditor.hidden = false;
         programCalendarEditorTitle.textContent = `ASSIGN WORKOUTS · "${(program.title || '').toUpperCase()}"`;
+        const progressionNote = document.getElementById('program-calendar-progression-note');
+        const deloadLine = program.deload_week ? ` Deload week: ${program.deload_week}.` : '';
+        progressionNote.textContent = program.progression_notes ? `${program.progression_notes}${deloadLine}` : 'No progression guide written for this program yet, add one above and save.';
         await refreshProgramCalendar();
     }
 
@@ -1145,6 +1150,7 @@ async function initializeWorkoutLibraryManager() {
         programForm.elements.id.value = '';
         programCancelBtn.hidden = true;
         programCalendarEditor.hidden = true;
+        document.getElementById('program-calendar-progression-note').textContent = '';
         activeProgramId = null;
     });
 
@@ -1157,6 +1163,8 @@ async function initializeWorkoutLibraryManager() {
             goal: programForm.elements.goal.value.trim() || null,
             description: programForm.elements.description.value.trim() || null,
             duration_weeks: Number(programForm.elements.duration_weeks.value) || 12,
+            deload_week: programForm.elements.deload_week.value ? Number(programForm.elements.deload_week.value) : null,
+            progression_notes: programForm.elements.progression_notes.value.trim() || null,
             status: programForm.elements.status.value
         };
         const { error } = id
@@ -1724,16 +1732,19 @@ async function appendMemberCoachingControls(detail, row, memberName) {
     enrollForm.addEventListener('submit', async event => {
         event.preventDefault();
         enrollFeedback.textContent = '';
-        const { data: templateWorkouts, error: fetchError } = await echelonAdminClient
-            .from('program_template_workouts')
-            .select('week_number, day_number, workout_id, notes')
-            .eq('program_template_id', programSelect.value);
+        const [{ data: templateWorkouts, error: fetchError }, { data: templateRow }] = await Promise.all([
+            echelonAdminClient.from('program_template_workouts').select('week_number, day_number, workout_id, notes').eq('program_template_id', programSelect.value),
+            echelonAdminClient.from('program_templates').select('deload_week').eq('id', programSelect.value).single()
+        ]);
         if (fetchError || !templateWorkouts.length) { enrollFeedback.textContent = 'This program has no workouts assigned yet.'; return; }
+        const deloadWeek = templateRow?.deload_week || null;
         const start = new Date(`${enrollDateInput.value}T00:00:00`);
         const rows = templateWorkouts.map(tw => {
             const date = new Date(start);
             date.setDate(date.getDate() + (tw.week_number - 1) * 7 + (tw.day_number - 1));
-            return { user_id: row.user_id, workout_id: tw.workout_id, assigned_date: date.toISOString().slice(0, 10), coach_note: tw.notes || null };
+            const deloadNote = tw.week_number === deloadWeek ? 'Deload week: same exercises, reduce load about 40% and add extra rest between sets.' : null;
+            const coachNote = [tw.notes, deloadNote].filter(Boolean).join(' ') || null;
+            return { user_id: row.user_id, workout_id: tw.workout_id, assigned_date: date.toISOString().slice(0, 10), coach_note: coachNote };
         });
         const { error: insertError } = await echelonAdminClient.from('member_daily_workouts').insert(rows);
         if (insertError) { enrollFeedback.textContent = 'We could not enroll this member. Please try again.'; return; }

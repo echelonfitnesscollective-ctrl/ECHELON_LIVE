@@ -2914,6 +2914,16 @@ MOBILE
     font-size:.8rem;
 }
 
+.program-progression-note{
+    margin:0 0 18px;
+    padding:16px 18px;
+    border-left:2px solid var(--primary);
+    background:rgba(215,181,91,.08);
+    color:#d7d7d7;
+    font-size:.82rem;
+    line-height:1.6;
+}
+
 .exercise-category{
     border:1px solid rgba(255,255,255,.12);
     background:rgba(255,255,255,.02);

@@ -501,6 +501,8 @@
                         <input name="goal" type="text" placeholder="Goal (ex: cutting, bulking, muscle, performance, older-adult)" aria-label="Goal">
                         <textarea name="description" rows="2" placeholder="Short description" aria-label="Description"></textarea>
                         <input name="duration_weeks" type="number" min="1" value="12" placeholder="Duration (weeks)" aria-label="Duration weeks">
+                        <input name="deload_week" type="number" min="1" placeholder="Deload week # (optional)" aria-label="Deload week number">
+                        <textarea name="progression_notes" rows="4" placeholder="Progression guide: how load/reps/rest change week to week, what the deload week is for, when the Progress Review happens" aria-label="Progression notes"></textarea>
                         <select name="status" aria-label="Status">
                             <option value="draft">Draft</option>
                             <option value="published">Published</option>
@@ -513,6 +515,7 @@
 
                     <div id="program-calendar-editor" hidden>
                         <div class="form-section-header"><h3 id="program-calendar-editor-title">ASSIGN WORKOUTS TO WEEK / DAY</h3></div>
+                        <p id="program-calendar-progression-note" class="program-progression-note"></p>
                         <form id="program-calendar-form" class="echelon-form">
                             <input name="week_number" type="number" min="1" placeholder="Week #" required aria-label="Week number">
                             <input name="day_number" type="number" min="1" max="7" placeholder="Day # (1-7)" required aria-label="Day number">
