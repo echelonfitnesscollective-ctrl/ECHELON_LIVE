@@ -1625,7 +1625,10 @@ async function appendMemberTrainingProfile(detail, row) {
     const durationInput = document.createElement('input'); durationInput.type = 'number'; durationInput.min = '10'; durationInput.max = '180'; durationInput.placeholder = 'Session duration (minutes)'; durationInput.setAttribute('aria-label', 'Session duration in minutes'); durationInput.value = profile?.session_duration_minutes ?? '';
     const equipmentSelect = trainingProfileSelect('Equipment access', TRAINING_PROFILE_EQUIPMENT, profile?.equipment_access);
     const activitySelect = trainingProfileSelect('Current activity level', TRAINING_PROFILE_ACTIVITY, profile?.current_activity_level);
-    const injuriesInput = document.createElement('textarea'); injuriesInput.rows = 2; injuriesInput.placeholder = 'Injuries, pain, surgeries, pregnancy/postpartum status, or medical conditions'; injuriesInput.setAttribute('aria-label', 'Injuries, pain, surgeries, pregnancy or postpartum status, or medical conditions'); injuriesInput.value = profile?.injuries_conditions || '';
+    const injuriesInput = document.createElement('textarea'); injuriesInput.rows = 2; injuriesInput.placeholder = 'Injuries, pain, surgeries, or medical conditions'; injuriesInput.setAttribute('aria-label', 'Injuries, pain, surgeries, or medical conditions'); injuriesInput.value = profile?.injuries_conditions || '';
+    const pregnancyLabel = document.createElement('label'); pregnancyLabel.className = 'pregnancy-toggle';
+    const pregnancyCheckbox = document.createElement('input'); pregnancyCheckbox.type = 'checkbox'; pregnancyCheckbox.checked = !!profile?.pregnant_or_postpartum;
+    pregnancyLabel.append(pregnancyCheckbox, document.createTextNode("Currently pregnant or postpartum, show her the pregnancy-safe modification instead of Up/Down"));
     const clearanceSelect = trainingProfileSelect('Medical clearance', TRAINING_PROFILE_CLEARANCE, profile?.medical_clearance);
     const preferencesInput = document.createElement('textarea'); preferencesInput.rows = 2; preferencesInput.placeholder = 'Exercise preferences (likes, dislikes, movements to avoid)'; preferencesInput.setAttribute('aria-label', 'Exercise preferences'); preferencesInput.value = profile?.exercise_preferences || '';
     const sleepStressInput = document.createElement('textarea'); sleepStressInput.rows = 2; sleepStressInput.placeholder = 'Sleep and stress'; sleepStressInput.setAttribute('aria-label', 'Sleep and stress'); sleepStressInput.value = profile?.sleep_stress || '';
@@ -1635,7 +1638,7 @@ async function appendMemberTrainingProfile(detail, row) {
 
     form.append(
         deliverySelect, primaryGoalSelect, secondaryGoalSelect, ageInput, experienceSelect,
-        daysInput, durationInput, equipmentSelect, activitySelect, injuriesInput,
+        daysInput, durationInput, equipmentSelect, activitySelect, injuriesInput, pregnancyLabel,
         clearanceSelect, preferencesInput, sleepStressInput, barrierInput, saveButton, feedback
     );
 
@@ -1654,6 +1657,7 @@ async function appendMemberTrainingProfile(detail, row) {
             equipment_access: equipmentSelect.value || null,
             current_activity_level: activitySelect.value || null,
             injuries_conditions: injuriesInput.value.trim() || null,
+            pregnant_or_postpartum: pregnancyCheckbox.checked,
             medical_clearance: clearanceSelect.value || null,
             exercise_preferences: preferencesInput.value.trim() || null,
             sleep_stress: sleepStressInput.value.trim() || null,

@@ -3562,13 +3562,14 @@ COACHING PLAYBOOK
 .photo-timeline,
 .message-thread{ margin-top:22px; }
 .coaching-history-item{ padding:11px 0; border-bottom:1px solid rgba(255,255,255,.1); color:#d7d7d7; font-size:.78rem; }
-.workout-plan-card{ padding:18px; margin-bottom:12px; border:1px solid rgba(215,181,91,.3); background:rgba(215,181,91,.05); }
-.workout-plan-card h3{ margin:0 0 8px; color:var(--primary); font-size:1.2rem; }
-.workout-plan-card p{ color:#ccc; font-size:.8rem; line-height:1.5; }
-.workout-plan-card pre{ white-space:pre-wrap; font:400 .82rem/1.65 'Montserrat',sans-serif; color:#fff; }
 
 .pregnancy-toggle{ display:flex; align-items:center; gap:10px; margin-top:14px; padding:12px 14px; border:1px solid rgba(215,181,91,.3); background:rgba(215,181,91,.05); color:#d7d7d7; font-size:.78rem; line-height:1.5; cursor:pointer; }
 .pregnancy-toggle input{ flex:0 0 auto; width:16px; height:16px; accent-color:var(--primary); cursor:pointer; }
+.todays-work-nav{ display:flex; align-items:center; justify-content:space-between; gap:14px; margin-top:14px; }
+.todays-work-arrow{ flex:0 0 auto; width:40px; height:40px; border:1px solid rgba(215,181,91,.4); background:transparent; color:var(--primary); font-size:1.1rem; cursor:pointer; transition:border-color .2s ease, background .2s ease; }
+.todays-work-arrow:hover:not(:disabled){ border-color:var(--primary); background:rgba(215,181,91,.08); }
+.todays-work-arrow:disabled{ opacity:.3; cursor:default; }
+.todays-work-position{ flex:1; text-align:center; color:#c7c7c7; font:700 .72rem 'Montserrat',sans-serif; letter-spacing:.08em; text-transform:uppercase; }
 .todays-work-list{ margin-top:22px; }
 .todays-work-day{ padding:18px; margin-bottom:16px; border:1px solid rgba(255,255,255,.08); }
 .todays-work-day:last-child{ margin-bottom:0; }

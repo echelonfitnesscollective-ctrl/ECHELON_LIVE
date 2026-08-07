@@ -28,10 +28,18 @@ create table if not exists public.training_programs (
 
 alter table public.training_programs enable row level security;
 
+-- Public reads every row, including hidden ones. This looks backwards but
+-- is required: section-control.js needs to actually receive a hidden row
+-- to know to hide the card and skip it during reordering. A policy that
+-- filters status<>'hidden' out of the SELECT means the client never sees
+-- the row at all, so it silently leaves the card in its static fallback
+-- position instead (2026-08-06 bug: hidden cards stayed visible, often
+-- landing at the front). The real gating already happens client-side.
 drop policy if exists "Public can view non-hidden training programs" on public.training_programs;
-create policy "Public can view non-hidden training programs"
+drop policy if exists "Public can view training programs" on public.training_programs;
+create policy "Public can view training programs"
 on public.training_programs for select to public
-using (status <> 'hidden');
+using (true);
 
 drop policy if exists "Admins manage training programs" on public.training_programs;
 create policy "Admins manage training programs"
