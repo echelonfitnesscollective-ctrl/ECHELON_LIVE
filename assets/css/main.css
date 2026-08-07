@@ -2963,6 +2963,22 @@ MOBILE
     font-size:.8rem;
 }
 
+.admin-record a{
+
+    font-size:.8rem;
+
+    color:var(--primary);
+
+    text-decoration:none;
+
+    font-weight:600;
+}
+
+.admin-record a:hover{
+
+    text-decoration:underline;
+}
+
 .program-progression-note{
     margin:0 0 18px;
     padding:16px 18px;

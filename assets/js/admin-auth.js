@@ -180,6 +180,38 @@ function createAdminRecord(columns) {
     return record;
 }
 
+function createTrainerResourceRecord(item) {
+    const record = document.createElement('article');
+    record.className = 'admin-record';
+    const title = document.createElement('strong'); title.textContent = item.title;
+    const category = document.createElement('span'); category.textContent = item.category;
+    record.append(title, category);
+
+    if (item.resource_url && /^https?:\/\//i.test(item.resource_url)) {
+        const link = document.createElement('a');
+        link.href = item.resource_url; link.target = '_blank'; link.rel = 'noopener';
+        link.textContent = 'OPEN LINK →';
+        record.append(link);
+    } else if (item.resource_url) {
+        const link = document.createElement('a');
+        link.href = '#'; link.textContent = 'OPEN FILE →';
+        link.addEventListener('click', async (event) => {
+            event.preventDefault();
+            const original = link.textContent;
+            link.textContent = 'LOADING…';
+            const { data, error } = await echelonAdminClient.storage.from('trainer-resources').createSignedUrl(item.resource_url, 3600);
+            link.textContent = original;
+            if (error || !data?.signedUrl) { link.textContent = 'UNAVAILABLE'; return; }
+            window.open(data.signedUrl, '_blank', 'noopener');
+        });
+        record.append(link);
+    } else if (item.notes) {
+        const notes = document.createElement('span'); notes.textContent = item.notes;
+        record.append(notes);
+    }
+    return record;
+}
+
 function paymentOptionForApplication(application) {
     const program = String(application.program_interest || '').toLowerCase();
     if (program.includes('private') || program.includes('group')) return 'private_group_training';
@@ -548,11 +580,7 @@ async function initializeOperationsConsole() {
     ]));
 
     const resourceList = document.getElementById('trainer-resources-list');
-    renderAdminRecords(resourceList, resources, 'Save links, templates, and education here for your team.', (item) => createAdminRecord([
-        { text: item.title, strong: true },
-        { text: item.category },
-        { text: item.resource_url || item.notes || 'Private note' }
-    ]));
+    renderAdminRecords(resourceList, resources, 'Save links, templates, and education here for your team.', createTrainerResourceRecord);
 
     const resourceForm = document.getElementById('trainer-resource-form');
     const resourceFeedback = document.getElementById('trainer-resource-feedback');
