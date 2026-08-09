@@ -339,7 +339,7 @@ function renderPaymentLinkButtons(actions, item, paymentUrl, label, paymentFeedb
     email.addEventListener('click', async () => {
         email.disabled = true; email.textContent = 'SENDING…'; paymentFeedback.textContent = '';
         const { data: sessionData } = await echelonAdminClient.auth.getSession();
-        const result = await fetch('/api/enrollment/send-payment-email', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionData.session?.access_token || ''}` }, body: JSON.stringify({ applicationId: item.id }) });
+        const result = await fetch('/api/enrollment/create-offer', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionData.session?.access_token || ''}` }, body: JSON.stringify({ action: 'send-email', applicationId: item.id }) });
         const body = await result.json();
         paymentFeedback.textContent = result.ok ? body.message : (body.error || 'The payment email could not be sent.');
         email.disabled = false; email.textContent = 'SEND PAYMENT EMAIL';
