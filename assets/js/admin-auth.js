@@ -1964,6 +1964,7 @@ async function appendMemberCoachingControls(detail, row, memberName) {
     const enrollForm = document.createElement('form'); enrollForm.className = 'echelon-form';
     const programSelect = document.createElement('select'); programSelect.required = true; programSelect.setAttribute('aria-label', 'Program to enroll in');
     if (!programsResult.error && programsResult.data.length) {
+        const placeholder = document.createElement('option'); placeholder.value = ''; placeholder.disabled = true; placeholder.selected = true; placeholder.textContent = 'Choose a program…'; programSelect.append(placeholder);
         programsResult.data.forEach(p => { const opt = document.createElement('option'); opt.value = p.id; opt.textContent = `${p.title} (${p.duration_weeks} wks)`; programSelect.append(opt); });
     } else {
         const opt = document.createElement('option'); opt.textContent = 'Publish a program template first'; opt.value = ''; programSelect.append(opt); programSelect.disabled = true;
@@ -2000,6 +2001,7 @@ async function appendMemberCoachingControls(detail, row, memberName) {
     if (!workoutsResult.data.length) {
         const opt = document.createElement('option'); opt.textContent = 'Publish a workout in the Workout Library first'; opt.value = ''; workoutSelect.append(opt); workoutSelect.disabled = true;
     } else {
+        const placeholder = document.createElement('option'); placeholder.value = ''; placeholder.disabled = true; placeholder.selected = true; placeholder.textContent = 'Choose a workout…'; workoutSelect.append(placeholder);
         workoutsResult.data.forEach(w => { const opt = document.createElement('option'); opt.value = w.id; opt.textContent = `${w.title} (${workoutSettingLabel(w.setting)})`; workoutSelect.append(opt); });
     }
     const dateInput = document.createElement('input'); dateInput.type = 'date'; dateInput.required = true; dateInput.setAttribute('aria-label', 'Assigned date'); dateInput.valueAsDate = new Date();
