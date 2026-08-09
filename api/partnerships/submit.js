@@ -52,6 +52,7 @@ module.exports = async function submitPartnershipInquiry(req, res) {
   }
 
   const body = req.body || {};
+  if (String(body.efc_hp || '').trim()) return res.status(200).json({ ok: true });
   const organization = String(body.organization || '').trim().slice(0, 200);
   const contactName = String(body.contact_name || '').trim().slice(0, 200);
   const email = String(body.email || '').trim().slice(0, 200);

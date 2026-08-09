@@ -52,6 +52,7 @@ module.exports = async function submitCoachingApplication(req, res) {
   }
 
   const body = req.body || {};
+  if (String(body.efc_hp || '').trim()) return res.status(200).json({ ok: true });
   const fullName = String(body.full_name || '').trim().slice(0, 200);
   const email = String(body.email || '').trim().slice(0, 200);
   const phone = String(body.phone || '').trim().slice(0, 60);

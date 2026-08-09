@@ -130,6 +130,7 @@ module.exports = async function submitSiteForm(req, res) {
   }
 
   const body = req.body || {};
+  if (String(body.efc_hp || '').trim()) return res.status(200).json({ ok: true });
   const form = String(body.form || '').trim();
 
   let result;

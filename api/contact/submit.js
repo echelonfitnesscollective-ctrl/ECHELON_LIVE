@@ -52,6 +52,7 @@ module.exports = async function submitContact(req, res) {
   }
 
   const body = req.body || {};
+  if (String(body.efc_hp || '').trim()) return res.status(200).json({ ok: true });
   const name = String(body.name || '').trim().slice(0, 200);
   const email = String(body.email || '').trim().slice(0, 200);
   const inquiryType = String(body.inquiry_type || '').trim().slice(0, 100);
