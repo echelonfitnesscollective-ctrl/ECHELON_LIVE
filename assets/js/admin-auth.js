@@ -1486,8 +1486,10 @@ function renderIntakeDetail(row) {
     detail.append(waiverStatus);
 
     appendMemberProfileEditor(detail, row, email);
+    appendCopyIntakeSummary(detail, row, memberName);
     appendMemberTracker(detail, row, memberName);
     appendMemberTrainingProfile(detail, row);
+    appendMemberNutritionTargets(detail, row);
     appendMemberCoachingControls(detail, row, memberName);
 
     if (onboardingDone) {
@@ -1748,6 +1750,114 @@ function appendMemberProfileEditor(detail, row, email) {
     detail.append(section);
 }
 
+function appendCopyIntakeSummary(detail, row, memberName) {
+    const section = document.createElement('section');
+    const heading = document.createElement('h4');
+    heading.textContent = 'PROGRAM BUILD PROMPT';
+    const note = document.createElement('p');
+    note.className = 'admin-detail-date';
+    note.textContent = 'Pulls her application answers, Training Profile, and your call notes into one block, ready to paste into a new conversation with the New Client template (docs/coaching-programs/template-new-client-pdf-and-hub-setup.md).';
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'btn-secondary';
+    button.textContent = 'COPY INTAKE SUMMARY';
+    const feedback = document.createElement('p');
+    feedback.className = 'form-error';
+    feedback.setAttribute('role', 'status');
+
+    button.addEventListener('click', async () => {
+        button.disabled = true; button.textContent = 'GATHERING…';
+        const email = row.profile?.email;
+        const [appResult, profileResult] = await Promise.all([
+            email
+                ? echelonAdminClient.from('coaching_applications').select('application_data, program_interest, approved_program').eq('email', email).order('created_at', { ascending: false }).limit(1).maybeSingle()
+                : Promise.resolve({ data: null }),
+            echelonAdminClient.from('member_training_profiles').select('*').eq('user_id', row.user_id).maybeSingle()
+        ]);
+        const appData = appResult.data?.application_data || {};
+        const profile = profileResult.data || {};
+        const skip = new Set(['user_id', 'created_at', 'updated_at', 'call_notes']);
+
+        const lines = [`New client: ${memberName}`, ''];
+        lines.push('COACHING APPLICATION:');
+        if (appResult.data?.program_interest) lines.push(`Program interest: ${appResult.data.program_interest}`);
+        Object.entries(appData).forEach(([key, value]) => { if (value !== undefined && value !== null && String(value).trim() !== '') lines.push(`${formatFieldLabel(key)}: ${value}`); });
+        lines.push('', 'TRAINING PROFILE:');
+        Object.entries(profile).forEach(([key, value]) => { if (!skip.has(key) && value !== undefined && value !== null && String(value).trim() !== '') lines.push(`${formatFieldLabel(key)}: ${value}`); });
+        lines.push('', 'CALL NOTES (unstructured, whatever came up):');
+        lines.push(profile.call_notes && profile.call_notes.trim() ? profile.call_notes.trim() : '(none on file yet, add them in the Training Profile section below before building her program)');
+
+        const text = lines.join('\n');
+        try {
+            await navigator.clipboard.writeText(text);
+            feedback.textContent = 'Copied. Paste into a new conversation along with the New Client template.';
+        } catch (_) {
+            window.prompt('Copy this:', text);
+        }
+        button.disabled = false; button.textContent = 'COPY INTAKE SUMMARY';
+    });
+
+    section.append(heading, note, button, feedback);
+    detail.append(section);
+}
+
+function nutritionAdminInput(placeholder, value) {
+    const input = document.createElement('input');
+    input.type = 'number'; input.step = 'any'; input.min = '0';
+    input.placeholder = placeholder;
+    input.setAttribute('aria-label', placeholder);
+    if (value !== null && value !== undefined) input.value = value;
+    return input;
+}
+
+async function appendMemberNutritionTargets(detail, row) {
+    const section = document.createElement('section');
+    const heading = document.createElement('h4');
+    heading.textContent = 'NUTRITION TARGETS';
+    const summary = document.createElement('p');
+    summary.className = 'admin-detail-date';
+    summary.textContent = 'Loading targets…';
+    section.append(heading, summary);
+    detail.append(section);
+
+    const { data: existing, error } = await echelonAdminClient.from('nutrition_profiles').select('*').eq('user_id', row.user_id).maybeSingle();
+    if (error) { summary.textContent = 'Nutrition targets will be ready after the Fuel Tracker database update is run.'; return; }
+    summary.textContent = existing ? `Last updated ${new Date(existing.updated_at).toLocaleDateString()}, defaults apply to anything left blank.` : 'No targets set yet, the Fuel Tracker defaults (2,200 kcal / 160g protein / 220g carbs / 70g fat / 84oz water) apply until you save these.';
+
+    const form = document.createElement('form');
+    form.className = 'echelon-form';
+    const calInput = nutritionAdminInput('Daily calorie target', existing?.calorie_target);
+    const proteinInput = nutritionAdminInput('Protein target (g)', existing?.protein_target_grams);
+    const carbInput = nutritionAdminInput('Carbohydrate target (g)', existing?.carbohydrate_target_grams);
+    const fatInput = nutritionAdminInput('Fat target (g)', existing?.fat_target_grams);
+    const waterInput = nutritionAdminInput('Water target (oz)', existing?.water_target_ml ? Math.round(existing.water_target_ml / 29.5735) : null);
+    const save = document.createElement('button');
+    save.type = 'submit'; save.className = 'btn-secondary'; save.textContent = existing ? 'UPDATE NUTRITION TARGETS' : 'SAVE NUTRITION TARGETS';
+    const feedback = document.createElement('p');
+    feedback.className = 'form-error';
+    feedback.setAttribute('role', 'status');
+    form.append(calInput, proteinInput, carbInput, fatInput, waterInput, save, feedback);
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        feedback.textContent = '';
+        const payload = {
+            user_id: row.user_id,
+            calorie_target: calInput.value ? Number(calInput.value) : 2200,
+            protein_target_grams: proteinInput.value ? Number(proteinInput.value) : 160,
+            carbohydrate_target_grams: carbInput.value ? Number(carbInput.value) : 220,
+            fat_target_grams: fatInput.value ? Number(fatInput.value) : 70,
+            water_target_ml: Math.round((waterInput.value ? Number(waterInput.value) : 84) * 29.5735)
+        };
+        const { error: saveError } = await echelonAdminClient.from('nutrition_profiles').upsert(payload, { onConflict: 'user_id' });
+        if (saveError) { feedback.textContent = 'We could not save these targets. Please try again.'; return; }
+        feedback.textContent = 'Saved.';
+        save.textContent = 'UPDATE NUTRITION TARGETS';
+    });
+
+    section.append(form);
+}
+
 async function appendMemberTracker(detail, row, memberName) {
     const tracker = document.createElement('section');
     const title = document.createElement('h4');
@@ -1872,13 +1982,14 @@ async function appendMemberTrainingProfile(detail, row) {
     const preferencesInput = document.createElement('textarea'); preferencesInput.rows = 2; preferencesInput.placeholder = 'Exercise preferences (likes, dislikes, movements to avoid)'; preferencesInput.setAttribute('aria-label', 'Exercise preferences'); preferencesInput.value = profile?.exercise_preferences || '';
     const sleepStressInput = document.createElement('textarea'); sleepStressInput.rows = 2; sleepStressInput.placeholder = 'Sleep and stress'; sleepStressInput.setAttribute('aria-label', 'Sleep and stress'); sleepStressInput.value = profile?.sleep_stress || '';
     const barrierInput = document.createElement('textarea'); barrierInput.rows = 2; barrierInput.placeholder = 'Biggest consistency barrier'; barrierInput.setAttribute('aria-label', 'Biggest consistency barrier'); barrierInput.value = profile?.consistency_barrier || '';
+    const callNotesInput = document.createElement('textarea'); callNotesInput.rows = 5; callNotesInput.placeholder = "Anything else from your call, in no particular order: current lifts and weights, how she talks about her own body, what she wants to avoid, a deadline and why it matters, whether she's into athletic/plyo work, splits, whatever came up that doesn't fit a field above. This is what makes her program read like it was actually built for her."; callNotesInput.setAttribute('aria-label', 'Call notes'); callNotesInput.value = profile?.call_notes || '';
     const saveButton = document.createElement('button'); saveButton.type = 'submit'; saveButton.className = 'btn-secondary'; saveButton.textContent = profile ? 'UPDATE TRAINING PROFILE' : 'SAVE TRAINING PROFILE';
     const feedback = document.createElement('p'); feedback.className = 'form-error'; feedback.setAttribute('role', 'status');
 
     form.append(
         deliverySelect, primaryGoalSelect, secondaryGoalSelect, ageInput, experienceSelect,
         daysInput, durationInput, equipmentSelect, activitySelect, injuriesInput, pregnancyLabel,
-        clearanceSelect, preferencesInput, sleepStressInput, barrierInput, saveButton, feedback
+        clearanceSelect, preferencesInput, sleepStressInput, barrierInput, callNotesInput, saveButton, feedback
     );
 
     form.addEventListener('submit', async (event) => {
@@ -1900,7 +2011,8 @@ async function appendMemberTrainingProfile(detail, row) {
             medical_clearance: clearanceSelect.value || null,
             exercise_preferences: preferencesInput.value.trim() || null,
             sleep_stress: sleepStressInput.value.trim() || null,
-            consistency_barrier: barrierInput.value.trim() || null
+            consistency_barrier: barrierInput.value.trim() || null,
+            call_notes: callNotesInput.value.trim() || null
         };
         const { error: saveError } = await echelonAdminClient.from('member_training_profiles').upsert(payload, { onConflict: 'user_id' });
         if (saveError) { feedback.textContent = 'We could not save this profile. Please try again.'; return; }
