@@ -2,7 +2,10 @@
 // capture whether this link was an invite (first-ever password set) before
 // that happens. Used to route brand-new members to a welcome page instead of
 // straight to the portal, without affecting ordinary "forgot password" resets.
-const EFC_AUTH_HASH_TYPE = new URLSearchParams(window.location.hash.replace(/^#/, '')).get('type');
+// Checked in both places: older emails still in inboxes use the #-hash format,
+// new ones use the ?token_hash= format from verifyPasswordResetToken() below.
+const EFC_AUTH_HASH_TYPE = new URLSearchParams(window.location.hash.replace(/^#/, '')).get('type')
+    || new URLSearchParams(window.location.search).get('type');
 
 const EFC_SUPABASE_URL = 'https://plkdyvtriajpzcfgtwzp.supabase.co';
 const EFC_SUPABASE_KEY = 'sb_publishable_CwFNrWSrhLKURZIk_-yt1A_ZVpFHEwf';
@@ -198,6 +201,26 @@ async function initializeMemberPortal() {
     });
 }
 
+// Invite/reset emails used to link straight to Supabase's own verify endpoint,
+// which consumes the one-time token on the first GET request to it. Corporate
+// and webmail link scanners (Outlook Safe Links, some spam filters) fetch that
+// link automatically to check it's safe, burning the token before the member
+// ever clicks it, they land back on the main site with no error visible.
+// The email templates now link to this page instead, with the token carried
+// as ?token_hash=&type= in the query string, and verification only happens
+// here, inside real page JavaScript. Scanners that just fetch the URL never
+// run this, only an actual browser opening the page does.
+async function verifyPasswordResetToken() {
+    const params = new URLSearchParams(window.location.search);
+    const tokenHash = params.get('token_hash');
+    const type = params.get('type');
+    if (!tokenHash || !type) return false;
+
+    const { error } = await echelonMemberClient.auth.verifyOtp({ token_hash: tokenHash, type });
+    window.history.replaceState({}, '', window.location.pathname);
+    return !error;
+}
+
 async function initializeMemberPasswordReset() {
     const requestForm = document.getElementById('password-reset-request-form');
     const updateForm = document.getElementById('password-reset-update-form');
@@ -211,8 +234,9 @@ async function initializeMemberPasswordReset() {
         updateForm.hidden = false;
     };
 
+    const verifiedFromLink = await verifyPasswordResetToken();
     const existingMember = await getAuthenticatedMember();
-    if (existingMember) showUpdateForm();
+    if (verifiedFromLink || existingMember) showUpdateForm();
 
     echelonMemberClient.auth.onAuthStateChange((event) => {
         if (event === 'PASSWORD_RECOVERY') showUpdateForm();
