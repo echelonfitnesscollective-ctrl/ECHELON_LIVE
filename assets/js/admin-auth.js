@@ -1756,11 +1756,11 @@ function appendCopyIntakeSummary(detail, row, memberName) {
     heading.textContent = 'PROGRAM BUILD PROMPT';
     const note = document.createElement('p');
     note.className = 'admin-detail-date';
-    note.textContent = 'Pulls her application answers, Training Profile, and your call notes into one block, ready to paste into a new conversation with the New Client template (docs/coaching-programs/template-new-client-pdf-and-hub-setup.md).';
+    note.textContent = 'One click copies the full New Client prompt, her application answers, Training Profile, and your call notes, ready to paste straight into a new conversation.';
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'btn-secondary';
-    button.textContent = 'COPY INTAKE SUMMARY';
+    button.textContent = 'COPY PROGRAM BUILD PROMPT';
     const feedback = document.createElement('p');
     feedback.className = 'form-error';
     feedback.setAttribute('role', 'status');
@@ -1778,14 +1778,24 @@ function appendCopyIntakeSummary(detail, row, memberName) {
         const profile = profileResult.data || {};
         const skip = new Set(['user_id', 'created_at', 'updated_at', 'call_notes']);
 
-        const lines = [`New client: ${memberName}`, ''];
-        lines.push('COACHING APPLICATION:');
+        const lines = [
+            `I have a new coaching client, ${memberName}. I want a program PDF and webpage built for them just like Zamiyah's Elite Performance & Shape Program, use docs/coaching-programs/client-programs/zamiyah-elite-performance-program.md as the exact template for structure, tone, and design.`,
+            ''
+        ];
+        lines.push("Here's her full intake application data:");
         if (appResult.data?.program_interest) lines.push(`Program interest: ${appResult.data.program_interest}`);
         Object.entries(appData).forEach(([key, value]) => { if (value !== undefined && value !== null && String(value).trim() !== '') lines.push(`${formatFieldLabel(key)}: ${value}`); });
-        lines.push('', 'TRAINING PROFILE:');
+        lines.push('', "Here's her Training Profile:");
         Object.entries(profile).forEach(([key, value]) => { if (!skip.has(key) && value !== undefined && value !== null && String(value).trim() !== '') lines.push(`${formatFieldLabel(key)}: ${value}`); });
-        lines.push('', 'CALL NOTES (unstructured, whatever came up):');
+        lines.push('', "Here's what I learned from our call that isn't in the system:");
         lines.push(profile.call_notes && profile.call_notes.trim() ? profile.call_notes.trim() : '(none on file yet, add them in the Training Profile section below before building her program)');
+        lines.push(
+            '',
+            'Build me:',
+            '1. The PDF + webpage, same style as Zamiyah\'s.',
+            '2. The Workout Library entries and however many training days her split needs, published.',
+            '3. Once I give you her start date, populate her Hub exactly like Zamiyah\'s: a program_template covering her full timeline, program_template_workouts for every week, member_program_enrollments, and her nutrition_profiles targets.'
+        );
 
         const text = lines.join('\n');
         try {
