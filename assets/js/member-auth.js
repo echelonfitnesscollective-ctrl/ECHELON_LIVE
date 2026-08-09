@@ -105,6 +105,10 @@ async function requireMemberSession() {
     }
 
     const currentPage = window.location.pathname.split('/').pop();
+    if (!EFC_ONBOARDING_EXEMPT_PAGES.has(currentPage) && !(await hasCompletedOnboarding(member))) {
+        window.location.replace('member-onboarding.html');
+        return null;
+    }
     if (!EFC_WAIVER_EXEMPT_PAGES.has(currentPage) && !(await hasSignedWaiver(member))) {
         window.location.replace('member-waiver.html');
         return null;
@@ -121,6 +125,16 @@ async function hasMemberHubAccess() {
 }
 
 const EFC_WAIVER_EXEMPT_PAGES = new Set(['member-waiver.html', 'member-onboarding.html']);
+const EFC_ONBOARDING_EXEMPT_PAGES = new Set(['member-onboarding.html']);
+
+async function hasCompletedOnboarding(member) {
+    const { data, error } = await echelonMemberClient
+        .from('member_onboarding')
+        .select('user_id')
+        .eq('user_id', member.id)
+        .maybeSingle();
+    return !error && Boolean(data);
+}
 
 async function hasSignedWaiver(member) {
     const { data, error } = await echelonMemberClient

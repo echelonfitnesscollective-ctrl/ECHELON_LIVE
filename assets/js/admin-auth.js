@@ -1463,20 +1463,25 @@ function renderIntakeDetail(row) {
     const profile = row.profile;
     const email = profile?.email || `Member ${row.user_id.slice(0, 8)}`;
     const memberName = profile?.full_name || email;
-    const updated = row.updated_at ? new Date(row.updated_at).toLocaleString() : 'Unknown date';
+    const onboardingDone = Boolean(row.acknowledged_at);
 
     detail.replaceChildren();
     const heading = document.createElement('h3');
     heading.textContent = memberName.toUpperCase();
-    const timestamp = document.createElement('p');
-    timestamp.className = 'admin-detail-date';
-    timestamp.textContent = `Last submitted: ${updated}`;
-    detail.append(heading, timestamp);
+    detail.append(heading);
+
+    if (onboardingDone) {
+        const timestamp = document.createElement('p');
+        timestamp.className = 'admin-detail-date';
+        const updated = row.updated_at ? new Date(row.updated_at).toLocaleString() : 'Unknown date';
+        timestamp.textContent = `Onboarding on file: ${updated} (${entryMethodLabel(row.entry_method)})`;
+        detail.append(timestamp);
+    }
 
     const waiverStatus = document.createElement('p');
     waiverStatus.className = 'admin-detail-date';
     waiverStatus.textContent = row.waiver
-        ? `Waiver signed by ${row.waiver.full_name} on ${new Date(row.waiver.signed_at).toLocaleString()}`
+        ? `Waiver signed by ${row.waiver.full_name} on ${new Date(row.waiver.signed_at).toLocaleString()} (${entryMethodLabel(row.waiver.entry_method)})`
         : 'Waiver not yet signed.';
     detail.append(waiverStatus);
 
@@ -1485,21 +1490,225 @@ function renderIntakeDetail(row) {
     appendMemberTrainingProfile(detail, row);
     appendMemberCoachingControls(detail, row, memberName);
 
-    [['PAR-Q READINESS', row.parq], ['HEALTH & CONTACT NOTES', row.health_history]].forEach(([title, values]) => {
-        const section = document.createElement('section');
-        const titleElement = document.createElement('h4');
-        titleElement.textContent = title;
-        const list = document.createElement('dl');
-        Object.entries(values || {}).forEach(([key, value]) => {
-            const term = document.createElement('dt');
-            term.textContent = formatFieldLabel(key);
-            const description = document.createElement('dd');
-            description.textContent = formatValue(value);
-            list.append(term, description);
+    if (onboardingDone) {
+        [['PAR-Q READINESS', row.parq], ['HEALTH & CONTACT NOTES', row.health_history]].forEach(([title, values]) => {
+            const section = document.createElement('section');
+            const titleElement = document.createElement('h4');
+            titleElement.textContent = title;
+            const list = document.createElement('dl');
+            Object.entries(values || {}).forEach(([key, value]) => {
+                const term = document.createElement('dt');
+                term.textContent = formatFieldLabel(key);
+                const description = document.createElement('dd');
+                description.textContent = formatValue(value);
+                list.append(term, description);
+            });
+            section.append(titleElement, list);
+            detail.append(section);
         });
-        section.append(titleElement, list);
-        detail.append(section);
+    } else {
+        appendOnboardingEntryForm(detail, row);
+    }
+
+    if (!row.waiver) appendWaiverEntryForm(detail, row, memberName);
+
+    appendMemberDangerZone(detail, row, memberName);
+}
+
+function entryMethodLabel(method) {
+    return { self: 'self-submitted', phone: 'entered by phone', in_person: 'entered in person', bypassed: 'bypassed' }[method] || 'self-submitted';
+}
+
+const EFC_ONBOARDING_FIELDS = [
+    ['heart_condition', 'Diagnosed heart condition, supervised activity advised?'],
+    ['heart_medication', 'Currently takes blood pressure or heart medication?'],
+    ['chest_pain_activity', 'Chest pain during physical activity?'],
+    ['dizziness_or_fainting', 'Dizziness, loss of balance, or consciousness in the past 12 months?'],
+    ['bone_joint_tissue', 'Bone, joint, or soft-tissue condition activity could aggravate?'],
+    ['recent_chest_pain', 'Chest pain at any point in the past 30 days?'],
+    ['other_activity_concern', 'Any other reason to not begin physical activity now?'],
+    ['current_injuries_or_limitations', 'Current injuries, pain, or movement limitations'],
+    ['medications_or_conditions', 'Relevant medications or diagnosed conditions'],
+    ['allergies', 'Allergies or other safety considerations'],
+    ['surgeries_or_hospitalizations', 'Recent surgeries or hospitalizations'],
+    ['pregnancy_or_postpartum', 'Currently pregnant or postpartum?'],
+    ['emergency_contact', 'Emergency contact name and phone number'],
+    ['health_notes', 'Anything else the coach should know for safe training?']
+];
+const EFC_ONBOARDING_PARQ_KEYS = new Set(['heart_condition', 'heart_medication', 'chest_pain_activity', 'dizziness_or_fainting', 'bone_joint_tissue', 'recent_chest_pain', 'other_activity_concern']);
+
+function appendOnboardingEntryForm(detail, row) {
+    const section = document.createElement('section');
+    section.className = 'admin-manual-entry';
+    const heading = document.createElement('h4');
+    heading.textContent = 'ENTER ONBOARDING FOR THIS MEMBER';
+    const note = document.createElement('p');
+    note.className = 'admin-detail-date';
+    note.textContent = 'Use this if you are walking through PAR-Q and health history with her on the phone or in person, instead of her filling out the form herself.';
+    const form = document.createElement('form');
+    form.className = 'echelon-form';
+
+    const methodSelect = document.createElement('select');
+    methodSelect.setAttribute('aria-label', 'How this was collected');
+    [['phone', 'Collected by phone'], ['in_person', 'Collected in person']].forEach(([value, label]) => {
+        const option = document.createElement('option');
+        option.value = value; option.textContent = label;
+        methodSelect.append(option);
     });
+    form.append(methodSelect);
+
+    const inputs = {};
+    EFC_ONBOARDING_FIELDS.forEach(([key, label]) => {
+        const input = document.createElement('input');
+        input.placeholder = label;
+        input.setAttribute('aria-label', label);
+        inputs[key] = input;
+        form.append(input);
+    });
+
+    const submit = document.createElement('button');
+    submit.type = 'submit';
+    submit.className = 'btn-secondary';
+    submit.textContent = 'SAVE ONBOARDING';
+    const feedback = document.createElement('p');
+    feedback.className = 'form-error';
+    feedback.setAttribute('role', 'status');
+    form.append(submit, feedback);
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        feedback.textContent = '';
+        submit.disabled = true; submit.textContent = 'SAVING…';
+        const admin = await getAdminUser();
+        const parq = {}; const healthHistory = {};
+        EFC_ONBOARDING_FIELDS.forEach(([key]) => {
+            (EFC_ONBOARDING_PARQ_KEYS.has(key) ? parq : healthHistory)[key] = inputs[key].value.trim();
+        });
+        const { error } = await echelonAdminClient.from('member_onboarding').upsert({
+            user_id: row.user_id,
+            parq,
+            health_history: healthHistory,
+            acknowledged_at: new Date().toISOString(),
+            filled_out_by: admin?.id || null,
+            entry_method: methodSelect.value
+        }, { onConflict: 'user_id' });
+        if (error) { feedback.textContent = 'Could not save onboarding.'; submit.disabled = false; submit.textContent = 'SAVE ONBOARDING'; return; }
+        initializeOperationsConsole();
+        initializeAdminDashboard();
+    });
+
+    section.append(heading, note, form);
+    detail.append(section);
+}
+
+function appendWaiverEntryForm(detail, row, memberName) {
+    const section = document.createElement('section');
+    section.className = 'admin-manual-entry';
+    const heading = document.createElement('h4');
+    heading.textContent = 'ENTER WAIVER FOR THIS MEMBER';
+    const note = document.createElement('p');
+    note.className = 'admin-detail-date';
+    note.textContent = 'Use this only when she has verbally agreed to the participation agreement with you directly, phone or in person.';
+    const form = document.createElement('form');
+    form.className = 'echelon-form';
+
+    const nameInput = document.createElement('input');
+    nameInput.placeholder = 'Full legal name';
+    nameInput.value = memberName;
+    nameInput.required = true;
+    const methodSelect = document.createElement('select');
+    methodSelect.setAttribute('aria-label', 'How this was collected');
+    [['phone', 'Agreed by phone'], ['in_person', 'Agreed in person']].forEach(([value, label]) => {
+        const option = document.createElement('option');
+        option.value = value; option.textContent = label;
+        methodSelect.append(option);
+    });
+    const consentLabel = document.createElement('label');
+    const consentCheckbox = document.createElement('input');
+    consentCheckbox.type = 'checkbox';
+    consentCheckbox.required = true;
+    consentLabel.append(consentCheckbox, document.createTextNode(' She verbally agreed to the Echelon participation agreement.'));
+
+    const submit = document.createElement('button');
+    submit.type = 'submit';
+    submit.className = 'btn-secondary';
+    submit.textContent = 'SAVE WAIVER';
+    const feedback = document.createElement('p');
+    feedback.className = 'form-error';
+    feedback.setAttribute('role', 'status');
+    form.append(nameInput, methodSelect, consentLabel, submit, feedback);
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        feedback.textContent = '';
+        submit.disabled = true; submit.textContent = 'SAVING…';
+        const admin = await getAdminUser();
+        const { error } = await echelonAdminClient.from('member_waivers').upsert({
+            user_id: row.user_id,
+            full_name: nameInput.value.trim(),
+            agreement_version: 'EFC-waiver-v1.0',
+            electronic_consent: true,
+            signed_at: new Date().toISOString(),
+            filled_out_by: admin?.id || null,
+            entry_method: methodSelect.value
+        }, { onConflict: 'user_id' });
+        if (error) { feedback.textContent = 'Could not save waiver.'; submit.disabled = false; submit.textContent = 'SAVE WAIVER'; return; }
+        initializeOperationsConsole();
+        initializeAdminDashboard();
+    });
+
+    section.append(heading, note, form);
+    detail.append(section);
+}
+
+function appendMemberDangerZone(detail, row, memberName) {
+    const section = document.createElement('section');
+    section.className = 'admin-danger-zone';
+    const heading = document.createElement('h4');
+    heading.textContent = 'DANGER ZONE';
+    const feedback = document.createElement('p');
+    feedback.className = 'form-error';
+    feedback.setAttribute('role', 'status');
+
+    const archiveButton = document.createElement('button');
+    archiveButton.type = 'button';
+    archiveButton.className = 'btn-secondary';
+    archiveButton.textContent = 'ARCHIVE MEMBER';
+    archiveButton.title = 'Removes her from the active roster, keeps all her records. Reversible.';
+    archiveButton.addEventListener('click', async () => {
+        if (!window.confirm(`Archive ${memberName}? She will be removed from the active member list, but nothing is deleted. This can be undone directly in Supabase.`)) return;
+        archiveButton.disabled = true;
+        const admin = await getAdminUser();
+        const { error } = await echelonAdminClient.from('account_access').update({
+            archived_at: new Date().toISOString(),
+            archived_by: admin?.id || null
+        }).eq('user_id', row.user_id);
+        if (error) { feedback.textContent = 'Could not archive this member.'; archiveButton.disabled = false; return; }
+        initializeAdminDashboard();
+    });
+
+    const deleteButton = document.createElement('button');
+    deleteButton.type = 'button';
+    deleteButton.className = 'btn-secondary';
+    deleteButton.textContent = 'DELETE MEMBER';
+    deleteButton.title = 'Permanently deletes her account and all associated records. Cannot be undone.';
+    deleteButton.addEventListener('click', async () => {
+        const typed = window.prompt(`This permanently deletes ${memberName}'s account, workouts, photos, messages, and every record tied to it. This cannot be undone.\n\nType DELETE to confirm.`);
+        if (typed !== 'DELETE') return;
+        deleteButton.disabled = true; deleteButton.textContent = 'DELETING…';
+        const { data: sessionData } = await echelonAdminClient.auth.getSession();
+        const result = await fetch('/api/enrollment/activate-member', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionData.session?.access_token || ''}` },
+            body: JSON.stringify({ action: 'delete-member', userId: row.user_id })
+        });
+        const body = await result.json();
+        if (!result.ok) { feedback.textContent = body.error || 'Could not delete this member.'; deleteButton.disabled = false; deleteButton.textContent = 'DELETE MEMBER'; return; }
+        initializeAdminDashboard();
+    });
+
+    section.append(heading, archiveButton, deleteButton, feedback);
+    detail.append(section);
 }
 
 function appendMemberProfileEditor(detail, row, email) {
@@ -1839,10 +2048,20 @@ async function initializeAdminDashboard() {
     });
 
     const status = document.getElementById('admin-intake-status');
+    const { data: members, error: membersError } = await echelonAdminClient
+        .from('account_access')
+        .select('user_id, membership_status, archived_at')
+        .eq('role', 'member')
+        .order('approved_at', { ascending: false });
+
+    if (membersError) {
+        status.textContent = 'We could not load members.';
+        return;
+    }
+
     const { data: onboardingRecords, error: onboardingError } = await echelonAdminClient
         .from('member_onboarding')
-        .select('user_id, parq, health_history, acknowledged_at, updated_at')
-        .order('updated_at', { ascending: false });
+        .select('user_id, parq, health_history, acknowledged_at, updated_at, entry_method');
 
     if (onboardingError) {
         status.textContent = 'We could not load intake submissions.';
@@ -1860,35 +2079,39 @@ async function initializeAdminDashboard() {
 
     const { data: waivers, error: waiversError } = await echelonAdminClient
         .from('member_waivers')
-        .select('user_id, full_name, signed_at, agreement_version');
+        .select('user_id, full_name, signed_at, agreement_version, entry_method');
 
     if (waiversError) {
         status.textContent = 'We could not load waiver records.';
         return;
     }
 
-    document.getElementById('admin-member-count').textContent = onboardingRecords.length;
+    const profilesByUserId = new Map(profiles.map((profile) => [profile.user_id, profile]));
+    const onboardingByUserId = new Map(onboardingRecords.map((record) => [record.user_id, record]));
+    const waiversByUserId = new Map(waivers.map((waiver) => [waiver.user_id, waiver]));
 
-    const profilesByUserId = new Map(
-        profiles.map((profile) => [profile.user_id, profile])
-    );
-    const waiversByUserId = new Map(
-        waivers.map((waiver) => [waiver.user_id, waiver])
-    );
-    const data = onboardingRecords.map((record) => ({
-        ...record,
-        profile: profilesByUserId.get(record.user_id),
-        waiver: waiversByUserId.get(record.user_id)
+    const activeMembers = members.filter((member) => !member.archived_at);
+    document.getElementById('admin-member-count').textContent = activeMembers.length;
+
+    const data = activeMembers.map((member) => ({
+        user_id: member.user_id,
+        membership_status: member.membership_status,
+        profile: profilesByUserId.get(member.user_id),
+        waiver: waiversByUserId.get(member.user_id),
+        parq: null, health_history: null, acknowledged_at: null, updated_at: null, entry_method: null,
+        ...(onboardingByUserId.get(member.user_id) || {})
     }));
 
-    status.textContent = data.length ? `${data.length} submission${data.length === 1 ? '' : 's'}` : 'No submissions yet';
+    status.textContent = data.length ? `${data.length} member${data.length === 1 ? '' : 's'}` : 'No active members yet';
     if (!data.length) {
-        list.textContent = 'When a member submits their onboarding intake, it will appear here.';
+        list.textContent = 'When a member is invited and their account activates, they will appear here.';
         return;
     }
 
     data.forEach((row, index) => {
         const profile = row.profile;
+        const onboardingDone = onboardingByUserId.has(row.user_id);
+        const waiverDone = Boolean(row.waiver);
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'admin-intake-item';
@@ -1896,9 +2119,10 @@ async function initializeAdminDashboard() {
         name.textContent = profile?.full_name || profile?.email || `Member ${row.user_id.slice(0, 8)}`;
         const email = document.createElement('span');
         email.textContent = profile?.email || 'Email not available';
-        const phone = document.createElement('span');
-        phone.textContent = profile?.phone || 'Phone not added';
-        button.append(name, email, phone);
+        const readiness = document.createElement('span');
+        readiness.className = onboardingDone && waiverDone ? 'admin-intake-item-ready' : 'admin-intake-item-pending';
+        readiness.textContent = `${onboardingDone ? 'Onboarding ✓' : 'Onboarding pending'} · ${waiverDone ? 'Waiver ✓' : 'Waiver pending'}`;
+        button.append(name, email, readiness);
         button.addEventListener('click', () => {
             list.querySelectorAll('.admin-intake-item').forEach((item) => item.classList.remove('active'));
             button.classList.add('active');

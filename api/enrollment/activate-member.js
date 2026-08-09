@@ -23,6 +23,15 @@ module.exports = async function activateMember(request, response) {
   if (request.method !== 'POST') return response.status(405).json({ error: 'Method not allowed.' });
   const admin = await requireAdmin(request);
   if (!admin) return response.status(401).json({ error: 'Your admin session is required.' });
+
+  if (request.body?.action === 'delete-member') {
+    const userId = request.body?.userId;
+    if (!userId) return response.status(400).json({ error: 'Choose a member to delete first.' });
+    const deletion = await serviceRequest(`/auth/v1/admin/users/${encodeURIComponent(userId)}`, { method: 'DELETE' });
+    if (!deletion.result.ok) return response.status(502).json({ error: 'This member could not be deleted.' });
+    return response.status(200).json({ message: 'Member deleted.' });
+  }
+
   const applicationId = request.body?.applicationId;
   if (!applicationId) return response.status(400).json({ error: 'Choose an accepted applicant first.' });
   const appResult = await serviceRequest(`/rest/v1/coaching_applications?id=eq.${encodeURIComponent(applicationId)}&select=id,full_name,email,approved_program,payment_status&limit=1`);
