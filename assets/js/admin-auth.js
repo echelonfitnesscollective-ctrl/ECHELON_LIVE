@@ -219,12 +219,6 @@ function paymentOptionForApplication(application) {
     return 'echelon_12_monthly';
 }
 
-function paymentEmailLink(application, paymentUrl, label) {
-    const subject = 'Your Echelon coaching next step';
-    const body = `Hi ${application.full_name || ''},\n\nThank you for sharing your goals with Echelon. I’d be glad to move forward with ${label}.\n\nYour private payment link is below. Once payment is confirmed, I’ll send your Member Portal invitation and onboarding next steps.\n\n${paymentUrl}\n\nRespectfully,\nEchelon Fitness Collective`;
-    return `mailto:${encodeURIComponent(application.email || '')}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-}
-
 const APPLICATION_DETAIL_FIELDS = [
     ['primary_goal', 'Primary Goal'],
     ['fitness_level', 'Current Fitness Level'],
@@ -338,10 +332,18 @@ async function fetchExistingOfferForApplication(applicationId) {
     return { paymentUrl: `${window.location.origin}/pages/enrollment-checkout.html?token=${offerResult.data.checkout_token}`, label };
 }
 
-function renderPaymentLinkButtons(actions, item, paymentUrl, label) {
+function renderPaymentLinkButtons(actions, item, paymentUrl, label, paymentFeedback) {
     actions.querySelectorAll('[data-payment-link-button]').forEach((el) => el.remove());
     const copy = document.createElement('button'); copy.type = 'button'; copy.className = 'btn-secondary'; copy.dataset.paymentLinkButton = '1'; copy.textContent = 'COPY PAYMENT LINK'; copy.addEventListener('click', async () => { try { await navigator.clipboard.writeText(paymentUrl); copy.textContent = 'LINK COPIED'; setTimeout(() => { copy.textContent = 'COPY PAYMENT LINK'; }, 2000); } catch (_) { window.prompt('Copy this private payment link:', paymentUrl); } });
-    const email = document.createElement('a'); email.className = 'btn-primary'; email.dataset.paymentLinkButton = '1'; email.textContent = 'OPEN PAYMENT EMAIL'; email.href = paymentEmailLink(item, paymentUrl, label);
+    const email = document.createElement('button'); email.type = 'button'; email.className = 'btn-primary'; email.dataset.paymentLinkButton = '1'; email.textContent = 'SEND PAYMENT EMAIL';
+    email.addEventListener('click', async () => {
+        email.disabled = true; email.textContent = 'SENDING…'; paymentFeedback.textContent = '';
+        const { data: sessionData } = await echelonAdminClient.auth.getSession();
+        const result = await fetch('/api/enrollment/send-payment-email', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionData.session?.access_token || ''}` }, body: JSON.stringify({ applicationId: item.id }) });
+        const body = await result.json();
+        paymentFeedback.textContent = result.ok ? body.message : (body.error || 'The payment email could not be sent.');
+        email.disabled = false; email.textContent = 'SEND PAYMENT EMAIL';
+    });
     actions.append(copy, email);
 }
 
@@ -389,9 +391,9 @@ function createApplicationRecord(item) {
             const result = await fetch('/api/enrollment/create-offer', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionData.session?.access_token || ''}` }, body: JSON.stringify(payload) });
             const body = await result.json();
             if (!result.ok || !body.paymentUrl) { paymentFeedback.textContent = body.error || 'The payment link could not be created.'; createOffer.disabled = false; createOffer.textContent = reopenLabel || 'CREATE PAYMENT LINK'; return; }
-            paymentFeedback.textContent = 'Private payment link created. Send it from your email below.';
+            paymentFeedback.textContent = 'Private payment link created. Send it below.';
             choice.remove(); groupSizeInput.remove(); createOffer.remove();
-            renderPaymentLinkButtons(actions, item, body.paymentUrl, body.label);
+            renderPaymentLinkButtons(actions, item, body.paymentUrl, body.label, paymentFeedback);
             initializeCoachCommand();
         });
         actions.append(choice, groupSizeInput, createOffer);
@@ -403,7 +405,7 @@ function createApplicationRecord(item) {
         fetchExistingOfferForApplication(item.id).then((offer) => {
             loading.remove();
             if (offer) {
-                renderPaymentLinkButtons(actions, item, offer.paymentUrl, offer.label);
+                renderPaymentLinkButtons(actions, item, offer.paymentUrl, offer.label, paymentFeedback);
                 const change = document.createElement('button'); change.type = 'button'; change.className = 'btn-secondary application-change-plan'; change.textContent = 'CHOOSE A DIFFERENT PLAN INSTEAD';
                 change.addEventListener('click', () => { change.remove(); buildCreateOfferForm('CREATE NEW PAYMENT LINK'); });
                 actions.append(change);
