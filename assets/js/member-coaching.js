@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     let todaysWorkAssignments = [];
     let todaysWorkIndex = 0;
+    let exerciseLoadMap = new Map();
     const todaysWorkPrevBtn = document.getElementById('todays-work-prev');
     const todaysWorkNextBtn = document.getElementById('todays-work-next');
     const todaysWorkPosition = document.getElementById('todays-work-position');
@@ -47,6 +48,27 @@ document.addEventListener('DOMContentLoaded', async () => {
             const prescription = document.createElement('p'); prescription.className = 'todays-work-prescription';
             prescription.textContent = `${row.sets ?? 'N/A'} sets x ${row.reps || 'N/A'}${row.rest_seconds ? ` · ${row.rest_seconds}s rest` : ''}`;
             card.append(prescription);
+            if (row.exercise_id) {
+                const loadWrap = document.createElement('label'); loadWrap.className = 'todays-work-load';
+                const loadLabelText = document.createElement('span'); loadLabelText.textContent = 'Load (lb)'; loadWrap.append(loadLabelText);
+                const loadInput = document.createElement('input');
+                loadInput.type = 'number'; loadInput.min = '0'; loadInput.step = '0.5'; loadInput.inputMode = 'decimal'; loadInput.placeholder = 'lb';
+                const existingLoad = exerciseLoadMap.get(`${assignment.id}_${row.exercise_id}`);
+                if (existingLoad !== undefined && existingLoad !== null) loadInput.value = existingLoad;
+                const loadStatus = document.createElement('span'); loadStatus.className = 'todays-work-load-status';
+                loadInput.addEventListener('change', async () => {
+                    const value = loadInput.value === '' ? null : Number(loadInput.value);
+                    loadStatus.textContent = 'Saving…';
+                    const { error: logError } = await echelonMemberClient
+                        .from('member_exercise_logs')
+                        .upsert({ user_id: member.id, daily_workout_id: assignment.id, exercise_id: row.exercise_id, load_lb: value }, { onConflict: 'daily_workout_id,exercise_id' });
+                    loadStatus.textContent = logError ? 'Could not save' : 'Saved';
+                    if (!logError) exerciseLoadMap.set(`${assignment.id}_${row.exercise_id}`, value);
+                    setTimeout(() => { loadStatus.textContent = ''; }, 2000);
+                });
+                loadWrap.append(loadInput, loadStatus);
+                card.append(loadWrap);
+            }
             if (exercise.target_area) { const target = document.createElement('p'); target.className = 'todays-work-target'; target.textContent = `Targets: ${exercise.target_area}`; card.append(target); }
             if (exercise.form_cues) { const cues = document.createElement('p'); cues.textContent = exercise.form_cues; card.append(cues); }
             if (exercise.coaching_cues) { const cues = document.createElement('p'); cues.textContent = exercise.coaching_cues; card.append(cues); }
@@ -100,13 +122,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         const previouslyViewedDate = todaysWorkAssignments[todaysWorkIndex]?.assigned_date;
         const { data, error } = await echelonMemberClient
             .from('member_daily_workouts')
-            .select('id, assigned_date, status, coach_note, workouts(title, category, description, setting, workout_exercises(sort_order, sets, reps, rest_seconds, notes, exercise_library(name, target_area, form_cues, coaching_cues, modification_up, modification_down, modification_pregnancy, video_url)))')
+            .select('id, assigned_date, status, coach_note, workouts(title, category, description, setting, workout_exercises(exercise_id, sort_order, sets, reps, rest_seconds, notes, exercise_library(name, target_area, form_cues, coaching_cues, modification_up, modification_down, modification_pregnancy, video_url)))')
             .eq('user_id', member.id)
             .gte('assigned_date', today)
             .order('assigned_date', { ascending: true })
             .order('sort_order', { foreignTable: 'workouts.workout_exercises', ascending: true })
             .limit(14);
         if (error || !(data || []).length) { todaysWorkAssignments = []; todaysWorkIndex = 0; renderTodaysWorkSlide(); return; }
+        const { data: logs } = await echelonMemberClient
+            .from('member_exercise_logs')
+            .select('daily_workout_id, exercise_id, load_lb')
+            .in('daily_workout_id', data.map(a => a.id));
+        exerciseLoadMap = new Map((logs || []).map(entry => [`${entry.daily_workout_id}_${entry.exercise_id}`, entry.load_lb]));
         todaysWorkAssignments = data;
         const keepIndex = previouslyViewedDate ? data.findIndex(a => a.assigned_date === previouslyViewedDate) : -1;
         const todayIndex = data.findIndex(a => a.assigned_date === today);

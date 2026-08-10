@@ -1792,9 +1792,10 @@ function appendCopyIntakeSummary(detail, row, memberName) {
         lines.push(
             '',
             'Build me:',
-            '1. The PDF + webpage, same style as Zamiyah\'s.',
-            '2. The Workout Library entries and however many training days her split needs, published.',
-            '3. Once I give you her start date, populate her Hub exactly like Zamiyah\'s: a program_template covering her full timeline, program_template_workouts for every week, member_program_enrollments, and her nutrition_profiles targets.'
+            '1. The PDF + a standalone webpage at pages/programs/<name>.html, same black/gold style as Zamiyah\'s, with its own PWA manifest so it can be added to their phone\'s home screen like an app.',
+            '2. The Workout Library entries and however many training days their split needs, published. Reuse existing exercise_library rows by exact name wherever they fit, don\'t duplicate what\'s already there.',
+            '3. If I didn\'t give you their current working weights, don\'t invent numbers, use "Establish Week 1, log in Hub" as the Load value and say so plainly in the program.',
+            '4. Once I give you their start date, populate their Hub exactly like Zamiyah\'s: a program_template covering their full timeline, program_template_workouts for every week, member_program_enrollments, and their nutrition_profiles targets.'
         );
 
         const text = lines.join('\n');

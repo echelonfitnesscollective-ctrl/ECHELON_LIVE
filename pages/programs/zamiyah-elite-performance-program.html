@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="/assets/images/favicon.png?v=9" type="image/png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Zamiyah's 28-week Elite Performance & Shape Program, built by Echelon Fitness Collective.">
+<title>Zamiyah: Elite Performance & Shape Program | Echelon Fitness Collective</title>
+<link rel="manifest" href="manifest-zamiyah.json">
+<meta name="theme-color" content="#0D0D0C">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Zamiyah Program">
+<link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+    --primary:#FFD700;
+    --black:#0D0D0C;
+    --card:#1A1917;
+    --border:#2A2822;
+    --white:#FFFFFF;
+    --gray:#AAAAAA;
+    --heading-font:'Bebas Neue',sans-serif;
+    --body-font:'Montserrat',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+    background:var(--black);
+    color:var(--white);
+    font-family:var(--body-font);
+    font-size:15px;
+    line-height:1.65;
+}
+.wrap{max-width:900px;margin:0 auto;padding:50px 28px 90px;}
+a{color:var(--primary);}
+h1,h2,h3{font-family:var(--heading-font);letter-spacing:1px;font-weight:400;color:var(--primary);}
+.top-back{display:block;font-family:var(--body-font);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);text-decoration:none;margin-bottom:26px;}
+.top-back:hover{color:var(--primary);}
+.masthead{border:1px solid var(--border);background:var(--card);padding:36px 32px;margin-bottom:34px;}
+.masthead .kicker{font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gray);margin-bottom:10px;}
+.masthead h1{font-size:2.6rem;line-height:1.05;margin-bottom:18px;}
+.meta-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 28px;margin-bottom:20px;}
+.meta-grid dt{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);}
+.meta-grid dd{font-size:.92rem;color:var(--white);margin-bottom:8px;}
+.tagline{font-size:.98rem;color:#ddd;border-top:1px solid var(--border);padding-top:18px;margin-top:6px;}
+section{margin-bottom:42px;}
+h2{font-size:1.75rem;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+h3{font-size:1.25rem;color:var(--white);margin:22px 0 10px;}
+p{margin-bottom:12px;color:#ddd;}
+p strong{color:var(--white);}
+.why-block{border-left:2px solid var(--primary);padding:4px 0 4px 18px;margin-bottom:16px;}
+.why-block strong{color:var(--primary);display:block;margin-bottom:4px;font-size:.95rem;}
+table{width:100%;border-collapse:collapse;margin:14px 0 20px;font-size:.87rem;}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top;}
+th{background:var(--card);color:var(--primary);font-family:var(--heading-font);font-weight:400;letter-spacing:.06em;font-size:.82rem;}
+td{color:#ddd;}
+tr:nth-child(even) td{background:rgba(255,255,255,0.02);}
+ul,ol{margin:0 0 14px 20px;color:#ddd;}
+li{margin-bottom:6px;}
+.day-card{border:1px solid var(--border);background:var(--card);padding:24px 26px;margin-bottom:20px;}
+.day-card .day-tag{font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--primary);margin-bottom:4px;}
+.day-card h2{border:none;margin-bottom:4px;padding-bottom:0;font-size:1.55rem;}
+.day-card .day-meta{font-size:.78rem;color:var(--gray);margin-bottom:16px;font-style:italic;}
+.note{font-size:.82rem;color:var(--gray);font-style:italic;border-top:1px solid var(--border);padding-top:14px;margin-top:6px;}
+.closing{border:1px solid var(--border);background:var(--card);padding:30px 32px;text-align:center;}
+.closing p{color:#ddd;font-size:.98rem;margin-bottom:16px;}
+.closing .brand-line{font-family:var(--heading-font);color:var(--primary);letter-spacing:.08em;font-size:1.1rem;}
+.tracker-grid{overflow-x:auto;}
+.tracker-grid table{min-width:760px;}
+.chip{display:inline-block;padding:2px 9px;border:1px solid var(--primary);color:var(--primary);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;border-radius:2px;}
+@media print{
+    body{background:#fff;color:#111;}
+    .top-back{display:none;}
+    .masthead,.day-card,.closing{background:#fff;border-color:#ccc;}
+    h1,h2,h3,.chip{color:#000;}
+    .masthead .kicker,.meta-grid dt,.meta-grid dd,.day-card .day-tag,.day-card .day-meta,.tagline,p,td,li,.note,.closing p{color:#333 !important;}
+    th{background:#f2f2f2;color:#000;}
+    a{color:#000;text-decoration:none;}
+    .why-block{border-left-color:#000;}
+    .why-block strong{color:#000;}
+    p strong{color:#000 !important;}
+    .closing .brand-line{color:#000 !important;}
+}
+@media(max-width:640px){
+    .meta-grid{grid-template-columns:1fr;}
+    .masthead h1{font-size:1.9rem;}
+    .wrap{padding:30px 18px 60px;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<a href="../../index.html" class="top-back">&larr; Echelon Fitness Collective</a>
+
+<header class="masthead">
+    <div class="kicker">1-on-1 Coaching &middot; Built From Our Consult Call</div>
+    <h1>ZAMIYAH: ELITE PERFORMANCE<br>&amp; SHAPE PROGRAM</h1>
+    <dl class="meta-grid">
+        <div><dt>Client</dt><dd>Zamiyah (IG: @iiamzamiyah)</dd></div>
+        <div><dt>Coach</dt><dd>Echelon Fitness Collective</dd></div>
+        <div><dt>Goal</dt><dd>Body Recomposition</dd></div>
+        <div><dt>Timeline</dt><dd>August 8, 2026 &rarr; February 26, 2027 (28 weeks, her birthday)</dd></div>
+        <div><dt>Structure</dt><dd>4 training days + 1 light/home mobility day</dd></div>
+        <div><dt>Level</dt><dd>Intermediate</dd></div>
+    </dl>
+    <p class="tagline">A 5-day recomposition build: glute and hip-dip shelf development, arm definition, a flat and functional core, athletic conditioning, and a splits progression. Built around everything she walked me through on the phone.</p>
+</header>
+
+<section>
+    <h2>Why I Built It This Way</h2>
+    <p>She walked me through all of it on the phone: the lifts she already loves, the hip dips, the arm insecurity, wanting a split by her birthday. Nothing here is generic. The periodization, the arm and core strategy, and the athletic layer are all built around exactly what she told me, so it adds up to the shape she's after by February 26 instead of staying four good days that don't compound.</p>
+    <div class="why-block"><strong>On the hip dips</strong>That "shelf" comes from the upper glute medius/minimus, a different target than the glute max work her hip thrusts and squats already hit. Kept her abduction and clamshell work and added a forward-lean cable angle and a slow pulse variation. Both bias the upper fibers specifically.</div>
+    <div class="why-block"><strong>On the "bat wings"</strong>No amount of tricep volume spot-reduces arm fat, that comes down from nutrition and total training volume. What the arm work does is build shape underneath so that as the fat comes off, there's definition waiting, not just skin. That's why Day 3 stays higher-rep and lighter-load: shape, not size.</div>
+    <div class="why-block"><strong>On "not big, just bigger glutes"</strong>Heavy compound lower-body work paired with a controlled diet builds the glutes preferentially while the rest of her leans out. That's recomposition, and it's exactly what she said on the call she wants.</div>
+    <div class="why-block"><strong>On the athletic piece</strong>Plyometric and agility work is loaded in small, high-quality doses on Days 1, 2, and 4. Enough to build real jump and change-of-direction capacity without adding junk volume on top of her lifting.</div>
+    <p class="note">Programmed to the ISSA CPT standard, for Echelon Fitness Collective.</p>
+</section>
+
+<section>
+    <h2>28-Week Roadmap to February 26</h2>
+    <table>
+        <tr><th>Phase</th><th>Weeks</th><th>Focus</th></tr>
+        <tr><td><strong>Phase 1: Foundation &amp; Reconnection</strong></td><td>1&ndash;7</td><td>Rebuild the habit first. Technique on every lift, light plyo to teach landing mechanics before intensity, tracking habit starts here. Baseline photos, measurements, and split-depth check in Week 1. Deload Week 7.</td></tr>
+        <tr><td><strong>Phase 2: Shape &amp; Strength Build</strong></td><td>8&ndash;15</td><td>Progressive overload on hip thrust, sumo squat, and RDL. Hip-dip shelf work and Day 3 arm volume both step up. Plyo/agility complexity increases. Deload Week 15.</td></tr>
+        <tr><td><strong>Phase 3: Recomposition Push</strong></td><td>16&ndash;23</td><td>Nutrition tightens to a modest deficit (see Nutrition Protocol). Metabolic finishers added to Day 2 and Day 4, ab definition work stays consistent. Deload Week 23.</td></tr>
+        <tr><td><strong>Phase 4: Peak &amp; Polish</strong></td><td>24&ndash;28</td><td>Volume tapers ~15% so she walks into her birthday recovered, not depleted. Splits progression gets its final push. Week 28: photo check-in against Week 1 baseline.</td></tr>
+    </table>
+</section>
+
+<section>
+    <h2>Weekly Structure</h2>
+    <table>
+        <tr><th>Day</th><th>Focus</th><th>Why it's placed here</th></tr>
+        <tr><td><strong>Day 1</strong></td><td>Glute Power + Hip-Dip Shelf (Heavy)</td><td>Fresh CNS for the heaviest compound pull of the week.</td></tr>
+        <tr><td><strong>Day 2</strong></td><td>Athletic Core, Agility &amp; Conditioning</td><td>Recovery day for the lower body, load day for jump/agility work and abs.</td></tr>
+        <tr><td><strong>Day 3</strong></td><td>Back, Posture &amp; Arm Definition</td><td>Full upper-body recovery from Day 1, posture work for the hourglass line.</td></tr>
+        <tr><td><strong>Day 4</strong></td><td>Glutes, Hamstrings &amp; Side-Glute Volume</td><td>Second glute stimulus of the week, volume-biased instead of heavy.</td></tr>
+        <tr><td><strong>Day 5</strong></td><td>Mobility, Splits &amp; Light Home Recovery</td><td>Active recovery before Day 1 restarts the week; where the splits get made.</td></tr>
+    </table>
+</section>
+
+<div class="day-card">
+    <div class="day-tag">Heavy &middot; ~55&ndash;65 min</div>
+    <h2>Day 1 / Monday &mdash; Glute Power + Hip-Dip Shelf</h2>
+    <h3>Warm-Up</h3>
+    <ul>
+        <li>Glute Bridges &mdash; 2 &times; 15</li>
+        <li>Banded Lateral Walks &mdash; 2 &times; 15 steps/side</li>
+        <li>Clamshells (bodyweight) &mdash; 2 &times; 15/side</li>
+        <li>Pogo Hops (new, primes landing mechanics) &mdash; 2 &times; 20</li>
+    </ul>
+    <h3>Main Lifts</h3>
+    <table>
+        <tr><th>Exercise</th><th>Sets &times; Reps</th><th>Load</th></tr>
+        <tr><td>Hip Thrust</td><td>4 &times; 6&ndash;8</td><td>45 lb</td></tr>
+        <tr><td>Cable Kickback</td><td>3 &times; 8&ndash;10/leg</td><td>25 lb</td></tr>
+        <tr><td>Romanian Deadlift</td><td>3 &times; 8&ndash;10</td><td>25 lb</td></tr>
+        <tr><td>Step-Ups (lean-forward, glute bias)</td><td>3 &times; 10/leg</td><td>15 lb</td></tr>
+    </table>
+    <p class="note">Cues: Hip thrust, ribs down, chin tucked, drive through heels, not a lower-back movement. RDL, hips travel back not down, soft knee bend, feel the stretch in the hamstring before reversing. Step-up, torso leans forward over the front leg so the glute, not the quad, does the driving.</p>
+    <h3>Hip-Dip Shelf Finisher (superset)</h3>
+    <table>
+        <tr><th>Exercise</th><th>Sets &times; Reps</th><th>Load</th></tr>
+        <tr><td>5A &middot; Standing Cable Abduction, torso leaned forward</td><td>3 &times; 15&ndash;20/leg</td><td>40 lb</td></tr>
+        <tr><td>5B &middot; Cable Clamshells</td><td>3 &times; 12&ndash;15/side</td><td>10 lb</td></tr>
+        <tr><td>5C &middot; Side-Lying Hip Abduction Pulses (new)</td><td>2 &times; 20/side</td><td>bodyweight</td></tr>
+    </table>
+    <p>The lean-forward angle and the slow pulse both bias the upper glute medius fibers, the muscle that fills in the hip dip. Non-negotiable even on short-time days.</p>
+    <h3>Athletic Finisher (2&times;/week)</h3>
+    <ul>
+        <li>Lateral Bounds &mdash; 3 &times; 6/side</li>
+        <li>Broad Jump to Stick &mdash; 3 &times; 5</li>
+    </ul>
+</div>
+
+<div class="day-card">
+    <div class="day-tag">Moderate &middot; ~45 min</div>
+    <h2>Day 2 / Tuesday &mdash; Athletic Core, Agility &amp; Conditioning</h2>
+    <h3>Agility &amp; Plyo Block</h3>
+    <ul>
+        <li>Agility Ladder (in-ins &amp; lateral shuffle) &mdash; 4 &times; 20 sec</li>
+        <li>Jump Squats &mdash; 3 &times; 8</li>
+        <li>Lateral Skater Bounds &mdash; 3 &times; 8/side</li>
+    </ul>
+    <p class="note">No ladder at home? Tape an X-pattern on the floor and use that instead.</p>
+    <h3>Core Circuit (2&ndash;3 rounds)</h3>
+    <ul>
+        <li>Hanging Knee Raises &mdash; 3 &times; 10&ndash;15</li>
+        <li>Sit-Ups &mdash; 3 &times; 12&ndash;15</li>
+        <li>Dumbbell Marches &mdash; 3 &times; 30&ndash;45 sec</li>
+        <li>Plank &mdash; 3 &times; 30&ndash;60 sec</li>
+        <li>Bicycle Crunches &mdash; 3 &times; 20&ndash;30 total</li>
+    </ul>
+    <h3>Cooldown</h3>
+    <ul>
+        <li>Cossack Squats: 10/side</li>
+        <li>Butterfly Stretch: 1 min</li>
+        <li>Side Lunge Hold: 45 sec/side</li>
+    </ul>
+</div>
+
+<div class="day-card">
+    <div class="day-tag">Toning &middot; higher rep, shorter rest</div>
+    <h2>Day 3 / Wednesday &mdash; Back, Posture &amp; Arm Definition</h2>
+    <h3>Warm-Up</h3>
+    <ul>
+        <li>Arm Swings: 2 &times; 8</li>
+        <li>Cat-Cow: 2 &times; 8</li>
+        <li>Wall Angels: 2 &times; 8</li>
+    </ul>
+    <h3>Back &amp; Posture</h3>
+    <table>
+        <tr><th>Exercise</th><th>Sets &times; Reps</th><th>Load</th></tr>
+        <tr><td>Assisted Pull-Ups</td><td>2 &times; 8&ndash;10</td><td>more assistance</td></tr>
+        <tr><td>Lat Pulldown</td><td>3 &times; 10&ndash;12</td><td>45&ndash;50 lb</td></tr>
+        <tr><td>Seated Cable Row</td><td>2 &times; 10&ndash;12</td><td>40 lb</td></tr>
+        <tr><td>Face Pulls</td><td>3 &times; 8&ndash;10</td><td>40 lb</td></tr>
+    </table>
+    <p class="note">Pull-ups: stop 2&ndash;3 reps before failure; maintenance block for the back, not a max-effort day.</p>
+    <h3>Arm Definition (60 sec rest, light&ndash;moderate load)</h3>
+    <table>
+        <tr><th>Exercise</th><th>Sets &times; Reps</th><th>Load</th></tr>
+        <tr><td>Triceps Pushdown</td><td>3 &times; 12&ndash;15</td><td>20 lb</td></tr>
+        <tr><td>Skull Crushers</td><td>2 &times; 12&ndash;15</td><td>light</td></tr>
+        <tr><td>Overhead Rope Tricep Extension (new)</td><td>2 &times; 15&ndash;20</td><td>light</td></tr>
+    </table>
+    <p>Three angles (pushdown, overhead, skull crusher) cover the whole triceps without heavy loading. Builds shape, not size; the fat loss that reveals it happens through nutrition, not more sets.</p>
+    <h3>Optional Finisher</h3>
+    <ul>
+        <li>Incline Push-Ups: 2 &times; 12&ndash;15</li>
+    </ul>
+</div>
+
+<div class="day-card">
+    <div class="day-tag">Volume &middot; ~55 min</div>
+    <h2>Day 4 / Thursday &mdash; Glutes, Hamstrings &amp; Side-Glute Volume</h2>
+    <h3>Warm-Up</h3>
+    <ul>
+        <li>Banded Lateral Walks: 2 &times; 15 steps/side</li>
+        <li>Glute Bridges: 2 &times; 15</li>
+    </ul>
+    <h3>Main Lifts</h3>
+    <table>
+        <tr><th>Exercise</th><th>Sets &times; Reps</th><th>Load</th></tr>
+        <tr><td>Sumo Squat (Heavy)</td><td>4 &times; 6&ndash;8</td><td>45 lb</td></tr>
+        <tr><td>Single-Leg RDL</td><td>3 &times; 8&ndash;10/leg</td><td>25 lb</td></tr>
+        <tr><td>Hyperextensions (glute bias)</td><td>3 &times; 12&ndash;15</td><td>25 lb</td></tr>
+        <tr><td>Seated Leg Press (glute stance, feet high &amp; wide)</td><td>3 &times; 10&ndash;12</td><td>45 lb</td></tr>
+        <tr><td>Lying Hamstring Curl</td><td>3 &times; 10&ndash;13</td><td>40 lb</td></tr>
+    </table>
+    <h3>Side-Glute Finisher (superset)</h3>
+    <ul>
+        <li>6A &middot; Side-Lying Leg Raises &mdash; 2 &times; 12&ndash;15/side</li>
+        <li>6B &middot; Curtsy Lunges &mdash; 2 &times; 10&ndash;12/side</li>
+    </ul>
+    <h3>Core Finisher</h3>
+    <ul>
+        <li>Dead Bugs &mdash; 45 sec</li>
+        <li>Plank &mdash; 45 sec</li>
+        <li>Bicycle Crunches &mdash; 45 sec</li>
+        <li>Hollow Hold or Knee Tucks &mdash; 45 sec</li>
+    </ul>
+</div>
+
+<div class="day-card">
+    <div class="day-tag">Light &middot; full flow ~25&ndash;30 min</div>
+    <h2>Day 5 / At Home &mdash; Mobility, Splits &amp; Light Recovery</h2>
+    <p>Her flow, held in sequence, two rounds through. Hold times are the floor; add 5&ndash;10 seconds per position every two weeks as range opens up.</p>
+    <ol>
+        <li><strong>Cossack Squats</strong> &mdash; 10 each side, dynamic, keep it moving</li>
+        <li><strong>Butterfly Stretch</strong> &mdash; 1 min: contract 5 sec, relax, sink deeper, repeat 3&times;</li>
+        <li><strong>Side Lunge Hold</strong> &mdash; 45 sec each side</li>
+        <li><strong>Frog Stretch</strong> &mdash; 1&ndash;2 min</li>
+        <li><strong>Pancake Stretch</strong> &mdash; 1 min: track fingertip-to-floor distance monthly</li>
+        <li><strong>Middle Split Lean</strong> &mdash; 30&ndash;45 sec</li>
+        <li><strong>Wall-Assisted Middle Split</strong> &mdash; 1 min: lower the support height as range improves</li>
+    </ol>
+    <p class="note">Optional Light Cardio: 15&ndash;20 min incline walk, or light jump rope, low-impact enough to arrive fresh for Monday.</p>
+</div>
+
+<section>
+    <h2>Nutrition Protocol</h2>
+    <p>Recomposition happens on the plate more than on the platform. At 154 lb, here's the target, built around what she told me on the call she wants: more protein, tighter carbs, more water.</p>
+    <table>
+        <tr><th>Macro</th><th>Target</th></tr>
+        <tr><td>Protein</td><td>150 g/day</td></tr>
+        <tr><td>Fat</td><td>55 g/day</td></tr>
+        <tr><td>Carbs</td><td>175&ndash;225 g/day</td></tr>
+        <tr><td>Water</td><td>90&ndash;100 oz/day</td></tr>
+    </table>
+    <ul>
+        <li><strong>Phases 1 &amp; 2 (Weeks 1&ndash;15):</strong> hold near 2,000 kcal with the macros above; carbs toward the higher end (~225g), concentrated around Days 1 and 4 when lifting heaviest.</li>
+        <li><strong>Phase 3 (Weeks 16&ndash;23):</strong> step down to roughly 1,750&ndash;1,800 kcal by trimming carbs toward ~175g. Protein and fat stay put; this is where the deficit does its work without costing strength.</li>
+        <li><strong>Phase 4 (Weeks 24&ndash;28):</strong> back up to ~1,900 kcal so she's recovered and full, not depleted, going into her birthday.</li>
+        <li>Protein at every meal: chicken, fish, eggs, Greek yogurt, cottage cheese, lean beef. The one number that matters most for keeping the muscle being built while the fat comes off.</li>
+        <li>Water climbs on Day 1 and Day 4; add 16&ndash;24 oz on top of baseline on heavy lift days.</li>
+        <li>Sleep is currently averaging 6 hours, that's the quiet limiter on both glute recovery and appetite control. Even pushing toward 7 hours will show up faster than any dietary change.</li>
+    </ul>
+    <p class="note">General fitness and nutrition guidance from her coach, not a substitute for individualized clinical dietary advice. Check with a physician before starting the plyometric or splits work if there is any joint, hip, or back history.</p>
+</section>
+
+<section>
+    <h2>Mobility &amp; Splits: Frequency, Not Just a Day</h2>
+    <p>One session a week won't produce a split by February; range of motion responds to frequency. Keep Day 5 as the full flow, and add two short 10-minute "flexibility snacks" on off-evenings (pancake fold + middle split lean is enough) to triple weekly stretching frequency without adding a real session.</p>
+    <ul>
+        <li>Check fingertip-to-floor distance on the pancake stretch monthly, that's the clearest progress marker.</li>
+        <li>Photograph the wall-assisted middle split monthly from the same angle; lower the support height as depth improves.</li>
+        <li>Never stretch into sharp or pinching pain; a deep stretch sensation is the target, pain is the stop signal.</li>
+    </ul>
+</section>
+
+<section class="tracker-grid">
+    <h2>Accountability: What We Track <span class="chip">Weekly in the Hub</span></h2>
+    <p>She told me on our call that inconsistent tracking has been the barrier, so the system is deliberately light. Five things, logged weekly, nothing more.</p>
+    <table>
+        <tr><th>What</th><th>Frequency</th><th>Why</th></tr>
+        <tr><td>Sessions completed</td><td>Weekly</td><td>Target 5/5, floor is 4/5; the number that predicts the outcome more than any other.</td></tr>
+        <tr><td>Body weight</td><td>1&times;/week, same morning conditions</td><td>Trend over 4 weeks, not day to day.</td></tr>
+        <tr><td>Protein grams</td><td>Daily, even if estimated</td><td>The one macro worth tracking precisely.</td></tr>
+        <tr><td>Progress photos</td><td>Every 2 weeks</td><td>Recomposition shows in the mirror before it shows on the scale.</td></tr>
+        <tr><td>Waist / hip / thigh measurements</td><td>Monthly</td><td>Confirms the shift the scale alone won't.</td></tr>
+    </table>
+</section>
+
+<div class="closing">
+    <p>Everything above is built on what she told me on our call already works for her. This just gives it a runway to February 26. Check in through the Member Portal on how Week 1 feels, adjust from there.</p>
+    <div class="brand-line">ECHELON FITNESS COLLECTIVE: STRUCTURE. ACCOUNTABILITY. COMMITMENT. FAITH.</div>
+</div>
+
+</div>
+</body>
+</html>

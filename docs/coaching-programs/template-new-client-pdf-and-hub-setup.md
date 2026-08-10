@@ -10,16 +10,17 @@ Paste this into a new conversation, filled in, once you've got the client's inta
 
 > I have a new coaching client, **[NAME]**. I want a program PDF and webpage built for them just like Zamiyah's Elite Performance & Shape Program, use `docs/coaching-programs/client-programs/zamiyah-elite-performance-program.md` as the exact template for structure, tone, and design (black/gold theme, philosophy section, 28-week-style roadmap, tracking chart, nutrition protocol).
 >
-> Here's her full intake application data:
+> Here's their full intake application data:
 > [paste everything from the coaching application]
 >
 > Here's what I learned from our call that isn't in the system:
 > [paste your call notes, see the checklist below for what to cover]
 >
 > Build me:
-> 1. The PDF + webpage, same style as Zamiyah's.
-> 2. The Workout Library entries and however many training days her split needs, published.
-> 3. Once I give you her start date, populate her Hub exactly like Zamiyah's: a program_template covering her full timeline, program_template_workouts for every week, member_program_enrollments, and her nutrition_profiles targets.
+> 1. The PDF + a standalone webpage at `pages/programs/<name>.html`, same black/gold style as Zamiyah's, with its own PWA manifest so it can be added to their phone's home screen like an app.
+> 2. The Workout Library entries and however many training days their split needs, published. Reuse existing `exercise_library` rows by exact name wherever they fit (see section 5 below), don't duplicate what's already there.
+> 3. If I didn't give you their current working weights, don't invent numbers, use "Establish Week 1, log in Hub" as the Load value and say so plainly in the program.
+> 4. Once I give you their start date, populate their Hub exactly like Zamiyah's: a program_template covering their full timeline, program_template_workouts for every week, member_program_enrollments, and their nutrition_profiles targets.
 
 ---
 
@@ -53,3 +54,27 @@ If both of these are filled in before the call, you're mostly just confirming, n
 4. `program_template_workouts` maps every week/day to the right workout, with deload and phase-transition weeks carrying a `notes` flag that surfaces as a coach note in her Today's Work automatically.
 5. Once you give a start date, `member_program_enrollments` plus the full `member_daily_workouts` calendar get generated from the template, this is what actually drives her Today's Work panel.
 6. `nutrition_profiles` gets her real macro targets from the plan, not the 2,200/160/220/70 defaults.
+
+---
+
+## 5. Exercise Library Lookup (do this before writing new exercise rows)
+
+The library is large and reused across every prior client program, most common movements already exist. Building Lex's program reused about 30 existing rows and only added 12 new ones. Check before creating:
+
+```sql
+select target_area, string_agg(name, ' | ' order by name) from exercise_library group by target_area order by target_area;
+```
+
+Existing `target_area` groupings as of the last build: Push, Pull, Squat, Lunge, Hinge, Isolation/Activation (biceps, triceps, calves, leg curl/extension, lateral raise, etc.), Core, Glutes, Glute Medius, Hamstrings, Adductors, Locomotion (carries, sled work), SAQ (Speed, Agility, Quickness), Athletic/Plyometric, Prenatal/Postpartum. Reuse an exact existing `name` wherever the movement matches, only add a new row for something genuinely not covered (a specific technique variant, a new running/conditioning protocol, a new mobility drill).
+
+**Schema reference** (`exercise_library`): `id, name, target_area, description, form_cues, coaching_cues, modification_up, modification_down, modification_pregnancy, video_url, equipment_needed, status`.
+**Schema reference** (`workouts`): `id, title, category, description, status, created_at, updated_at, setting` (`setting` is `gym` / `home` / `both`; `category` is a free-text muscle-group or type label like `Full-Body`, `Conditioning`, `Mobility`).
+**Schema reference** (`workout_exercises`): `id, workout_id, exercise_id, sort_order, sets, reps, rest_seconds, notes` (`sets` is an integer, so rep ranges like "6-8" belong in `reps` as text, not `sets`; if the count itself is a range, set `sets` to 1 and describe the range inside `reps`).
+
+**Linking workout_exercises safely:** several exercise names are duplicated across `target_area` rows from earlier programs (e.g. multiple "Face Pull" or "Romanian Deadlift" rows). Never `join` on `exercise_library.name` directly, it silently multiplies rows. Use a scalar subquery with `limit 1` per row instead: `(select id from exercise_library where name='Exact Name' limit 1)`.
+
+**Typing SQL in the Supabase SQL Editor safely:** always open a genuinely blank new query tab (the `+` button, not an existing tab, which can carry over stale content) before typing. Write each statement as one continuous line with no line breaks (chunk long statements across multiple `type` actions rather than pressing Enter mid-statement), since Monaco's auto-close-bracket feature corrupts a statement if a line break lands right after an open parenthesis. For a new client's full workout_exercises set, insert per-day (7-11 rows at a time) rather than one giant statement, so a mistake is easy to isolate. After inserting, verify with a count/null check before moving on: `select w.title, count(*) filter (where we.exercise_id is null) as missing, count(*) as total from workouts w join workout_exercises we on we.workout_id = w.id where w.title like 'ClientName - %' group by w.title;` — `missing` should always be 0.
+
+**When you don't have real working weights:** if the client's intake doesn't include current lifts (unlike Zamiyah's workout log), don't invent numbers. Use "Establish Week 1, log in Hub" (or "Light, log in Hub" for accessory work) as the Load value instead, and say so plainly in the PDF/webpage. The Hub's Today's Work panel has a per-exercise load-weight input specifically for this, the client's first real session becomes the baseline everything after progresses against.
+
+**Webpage + home screen:** every client program should exist as a standalone page at `pages/programs/<client-slug>.html`, styled black/gold to match the site (see an existing one for the exact CSS block to reuse), with its own `manifest-<client-slug>.json` in the same folder and the standard PWA head tags (`link rel="manifest"`, `apple-mobile-web-app-*` meta tags, `apple-touch-icon`) so the client can add it to their phone's home screen like a native app. The PDF is generated by pointing headless Microsoft Edge's `--print-to-pdf` at that same live page (via a local static server), not built separately, so the two never drift apart. A `@media print` block in the page's CSS handles the black-to-white flip for the printed version; when adding new elements, always add their print-mode text color to that block too, plain white text on a printed white page is invisible and easy to miss until you actually render a page and look.

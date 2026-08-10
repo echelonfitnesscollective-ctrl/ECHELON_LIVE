@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="/assets/images/favicon.png?v=9" type="image/png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Lex's 28-week Hybrid Athlete Performance Program, built by Echelon Fitness Collective.">
+<title>Lex: Hybrid Athlete Performance Program | Echelon Fitness Collective</title>
+<link rel="manifest" href="manifest-lex.json">
+<meta name="theme-color" content="#0D0D0C">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Lex Hybrid">
+<link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+    --primary:#FFD700;
+    --black:#0D0D0C;
+    --card:#1A1917;
+    --border:#2A2822;
+    --white:#FFFFFF;
+    --gray:#AAAAAA;
+    --heading-font:'Bebas Neue',sans-serif;
+    --body-font:'Montserrat',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+    background:var(--black);
+    color:var(--white);
+    font-family:var(--body-font);
+    font-size:15px;
+    line-height:1.65;
+}
+.wrap{max-width:900px;margin:0 auto;padding:50px 28px 90px;}
+a{color:var(--primary);}
+h1,h2,h3{font-family:var(--heading-font);letter-spacing:1px;font-weight:400;color:var(--primary);}
+.top-back{display:block;font-family:var(--body-font);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);text-decoration:none;margin-bottom:26px;}
+.top-back:hover{color:var(--primary);}
+.masthead{border:1px solid var(--border);background:var(--card);padding:36px 32px;margin-bottom:34px;}
+.masthead .kicker{font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gray);margin-bottom:10px;}
+.masthead h1{font-size:2.6rem;line-height:1.05;margin-bottom:18px;}
+.meta-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 28px;margin-bottom:20px;}
+.meta-grid dt{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);}
+.meta-grid dd{font-size:.92rem;color:var(--white);margin-bottom:8px;}
+.tagline{font-size:.98rem;color:#ddd;border-top:1px solid var(--border);padding-top:18px;margin-top:6px;}
+section{margin-bottom:42px;}
+h2{font-size:1.75rem;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+h3{font-size:1.25rem;color:var(--white);margin:22px 0 10px;}
+p{margin-bottom:12px;color:#ddd;}
+p strong{color:var(--white);}
+.why-block{border-left:2px solid var(--primary);padding:4px 0 4px 18px;margin-bottom:16px;}
+.why-block strong{color:var(--primary);display:block;margin-bottom:4px;font-size:.95rem;}
+table{width:100%;border-collapse:collapse;margin:14px 0 20px;font-size:.87rem;}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top;}
+th{background:var(--card);color:var(--primary);font-family:var(--heading-font);font-weight:400;letter-spacing:.06em;font-size:.82rem;}
+td{color:#ddd;}
+tr:nth-child(even) td{background:rgba(255,255,255,0.02);}
+ul,ol{margin:0 0 14px 20px;color:#ddd;}
+li{margin-bottom:6px;}
+.day-card{border:1px solid var(--border);background:var(--card);padding:24px 26px;margin-bottom:20px;}
+.day-card .day-tag{font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--primary);margin-bottom:4px;}
+.day-card h2{border:none;margin-bottom:4px;padding-bottom:0;font-size:1.55rem;}
+.day-card .day-meta{font-size:.78rem;color:var(--gray);margin-bottom:16px;font-style:italic;}
+.note{font-size:.82rem;color:var(--gray);font-style:italic;border-top:1px solid var(--border);padding-top:14px;margin-top:6px;}
+.closing{border:1px solid var(--border);background:var(--card);padding:30px 32px;text-align:center;}
+.closing p{color:#ddd;font-size:.98rem;margin-bottom:16px;}
+.closing .brand-line{font-family:var(--heading-font);color:var(--primary);letter-spacing:.08em;font-size:1.1rem;}
+.tracker-grid{overflow-x:auto;}
+.tracker-grid table{min-width:760px;}
+.chip{display:inline-block;padding:2px 9px;border:1px solid var(--primary);color:var(--primary);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;border-radius:2px;}
+@media print{
+    body{background:#fff;color:#111;}
+    .top-back{display:none;}
+    .masthead,.day-card,.closing{background:#fff;border-color:#ccc;}
+    h1,h2,h3,.chip{color:#000;}
+    .masthead .kicker,.meta-grid dt,.meta-grid dd,.day-card .day-tag,.day-card .day-meta,.tagline,p,td,li,.note,.closing p{color:#333 !important;}
+    th{background:#f2f2f2;color:#000;}
+    a{color:#000;text-decoration:none;}
+    .why-block{border-left-color:#000;}
+    .why-block strong{color:#000;}
+    p strong{color:#000 !important;}
+    .closing .brand-line{color:#000 !important;}
+}
+@media(max-width:640px){
+    .meta-grid{grid-template-columns:1fr;}
+    .masthead h1{font-size:1.9rem;}
+    .wrap{padding:30px 18px 60px;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<a href="../../index.html" class="top-back">&larr; Echelon Fitness Collective</a>
+
+<header class="masthead">
+    <div class="kicker">1-on-1 Coaching &middot; Built From Our Consult Call</div>
+    <h1>LEX: HYBRID ATHLETE<br>PERFORMANCE PROGRAM</h1>
+    <dl class="meta-grid">
+        <div><dt>Client</dt><dd>Lex (IG: @Whois.l3x)</dd></div>
+        <div><dt>Coach</dt><dd>Echelon Fitness Collective</dd></div>
+        <div><dt>Goal</dt><dd>Hybrid Athletic Development &mdash; Muscle Gain + Performance</dd></div>
+        <div><dt>Timeline</dt><dd>Start date TBD &rarr; approx. March 2027 (28 weeks)</dd></div>
+        <div><dt>Structure</dt><dd>4 strength/speed days + Zone 2 + long run + 1 recovery day</dd></div>
+        <div><dt>Level</dt><dd>Advanced</dd></div>
+    </dl>
+    <p class="tagline">A 28-week hybrid build: strength that transfers, muscle that shows, and the conditioning to run it all down, built around the split you already designed, with knee-friendly mechanics woven through every heavy day.</p>
+</header>
+
+<section>
+    <h2>Why I Built It This Way</h2>
+    <div class="why-block"><strong>On the split</strong>You already built this one. The hybrid routine you sent over is almost exactly what we're running, I mostly formalized the periodization and merged it with a phase structure. When something works and it's clearly yours, my job is to sharpen it, not replace it.</div>
+    <div class="why-block"><strong>On "not a bodybuilder, not a powerlifter"</strong>Compound lifts stay first when you're freshest (Monday and Friday), accessory volume stays moderate instead of chasing size in one direction, and speed work, Zone 2, and a long run are layered in so the engine keeps pace with the strength. That's the "weak in the middle" problem solved, strength, size, and conditioning develop together instead of one eating into the others.</div>
+    <div class="why-block"><strong>On the knee</strong>A click with no pain usually points to a tracking or stability issue, not a structural one, but I'm not a physician, so get it looked at once before we push the plyometric work harder (see the note below). In the meantime, box squats replace free squats on Monday, controlling depth and shear force, Controlled Articular Rotations go into every warm-up, and single-leg and posterior-chain work builds the stability that usually resolves a painless click over time.</div>
+    <div class="why-block"><strong>On the "5% body fat" target</strong>I want to be straight with you on this one. 5% is stage-shredded, competition-only condition, essentially unsustainable, and it actively fights muscle gain since your body needs some fat reserve to build and recover. What actually gets you strong, muscular, and lean in a way you can hold onto sits closer to 8&ndash;12%: visible abs, visible separation, still enough in the tank to keep adding muscle and mileage. That's the number this program is actually built toward. If you want to chase single digits for a specific event down the line, we can run a short, planned cut for that, but not as the year-round target.</div>
+    <div class="why-block"><strong>On the calendar</strong>Your own program already builds in a deload every 4th week. I kept that exactly as you designed it and used it as the engine for the whole periodization below, instead of imposing a different rhythm on top of it.</div>
+    <p class="note">Programmed to the ISSA CPT standard, for Echelon Fitness Collective.</p>
+</section>
+
+<section>
+    <h2>28-Week Roadmap</h2>
+    <table>
+        <tr><th>Phase</th><th>Weeks</th><th>Focus</th></tr>
+        <tr><td><strong>Phase 1: Foundation &amp; Knee Stability</strong></td><td>1&ndash;8</td><td>Box squat depth and bar path get full attention before load climbs. Controlled Articular Rotations become a daily habit. Moderate loads everywhere while movement quality locks in. Deloads at Week 4 and Week 8.</td></tr>
+        <tr><td><strong>Phase 2: Strength &amp; Engine Build</strong></td><td>9&ndash;16</td><td>Main lifts progress toward heavier strength blocks (4&times;4&ndash;6). Tempo runs get faster, Zone 2 volume increases. Deloads at Week 12 and Week 16.</td></tr>
+        <tr><td><strong>Phase 3: Hybrid Peak</strong></td><td>17&ndash;24</td><td>Heaviest strength numbers of the block. Hypertrophy accessories run at higher volume. Threshold, 400m, and tempo paces all get faster. Nutrition shifts toward the cut. Deloads at Week 20 and Week 24.</td></tr>
+        <tr><td><strong>Phase 4: Polish &amp; Performance Test</strong></td><td>25&ndash;28</td><td>Volume tapers ~15%. Week 28: retest the main lifts, the speed protocols, and the long run distance against Week 1 baseline, to see the actual gap closed.</td></tr>
+    </table>
+</section>
+
+<section>
+    <h2>Weekly Structure</h2>
+    <table>
+        <tr><th>Day</th><th>Focus</th><th>Why it's placed here</th></tr>
+        <tr><td><strong>Day 1</strong></td><td>Full Body Strength A (Lower Emphasis)</td><td>Fresh CNS for the week's heaviest lower-body pull; box squat mechanics get full attention before fatigue sets in.</td></tr>
+        <tr><td><strong>Day 2</strong></td><td>Zone 2 Conditioning</td><td>Recovery-paced aerobic work the day after the heaviest lower session; builds the engine without adding load.</td></tr>
+        <tr><td><strong>Day 3</strong></td><td>Upper Body Performance &amp; Hypertrophy</td><td>Full lower-body recovery; heaviest upper pressing and pulling of the week.</td></tr>
+        <tr><td><strong>Day 4</strong></td><td>Speed / Tempo Development (rotating)</td><td>Legs recovered from Monday, fresh for top-end speed work.</td></tr>
+        <tr><td><strong>Day 5</strong></td><td>Full Body Strength B (Posterior Chain)</td><td>Second full-body strength stimulus, posterior-chain-biased to balance Day 1's quad-dominant box squat.</td></tr>
+        <tr><td><strong>Day 6</strong></td><td>Recovery &amp; Knee-Mobility Flow</td><td>Active recovery before the long run; where the CARs and hip/knee mobility work get dedicated time.</td></tr>
+        <tr><td><strong>Day 7</strong></td><td>Long Run (Aerobic Base)</td><td>Builds the "run also" piece from our call, conversational pace, capped so it doesn't eat into Day 1.</td></tr>
+    </table>
+</section>
+
+<p class="note" style="border-top:none;padding-top:0;margin-bottom:24px;"><strong style="color:var(--white);">On Load:</strong> you didn't send over current working weights, so every lift below starts at "establish Week 1" instead of a guessed number. Log the actual weight you use for each lift in the Hub the first time you run it, that becomes your baseline, and every week after that you're progressing against your own number, not mine.</p>
+
+<div class="day-card">
+    <div class="day-tag">Heavy &middot; ~60 min</div>
+    <h2>Day 1 / Monday &mdash; Full Body Strength A (Lower Emphasis)</h2>
+    <h3>Warm-Up</h3>
+    <ul>
+        <li>Bike &mdash; 5 min easy spin</li>
+        <li>Band Activation (monster walk, lateral band walk) &mdash; 2 &times; 15 steps/side</li>
+        <li>Knee CARs (Controlled Articular Rotations) &mdash; 2 &times; 5 slow circles/side</li>
+        <li>Box Jumps or Broad Jumps &mdash; 3 &times; 3</li>
+    </ul>
+    <h3>Strength</h3>
+    <table>
+        <tr><th>Exercise</th><th>Sets &times; Reps</th><th>Load</th><th>Notes</th></tr>
+        <tr><td>Barbell Box Squat</td><td>3 &times; 5&ndash;6</td><td>Establish Week 1, log in Hub</td><td>Box height sets your depth, sit back onto it, don't drop. Controls shear force on the knee.</td></tr>
+        <tr><td>Romanian Deadlift</td><td>3 &times; 6&ndash;8</td><td>Establish Week 1, log in Hub</td><td>Hips travel back not down, soft knee bend, feel the hamstring stretch before reversing.</td></tr>
+    </table>
+    <h3>Upper Strength</h3>
+    <table>
+        <tr><th>Exercise</th><th>Sets &times; Reps</th><th>Load</th></tr>
+        <tr><td>Incline Dumbbell Press</td><td>3 &times; 6&ndash;8</td><td>Establish Week 1, log in Hub</td></tr>
+        <tr><td>Lat Pulldown (wide grip)</td><td>3 &times; 8</td><td>Establish Week 1, log in Hub</td></tr>
+    </table>
+    <h3>Accessories</h3>
+    <table>
+        <tr><th>Exercise</th><th>Sets &times; Reps</th><th>Load</th></tr>
+        <tr><td>Cable Lateral Raise</td><td>2 &times; 12&ndash;15</td><td>Light, log in Hub</td></tr>
+        <tr><td>Rope Tricep Pushdown</td><td>2 &times; 12&ndash;15</td><td>Light, log in Hub</td></tr>
+        <tr><td>Cable Crunch</td><td>3 &times; 12</td><td>Bodyweight/cable stack, log in Hub</td></tr>
+    </table>
+</div>
+
+<div class="day-card">
+    <div class="day-tag">Easy &middot; 45&ndash;60 min</div>
+    <h2>Day 2 / Tuesday &mdash; Zone 2 Conditioning</h2>
+    <ul>
+        <li><strong>Zone 2 Cardio (Run or Bike)</strong> &mdash; 45&ndash;60 min. Heart rate stays conversational the entire time; if you can't hold a conversation, you're going too hard.</li>
+        <li>Optional mobility flow afterward &mdash; 10 min, hips and ankles.</li>
+    </ul>
+</div>
+
+<div class="day-card">
+    <div class="day-tag">Moderate&ndash;Heavy &middot; ~60 min</div>
+    <h2>Day 3 / Wednesday &mdash; Upper Body Performance &amp; Hypertrophy</h2>
+    <h3>Main Strength</h3>
+    <table>
+        <tr><th>Exercise</th><th>Sets &times; Reps</th><th>Load</th></tr>
+        <tr><td>Flat Barbell Bench Press</td><td>3 &times; 5&ndash;6</td><td>Establish Week 1, log in Hub</td></tr>
+        <tr><td>Chest-Supported Row</td><td>3 &times; 6&ndash;8</td><td>Establish Week 1, log in Hub</td></tr>
+    </table>
+    <h3>Secondary</h3>
+    <table>
+        <tr><th>Exercise</th><th>Sets &times; Reps</th><th>Load</th><th>Notes</th></tr>
+        <tr><td>Weighted Pull-Up</td><td>3 &times; 6&ndash;8</td><td>Bodyweight until clean, then add load, log in Hub</td><td>Add weight only once you can hit 3&times;8 bodyweight clean.</td></tr>
+        <tr><td>Standing Barbell Overhead Press</td><td>3 &times; 6&ndash;8</td><td>Establish Week 1, log in Hub</td><td></td></tr>
+    </table>
+    <h3>Hypertrophy</h3>
+    <table>
+        <tr><th>Exercise</th><th>Sets &times; Reps</th><th>Load</th></tr>
+        <tr><td>Cable Fly (high-to-low angle)</td><td>2 &times; 12</td><td>Light, log in Hub</td></tr>
+        <tr><td>Face Pull</td><td>2 &times; 15</td><td>Light, log in Hub</td></tr>
+        <tr><td>Dumbbell Biceps Curl (alternating)</td><td>2 &times; 10</td><td>Light, log in Hub</td></tr>
+        <tr><td>Overhead Rope Tricep Extension</td><td>2 &times; 10</td><td>Light, log in Hub</td></tr>
+    </table>
+</div>
+
+<div class="day-card">
+    <div class="day-tag">Moderate &middot; 30&ndash;40 min of running work &mdash; rotate A &rarr; B &rarr; C weekly, then repeat</div>
+    <h2>Day 4 / Thursday &mdash; Speed / Tempo Development</h2>
+    <p><strong>Week A: Threshold Intervals</strong> &mdash; 5 &times; 4 min at threshold pace, 2 min easy jog between.</p>
+    <p><strong>Week B: 400m Repeats</strong> &mdash; 6&ndash;8 &times; 400m at goal 5K pace or faster, full recovery between.</p>
+    <p><strong>Week C: Tempo Run</strong> &mdash; 20&ndash;25 min continuous at a "comfortably hard" pace, faster than Zone 2, controlled the whole way.</p>
+    <p class="note">The same three sessions get faster as the block progresses, that's the actual progression metric on this day.</p>
+</div>
+
+<div class="day-card">
+    <div class="day-tag">Heavy &middot; ~60 min</div>
+    <h2>Day 5 / Friday &mdash; Full Body Strength B (Posterior Chain)</h2>
+    <h3>Warm-Up</h3>
+    <ul>
+        <li>Bike &mdash; 5 min</li>
+        <li>Broad Jumps or Pogo Hops &mdash; 3 &times; 5</li>
+    </ul>
+    <h3>Strength</h3>
+    <table>
+        <tr><th>Exercise</th><th>Sets &times; Reps</th><th>Load</th><th>Notes</th></tr>
+        <tr><td>Trap-Bar Deadlift</td><td>3 &times; 5</td><td>Establish Week 1, log in Hub</td><td></td></tr>
+        <tr><td>Zercher Walking Lunge</td><td>3 &times; 8/leg</td><td>Establish Week 1, log in Hub</td><td>Front-loaded position builds the midline strength a straight bodybuilding split skips.</td></tr>
+    </table>
+    <h3>Upper Strength</h3>
+    <table>
+        <tr><th>Exercise</th><th>Sets &times; Reps</th><th>Load</th></tr>
+        <tr><td>Standing Barbell Overhead Press</td><td>3 &times; 6</td><td>Establish Week 1, log in Hub</td></tr>
+        <tr><td>Seated Cable Row</td><td>3 &times; 8</td><td>Establish Week 1, log in Hub</td></tr>
+    </table>
+    <h3>Hypertrophy Finish</h3>
+    <table>
+        <tr><th>Exercise</th><th>Sets &times; Reps</th><th>Load</th></tr>
+        <tr><td>Seated Leg Curl</td><td>2 &times; 10</td><td>Light, log in Hub</td></tr>
+        <tr><td>Machine Chest Fly</td><td>2 &times; 12</td><td>Light, log in Hub</td></tr>
+        <tr><td>Hammer Curl</td><td>2 &times; 10</td><td>Light, log in Hub</td></tr>
+        <tr><td>Skull Crusher</td><td>2 &times; 10</td><td>Light, log in Hub</td></tr>
+        <tr><td>Hanging Knee Raises</td><td>3 &times; 10</td><td>Bodyweight, log in Hub</td></tr>
+    </table>
+</div>
+
+<div class="day-card">
+    <div class="day-tag">Light &middot; 25&ndash;30 min, this is where the dedicated knee work lives</div>
+    <h2>Day 6 / Saturday &mdash; Recovery &amp; Knee-Mobility Flow</h2>
+    <table>
+        <tr><th>Exercise</th><th>Volume</th><th>Notes</th></tr>
+        <tr><td>Knee CARs (Controlled Articular Rotations)</td><td>2 &times; 5 slow circles/side</td><td></td></tr>
+        <tr><td>Cossack Squats</td><td>10/side, dynamic</td><td></td></tr>
+        <tr><td>Supported Wall Sit</td><td>3 &times; 30&ndash;45 sec</td><td>Builds quad/VMO endurance without joint shear, directly targets what usually quiets a painless knee click.</td></tr>
+        <tr><td>Foam Rolling (Quads, IT Band, Calves)</td><td>2 min/area</td><td></td></tr>
+        <tr><td>Butterfly Stretch</td><td>1 min</td><td></td></tr>
+        <tr><td>Frog Stretch</td><td>1&ndash;2 min</td><td></td></tr>
+    </table>
+    <p class="note">Optional: sauna or cold plunge, easy walk.</p>
+</div>
+
+<div class="day-card">
+    <div class="day-tag">Easy &middot; 60&ndash;90 min</div>
+    <h2>Day 7 / Sunday &mdash; Long Run (Aerobic Base)</h2>
+    <p><strong>Long Run (Conversational Pace)</strong> &mdash; 60&ndash;90 min. Same rule as Zone 2: if you can't talk, slow down. This is the "run also" piece from our call, capped so it doesn't compromise Day 1.</p>
+</div>
+
+<section>
+    <h2>Nutrition Protocol</h2>
+    <p>Your goal is both "build muscle" and "get lean," and those pull in opposite directions at the extremes you named. Here's the honest split: we build first, then we cut, not both at once, that's how it actually works at an advanced level.</p>
+    <table>
+        <tr><th>Macro</th><th>Target</th></tr>
+        <tr><td>Protein</td><td>1.0 g per lb of bodyweight/day</td></tr>
+        <tr><td>Fat</td><td>0.35 g per lb of bodyweight/day</td></tr>
+        <tr><td>Carbs</td><td>Fills the rest of the target: higher in the Build phases, lower in the Cut phase</td></tr>
+        <tr><td>Calories</td><td>Maintenance + ~250&ndash;300 kcal in Build phases, Maintenance &minus; ~350&ndash;400 kcal in the Cut phase</td></tr>
+    </table>
+    <ul>
+        <li><strong>Phases 1 &amp; 2 (Weeks 1&ndash;16, Build):</strong> modest surplus, carbs concentrated around lifting days (Mon/Wed/Fri). This is where the muscle gets built.</li>
+        <li><strong>Phase 3 (Weeks 17&ndash;24, Cut):</strong> controlled deficit. Protein and training volume stay put so the muscle built in Phases 1&ndash;2 doesn't get eaten into, this is where the number on the scale and the mirror actually move toward that lean, defined look.</li>
+        <li><strong>Phase 4 (Weeks 25&ndash;28, Maintain):</strong> back to maintenance so you walk into the Week 28 retest recovered, not depleted.</li>
+        <li>Exact gram targets lock in once we have your Week 1 morning weigh-in, log it in the Hub and I'll confirm the numbers the same day.</li>
+        <li>Protein at every meal: chicken, fish, eggs, Greek yogurt, lean beef, cottage cheese.</li>
+        <li>Sleep is already solid at 7 hours, that's a real advantage most clients don't have. Protect it.</li>
+    </ul>
+    <p class="note">General fitness and nutrition guidance from your coach, not a substitute for individualized clinical dietary advice. Get the knee looked at by a physician before we push the plyometric or box jump work to higher intensity, given the click you mentioned on the call.</p>
+</section>
+
+<section>
+    <h2>Mobility &amp; Knee Health: Frequency, Not Just a Day</h2>
+    <p>A click with no pain is common and usually mechanical, not damage, but frequency of the right kind of work is what actually changes it, not one Saturday session.</p>
+    <ul>
+        <li>Knee CARs go in every single warm-up, all seven days, not just Saturday, that's the real fix.</li>
+        <li>Box squat depth stays fixed at parallel or just above until the click is a non-issue for 4 straight weeks, then we can explore deeper ranges.</li>
+        <li>Track how the knee feels weekly (fine / mild click / anything sharper) in the Hub; sharp or painful is the stop signal, mild painless clicking is not.</li>
+    </ul>
+</section>
+
+<section class="tracker-grid">
+    <h2>Accountability: What We Track <span class="chip">Weekly in the Hub</span></h2>
+    <table>
+        <tr><th>What</th><th>Frequency</th><th>Why</th></tr>
+        <tr><td>Sessions completed</td><td>Weekly</td><td>Target 6/6 (Days 1&ndash;5 + the Sunday long run), floor is 5/6.</td></tr>
+        <tr><td>Body weight</td><td>1&times;/week, same morning conditions</td><td>Sets your nutrition targets and confirms the Build/Cut phases are actually working.</td></tr>
+        <tr><td>Protein grams</td><td>Daily, even if estimated</td><td>The one macro that protects the muscle through the Cut phase.</td></tr>
+        <tr><td>Main lift numbers (Box Squat, Bench, Trap-Bar Deadlift, Standing OHP)</td><td>Weekly</td><td>The real strength progress marker for a hybrid athlete, more useful than a mirror check some weeks.</td></tr>
+        <tr><td>Speed day time/pace</td><td>Weekly (Thursdays)</td><td>Threshold pace, 400m splits, and tempo pace all trend down as the engine improves, that's the conditioning half of "hybrid" showing up in the numbers.</td></tr>
+        <tr><td>Knee status</td><td>Weekly</td><td>Fine / mild click / other. The early-warning system for the mobility work.</td></tr>
+    </table>
+</section>
+
+<div class="closing">
+    <p>Your own routine did most of the work here, I mostly gave it a runway, a periodization system, and a plan for the knee. Check in through the Member Portal on how Week 1 feels, and log your morning weight so I can lock your nutrition targets the same day.</p>
+    <div class="brand-line">ECHELON FITNESS COLLECTIVE: STRUCTURE. ACCOUNTABILITY. COMMITMENT. FAITH.</div>
+</div>
+
+</div>
+</body>
+</html>

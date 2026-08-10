@@ -3661,6 +3661,10 @@ COACHING PLAYBOOK
 .todays-work-mods p{ margin:8px 0 0; }
 .todays-work-mods a{ color:var(--primary); }
 .todays-work-status-done{ color:#8fd18f; font-size:.75rem; font-weight:700; letter-spacing:.05em; }
+.todays-work-load{ display:flex; align-items:center; gap:8px; margin:8px 0; }
+.todays-work-load span:first-child{ color:#ccc; font-size:.72rem; letter-spacing:.05em; text-transform:uppercase; }
+.todays-work-load input{ width:80px; padding:6px 8px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.2); color:#fff; font-size:.85rem; }
+.todays-work-load-status{ color:var(--primary); font-size:.7rem; }
 .photo-timeline{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
 .photo-timeline figure{ margin:0; }
 .photo-timeline img{ width:100%; aspect-ratio:1; object-fit:cover; border:1px solid rgba(255,255,255,.18); transition:transform .3s ease,border-color .3s ease; }
