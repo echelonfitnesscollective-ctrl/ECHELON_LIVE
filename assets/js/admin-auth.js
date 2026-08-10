@@ -1546,7 +1546,7 @@ function appendOnboardingEntryForm(detail, row) {
     heading.textContent = 'ENTER ONBOARDING FOR THIS MEMBER';
     const note = document.createElement('p');
     note.className = 'admin-detail-date';
-    note.textContent = 'Use this if you are walking through PAR-Q and health history with her on the phone or in person, instead of her filling out the form herself.';
+    note.textContent = 'Use this if you are walking through PAR-Q and health history with them on the phone or in person, instead of them filling out the form themselves.';
     const form = document.createElement('form');
     form.className = 'echelon-form';
 
@@ -1610,7 +1610,7 @@ function appendWaiverEntryForm(detail, row, memberName) {
     heading.textContent = 'ENTER WAIVER FOR THIS MEMBER';
     const note = document.createElement('p');
     note.className = 'admin-detail-date';
-    note.textContent = 'Use this only when she has verbally agreed to the participation agreement with you directly, phone or in person.';
+    note.textContent = 'Use this only when they have verbally agreed to the participation agreement with you directly, phone or in person.';
     const form = document.createElement('form');
     form.className = 'echelon-form';
 
@@ -1676,9 +1676,9 @@ function appendMemberDangerZone(detail, row, memberName) {
     archiveButton.type = 'button';
     archiveButton.className = 'btn-secondary';
     archiveButton.textContent = 'ARCHIVE MEMBER';
-    archiveButton.title = 'Removes her from the active roster, keeps all her records. Reversible.';
+    archiveButton.title = 'Removes them from the active roster, keeps all their records. Reversible.';
     archiveButton.addEventListener('click', async () => {
-        if (!window.confirm(`Archive ${memberName}? She will be removed from the active member list, but nothing is deleted. This can be undone directly in Supabase.`)) return;
+        if (!window.confirm(`Archive ${memberName}? They will be removed from the active member list, but nothing is deleted. This can be undone directly in Supabase.`)) return;
         archiveButton.disabled = true;
         const admin = await getAdminUser();
         const { error } = await echelonAdminClient.from('account_access').update({
@@ -1693,7 +1693,7 @@ function appendMemberDangerZone(detail, row, memberName) {
     deleteButton.type = 'button';
     deleteButton.className = 'btn-secondary';
     deleteButton.textContent = 'DELETE MEMBER';
-    deleteButton.title = 'Permanently deletes her account and all associated records. Cannot be undone.';
+    deleteButton.title = 'Permanently deletes their account and all associated records. Cannot be undone.';
     deleteButton.addEventListener('click', async () => {
         const typed = window.prompt(`This permanently deletes ${memberName}'s account, workouts, photos, messages, and every record tied to it. This cannot be undone.\n\nType DELETE to confirm.`);
         if (typed !== 'DELETE') return;
@@ -1756,7 +1756,7 @@ function appendCopyIntakeSummary(detail, row, memberName) {
     heading.textContent = 'PROGRAM BUILD PROMPT';
     const note = document.createElement('p');
     note.className = 'admin-detail-date';
-    note.textContent = 'One click copies the full New Client prompt, her application answers, Training Profile, and your call notes, ready to paste straight into a new conversation.';
+    note.textContent = 'One click copies the full New Client prompt, their application answers, Training Profile, and your call notes, ready to paste straight into a new conversation.';
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'btn-secondary';
@@ -1782,13 +1782,13 @@ function appendCopyIntakeSummary(detail, row, memberName) {
             `I have a new coaching client, ${memberName}. I want a program PDF and webpage built for them just like Zamiyah's Elite Performance & Shape Program, use docs/coaching-programs/client-programs/zamiyah-elite-performance-program.md as the exact template for structure, tone, and design.`,
             ''
         ];
-        lines.push("Here's her full intake application data:");
+        lines.push("Here's their full intake application data:");
         if (appResult.data?.program_interest) lines.push(`Program interest: ${appResult.data.program_interest}`);
         Object.entries(appData).forEach(([key, value]) => { if (value !== undefined && value !== null && String(value).trim() !== '') lines.push(`${formatFieldLabel(key)}: ${value}`); });
-        lines.push('', "Here's her Training Profile:");
+        lines.push('', "Here's their Training Profile:");
         Object.entries(profile).forEach(([key, value]) => { if (!skip.has(key) && value !== undefined && value !== null && String(value).trim() !== '') lines.push(`${formatFieldLabel(key)}: ${value}`); });
         lines.push('', "Here's what I learned from our call that isn't in the system:");
-        lines.push(profile.call_notes && profile.call_notes.trim() ? profile.call_notes.trim() : '(none on file yet, add them in the Training Profile section below before building her program)');
+        lines.push(profile.call_notes && profile.call_notes.trim() ? profile.call_notes.trim() : '(none on file yet, add them in the Training Profile section below before building their program)');
         lines.push(
             '',
             'Build me:',
@@ -1988,12 +1988,12 @@ async function appendMemberTrainingProfile(detail, row) {
     const injuriesInput = document.createElement('textarea'); injuriesInput.rows = 2; injuriesInput.placeholder = 'Injuries, pain, surgeries, or medical conditions'; injuriesInput.setAttribute('aria-label', 'Injuries, pain, surgeries, or medical conditions'); injuriesInput.value = profile?.injuries_conditions || '';
     const pregnancyLabel = document.createElement('label'); pregnancyLabel.className = 'pregnancy-toggle';
     const pregnancyCheckbox = document.createElement('input'); pregnancyCheckbox.type = 'checkbox'; pregnancyCheckbox.checked = !!profile?.pregnant_or_postpartum;
-    pregnancyLabel.append(pregnancyCheckbox, document.createTextNode("Currently pregnant or postpartum, show her the pregnancy-safe modification instead of Up/Down"));
+    pregnancyLabel.append(pregnancyCheckbox, document.createTextNode("Currently pregnant or postpartum, show them the pregnancy-safe modification instead of Up/Down"));
     const clearanceSelect = trainingProfileSelect('Medical clearance', TRAINING_PROFILE_CLEARANCE, profile?.medical_clearance);
     const preferencesInput = document.createElement('textarea'); preferencesInput.rows = 2; preferencesInput.placeholder = 'Exercise preferences (likes, dislikes, movements to avoid)'; preferencesInput.setAttribute('aria-label', 'Exercise preferences'); preferencesInput.value = profile?.exercise_preferences || '';
     const sleepStressInput = document.createElement('textarea'); sleepStressInput.rows = 2; sleepStressInput.placeholder = 'Sleep and stress'; sleepStressInput.setAttribute('aria-label', 'Sleep and stress'); sleepStressInput.value = profile?.sleep_stress || '';
     const barrierInput = document.createElement('textarea'); barrierInput.rows = 2; barrierInput.placeholder = 'Biggest consistency barrier'; barrierInput.setAttribute('aria-label', 'Biggest consistency barrier'); barrierInput.value = profile?.consistency_barrier || '';
-    const callNotesInput = document.createElement('textarea'); callNotesInput.rows = 5; callNotesInput.placeholder = "Anything else from your call, in no particular order: current lifts and weights, how she talks about her own body, what she wants to avoid, a deadline and why it matters, whether she's into athletic/plyo work, splits, whatever came up that doesn't fit a field above. This is what makes her program read like it was actually built for her."; callNotesInput.setAttribute('aria-label', 'Call notes'); callNotesInput.value = profile?.call_notes || '';
+    const callNotesInput = document.createElement('textarea'); callNotesInput.rows = 5; callNotesInput.placeholder = "Anything else from your call, in no particular order: current lifts and weights, how they talk about their own body, what they want to avoid, a deadline and why it matters, whether they're into athletic/plyo work, splits, whatever came up that doesn't fit a field above. This is what makes their program read like it was actually built for them."; callNotesInput.setAttribute('aria-label', 'Call notes'); callNotesInput.value = profile?.call_notes || '';
     const saveButton = document.createElement('button'); saveButton.type = 'submit'; saveButton.className = 'btn-secondary'; saveButton.textContent = profile ? 'UPDATE TRAINING PROFILE' : 'SAVE TRAINING PROFILE';
     const feedback = document.createElement('p'); feedback.className = 'form-error'; feedback.setAttribute('role', 'status');
 
