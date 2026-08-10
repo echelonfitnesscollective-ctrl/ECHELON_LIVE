@@ -25,6 +25,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const todaysWorkPrevBtn = document.getElementById('todays-work-prev');
     const todaysWorkNextBtn = document.getElementById('todays-work-next');
     const todaysWorkPosition = document.getElementById('todays-work-position');
+    const todaysWorkJumpBtn = document.getElementById('todays-work-jump');
+    const todaysWorkCalendar = document.getElementById('todays-work-calendar');
+    let calendarMonthCursor = new Date(`${today}T00:00:00`);
+    let programDateBounds = null;
 
     function buildDaySlide(assignment) {
         const isToday = assignment.assigned_date === today;
@@ -104,13 +108,154 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!list) return;
         if (!todaysWorkAssignments.length) { list.textContent = "Your coach hasn't assigned any upcoming work yet."; if (todaysWorkPosition) todaysWorkPosition.textContent = ''; if (todaysWorkPrevBtn) todaysWorkPrevBtn.disabled = true; if (todaysWorkNextBtn) todaysWorkNextBtn.disabled = true; return; }
         const assignment = todaysWorkAssignments[todaysWorkIndex];
-        list.replaceChildren(buildDaySlide(assignment));
+        const daySlide = buildDaySlide(assignment);
+        list.replaceChildren(daySlide);
         if (todaysWorkPosition) {
             const isToday = assignment.assigned_date === today;
             todaysWorkPosition.textContent = `${isToday ? 'TODAY' : assignment.assigned_date} · ${todaysWorkIndex + 1} of ${todaysWorkAssignments.length}`;
         }
         if (todaysWorkPrevBtn) todaysWorkPrevBtn.disabled = todaysWorkIndex === 0;
         if (todaysWorkNextBtn) todaysWorkNextBtn.disabled = todaysWorkIndex === todaysWorkAssignments.length - 1;
+        loadDaySummary(assignment.assigned_date).then((summary) => {
+            if (list.firstElementChild !== daySlide) return;
+            const box = document.createElement('div');
+            box.className = 'todays-work-day-summary';
+            if (summary.hasFood || summary.weight) {
+                const parts = [];
+                if (summary.hasFood) parts.push(`${Math.round(summary.totals.calories)} kcal`, `${Math.round(summary.totals.protein)}g protein`, `${Math.round(summary.totals.carbs)}g carbs`, `${Math.round(summary.totals.fat)}g fat`);
+                if (summary.weight) parts.push(`Weight ${summary.weight.weight_value} ${summary.weight.weight_unit}`);
+                box.textContent = `Logged that day: ${parts.join(' · ')}`;
+            } else {
+                box.textContent = 'Nothing logged for this day yet.';
+            }
+            daySlide.append(box);
+        });
+    }
+
+    async function loadDaySummary(assignedDate) {
+        const [{ data: foodRows }, { data: weightRow }] = await Promise.all([
+            echelonMemberClient.from('food_logs').select('calories, protein_grams, carbohydrate_grams, fat_grams').eq('user_id', member.id).eq('log_date', assignedDate),
+            echelonMemberClient.from('weight_logs').select('weight_value, weight_unit').eq('user_id', member.id).eq('log_date', assignedDate).maybeSingle()
+        ]);
+        const totals = (foodRows || []).reduce((acc, row) => {
+            acc.calories += Number(row.calories) || 0;
+            acc.protein += Number(row.protein_grams) || 0;
+            acc.carbs += Number(row.carbohydrate_grams) || 0;
+            acc.fat += Number(row.fat_grams) || 0;
+            return acc;
+        }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
+        return { totals, hasFood: (foodRows || []).length > 0, weight: weightRow || null };
+    }
+
+    async function loadStreak() {
+        const streakEl = document.getElementById('member-streak');
+        if (!streakEl) return;
+        const since = new Date(`${today}T00:00:00`);
+        since.setDate(since.getDate() - 30);
+        const sinceStr = since.toISOString().slice(0, 10);
+        const [{ data: workouts }, { data: foodDates }, { data: waterDates }] = await Promise.all([
+            echelonMemberClient.from('member_daily_workouts').select('assigned_date, status').eq('user_id', member.id).gte('assigned_date', sinceStr).lte('assigned_date', today).order('assigned_date', { ascending: false }),
+            echelonMemberClient.from('food_logs').select('log_date').eq('user_id', member.id).gte('log_date', sinceStr).lte('log_date', today),
+            echelonMemberClient.from('water_logs').select('log_date').eq('user_id', member.id).gte('log_date', sinceStr).lte('log_date', today)
+        ]);
+        const foodDaySet = new Set((foodDates || []).map((r) => r.log_date));
+        const waterDaySet = new Set((waterDates || []).map((r) => r.log_date));
+        let streak = 0;
+        for (const day of (workouts || [])) {
+            const complete = day.status === 'completed' && foodDaySet.has(day.assigned_date) && waterDaySet.has(day.assigned_date);
+            if (!complete && day.assigned_date === today) continue;
+            if (complete) { streak += 1; continue; }
+            break;
+        }
+        streakEl.textContent = streak > 0
+            ? `🔥 ${streak} day${streak === 1 ? '' : 's'} strong, workout + macros + water logged every one`
+            : 'Log your workout, macros, and water on the same day to start a streak.';
+    }
+
+    async function ensureProgramDateBounds() {
+        if (programDateBounds) return programDateBounds;
+        const [{ data: earliest }, { data: latest }] = await Promise.all([
+            echelonMemberClient.from('member_daily_workouts').select('assigned_date').eq('user_id', member.id).order('assigned_date', { ascending: true }).limit(1),
+            echelonMemberClient.from('member_daily_workouts').select('assigned_date').eq('user_id', member.id).order('assigned_date', { ascending: false }).limit(1)
+        ]);
+        programDateBounds = { min: earliest?.[0]?.assigned_date || today, max: latest?.[0]?.assigned_date || today };
+        return programDateBounds;
+    }
+
+    function renderCalendar() {
+        if (!todaysWorkCalendar) return;
+        todaysWorkCalendar.replaceChildren();
+        const year = calendarMonthCursor.getFullYear();
+        const month = calendarMonthCursor.getMonth();
+
+        const header = document.createElement('div');
+        header.className = 'todays-work-calendar-header';
+        const prevBtn = document.createElement('button');
+        prevBtn.type = 'button'; prevBtn.textContent = '←'; prevBtn.setAttribute('aria-label', 'Previous month');
+        const nextBtn = document.createElement('button');
+        nextBtn.type = 'button'; nextBtn.textContent = '→'; nextBtn.setAttribute('aria-label', 'Next month');
+        const label = document.createElement('span');
+        label.textContent = calendarMonthCursor.toLocaleDateString([], { month: 'long', year: 'numeric' });
+        prevBtn.addEventListener('click', () => { calendarMonthCursor = new Date(year, month - 1, 1); renderCalendar(); });
+        nextBtn.addEventListener('click', () => { calendarMonthCursor = new Date(year, month + 1, 1); renderCalendar(); });
+        header.append(prevBtn, label, nextBtn);
+        todaysWorkCalendar.append(header);
+
+        const grid = document.createElement('div');
+        grid.className = 'todays-work-calendar-grid';
+        ['S', 'M', 'T', 'W', 'T', 'F', 'S'].forEach((d) => { const el = document.createElement('span'); el.className = 'todays-work-calendar-dow'; el.textContent = d; grid.append(el); });
+        const firstOfMonth = new Date(year, month, 1);
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const currentAssignment = todaysWorkAssignments[todaysWorkIndex];
+        for (let i = 0; i < firstOfMonth.getDay(); i++) grid.append(document.createElement('span'));
+        for (let d = 1; d <= daysInMonth; d++) {
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+            const dayBtn = document.createElement('button');
+            dayBtn.type = 'button'; dayBtn.textContent = String(d); dayBtn.className = 'todays-work-calendar-day';
+            if (dateStr === today) dayBtn.classList.add('is-today');
+            if (currentAssignment && dateStr === currentAssignment.assigned_date) dayBtn.classList.add('is-selected');
+            dayBtn.addEventListener('click', () => jumpToDate(dateStr));
+            grid.append(dayBtn);
+        }
+        todaysWorkCalendar.append(grid);
+    }
+
+    async function jumpToDate(dateStr) {
+        const center = new Date(`${dateStr}T00:00:00`);
+        const from = new Date(center); from.setDate(from.getDate() - 7);
+        const to = new Date(center); to.setDate(to.getDate() + 7);
+        const { data, error } = await echelonMemberClient
+            .from('member_daily_workouts')
+            .select('id, assigned_date, status, coach_note, workouts(title, category, description, setting, workout_exercises(exercise_id, sort_order, sets, reps, rest_seconds, notes, exercise_library(name, target_area, form_cues, coaching_cues, modification_up, modification_down, modification_pregnancy, video_url)))')
+            .eq('user_id', member.id)
+            .gte('assigned_date', from.toISOString().slice(0, 10))
+            .lte('assigned_date', to.toISOString().slice(0, 10))
+            .order('assigned_date', { ascending: true })
+            .order('sort_order', { foreignTable: 'workouts.workout_exercises', ascending: true });
+        if (error || !(data || []).length) return;
+        const { data: logs } = await echelonMemberClient
+            .from('member_exercise_logs')
+            .select('daily_workout_id, exercise_id, load_lb')
+            .in('daily_workout_id', data.map((a) => a.id));
+        exerciseLoadMap = new Map((logs || []).map((entry) => [`${entry.daily_workout_id}_${entry.exercise_id}`, entry.load_lb]));
+        todaysWorkAssignments = data;
+        const idx = data.findIndex((a) => a.assigned_date === dateStr);
+        todaysWorkIndex = idx !== -1 ? idx : 0;
+        if (todaysWorkCalendar) todaysWorkCalendar.hidden = true;
+        renderTodaysWorkSlide();
+    }
+
+    if (todaysWorkJumpBtn && todaysWorkCalendar) {
+        todaysWorkJumpBtn.addEventListener('click', async () => {
+            const opening = todaysWorkCalendar.hidden;
+            if (opening) {
+                await ensureProgramDateBounds();
+                const anchor = todaysWorkAssignments[todaysWorkIndex]?.assigned_date || today;
+                calendarMonthCursor = new Date(`${anchor}T00:00:00`);
+                renderCalendar();
+            }
+            todaysWorkCalendar.hidden = !opening;
+        });
     }
 
     if (todaysWorkPrevBtn) todaysWorkPrevBtn.addEventListener('click', () => { if (todaysWorkIndex > 0) { todaysWorkIndex -= 1; renderTodaysWorkSlide(); } });
@@ -145,7 +290,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const [photos, messages] = await Promise.all([
             echelonMemberClient.from('member_progress_photos').select('storage_path, caption, taken_on, created_at').eq('user_id', member.id).order('taken_on', { ascending: false }).limit(12),
             echelonMemberClient.from('coach_messages').select('sender_id, message, created_at').or(`sender_id.eq.${member.id},recipient_id.eq.${member.id}`).order('created_at', { ascending: true }).limit(50),
-            loadTodaysWork()
+            loadTodaysWork(),
+            loadStreak()
         ]);
         const photoList = document.getElementById('progress-photo-list'); photoList.replaceChildren();
         for (const photo of (photos.data || [])) { const urlResult = await echelonMemberClient.storage.from('progress-photos').createSignedUrl(photo.storage_path, 3600); if (!urlResult.data?.signedUrl) continue; const figure = document.createElement('figure'); const image = document.createElement('img'); image.src = urlResult.data.signedUrl; image.alt = photo.caption || `Progress photo from ${photo.taken_on}`; const caption = document.createElement('figcaption'); caption.textContent = `${photo.taken_on}${photo.caption ? ` · ${photo.caption}` : ''}`; figure.append(image, caption); photoList.append(figure); }

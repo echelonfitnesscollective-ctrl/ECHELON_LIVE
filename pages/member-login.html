@@ -55,6 +55,11 @@
                     <label for="member-password">PASSWORD</label>
                     <input id="member-password" name="password" type="password" autocomplete="current-password" required>
 
+                    <label class="member-trust-device-toggle">
+                        <input id="member-trust-device" name="trust_device" type="checkbox" checked>
+                        Trust this device, stay signed in for up to 1 hour between visits
+                    </label>
+
                     <button type="submit" class="btn-primary">SIGN IN</button>
                     <p id="member-login-feedback" class="form-error" role="status"></p>
                 </form>

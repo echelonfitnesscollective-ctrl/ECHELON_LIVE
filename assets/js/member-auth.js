@@ -11,11 +11,16 @@ const EFC_SUPABASE_URL = 'https://plkdyvtriajpzcfgtwzp.supabase.co';
 const EFC_SUPABASE_KEY = 'sb_publishable_CwFNrWSrhLKURZIk_-yt1A_ZVpFHEwf';
 const EFC_MEMBER_STEP_UP_KEY = 'efc_member_step_up_user';
 const EFC_MEMBER_LAST_ACTIVITY_KEY = 'efc_member_last_activity';
-// 15 minutes of no clicks/keys/scrolling on a member page signs the session
-// out and sends the member back to the login form. This is separate from the
-// browser's own saved-password/Face-ID autofill, which still works normally
-// on the next sign-in, it just is not treated as "still signed in."
+const EFC_MEMBER_TRUST_KEY = 'efc_member_trusted_device';
+// Untrusted devices (shared/public computers) sign out after 15 minutes idle,
+// same as before. Trusted devices (the member's own phone) get a full hour,
+// this is what actually fixes "signed out mid-set": mobile browsers routinely
+// wipe sessionStorage when a tab is backgrounded for a few seconds (checking
+// a timer, a text), which used to look identical to a real timeout. Trusted
+// devices store their step-up marker in localStorage instead, which survives
+// that, so only genuine inactivity signs them out.
 const EFC_MEMBER_IDLE_TIMEOUT_MS = 15 * 60 * 1000;
+const EFC_MEMBER_TRUSTED_IDLE_TIMEOUT_MS = 60 * 60 * 1000;
 const EFC_MEMBER_IDLE_CHECK_INTERVAL_MS = 60 * 1000;
 const EFC_MEMBER_PAGES = new Set([
     'member-portal.html', 'member-coaching.html', 'member-nutrition.html',
@@ -38,28 +43,49 @@ async function getAuthenticatedMember() {
     return error ? null : data.user;
 }
 
-function hasRequiredMemberSignIn(member) {
-    return Boolean(member && window.sessionStorage.getItem(EFC_MEMBER_STEP_UP_KEY) === member.id);
+function isTrustedDevice() {
+    return window.localStorage.getItem(EFC_MEMBER_TRUST_KEY) === '1';
 }
 
-function markMemberSignIn(member) {
+// Trusted devices persist across tab close/background (localStorage);
+// untrusted devices behave as before, cleared when the tab session ends
+// (sessionStorage). Both are checked on read so a device trusted in one tab
+// is recognized in another, and so downgrading trust mid-session still works.
+function memberSignInStorages() {
+    return isTrustedDevice() ? [window.localStorage, window.sessionStorage] : [window.sessionStorage];
+}
+
+function hasRequiredMemberSignIn(member) {
+    if (!member) return false;
+    return memberSignInStorages().some((store) => store.getItem(EFC_MEMBER_STEP_UP_KEY) === member.id);
+}
+
+function markMemberSignIn(member, trustDevice) {
     if (!member) return;
-    window.sessionStorage.setItem(EFC_MEMBER_STEP_UP_KEY, member.id);
+    if (trustDevice) window.localStorage.setItem(EFC_MEMBER_TRUST_KEY, '1');
+    else window.localStorage.removeItem(EFC_MEMBER_TRUST_KEY);
+    const store = trustDevice ? window.localStorage : window.sessionStorage;
+    store.setItem(EFC_MEMBER_STEP_UP_KEY, member.id);
     recordMemberActivity();
 }
 
 function clearMemberSignIn() {
-    window.sessionStorage.removeItem(EFC_MEMBER_STEP_UP_KEY);
-    window.sessionStorage.removeItem(EFC_MEMBER_LAST_ACTIVITY_KEY);
+    [window.localStorage, window.sessionStorage].forEach((store) => {
+        store.removeItem(EFC_MEMBER_STEP_UP_KEY);
+        store.removeItem(EFC_MEMBER_LAST_ACTIVITY_KEY);
+    });
 }
 
 function recordMemberActivity() {
-    window.sessionStorage.setItem(EFC_MEMBER_LAST_ACTIVITY_KEY, String(Date.now()));
+    const store = isTrustedDevice() ? window.localStorage : window.sessionStorage;
+    store.setItem(EFC_MEMBER_LAST_ACTIVITY_KEY, String(Date.now()));
 }
 
 function isMemberSessionIdle() {
-    const last = Number(window.sessionStorage.getItem(EFC_MEMBER_LAST_ACTIVITY_KEY));
-    return !last || (Date.now() - last) > EFC_MEMBER_IDLE_TIMEOUT_MS;
+    const store = isTrustedDevice() ? window.localStorage : window.sessionStorage;
+    const timeout = isTrustedDevice() ? EFC_MEMBER_TRUSTED_IDLE_TIMEOUT_MS : EFC_MEMBER_IDLE_TIMEOUT_MS;
+    const last = Number(store.getItem(EFC_MEMBER_LAST_ACTIVITY_KEY));
+    return !last || (Date.now() - last) > timeout;
 }
 
 async function signOutIdleMember() {
@@ -190,7 +216,7 @@ async function initializeMemberLogin() {
             return;
         }
 
-        markMemberSignIn(signedInMember);
+        markMemberSignIn(signedInMember, Boolean(form.elements.trust_device?.checked));
         window.location.replace(getSafeNextPage());
     });
 }
