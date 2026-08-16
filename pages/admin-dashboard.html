@@ -15,6 +15,7 @@
     <script src="../assets/js/main.js" defer></script>
     <script src="../assets/js/admin-auth.js" defer></script>
     <script src="../assets/js/admin-coaching-playbook.js" defer></script>
+    <script src="../assets/js/admin-scheduling.js" defer></script>
 </head>
 <body>
 <a href="#main-content" class="skip-link">Skip to content</a>
@@ -66,6 +67,7 @@
                 <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="workouts" data-step="10">WORKOUT LIBRARY</button>
                 <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="playbook" data-step="11">COACHING PLAYBOOK</button>
                 <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="calendar" data-step="12">CALENDAR</button>
+                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="sessions" data-step="13">SESSIONS</button>
             </nav>
 
             <details class="admin-intake-section admin-console-section admin-content-section admin-tab-panel" data-admin-panel="content">
@@ -566,6 +568,62 @@
                     </form>
                     <div id="calendar-preview" class="calendar-preview"></div>
                 </div>
+            </details>
+        </div>
+
+        <div class="admin-tab-panel" data-admin-panel="sessions" hidden>
+            <details class="admin-intake-section admin-console-section" open>
+                <summary class="admin-section-heading">
+                    <div><span class="checkin-tag">SCHEDULE</span><h2>SESSIONS</h2></div>
+                    <p>Set the windows you're open for training, book a session directly for a member (great for someone you're onboarding by phone), and see what's coming up.</p>
+                </summary>
+                <div class="admin-resource-layout">
+                    <div>
+                        <h3>STANDING AVAILABILITY</h3>
+                        <form id="availability-window-form" class="echelon-form">
+                            <select name="day_of_week" aria-label="Day of week" required>
+                                <option value="0">Sunday</option>
+                                <option value="1" selected>Monday</option>
+                                <option value="2">Tuesday</option>
+                                <option value="3">Wednesday</option>
+                                <option value="4">Thursday</option>
+                                <option value="5">Friday</option>
+                                <option value="6">Saturday</option>
+                            </select>
+                            <input name="start_time" type="time" aria-label="Start time" required>
+                            <input name="end_time" type="time" aria-label="End time" required>
+                            <select name="session_type" aria-label="Session type">
+                                <option value="one_on_one">1-on-1</option>
+                                <option value="private_group">Private Group</option>
+                            </select>
+                            <button type="submit" class="btn-secondary">ADD WINDOW</button>
+                            <p id="availability-window-feedback" class="form-error" role="status"></p>
+                        </form>
+                        <div id="availability-window-list" class="availability-window-list">Loading…</div>
+                    </div>
+                    <div>
+                        <h3>BOOK A SESSION</h3>
+                        <form id="admin-book-session-form" class="echelon-form">
+                            <select name="user_id" aria-label="Member" required><option value="">Loading members…</option></select>
+                            <input name="date" type="date" aria-label="Date" required>
+                            <input name="time" type="time" aria-label="Time" required>
+                            <select name="duration_minutes" aria-label="Duration">
+                                <option value="30">30 minutes</option>
+                                <option value="60" selected>60 minutes</option>
+                                <option value="90">90 minutes</option>
+                            </select>
+                            <select name="session_type" aria-label="Session type">
+                                <option value="one_on_one">1-on-1</option>
+                                <option value="private_group">Private Group</option>
+                            </select>
+                            <textarea name="notes" rows="2" placeholder="Notes (optional)" aria-label="Notes"></textarea>
+                            <button type="submit" class="btn-primary">BOOK SESSION</button>
+                            <p id="admin-book-session-feedback" class="form-error" role="status"></p>
+                        </form>
+                    </div>
+                </div>
+                <h3>UPCOMING SESSIONS</h3>
+                <div id="upcoming-sessions-list" class="availability-window-list">Loading…</div>
             </details>
         </div>
     </main>

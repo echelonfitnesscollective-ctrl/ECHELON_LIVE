@@ -3402,6 +3402,12 @@ COACHING PLAYBOOK
 .calendar-preview{min-height:600px;color:#8f8f8f;font-size:.85rem}
 .calendar-preview iframe{width:100%;height:600px;border:1px solid #2A2822;background:#fff}
 
+.availability-window-list{display:flex;flex-direction:column;gap:8px;margin-top:14px;color:#aaa;font-size:.8rem}
+.availability-window-item{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 16px;border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.025)}
+.availability-window-item span{color:#e2e2e2;font-size:.78rem;line-height:1.5}
+.availability-window-item .btn-primary,.availability-window-item .btn-secondary{flex:0 0 auto;margin:0;padding:9px 14px;font-size:.62rem}
+@media(max-width:600px){.availability-window-item{flex-direction:column;align-items:flex-start}}
+
 .admin-bulk-upload{
     grid-column:1 / -1;
     margin-top:20px;

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="/assets/images/favicon.png?v=9" type="image/png">
+<link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png?v=9">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+    <title>Echelon Fitness Collective | Book a Session</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/js/main.js" defer></script>
+    <script src="../assets/js/member-auth.js" defer></script>
+    <script src="../assets/js/member-booking.js" defer></script>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to content</a>
+
+    <header class="site-header">
+        <div class="container">
+            <a href="../index.html" class="logo">ECHELON <span>FITNESS COLLECTIVE</span></a>
+            <nav class="desktop-nav">
+                <a href="member-portal.html">Member Portal</a>
+                <a href="member-coaching.html">Coaching</a>
+                <a href="member-nutrition.html">Fuel</a>
+                <a href="member-performance.html">Performance</a>
+                <a href="member-library.html">Member Vault</a>
+            </nav>
+            <button class="mobile-toggle" aria-label="Open Menu">☰</button>
+        </div>
+    </header>
+
+    <main class="portal-section" id="main-content">
+        <div class="container">
+            <div class="portal-card">
+                <span class="checkin-tag">ECHELON SCHEDULING</span>
+                <h1>BOOK A SESSION</h1>
+                <p>Pick an open training window below. Your coach confirms every booking instantly, no back and forth needed.</p>
+
+                <div class="form-section-header"><h2>YOUR UPCOMING SESSIONS</h2></div>
+                <div id="my-upcoming-sessions" class="availability-window-list">Loading…</div>
+
+                <div class="form-section-header"><h2>OPEN WINDOWS · NEXT 14 DAYS</h2></div>
+                <p id="booking-feedback" class="form-error" role="status"></p>
+                <div id="open-slot-list" class="availability-window-list">Loading…</div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

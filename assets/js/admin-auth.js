@@ -2275,6 +2275,7 @@ document.addEventListener('DOMContentLoaded', () => {
         initializeWorkoutLibraryManager();
         initializeCoachingPlaybook();
         initializeCalendarSettings();
+        initializeAdminScheduling();
         initializeAdminTabs();
     });
 });

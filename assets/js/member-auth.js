@@ -25,7 +25,7 @@ const EFC_MEMBER_IDLE_CHECK_INTERVAL_MS = 60 * 1000;
 const EFC_MEMBER_PAGES = new Set([
     'member-portal.html', 'member-coaching.html', 'member-nutrition.html',
     'member-performance.html', 'member-library.html', 'member-onboarding.html',
-    'member-waiver.html'
+    'member-waiver.html', 'member-booking.html'
 ]);
 
 const echelonMemberClient = window.supabase.createClient(
