@@ -2,4 +2,6 @@ User-agent: *
 Allow: /
 Disallow: /pages/admin-
 Disallow: /pages/member-
+Disallow: /admin-
+Disallow: /member-
 Sitemap: https://www.echelonfitness.co/sitemap.xml

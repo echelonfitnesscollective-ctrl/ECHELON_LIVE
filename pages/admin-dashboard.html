@@ -55,22 +55,22 @@
             </section>
 
             <nav class="admin-tab-bar" aria-label="Admin Console sections" role="tablist">
-                <button type="button" class="admin-tab active" role="tab" aria-selected="true" data-admin-tab="today" data-step="01">TODAY</button>
-                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="members" data-step="02">MEMBERS</button>
-                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="leads" data-step="03">LEADS</button>
-                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="programs" data-step="04">PROGRAMS</button>
-                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="content" data-step="05">SITE CONTENT</button>
-                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="media" data-step="06">MEDIA</button>
-                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="communications" data-step="07">COMMS</button>
-                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="library" data-step="08">LIBRARY</button>
-                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="equipment" data-step="09">EQUIPMENT</button>
-                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="workouts" data-step="10">WORKOUT LIBRARY</button>
-                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="playbook" data-step="11">COACHING PLAYBOOK</button>
-                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="calendar" data-step="12">CALENDAR</button>
-                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="sessions" data-step="13">SESSIONS</button>
+                <button type="button" class="admin-tab active" role="tab" aria-selected="true" data-admin-tab="today" aria-controls="admin-panel-today" data-step="01">TODAY</button>
+                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="members" aria-controls="admin-panel-members admin-panel-members-2" data-step="02">MEMBERS</button>
+                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="leads" aria-controls="admin-panel-leads admin-panel-leads-2" data-step="03">LEADS</button>
+                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="programs" aria-controls="admin-panel-programs" data-step="04">PROGRAMS</button>
+                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="content" aria-controls="admin-panel-content" data-step="05">SITE CONTENT</button>
+                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="media" aria-controls="admin-panel-media" data-step="06">MEDIA</button>
+                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="communications" aria-controls="admin-panel-communications" data-step="07">COMMS</button>
+                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="library" aria-controls="admin-panel-library admin-panel-library-2" data-step="08">LIBRARY</button>
+                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="equipment" aria-controls="admin-panel-equipment" data-step="09">EQUIPMENT</button>
+                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="workouts" aria-controls="admin-panel-workouts" data-step="10">WORKOUT LIBRARY</button>
+                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="playbook" aria-controls="admin-panel-playbook" data-step="11">COACHING PLAYBOOK</button>
+                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="calendar" aria-controls="admin-panel-calendar" data-step="12">CALENDAR</button>
+                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="sessions" aria-controls="admin-panel-sessions" data-step="13">SESSIONS</button>
             </nav>
 
-            <details class="admin-intake-section admin-console-section admin-content-section admin-tab-panel" data-admin-panel="content">
+            <details class="admin-intake-section admin-console-section admin-content-section admin-tab-panel" data-admin-panel="content" id="admin-panel-content" role="tabpanel">
                 <summary class="admin-section-heading">
                     <div><span class="checkin-tag">ECHELON SITE CMS</span><h2>DAILY SITE UPDATES</h2></div>
                     <p>Write once, choose where it belongs, then publish now or schedule it ahead.</p>
@@ -98,7 +98,7 @@
                 </div>
             </details>
 
-            <details class="admin-intake-section admin-console-section admin-media-section admin-tab-panel" data-admin-panel="media">
+            <details class="admin-intake-section admin-console-section admin-media-section admin-tab-panel" data-admin-panel="media" id="admin-panel-media" role="tabpanel">
                 <summary class="admin-section-heading">
                     <div><span class="checkin-tag">ECHELON MEDIA MANAGER</span><h2>YOUR GALLERY, ON YOUR TERMS</h2></div>
                     <p>Upload a new photo or short video, choose its order, and decide exactly what the public sees.</p>
@@ -121,7 +121,7 @@
                 </div>
             </details>
 
-            <details class="admin-intake-section admin-console-section communications-section admin-tab-panel" data-admin-panel="communications">
+            <details class="admin-intake-section admin-console-section communications-section admin-tab-panel" data-admin-panel="communications" id="admin-panel-communications" role="tabpanel">
                 <summary class="admin-section-heading">
                     <div><span class="checkin-tag">ECHELON COMMUNICATIONS</span><h2>RESPONSE LIBRARY</h2></div>
                     <p>Choose the moment, personalize the brackets, and copy a composed reply.</p>
@@ -134,7 +134,7 @@
                 <div id="communications-library" class="communications-grid"></div>
             </details>
 
-            <details class="admin-intake-section admin-console-section admin-today-section admin-tab-panel" data-admin-panel="today" open>
+            <details class="admin-intake-section admin-console-section admin-today-section admin-tab-panel" data-admin-panel="today" id="admin-panel-today" role="tabpanel" open>
                 <summary class="admin-section-heading">
                     <div><span class="checkin-tag">COACH COMMAND</span><h2>PRIORITIES &amp; FOLLOW-UPS</h2></div>
                     <p id="coach-command-status">Loading coach priorities…</p>
@@ -162,7 +162,7 @@
                 </div>
             </details>
 
-            <details class="admin-intake-section admin-console-section program-operations-section admin-tab-panel" data-admin-panel="programs">
+            <details class="admin-intake-section admin-console-section program-operations-section admin-tab-panel" data-admin-panel="programs" id="admin-panel-programs" role="tabpanel">
                 <summary class="admin-section-heading">
                     <div><span class="checkin-tag">PROGRAM DELIVERY</span><h2>HOW ECHELON RUNS</h2></div>
                     <p>Open the offering, follow the steps, and create a Coach Command task for every handoff.</p>
@@ -321,7 +321,7 @@
                 </div>
             </details>
 
-            <details class="admin-intake-section admin-console-section admin-leads-section admin-tab-panel" data-admin-panel="leads" open>
+            <details class="admin-intake-section admin-console-section admin-leads-section admin-tab-panel" data-admin-panel="leads" id="admin-panel-leads" role="tabpanel" open>
                 <summary class="admin-section-heading">
                     <div><span class="checkin-tag">LEADS</span><h2 id="applications-heading">COACHING APPLICATIONS</h2></div>
                     <p id="admin-applications-status">Loading applications…</p>
@@ -329,7 +329,7 @@
                 <div id="admin-applications-list" class="admin-record-list"></div>
             </details>
 
-            <details class="admin-intake-section admin-console-section admin-inquiries-section admin-tab-panel" data-admin-panel="leads">
+            <details class="admin-intake-section admin-console-section admin-inquiries-section admin-tab-panel" data-admin-panel="leads" id="admin-panel-leads-2" role="tabpanel">
                 <summary class="admin-section-heading">
                     <div><span class="checkin-tag">SITE INQUIRIES</span><h2 id="leads-heading">CONTACT &amp; WAITLIST</h2></div>
                     <p id="admin-leads-status">Loading website leads…</p>
@@ -337,7 +337,7 @@
                 <div id="admin-leads-list" class="admin-record-list"></div>
             </details>
 
-            <details class="admin-intake-section admin-console-section admin-member-activity-section admin-tab-panel" data-admin-panel="members">
+            <details class="admin-intake-section admin-console-section admin-member-activity-section admin-tab-panel" data-admin-panel="members" id="admin-panel-members" role="tabpanel">
                 <summary class="admin-section-heading">
                     <div><span class="checkin-tag">ATTENDANCE</span><h2 id="checkins-heading">RECENT CHECK-INS</h2></div>
                     <p id="admin-checkins-status">Loading check-ins…</p>
@@ -345,7 +345,7 @@
                 <div id="admin-checkins-list" class="admin-record-list"></div>
             </details>
 
-            <details class="admin-intake-section admin-console-section admin-member-records-section admin-tab-panel" data-admin-panel="members" open>
+            <details class="admin-intake-section admin-console-section admin-member-records-section admin-tab-panel" data-admin-panel="members" id="admin-panel-members-2" role="tabpanel" open>
                 <summary class="admin-section-heading">
                     <div>
                         <span class="checkin-tag">MEMBER TRACKER</span>
@@ -363,7 +363,7 @@
                 </div>
             </details>
 
-            <details class="admin-intake-section admin-console-section admin-member-vault-section admin-tab-panel" data-admin-panel="library">
+            <details class="admin-intake-section admin-console-section admin-member-vault-section admin-tab-panel" data-admin-panel="library" id="admin-panel-library" role="tabpanel">
                 <summary class="admin-section-heading"><div><span class="checkin-tag">MEMBER VAULT</span><h2>PRIVATE RESOURCE LIBRARY</h2></div><p>Upload guides and publish them only to signed-in members.</p></summary>
                 <div class="admin-resource-layout"><form id="member-library-form" class="echelon-form"><input name="title" type="text" placeholder="Resource title" required aria-label="Resource title"><select name="category" required aria-label="Goal category, so this groups correctly next to the matching free guides in the Member Vault"><option value="" disabled selected>Goal category (for Member Vault grouping)</option><option value="Weight Loss">Weight Loss</option><option value="Cutting">Cutting</option><option value="Bulking">Bulking</option><option value="Muscle">Muscle</option><option value="Performance">Performance</option><option value="Older-Adult Wellness">Older-Adult Wellness</option><option value="Fuel">Fuel (general, not goal-specific)</option><option value="Training">Training (general, not goal-specific)</option><option value="General">General / Other</option></select><textarea name="description" rows="3" placeholder="Short member-facing description" aria-label="Short member-facing description"></textarea><input name="resource_file" type="file" accept="application/pdf,image/png,image/jpeg" required aria-label="Resource File"><button type="submit" class="btn-secondary">PUBLISH TO MEMBER VAULT</button><p id="member-library-feedback" class="form-error" role="status"></p></form><div id="member-library-admin-list" class="admin-record-list"></div></div>
 
@@ -377,7 +377,7 @@
                 </div>
             </details>
 
-            <details class="admin-intake-section admin-console-section admin-trainer-resources-section admin-tab-panel" data-admin-panel="library">
+            <details class="admin-intake-section admin-console-section admin-trainer-resources-section admin-tab-panel" data-admin-panel="library" id="admin-panel-library-2" role="tabpanel">
                 <summary class="admin-section-heading">
                     <div><span class="checkin-tag">COACH DEVELOPMENT</span><h2 id="resources-heading">TRAINER RESOURCES</h2></div>
                     <p>Private education, templates, and reference links.</p>
@@ -396,7 +396,7 @@
             </details>
         </div>
 
-        <div class="admin-tab-panel" data-admin-panel="equipment" hidden>
+        <div class="admin-tab-panel" data-admin-panel="equipment" id="admin-panel-equipment" role="tabpanel" hidden>
             <details class="admin-intake-section admin-console-section" open>
                 <summary class="admin-section-heading">
                     <div><span class="checkin-tag">INVENTORY</span><h2>EQUIPMENT</h2></div>
@@ -419,7 +419,7 @@
             </details>
         </div>
 
-        <div class="admin-tab-panel" data-admin-panel="workouts" hidden>
+        <div class="admin-tab-panel" data-admin-panel="workouts" id="admin-panel-workouts" role="tabpanel" hidden>
             <details class="admin-intake-section admin-console-section" open>
                 <summary class="admin-section-heading">
                     <div><span class="checkin-tag">STEP 1 · BUILDING BLOCKS</span><h2>EXERCISE LIBRARY</h2></div>
@@ -531,7 +531,7 @@
             </details>
         </div>
 
-        <div class="admin-tab-panel" data-admin-panel="playbook" hidden>
+        <div class="admin-tab-panel" data-admin-panel="playbook" id="admin-panel-playbook" role="tabpanel" hidden>
             <div class="admin-section-heading">
                 <div><span class="checkin-tag">REFERENCE</span><h2>COACHING PLAYBOOK</h2></div>
                 <p>Every base program, blueprint, template, and per-goal education + delivery-format guide in one browsable reference. Read-only here: edit the source files in the codebase to change content.</p>
@@ -553,7 +553,7 @@
             </div>
         </div>
 
-        <div class="admin-tab-panel" data-admin-panel="calendar" hidden>
+        <div class="admin-tab-panel" data-admin-panel="calendar" id="admin-panel-calendar" role="tabpanel" hidden>
             <details class="admin-intake-section admin-console-section" open>
                 <summary class="admin-section-heading">
                     <div><span class="checkin-tag">SCHEDULE</span><h2>CALENDAR</h2></div>
@@ -571,7 +571,7 @@
             </details>
         </div>
 
-        <div class="admin-tab-panel" data-admin-panel="sessions" hidden>
+        <div class="admin-tab-panel" data-admin-panel="sessions" id="admin-panel-sessions" role="tabpanel" hidden>
             <details class="admin-intake-section admin-console-section" open>
                 <summary class="admin-section-heading">
                     <div><span class="checkin-tag">SCHEDULE</span><h2>SESSIONS</h2></div>
