@@ -3411,8 +3411,13 @@ COACHING PLAYBOOK
 .month-calendar{margin-top:14px}
 .month-calendar-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
 .month-calendar-header span{color:#fff;font-family:var(--heading-font);font-size:1.3rem;letter-spacing:.04em}
-.month-calendar-header button{margin:0;padding:8px 14px;font-size:.7rem}
+.month-calendar-header button{width:auto;max-width:none;flex:0 0 auto;margin:0;padding:8px 14px;font-size:.7rem}
 .month-calendar-header button:disabled{opacity:.35;cursor:default}
+@media(max-width:480px){
+    .month-calendar-header{gap:6px}
+    .month-calendar-header span{font-size:1.05rem}
+    .month-calendar-header button{padding:8px 11px;font-size:.64rem}
+}
 .month-calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
 .month-calendar-weekday{padding:6px 0;text-align:center;color:#8f8f8f;font:700 .6rem 'Montserrat',sans-serif;letter-spacing:.08em}
 .month-calendar-day{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.02);color:#8f8f8f;font-size:.78rem;cursor:default}
