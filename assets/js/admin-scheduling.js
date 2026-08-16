@@ -185,6 +185,10 @@ async function initializeAdminScheduling() {
     const bookForm = document.getElementById('admin-book-session-form');
     const bookFeedback = document.getElementById('admin-book-session-feedback');
     const memberSelect = bookForm.elements.user_id;
+    const groupForm = document.getElementById('group-create-form');
+    const groupFeedback = document.getElementById('group-create-feedback');
+    const groupResult = document.getElementById('group-create-result');
+    const groupWindowSelect = groupForm ? groupForm.elements.window_id : null;
     const sessionsCalendar = initializeSessionsCalendar();
 
     async function loadAvailabilityWindows() {
@@ -195,6 +199,19 @@ async function initializeAdminScheduling() {
             .order('start_time', { ascending: true });
         windowList.innerHTML = '';
         if (error) { windowList.textContent = 'Could not load availability windows.'; return; }
+
+        if (groupWindowSelect) {
+            const previous = groupWindowSelect.value;
+            groupWindowSelect.innerHTML = '<option value="">One-off session (not tied to a standing window)</option>';
+            (data || []).filter((row) => row.active).forEach((row) => {
+                const option = document.createElement('option');
+                option.value = row.id;
+                option.textContent = `${EFC_WEEKDAY_LABELS[row.day_of_week]} · ${efcFormatTime(row.start_time)} · ${efcSessionTypeLabel(row.session_type)} (cap ${row.capacity})`;
+                groupWindowSelect.append(option);
+            });
+            groupWindowSelect.value = previous;
+        }
+
         if (!data.length) { windowList.textContent = 'No standing availability yet, add one below.'; return; }
         data.forEach((row) => {
             const item = document.createElement('div');
@@ -285,6 +302,51 @@ async function initializeAdminScheduling() {
         if (sessionsCalendar) sessionsCalendar.reload();
         efcSyncBookingToCalendar(data.id, 'create');
     });
+
+    if (groupForm) {
+        groupForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            groupFeedback.textContent = '';
+            groupResult.innerHTML = '';
+            const { session_type, window_id, date, time, duration_minutes, capacity, host_name, host_email, notes } = groupForm.elements;
+            const submit = groupForm.querySelector('button[type="submit"]');
+            submit.disabled = true; submit.textContent = 'CREATING…';
+            const { data: sessionData } = await echelonAdminClient.auth.getSession();
+            const result = await fetch('/api/groups/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionData.session?.access_token || ''}` },
+                body: JSON.stringify({
+                    sessionType: session_type.value,
+                    windowId: window_id.value || null,
+                    date: date.value,
+                    time: time.value,
+                    durationMinutes: Number(duration_minutes.value),
+                    capacity: Number(capacity.value),
+                    hostName: host_name.value,
+                    hostEmail: host_email.value,
+                    notes: notes.value
+                })
+            });
+            const body = await result.json().catch(() => ({}));
+            submit.disabled = false; submit.textContent = 'CREATE JOIN LINK';
+            if (!result.ok || !body.joinUrl) { groupFeedback.textContent = body.error || 'Could not create that join link.'; return; }
+
+            const item = document.createElement('div');
+            item.className = 'availability-window-item';
+            const label = document.createElement('span');
+            label.textContent = body.joinUrl;
+            const copy = document.createElement('button');
+            copy.type = 'button'; copy.className = 'btn-secondary';
+            copy.textContent = 'COPY LINK';
+            copy.addEventListener('click', async () => {
+                try { await navigator.clipboard.writeText(body.joinUrl); copy.textContent = 'COPIED'; }
+                catch (_) { groupFeedback.textContent = 'Could not copy automatically, select and copy the link above.'; }
+            });
+            item.append(label, copy);
+            groupResult.append(item);
+            groupForm.reset();
+        });
+    }
 
     loadAvailabilityWindows();
     loadMembersForBooking();

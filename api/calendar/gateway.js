@@ -1,12 +1,14 @@
 'use strict';
 
-// Every Google Calendar endpoint, plus the health check, collapsed into one
-// serverless function. Vercel's Hobby plan caps a deployment at 12
-// functions and the site was already at that ceiling, so this file is
-// reached via explicit vercel.json rewrites (?route=...) instead of one
-// file per action -- /api/calendar/oauth-start, /api/calendar/oauth-callback,
-// /api/calendar/status, /api/calendar/sync-booking, /api/calendar/freebusy,
-// and (public URL unchanged) /api/health all resolve here.
+// Every Google Calendar endpoint, the group-join links, plus the health
+// check, collapsed into one serverless function. Vercel's Hobby plan caps
+// a deployment at 12 functions and the site was already at that ceiling,
+// so this file is reached via explicit vercel.json rewrites (?route=...)
+// instead of one file per action -- /api/calendar/oauth-start,
+// /api/calendar/oauth-callback, /api/calendar/status,
+// /api/calendar/sync-booking, /api/calendar/freebusy, /api/groups/create,
+// /api/groups/info, /api/groups/join, and (public URL unchanged)
+// /api/health all resolve here.
 
 const { randomBytes } = require('node:crypto');
 
@@ -241,6 +243,138 @@ async function handleFreeBusy(request, response) {
   }
 }
 
+// Shared by the authenticated sync-booking flow and the anonymous
+// group-join flow -- creates a Google Calendar event for a booking and
+// writes the resulting event id back. Best-effort: never throws.
+async function createCalendarEventForBooking(booking) {
+  try {
+    const session = await getCalendarSession();
+    if (!session) return;
+    const start = new Date(booking.scheduled_at);
+    const end = new Date(start.getTime() + booking.duration_minutes * 60 * 1000);
+    const eventResponse = await fetch(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(session.calendarId)}/events`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${session.accessToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        summary: `${EFC_SESSION_TYPE_LABELS[booking.session_type] || booking.session_type} · ${booking.member_name}`,
+        description: booking.notes || undefined,
+        start: { dateTime: start.toISOString() },
+        end: { dateTime: end.toISOString() }
+      })
+    });
+    const event = await eventResponse.json();
+    if (!eventResponse.ok || !event.id) return;
+    await supabase(`/rest/v1/session_bookings?id=eq.${encodeURIComponent(booking.id)}`, {
+      method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ google_event_id: event.id })
+    });
+  } catch (error) {
+    console.error('Create calendar event error', error && error.message);
+  }
+}
+
+async function handleGroupCreate(request, response) {
+  if (request.method !== 'POST') return response.status(405).json({ error: 'Method not allowed.' });
+  const admin = await requireAdmin(request);
+  if (!admin) return response.status(401).json({ error: 'Your admin session is required.' });
+
+  const { sessionType, windowId, date, time, durationMinutes, capacity, hostName, hostEmail, notes } = request.body || {};
+  if (!date || !time || !['private_group', 'group_fitness'].includes(sessionType)) {
+    return response.status(400).json({ error: 'A session type, date, and time are required.' });
+  }
+  const scheduledAt = new Date(`${date}T${time}`);
+  if (Number.isNaN(scheduledAt.getTime())) return response.status(400).json({ error: 'Choose a valid date and time.' });
+
+  try {
+    const insertResult = await supabase('/rest/v1/session_groups', {
+      method: 'POST', headers: { Prefer: 'return=representation' },
+      body: JSON.stringify({
+        window_id: windowId || null,
+        session_type: sessionType,
+        scheduled_at: scheduledAt.toISOString(),
+        duration_minutes: Math.max(15, Number(durationMinutes) || 60),
+        capacity: Math.max(1, Number(capacity) || 1),
+        host_name: hostName?.trim() || null,
+        host_email: hostEmail?.trim() || null,
+        notes: notes?.trim() || null
+      })
+    });
+    const group = Array.isArray(insertResult.body) ? insertResult.body[0] : null;
+    if (!insertResult.response.ok || !group) return response.status(502).json({ error: 'Could not create that group session.' });
+    return response.status(200).json({ joinUrl: `${siteUrl()}/pages/join-group.html?token=${group.join_token}` });
+  } catch (error) {
+    console.error('Group create error', error && error.message);
+    return response.status(503).json({ error: 'Could not create that group session right now.' });
+  }
+}
+
+async function handleGroupInfo(request, response) {
+  if (request.method !== 'GET') return response.status(405).json({ error: 'Method not allowed.' });
+  const token = request.query.token;
+  if (!token) return response.status(400).json({ error: 'A link token is required.' });
+
+  try {
+    const groupResult = await supabase(`/rest/v1/session_groups?join_token=eq.${encodeURIComponent(token)}&select=id,session_type,scheduled_at,duration_minutes,capacity,host_name&limit=1`);
+    const group = Array.isArray(groupResult.body) ? groupResult.body[0] : null;
+    if (!group) return response.status(404).json({ error: 'This link is not valid. Ask your host for a new one.' });
+
+    const takenResult = await supabase(`/rest/v1/session_bookings?scheduled_at=eq.${encodeURIComponent(group.scheduled_at)}&status=eq.confirmed&select=id`);
+    const taken = Array.isArray(takenResult.body) ? takenResult.body.length : 0;
+
+    return response.status(200).json({
+      sessionType: group.session_type,
+      scheduledAt: group.scheduled_at,
+      durationMinutes: group.duration_minutes,
+      capacity: group.capacity,
+      taken,
+      full: taken >= group.capacity,
+      hostName: group.host_name
+    });
+  } catch (error) {
+    console.error('Group info error', error && error.message);
+    return response.status(503).json({ error: 'Could not load this session right now.' });
+  }
+}
+
+async function handleGroupJoin(request, response) {
+  if (request.method !== 'POST') return response.status(405).json({ error: 'Method not allowed.' });
+  const { token, fullName, email, phone, waiverAgreed } = request.body || {};
+  if (!token || !fullName?.trim() || !waiverAgreed) return response.status(400).json({ error: 'Your name and a signed waiver are required.' });
+
+  try {
+    const groupResult = await supabase(`/rest/v1/session_groups?join_token=eq.${encodeURIComponent(token)}&select=id,window_id,session_type,scheduled_at,duration_minutes&limit=1`);
+    const group = Array.isArray(groupResult.body) ? groupResult.body[0] : null;
+    if (!group) return response.status(404).json({ error: 'This link is not valid. Ask your host for a new one.' });
+
+    const insertResult = await supabase('/rest/v1/session_bookings', {
+      method: 'POST', headers: { Prefer: 'return=representation' },
+      body: JSON.stringify({
+        user_id: null,
+        member_name: fullName.trim(),
+        guest_email: email?.trim() || null,
+        guest_phone: phone?.trim() || null,
+        waiver_agreed: true,
+        session_type: group.session_type,
+        scheduled_at: group.scheduled_at,
+        duration_minutes: group.duration_minutes,
+        booked_by: 'guest',
+        window_id: group.window_id,
+        group_id: group.id
+      })
+    });
+    const booking = Array.isArray(insertResult.body) ? insertResult.body[0] : null;
+    if (!insertResult.response.ok || !booking) {
+      if (insertResult.body?.code === '23514') return response.status(409).json({ error: 'This session just filled up.' });
+      return response.status(502).json({ error: 'Could not save your spot, try again.' });
+    }
+
+    createCalendarEventForBooking(booking);
+    return response.status(200).json({ confirmed: true, scheduledAt: booking.scheduled_at });
+  } catch (error) {
+    console.error('Group join error', error && error.message);
+    return response.status(503).json({ error: 'Could not save your spot right now.' });
+  }
+}
+
 async function handleSyncBooking(request, response) {
   if (request.method !== 'POST') return response.status(405).json({ error: 'Method not allowed.' });
   const user = await requireUser(request);
@@ -267,24 +401,7 @@ async function handleSyncBooking(request, response) {
       return response.status(200).json({ synced: true });
     }
 
-    const start = new Date(booking.scheduled_at);
-    const end = new Date(start.getTime() + booking.duration_minutes * 60 * 1000);
-    const eventResponse = await fetch(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(session.calendarId)}/events`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${session.accessToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        summary: `${EFC_SESSION_TYPE_LABELS[booking.session_type] || booking.session_type} · ${booking.member_name}`,
-        description: booking.notes || undefined,
-        start: { dateTime: start.toISOString() },
-        end: { dateTime: end.toISOString() }
-      })
-    });
-    const event = await eventResponse.json();
-    if (!eventResponse.ok || !event.id) return response.status(200).json({ synced: false, reason: 'google_error' });
-
-    await supabase(`/rest/v1/session_bookings?id=eq.${encodeURIComponent(bookingId)}`, {
-      method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ google_event_id: event.id })
-    });
+    await createCalendarEventForBooking(booking);
     return response.status(200).json({ synced: true });
   } catch (error) {
     console.error('Booking sync error', error && error.message);
@@ -302,5 +419,8 @@ module.exports = async function calendarGateway(request, response) {
   if (route === 'oauth-callback') return handleOAuthCallback(request, response);
   if (route === 'status') return handleStatus(request, response);
   if (route === 'sync-booking') return handleSyncBooking(request, response);
+  if (route === 'group-create') return handleGroupCreate(request, response);
+  if (route === 'group-info') return handleGroupInfo(request, response);
+  if (route === 'group-join') return handleGroupJoin(request, response);
   return response.status(404).json({ error: 'Not found.' });
 };

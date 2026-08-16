@@ -632,6 +632,32 @@
                         </form>
                     </div>
                 </div>
+                <h3>GROUP JOIN LINKS</h3>
+                <p>For a corporate group or a class drop-in who doesn't need a full account — just a name, contact info, and a signed waiver. Create a link, send it to the host or post it at the door.</p>
+                <form id="group-create-form" class="echelon-form">
+                    <select name="session_type" aria-label="Session type" required>
+                        <option value="private_group">Private Training Group (corporate)</option>
+                        <option value="group_fitness">Group Fitness (drop-in)</option>
+                    </select>
+                    <select name="window_id" aria-label="Attach to a standing window (optional)">
+                        <option value="">One-off session (not tied to a standing window)</option>
+                    </select>
+                    <input name="date" type="date" aria-label="Date" required>
+                    <input name="time" type="time" aria-label="Time" required>
+                    <select name="duration_minutes" aria-label="Duration">
+                        <option value="30">30 minutes</option>
+                        <option value="60" selected>60 minutes</option>
+                        <option value="90">90 minutes</option>
+                    </select>
+                    <input name="capacity" type="number" min="1" max="200" value="15" aria-label="Capacity">
+                    <input name="host_name" type="text" placeholder="Host or company name (optional)" aria-label="Host or company name">
+                    <input name="host_email" type="email" placeholder="Host email (optional)" aria-label="Host email">
+                    <textarea name="notes" rows="2" placeholder="Notes (optional)" aria-label="Notes"></textarea>
+                    <button type="submit" class="btn-primary">CREATE JOIN LINK</button>
+                    <p id="group-create-feedback" class="form-error" role="status"></p>
+                </form>
+                <div id="group-create-result" class="availability-window-list"></div>
+
                 <h3>UPCOMING SESSIONS</h3>
                 <div class="month-calendar" id="admin-sessions-calendar">
                     <div class="month-calendar-header">

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="/assets/images/favicon.png?v=9" type="image/png">
+<link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png?v=9">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+    <title>Echelon Fitness Collective | Join a Session</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <script src="../assets/js/main.js" defer></script>
+    <script src="../assets/js/join-group.js" defer></script>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to content</a>
+
+    <header class="site-header">
+        <div class="container">
+            <a href="../index.html" class="logo">ECHELON <span>FITNESS COLLECTIVE</span></a>
+            <nav class="desktop-nav">
+                <a href="../index.html#training">Training</a>
+                <a href="../index.html#contact">Contact</a>
+            </nav>
+            <button class="mobile-toggle" aria-label="Open Menu">☰</button>
+        </div>
+    </header>
+
+    <main class="portal-section" id="main-content">
+        <div class="container">
+            <div class="portal-card">
+                <span class="checkin-tag">ECHELON SCHEDULING</span>
+                <h1>JOIN YOUR SESSION</h1>
+                <p id="join-copy">Loading your session details…</p>
+                <p id="join-session-info" class="member-checkin-note" hidden role="status"></p>
+
+                <form id="join-form" class="echelon-form" hidden>
+                    <div class="form-section-header"><h2>YOUR INFORMATION</h2></div>
+                    <input type="text" name="full_name" placeholder="First & Last Name" required aria-label="First & Last Name">
+                    <input type="email" name="email" placeholder="Email Address" aria-label="Email Address">
+                    <input type="tel" name="phone" placeholder="Phone Number" aria-label="Phone Number">
+
+                    <div class="waiver-box">
+                        <div class="waiver-header">
+                            <h3>ECHELON FITNESS COLLECTIVE</h3>
+                            <span>LIABILITY WAIVER &amp; ASSUMPTION OF RISK</span>
+                        </div>
+                        <div class="waiver-content">
+                            By registering for and/or participating in any session offered by <strong>Echelon Fitness Collective (EFC)</strong>, I acknowledge, understand, and agree to the following terms:
+                            <br><br>
+                            <strong>1. Assumption of Risk:</strong> I understand that Echelon sessions involve <strong>intense physical activity</strong>, including metabolic conditioning, heavy resistance training, and community runs. I acknowledge that these activities carry <strong>inherent risks</strong> such as slips, falls, muscle strains, joint injuries, or other physical ailments. I voluntarily choose to participate and <strong>assume full responsibility</strong> for any risks associated with these movements.
+                            <br><br>
+                            <strong>2. Safety &amp; Modifications:</strong> I acknowledge that Echelon Fitness Collective is built on movement with intent. It is my responsibility to work within my own physical limits. I agree to utilize modifications when encouraged, move at my own pace, and exercise caution.
+                            <br><br>
+                            <strong>3. Health Conditions &amp; Prior Injuries:</strong> I affirm that I am physically capable of participating in high-intensity training. I understand that EFC, its coaches, and management are not responsible for injuries related to pre-existing conditions or previous injuries. I agree to disclose any health conditions, injuries, pregnancy, medications, or medical concerns to the Lead Coach prior to the start of the session, and to consult a medical professional first if I have any doubt about my health.
+                            <br><br>
+                            <strong>4. Release of Liability:</strong> In consideration of being allowed to participate, I hereby release, waive, and discharge Echelon Fitness Collective, its owners, coaches, staff, and affiliates from any and all liability, claims, demands, or causes of action arising from participation, including but not limited to personal injury, illness, or property damage.
+                        </div>
+                    </div>
+
+                    <label class="waiver-agreement">
+                        <input name="waiver_agreed" type="checkbox" value="YES" required>
+                        <span>I have read and agree to the Echelon Fitness Collective Liability Waiver &amp; Assumption of Risk above.</span>
+                    </label>
+
+                    <button type="submit" class="btn-primary">JOIN SESSION</button>
+                    <p id="join-feedback" class="form-error" role="status"></p>
+                </form>
+
+                <div id="join-success" hidden style="padding: 40px; text-align: center;">
+                    <h2>YOU'RE CONFIRMED</h2>
+                    <p id="join-success-detail">We'll see you there.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
