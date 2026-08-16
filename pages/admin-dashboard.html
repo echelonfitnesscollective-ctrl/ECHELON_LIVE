@@ -601,8 +601,10 @@
                             <input name="end_time" type="time" aria-label="End time" required>
                             <select name="session_type" aria-label="Session type">
                                 <option value="one_on_one">1-on-1</option>
-                                <option value="private_group">Private Group</option>
+                                <option value="private_group">Private Training Group</option>
+                                <option value="group_fitness">Group Fitness</option>
                             </select>
+                            <input name="capacity" type="number" min="1" max="200" value="1" aria-label="How many people can book this slot">
                             <button type="submit" class="btn-secondary">ADD WINDOW</button>
                             <p id="availability-window-feedback" class="form-error" role="status"></p>
                         </form>
@@ -621,7 +623,8 @@
                             </select>
                             <select name="session_type" aria-label="Session type">
                                 <option value="one_on_one">1-on-1</option>
-                                <option value="private_group">Private Group</option>
+                                <option value="private_group">Private Training Group</option>
+                                <option value="group_fitness">Group Fitness</option>
                             </select>
                             <textarea name="notes" rows="2" placeholder="Notes (optional)" aria-label="Notes"></textarea>
                             <button type="submit" class="btn-primary">BOOK SESSION</button>

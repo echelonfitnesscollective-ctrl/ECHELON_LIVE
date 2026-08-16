@@ -1,4 +1,4 @@
-const EFC_BOOKING_TYPE_LABELS = { one_on_one: '1-on-1', private_group: 'Private Group' };
+const EFC_BOOKING_TYPE_LABELS = { one_on_one: '1-on-1', private_group: 'Private Training Group', group_fitness: 'Group Fitness' };
 const EFC_BOOKING_HORIZON_DAYS = 60;
 
 function efcBookingTypeLabel(type) {
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const cursor = new Date(today.getFullYear(), today.getMonth(), 1);
     let selectedKey = efcDateKey(today);
     let windows = [];
-    let bookedTimes = new Set();
+    let bookedCounts = new Map();
     let busyRanges = [];
 
     async function loadMySessions() {
@@ -106,10 +106,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             const [hours, minutes] = window.start_time.split(':').map(Number);
             const scheduledAt = new Date(date.getFullYear(), date.getMonth(), date.getDate(), hours, minutes);
             if (scheduledAt < new Date()) return;
-            if (bookedTimes.has(scheduledAt.getTime())) return;
+            const taken = bookedCounts.get(scheduledAt.getTime()) || 0;
+            if (taken >= window.capacity) return;
             const slotEnd = new Date(scheduledAt.getTime() + efcWindowDurationMinutes(window) * 60 * 1000);
             if (busyRanges.some((busy) => scheduledAt < busy.end && slotEnd > busy.start)) return;
-            slots.push({ scheduledAt, window });
+            slots.push({ scheduledAt, window, taken });
         });
         return slots.sort((a, b) => a.scheduledAt - b.scheduledAt);
     }
@@ -172,12 +173,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             detail.append(empty);
             return;
         }
-        slots.forEach(({ scheduledAt, window }) => {
+        slots.forEach(({ scheduledAt, window, taken }) => {
             const item = document.createElement('div');
             item.className = 'availability-window-item';
             const end = new Date(scheduledAt.getTime() + efcWindowDurationMinutes(window) * 60 * 1000);
             const label = document.createElement('span');
-            label.textContent = `${scheduledAt.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })} – ${end.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })} · ${efcBookingTypeLabel(window.session_type)}`;
+            label.textContent = `${scheduledAt.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })} – ${end.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })} · ${efcBookingTypeLabel(window.session_type)}${window.capacity > 1 ? ` · ${taken}/${window.capacity} booked` : ''}`;
             const book = document.createElement('button');
             book.type = 'button'; book.className = 'btn-primary';
             book.textContent = 'BOOK';
@@ -189,10 +190,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     session_type: window.session_type,
                     scheduled_at: scheduledAt.toISOString(),
                     duration_minutes: efcWindowDurationMinutes(window),
-                    booked_by: 'member'
+                    booked_by: 'member',
+                    window_id: window.id
                 }).select('id').single();
                 if (error) {
-                    feedback.textContent = error.code === '23505' ? 'That time was just booked, pick another.' : 'Could not book that session.';
+                    feedback.textContent = (error.code === '23505' || error.code === '23514') ? 'That slot just filled up, pick another.' : 'Could not book that session.';
                     book.disabled = false; book.textContent = 'BOOK';
                     refreshAvailability();
                     return;
@@ -209,13 +211,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function refreshAvailability() {
         const [windowsResult, bookedResult, freshBusyRanges] = await Promise.all([
-            echelonMemberClient.from('coach_availability_windows').select('day_of_week, start_time, end_time, session_type').eq('active', true),
+            echelonMemberClient.from('coach_availability_windows').select('id, day_of_week, start_time, end_time, session_type, capacity').eq('active', true),
             echelonMemberClient.from('booked_session_times').select('scheduled_at').gte('scheduled_at', today.toISOString()).lte('scheduled_at', horizonEnd.toISOString()),
             efcFetchBusyRanges()
         ]);
         if (windowsResult.error || bookedResult.error) { feedback.textContent = 'Could not load open windows.'; return; }
         windows = windowsResult.data;
-        bookedTimes = new Set(bookedResult.data.map((row) => new Date(row.scheduled_at).getTime()));
+        bookedCounts = new Map();
+        bookedResult.data.forEach((row) => {
+            const time = new Date(row.scheduled_at).getTime();
+            bookedCounts.set(time, (bookedCounts.get(time) || 0) + 1);
+        });
         busyRanges = freshBusyRanges;
         renderGrid();
         renderDetail();
