@@ -47,22 +47,48 @@ async function isAdmin(userId) {
   return result.response.ok && Array.isArray(result.body) && result.body.length > 0;
 }
 
-async function getAccessToken() {
-  const tokenRow = await supabase('/rest/v1/coach_calendar_tokens?id=eq.1&select=refresh_token&limit=1');
-  const refreshToken = Array.isArray(tokenRow.body) ? tokenRow.body[0]?.refresh_token : null;
-  if (!refreshToken) return null;
+async function getCalendarSession() {
+  const tokenRow = await supabase('/rest/v1/coach_calendar_tokens?id=eq.1&select=refresh_token,training_calendar_id&limit=1');
+  const row = Array.isArray(tokenRow.body) ? tokenRow.body[0] : null;
+  if (!row?.refresh_token) return null;
   const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
-      refresh_token: refreshToken,
+      refresh_token: row.refresh_token,
       client_id: process.env.GOOGLE_CALENDAR_CLIENT_ID,
       client_secret: process.env.GOOGLE_CALENDAR_CLIENT_SECRET,
       grant_type: 'refresh_token'
     })
   });
   const tokens = await tokenResponse.json();
-  return tokenResponse.ok ? tokens.access_token : null;
+  if (!tokenResponse.ok) return null;
+  return { accessToken: tokens.access_token, calendarId: row.training_calendar_id || 'primary' };
+}
+
+// Creates the dedicated yellow "Echelon Training" calendar the first time a
+// coach connects, so session events land on their own color-coded calendar
+// instead of mixing into the primary one. Returns null on failure -- the
+// caller falls back to 'primary' rather than blocking the whole connection.
+async function createTrainingCalendar(accessToken) {
+  try {
+    const createResponse = await fetch('https://www.googleapis.com/calendar/v3/calendars', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ summary: 'Echelon Training' })
+    });
+    const created = await createResponse.json();
+    if (!createResponse.ok || !created.id) return null;
+    await fetch(`https://www.googleapis.com/calendar/v3/users/me/calendarList/${encodeURIComponent(created.id)}`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ colorId: '5' }) // Banana -- the closest stock Google Calendar color to Echelon gold.
+    });
+    return created.id;
+  } catch (error) {
+    console.error('Create training calendar error', error && error.message);
+    return null;
+  }
 }
 
 async function handleHealth(request, response) {
@@ -119,7 +145,7 @@ async function handleOAuthCallback(request, response) {
   if (request.query.error || !code || !state) return sendToAdmin(response, 'error');
 
   try {
-    const tokenRow = await supabase('/rest/v1/coach_calendar_tokens?id=eq.1&select=oauth_state,oauth_state_created_at&limit=1');
+    const tokenRow = await supabase('/rest/v1/coach_calendar_tokens?id=eq.1&select=oauth_state,oauth_state_created_at,training_calendar_id&limit=1');
     const stored = Array.isArray(tokenRow.body) ? tokenRow.body[0] : null;
     const stateAge = stored?.oauth_state_created_at ? Date.now() - new Date(stored.oauth_state_created_at).getTime() : Infinity;
     if (!stored?.oauth_state || stored.oauth_state !== state || stateAge > 10 * 60 * 1000) return sendToAdmin(response, 'error');
@@ -142,12 +168,15 @@ async function handleOAuthCallback(request, response) {
     const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', { headers: { Authorization: `Bearer ${tokens.access_token}` } });
     if (userInfoResponse.ok) connectedEmail = (await userInfoResponse.json()).email || null;
 
+    const trainingCalendarId = stored.training_calendar_id || await createTrainingCalendar(tokens.access_token);
+
     const saveResult = await supabase('/rest/v1/coach_calendar_tokens?id=eq.1', {
       method: 'PATCH', headers: { Prefer: 'return=minimal' },
       body: JSON.stringify({
         refresh_token: tokens.refresh_token,
         connected_email: connectedEmail,
         connected_at: new Date().toISOString(),
+        training_calendar_id: trainingCalendarId,
         oauth_state: null,
         oauth_state_created_at: null
       })
@@ -167,12 +196,13 @@ async function handleStatus(request, response) {
   if (!admin) return response.status(401).json({ error: 'Your admin session is required.' });
 
   try {
-    const result = await supabase('/rest/v1/coach_calendar_tokens?id=eq.1&select=refresh_token,connected_email,connected_at&limit=1');
+    const result = await supabase('/rest/v1/coach_calendar_tokens?id=eq.1&select=refresh_token,connected_email,connected_at,training_calendar_id&limit=1');
     const row = Array.isArray(result.body) ? result.body[0] : null;
     return response.status(200).json({
       connected: Boolean(row?.refresh_token),
       connectedEmail: row?.connected_email || null,
       connectedAt: row?.connected_at || null,
+      trainingCalendarActive: Boolean(row?.training_calendar_id),
       configured: Boolean(process.env.GOOGLE_CALENDAR_CLIENT_ID)
     });
   } catch (error) {
@@ -191,18 +221,19 @@ async function handleFreeBusy(request, response) {
   const timeMax = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
 
   try {
-    const accessToken = await getAccessToken();
-    if (!accessToken) return response.status(200).json({ busy: [] });
+    const session = await getCalendarSession();
+    if (!session) return response.status(200).json({ busy: [] });
 
+    const calendarIds = Array.from(new Set(['primary', session.calendarId]));
     const freeBusyResponse = await fetch('https://www.googleapis.com/calendar/v3/freeBusy', {
       method: 'POST',
-      headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ timeMin: timeMin.toISOString(), timeMax: timeMax.toISOString(), items: [{ id: 'primary' }] })
+      headers: { Authorization: `Bearer ${session.accessToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ timeMin: timeMin.toISOString(), timeMax: timeMax.toISOString(), items: calendarIds.map((id) => ({ id })) })
     });
     const body = await freeBusyResponse.json();
     if (!freeBusyResponse.ok) return response.status(200).json({ busy: [] });
 
-    const busy = body.calendars?.primary?.busy || [];
+    const busy = calendarIds.flatMap((id) => body.calendars?.[id]?.busy || []);
     return response.status(200).json({ busy });
   } catch (error) {
     console.error('Calendar freebusy error', error && error.message);
@@ -224,13 +255,13 @@ async function handleSyncBooking(request, response) {
     if (!booking) return response.status(404).json({ error: 'That booking could not be found.' });
     if (booking.user_id !== user.id && !(await isAdmin(user.id))) return response.status(403).json({ error: 'You cannot sync this booking.' });
 
-    const accessToken = await getAccessToken();
-    if (!accessToken) return response.status(200).json({ synced: false, reason: 'not_connected' });
+    const session = await getCalendarSession();
+    if (!session) return response.status(200).json({ synced: false, reason: 'not_connected' });
 
     if (action === 'cancel') {
       if (booking.google_event_id) {
-        await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events/${encodeURIComponent(booking.google_event_id)}`, {
-          method: 'DELETE', headers: { Authorization: `Bearer ${accessToken}` }
+        await fetch(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(session.calendarId)}/events/${encodeURIComponent(booking.google_event_id)}`, {
+          method: 'DELETE', headers: { Authorization: `Bearer ${session.accessToken}` }
         });
       }
       return response.status(200).json({ synced: true });
@@ -238,9 +269,9 @@ async function handleSyncBooking(request, response) {
 
     const start = new Date(booking.scheduled_at);
     const end = new Date(start.getTime() + booking.duration_minutes * 60 * 1000);
-    const eventResponse = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
+    const eventResponse = await fetch(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(session.calendarId)}/events`, {
       method: 'POST',
-      headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+      headers: { Authorization: `Bearer ${session.accessToken}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         summary: `${EFC_SESSION_TYPE_LABELS[booking.session_type] || booking.session_type} · ${booking.member_name}`,
         description: booking.notes || undefined,

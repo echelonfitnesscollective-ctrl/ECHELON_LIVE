@@ -45,7 +45,7 @@ async function initializeCalendarConnection() {
     if (!result.ok) { status.textContent = 'Could not check the calendar connection.'; return; }
     if (!body.configured) { status.textContent = 'Not set up yet, Google Calendar credentials are needed in Vercel.'; return; }
     if (body.connected) {
-        status.textContent = `Connected as ${body.connectedEmail || 'your Google account'}.`;
+        status.textContent = `Connected as ${body.connectedEmail || 'your Google account'}.${body.trainingCalendarActive ? ' Sessions sync to your yellow "Echelon Training" calendar.' : ' Reconnect once more to create the dedicated Echelon Training calendar.'}`;
         connectBtn.textContent = 'RECONNECT';
         connectBtn.hidden = false;
     } else {
