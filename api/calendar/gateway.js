@@ -126,7 +126,7 @@ async function handleOAuthStart(request, response) {
       response_type: 'code',
       access_type: 'offline',
       prompt: 'consent',
-      scope: 'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/userinfo.email',
+      scope: 'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.calendars https://www.googleapis.com/auth/userinfo.email',
       state
     });
     return response.status(200).json({ authUrl: `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}` });
