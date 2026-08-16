@@ -826,6 +826,12 @@ textarea{
 
 }
 
+.password-field-wrapper{position:relative}
+.password-field-wrapper input{padding-right:70px!important}
+.password-toggle{position:absolute;top:50%;right:8px;transform:translateY(-50%);margin:0;padding:6px 10px;border:1px solid rgba(255,215,0,.4);background:transparent;color:var(--primary);font:700 .62rem 'Montserrat',sans-serif;letter-spacing:.08em;cursor:pointer;border-radius:4px}
+.password-toggle:hover{background:rgba(255,215,0,.1)}
+.password-toggle:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+
 .echelon-form input:focus,
 .echelon-form select:focus,
 .echelon-form textarea:focus{

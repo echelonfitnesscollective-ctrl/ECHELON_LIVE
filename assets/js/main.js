@@ -573,3 +573,32 @@ function scrollCarousel(direction) {
         carousel.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     }
 }
+
+// Adds a show/hide toggle to every password field sitewide, no per-page markup needed.
+function efcInitPasswordToggles() {
+    document.querySelectorAll('input[type="password"]').forEach((input) => {
+        if (input.closest('.password-field-wrapper')) return;
+        const wrapper = document.createElement('div');
+        wrapper.className = 'password-field-wrapper';
+        input.parentNode.insertBefore(wrapper, input);
+        wrapper.appendChild(input);
+
+        const toggle = document.createElement('button');
+        toggle.type = 'button';
+        toggle.className = 'password-toggle';
+        toggle.textContent = 'SHOW';
+        toggle.setAttribute('aria-label', 'Show password');
+        toggle.addEventListener('click', () => {
+            const showing = input.type === 'text';
+            input.type = showing ? 'password' : 'text';
+            toggle.textContent = showing ? 'SHOW' : 'HIDE';
+            toggle.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+        });
+        wrapper.appendChild(toggle);
+    });
+}
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', efcInitPasswordToggles);
+} else {
+    efcInitPasswordToggles();
+}
