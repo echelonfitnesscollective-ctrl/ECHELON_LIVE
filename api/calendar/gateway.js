@@ -234,8 +234,7 @@ async function handleSyncBooking(request, response) {
 
 module.exports = async function calendarGateway(request, response) {
   response.setHeader('Cache-Control', 'no-store'); response.setHeader('X-Content-Type-Options', 'nosniff');
-  const segments = Array.isArray(request.query.route) ? request.query.route : [request.query.route];
-  const route = segments.join('/');
+  const route = Array.isArray(request.query.route) ? request.query.route[0] : request.query.route;
 
   if (route === 'health') return handleHealth(request, response);
   if (route === 'oauth-start') return handleOAuthStart(request, response);
