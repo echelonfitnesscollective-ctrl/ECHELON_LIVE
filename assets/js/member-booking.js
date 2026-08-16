@@ -12,6 +12,17 @@ function efcWindowDurationMinutes(window) {
     return (endHours * 60 + endMinutes) - (startHours * 60 + startMinutes);
 }
 
+async function efcSyncBookingToCalendar(bookingId, action) {
+    try {
+        const { data: sessionData } = await echelonMemberClient.auth.getSession();
+        await fetch('/api/calendar/sync-booking', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionData.session?.access_token || ''}` },
+            body: JSON.stringify({ bookingId, action })
+        });
+    } catch (_) { /* best-effort, the in-app booking already succeeded */ }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     const upcomingList = document.getElementById('my-upcoming-sessions');
     if (!upcomingList) return;
@@ -53,6 +64,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 await echelonMemberClient.from('session_bookings').update({ status: 'canceled' }).eq('id', row.id);
                 loadMySessions();
                 loadOpenSlots();
+                efcSyncBookingToCalendar(row.id, 'cancel');
             });
             item.append(label, cancel);
             upcomingList.append(item);
@@ -101,14 +113,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             book.textContent = 'BOOK';
             book.addEventListener('click', async () => {
                 book.disabled = true; book.textContent = 'BOOKING…';
-                const { error } = await echelonMemberClient.from('session_bookings').insert({
+                const { data, error } = await echelonMemberClient.from('session_bookings').insert({
                     user_id: member.id,
                     member_name: memberName,
                     session_type: window.session_type,
                     scheduled_at: scheduledAt.toISOString(),
                     duration_minutes: efcWindowDurationMinutes(window),
                     booked_by: 'member'
-                });
+                }).select('id').single();
                 if (error) {
                     feedback.textContent = error.code === '23505' ? 'That time was just booked, pick another.' : 'Could not book that session.';
                     book.disabled = false; book.textContent = 'BOOK';
@@ -117,6 +129,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
                 loadMySessions();
                 loadOpenSlots();
+                efcSyncBookingToCalendar(data.id, 'create');
             });
             item.append(label, book);
             slotList.append(item);

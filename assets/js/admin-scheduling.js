@@ -11,6 +11,57 @@ function efcFormatTime(timeString) {
     return date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
 }
 
+async function efcSyncBookingToCalendar(bookingId, action) {
+    try {
+        const { data: sessionData } = await echelonAdminClient.auth.getSession();
+        await fetch('/api/calendar/sync-booking', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionData.session?.access_token || ''}` },
+            body: JSON.stringify({ bookingId, action })
+        });
+    } catch (_) { /* best-effort, the in-app booking already succeeded */ }
+}
+
+async function initializeCalendarConnection() {
+    const status = document.getElementById('calendar-connection-status');
+    const connectBtn = document.getElementById('calendar-connect-btn');
+    if (!status) return;
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('calendar') === 'connected') status.textContent = 'Connected. Syncing new bookings now.';
+    else if (params.get('calendar') === 'error') status.textContent = 'That connection attempt did not work, try again.';
+    if (params.has('calendar')) {
+        params.delete('calendar');
+        window.history.replaceState({}, '', `${window.location.pathname}${params.toString() ? `?${params}` : ''}`);
+    }
+
+    const { data: sessionData } = await echelonAdminClient.auth.getSession();
+    const result = await fetch('/api/calendar/status', { headers: { Authorization: `Bearer ${sessionData.session?.access_token || ''}` } });
+    const body = await result.json().catch(() => ({}));
+    if (!result.ok) { status.textContent = 'Could not check the calendar connection.'; return; }
+    if (!body.configured) { status.textContent = 'Not set up yet, Google Calendar credentials are needed in Vercel.'; return; }
+    if (body.connected) {
+        status.textContent = `Connected as ${body.connectedEmail || 'your Google account'}.`;
+        connectBtn.textContent = 'RECONNECT';
+        connectBtn.hidden = false;
+    } else {
+        status.textContent = 'Not connected yet, bookings stay in-app only until you connect.';
+        connectBtn.textContent = 'CONNECT GOOGLE CALENDAR';
+        connectBtn.hidden = false;
+    }
+
+    connectBtn.addEventListener('click', async () => {
+        connectBtn.disabled = true;
+        const { data: session } = await echelonAdminClient.auth.getSession();
+        const startResult = await fetch('/api/calendar/oauth-start', {
+            method: 'POST', headers: { Authorization: `Bearer ${session.session?.access_token || ''}` }
+        });
+        const startBody = await startResult.json().catch(() => ({}));
+        if (!startResult.ok || !startBody.authUrl) { status.textContent = startBody.error || 'Could not start the Google connection.'; connectBtn.disabled = false; return; }
+        window.location.href = startBody.authUrl;
+    });
+}
+
 async function initializeAdminScheduling() {
     const windowForm = document.getElementById('availability-window-form');
     if (!windowForm) return;
@@ -101,7 +152,7 @@ async function initializeAdminScheduling() {
         const memberName = user_id.selectedOptions[0].textContent;
         const submit = bookForm.querySelector('button[type="submit"]');
         submit.disabled = true; submit.textContent = 'BOOKING…';
-        const { error } = await echelonAdminClient.from('session_bookings').insert({
+        const { data, error } = await echelonAdminClient.from('session_bookings').insert({
             user_id: user_id.value,
             member_name: memberName,
             session_type: session_type.value,
@@ -109,7 +160,7 @@ async function initializeAdminScheduling() {
             duration_minutes: Number(duration_minutes.value),
             notes: notes.value.trim() || null,
             booked_by: 'admin'
-        });
+        }).select('id').single();
         submit.disabled = false; submit.textContent = 'BOOK SESSION';
         if (error) {
             bookFeedback.textContent = error.code === '23505' ? 'That time is already booked.' : 'Could not book that session.';
@@ -117,6 +168,7 @@ async function initializeAdminScheduling() {
         }
         bookForm.reset();
         loadUpcomingSessions();
+        efcSyncBookingToCalendar(data.id, 'create');
     });
 
     async function loadUpcomingSessions() {
@@ -142,6 +194,7 @@ async function initializeAdminScheduling() {
             cancel.addEventListener('click', async () => {
                 await echelonAdminClient.from('session_bookings').update({ status: 'canceled' }).eq('id', row.id);
                 loadUpcomingSessions();
+                efcSyncBookingToCalendar(row.id, 'cancel');
             });
             item.append(label, cancel);
             upcomingList.append(item);
@@ -151,4 +204,5 @@ async function initializeAdminScheduling() {
     loadAvailabilityWindows();
     loadMembersForBooking();
     loadUpcomingSessions();
+    initializeCalendarConnection();
 }
