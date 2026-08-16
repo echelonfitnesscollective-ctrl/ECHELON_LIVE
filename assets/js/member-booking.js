@@ -23,6 +23,19 @@ async function efcSyncBookingToCalendar(bookingId, action) {
     } catch (_) { /* best-effort, the in-app booking already succeeded */ }
 }
 
+async function efcFetchBusyRanges() {
+    try {
+        const { data: sessionData } = await echelonMemberClient.auth.getSession();
+        const result = await fetch(`/api/calendar/freebusy?days=${EFC_BOOKING_LOOKAHEAD_DAYS}`, {
+            headers: { Authorization: `Bearer ${sessionData.session?.access_token || ''}` }
+        });
+        const body = await result.json().catch(() => ({}));
+        return (body.busy || []).map((range) => ({ start: new Date(range.start), end: new Date(range.end) }));
+    } catch (_) {
+        return [];
+    }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     const upcomingList = document.getElementById('my-upcoming-sessions');
     if (!upcomingList) return;
@@ -76,9 +89,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const rangeStart = new Date();
         const rangeEnd = new Date(Date.now() + EFC_BOOKING_LOOKAHEAD_DAYS * 24 * 60 * 60 * 1000);
 
-        const [windowsResult, bookedResult] = await Promise.all([
+        const [windowsResult, bookedResult, busyRanges] = await Promise.all([
             echelonMemberClient.from('coach_availability_windows').select('day_of_week, start_time, end_time, session_type').eq('active', true),
-            echelonMemberClient.from('booked_session_times').select('scheduled_at').gte('scheduled_at', rangeStart.toISOString()).lte('scheduled_at', rangeEnd.toISOString())
+            echelonMemberClient.from('booked_session_times').select('scheduled_at').gte('scheduled_at', rangeStart.toISOString()).lte('scheduled_at', rangeEnd.toISOString()),
+            efcFetchBusyRanges()
         ]);
 
         slotList.innerHTML = '';
@@ -97,6 +111,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const scheduledAt = new Date(date.getFullYear(), date.getMonth(), date.getDate(), hours, minutes);
                 if (scheduledAt < new Date()) return;
                 if (bookedTimes.has(scheduledAt.getTime())) return;
+                const slotEnd = new Date(scheduledAt.getTime() + efcWindowDurationMinutes(window) * 60 * 1000);
+                if (busyRanges.some((busy) => scheduledAt < busy.end && slotEnd > busy.start)) return;
                 slots.push({ scheduledAt, window });
             });
         }

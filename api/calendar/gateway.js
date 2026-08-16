@@ -2,11 +2,11 @@
 
 // Every Google Calendar endpoint, plus the health check, collapsed into one
 // serverless function. Vercel's Hobby plan caps a deployment at 12
-// functions and the site was already at that ceiling, so this file uses a
-// catch-all dynamic route ([...route].js) instead of one file per action --
-// /api/calendar/oauth-start, /api/calendar/oauth-callback,
-// /api/calendar/status, /api/calendar/sync-booking, and (via a vercel.json
-// rewrite, so the public URL is unchanged) /api/health all resolve here.
+// functions and the site was already at that ceiling, so this file is
+// reached via explicit vercel.json rewrites (?route=...) instead of one
+// file per action -- /api/calendar/oauth-start, /api/calendar/oauth-callback,
+// /api/calendar/status, /api/calendar/sync-booking, /api/calendar/freebusy,
+// and (public URL unchanged) /api/health all resolve here.
 
 const { randomBytes } = require('node:crypto');
 
@@ -181,6 +181,35 @@ async function handleStatus(request, response) {
   }
 }
 
+async function handleFreeBusy(request, response) {
+  if (request.method !== 'GET') return response.status(405).json({ error: 'Method not allowed.' });
+  const user = await requireUser(request);
+  if (!user) return response.status(401).json({ error: 'Your session is required.' });
+
+  const days = Math.min(60, Math.max(1, Number(request.query.days) || 14));
+  const timeMin = new Date();
+  const timeMax = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+
+  try {
+    const accessToken = await getAccessToken();
+    if (!accessToken) return response.status(200).json({ busy: [] });
+
+    const freeBusyResponse = await fetch('https://www.googleapis.com/calendar/v3/freeBusy', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ timeMin: timeMin.toISOString(), timeMax: timeMax.toISOString(), items: [{ id: 'primary' }] })
+    });
+    const body = await freeBusyResponse.json();
+    if (!freeBusyResponse.ok) return response.status(200).json({ busy: [] });
+
+    const busy = body.calendars?.primary?.busy || [];
+    return response.status(200).json({ busy });
+  } catch (error) {
+    console.error('Calendar freebusy error', error && error.message);
+    return response.status(200).json({ busy: [] });
+  }
+}
+
 async function handleSyncBooking(request, response) {
   if (request.method !== 'POST') return response.status(405).json({ error: 'Method not allowed.' });
   const user = await requireUser(request);
@@ -238,6 +267,7 @@ module.exports = async function calendarGateway(request, response) {
 
   if (route === 'health') return handleHealth(request, response);
   if (route === 'oauth-start') return handleOAuthStart(request, response);
+  if (route === 'freebusy') return handleFreeBusy(request, response);
   if (route === 'oauth-callback') return handleOAuthCallback(request, response);
   if (route === 'status') return handleStatus(request, response);
   if (route === 'sync-booking') return handleSyncBooking(request, response);

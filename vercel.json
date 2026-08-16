@@ -4,7 +4,8 @@
     { "source": "/api/calendar/oauth-start", "destination": "/api/calendar/gateway?route=oauth-start" },
     { "source": "/api/calendar/oauth-callback", "destination": "/api/calendar/gateway?route=oauth-callback" },
     { "source": "/api/calendar/status", "destination": "/api/calendar/gateway?route=status" },
-    { "source": "/api/calendar/sync-booking", "destination": "/api/calendar/gateway?route=sync-booking" }
+    { "source": "/api/calendar/sync-booking", "destination": "/api/calendar/gateway?route=sync-booking" },
+    { "source": "/api/calendar/freebusy", "destination": "/api/calendar/gateway?route=freebusy" }
   ],
   "headers": [
     {
