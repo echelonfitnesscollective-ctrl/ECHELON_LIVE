@@ -630,7 +630,15 @@
                     </div>
                 </div>
                 <h3>UPCOMING SESSIONS</h3>
-                <div id="upcoming-sessions-list" class="availability-window-list">Loading…</div>
+                <div class="month-calendar" id="admin-sessions-calendar">
+                    <div class="month-calendar-header">
+                        <button type="button" id="admin-calendar-prev" class="btn-secondary" aria-label="Previous month">←</button>
+                        <span id="admin-calendar-label"></span>
+                        <button type="button" id="admin-calendar-next" class="btn-secondary" aria-label="Next month">→</button>
+                    </div>
+                    <div class="month-calendar-grid" id="admin-calendar-grid"></div>
+                    <div class="month-calendar-day-detail" id="admin-calendar-day-detail"></div>
+                </div>
             </details>
         </div>
     </main>

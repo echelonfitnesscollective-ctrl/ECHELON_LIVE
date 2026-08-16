@@ -11,6 +11,10 @@ function efcFormatTime(timeString) {
     return date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
 }
 
+function efcDateKey(date) {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
 async function efcSyncBookingToCalendar(bookingId, action) {
     try {
         const { data: sessionData } = await echelonAdminClient.auth.getSession();
@@ -62,6 +66,116 @@ async function initializeCalendarConnection() {
     });
 }
 
+function initializeSessionsCalendar() {
+    const grid = document.getElementById('admin-calendar-grid');
+    if (!grid) return null;
+    const label = document.getElementById('admin-calendar-label');
+    const prevBtn = document.getElementById('admin-calendar-prev');
+    const nextBtn = document.getElementById('admin-calendar-next');
+    const detail = document.getElementById('admin-calendar-day-detail');
+
+    const cursor = new Date(); cursor.setDate(1); cursor.setHours(0, 0, 0, 0);
+    let selectedKey = efcDateKey(new Date());
+    let bookingsByDay = new Map();
+
+    function renderGrid() {
+        label.textContent = cursor.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+        grid.innerHTML = '';
+        ['S', 'M', 'T', 'W', 'T', 'F', 'S'].forEach((weekday) => {
+            const heading = document.createElement('div');
+            heading.className = 'month-calendar-weekday';
+            heading.textContent = weekday;
+            grid.append(heading);
+        });
+        const firstWeekday = cursor.getDay();
+        const daysInMonth = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 0).getDate();
+        for (let i = 0; i < firstWeekday; i++) {
+            const empty = document.createElement('div');
+            empty.className = 'month-calendar-day month-calendar-day-empty';
+            grid.append(empty);
+        }
+        const todayKey = efcDateKey(new Date());
+        for (let day = 1; day <= daysInMonth; day++) {
+            const date = new Date(cursor.getFullYear(), cursor.getMonth(), day);
+            const key = efcDateKey(date);
+            const cell = document.createElement('button');
+            cell.type = 'button';
+            cell.className = 'month-calendar-day month-calendar-day-active';
+            if (key === todayKey) cell.classList.add('month-calendar-day-today');
+            if (key === selectedKey) cell.classList.add('month-calendar-day-selected');
+            cell.append(document.createTextNode(String(day)));
+            if (bookingsByDay.has(key)) {
+                const dot = document.createElement('span');
+                dot.className = 'month-calendar-day-dot';
+                cell.append(dot);
+            }
+            cell.addEventListener('click', () => { selectedKey = key; renderGrid(); renderDetail(); });
+            grid.append(cell);
+        }
+    }
+
+    function renderDetail() {
+        detail.innerHTML = '';
+        const [year, month, day] = selectedKey.split('-').map(Number);
+        const heading = document.createElement('h4');
+        heading.textContent = new Date(year, month - 1, day).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+        detail.append(heading);
+        const rows = bookingsByDay.get(selectedKey) || [];
+        if (!rows.length) {
+            const empty = document.createElement('p');
+            empty.className = 'admin-detail-empty';
+            empty.textContent = 'No sessions this day.';
+            detail.append(empty);
+            return;
+        }
+        rows.forEach((row) => {
+            const item = document.createElement('div');
+            item.className = 'availability-window-item';
+            const when = new Date(row.scheduled_at);
+            const itemLabel = document.createElement('span');
+            itemLabel.textContent = `${row.member_name} · ${when.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })} · ${efcSessionTypeLabel(row.session_type)} · ${row.duration_minutes} min`;
+            const cancel = document.createElement('button');
+            cancel.type = 'button'; cancel.className = 'btn-secondary';
+            cancel.textContent = 'CANCEL';
+            cancel.addEventListener('click', async () => {
+                await echelonAdminClient.from('session_bookings').update({ status: 'canceled' }).eq('id', row.id);
+                efcSyncBookingToCalendar(row.id, 'cancel');
+                loadMonth();
+            });
+            item.append(itemLabel, cancel);
+            detail.append(item);
+        });
+    }
+
+    async function loadMonth() {
+        const monthStart = new Date(cursor.getFullYear(), cursor.getMonth(), 1);
+        const monthEnd = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1);
+        const { data, error } = await echelonAdminClient
+            .from('session_bookings')
+            .select('id, member_name, session_type, scheduled_at, duration_minutes')
+            .eq('status', 'confirmed')
+            .gte('scheduled_at', monthStart.toISOString())
+            .lt('scheduled_at', monthEnd.toISOString())
+            .order('scheduled_at', { ascending: true });
+        bookingsByDay = new Map();
+        if (!error) {
+            (data || []).forEach((row) => {
+                const key = efcDateKey(new Date(row.scheduled_at));
+                if (!bookingsByDay.has(key)) bookingsByDay.set(key, []);
+                bookingsByDay.get(key).push(row);
+            });
+        }
+        renderGrid();
+        renderDetail();
+    }
+
+    prevBtn.addEventListener('click', () => { cursor.setMonth(cursor.getMonth() - 1); loadMonth(); });
+    nextBtn.addEventListener('click', () => { cursor.setMonth(cursor.getMonth() + 1); loadMonth(); });
+
+    loadMonth();
+    return { reload: loadMonth };
+}
+
 async function initializeAdminScheduling() {
     const windowForm = document.getElementById('availability-window-form');
     if (!windowForm) return;
@@ -71,7 +185,7 @@ async function initializeAdminScheduling() {
     const bookForm = document.getElementById('admin-book-session-form');
     const bookFeedback = document.getElementById('admin-book-session-feedback');
     const memberSelect = bookForm.elements.user_id;
-    const upcomingList = document.getElementById('upcoming-sessions-list');
+    const sessionsCalendar = initializeSessionsCalendar();
 
     async function loadAvailabilityWindows() {
         const { data, error } = await echelonAdminClient
@@ -167,42 +281,11 @@ async function initializeAdminScheduling() {
             return;
         }
         bookForm.reset();
-        loadUpcomingSessions();
+        if (sessionsCalendar) sessionsCalendar.reload();
         efcSyncBookingToCalendar(data.id, 'create');
     });
 
-    async function loadUpcomingSessions() {
-        const { data, error } = await echelonAdminClient
-            .from('session_bookings')
-            .select('id, member_name, session_type, scheduled_at, duration_minutes, status')
-            .eq('status', 'confirmed')
-            .gte('scheduled_at', new Date().toISOString())
-            .order('scheduled_at', { ascending: true })
-            .limit(60);
-        upcomingList.innerHTML = '';
-        if (error) { upcomingList.textContent = 'Could not load upcoming sessions.'; return; }
-        if (!data.length) { upcomingList.textContent = 'No upcoming sessions booked yet.'; return; }
-        data.forEach((row) => {
-            const item = document.createElement('div');
-            item.className = 'availability-window-item';
-            const when = new Date(row.scheduled_at);
-            const label = document.createElement('span');
-            label.textContent = `${row.member_name} · ${when.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })} · ${when.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })} · ${efcSessionTypeLabel(row.session_type)} · ${row.duration_minutes} min`;
-            const cancel = document.createElement('button');
-            cancel.type = 'button'; cancel.className = 'btn-secondary';
-            cancel.textContent = 'CANCEL';
-            cancel.addEventListener('click', async () => {
-                await echelonAdminClient.from('session_bookings').update({ status: 'canceled' }).eq('id', row.id);
-                loadUpcomingSessions();
-                efcSyncBookingToCalendar(row.id, 'cancel');
-            });
-            item.append(label, cancel);
-            upcomingList.append(item);
-        });
-    }
-
     loadAvailabilityWindows();
     loadMembersForBooking();
-    loadUpcomingSessions();
     initializeCalendarConnection();
 }

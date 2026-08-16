@@ -1,6 +1,5 @@
-const EFC_BOOKING_WEEKDAY_LABELS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const EFC_BOOKING_TYPE_LABELS = { one_on_one: '1-on-1', private_group: 'Private Group' };
-const EFC_BOOKING_LOOKAHEAD_DAYS = 14;
+const EFC_BOOKING_HORIZON_DAYS = 60;
 
 function efcBookingTypeLabel(type) {
     return EFC_BOOKING_TYPE_LABELS[type] || type;
@@ -10,6 +9,10 @@ function efcWindowDurationMinutes(window) {
     const [startHours, startMinutes] = window.start_time.split(':').map(Number);
     const [endHours, endMinutes] = window.end_time.split(':').map(Number);
     return (endHours * 60 + endMinutes) - (startHours * 60 + startMinutes);
+}
+
+function efcDateKey(date) {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }
 
 async function efcSyncBookingToCalendar(bookingId, action) {
@@ -26,7 +29,7 @@ async function efcSyncBookingToCalendar(bookingId, action) {
 async function efcFetchBusyRanges() {
     try {
         const { data: sessionData } = await echelonMemberClient.auth.getSession();
-        const result = await fetch(`/api/calendar/freebusy?days=${EFC_BOOKING_LOOKAHEAD_DAYS}`, {
+        const result = await fetch(`/api/calendar/freebusy?days=${EFC_BOOKING_HORIZON_DAYS}`, {
             headers: { Authorization: `Bearer ${sessionData.session?.access_token || ''}` }
         });
         const body = await result.json().catch(() => ({}));
@@ -43,7 +46,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const member = await requireMemberSession();
     if (!member) return;
 
-    const slotList = document.getElementById('open-slot-list');
+    const grid = document.getElementById('booking-calendar-grid');
+    const calendarLabel = document.getElementById('booking-calendar-label');
+    const prevBtn = document.getElementById('booking-calendar-prev');
+    const nextBtn = document.getElementById('booking-calendar-next');
+    const detail = document.getElementById('booking-calendar-day-detail');
     const feedback = document.getElementById('booking-feedback');
 
     const { data: waiver } = await echelonMemberClient
@@ -52,6 +59,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         .eq('user_id', member.id)
         .maybeSingle();
     const memberName = waiver?.full_name || member.email;
+
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const horizonEnd = new Date(today.getTime() + EFC_BOOKING_HORIZON_DAYS * 24 * 60 * 60 * 1000);
+    const cursor = new Date(today.getFullYear(), today.getMonth(), 1);
+    let selectedKey = efcDateKey(today);
+    let windows = [];
+    let bookedTimes = new Set();
+    let busyRanges = [];
 
     async function loadMySessions() {
         const { data, error } = await echelonMemberClient
@@ -63,7 +78,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             .order('scheduled_at', { ascending: true });
         upcomingList.innerHTML = '';
         if (error) { upcomingList.textContent = 'Could not load your sessions.'; return; }
-        if (!data.length) { upcomingList.textContent = 'Nothing booked yet, choose an open window below.'; return; }
+        if (!data.length) { upcomingList.textContent = 'Nothing booked yet, choose an open day below.'; return; }
         data.forEach((row) => {
             const when = new Date(row.scheduled_at);
             const item = document.createElement('div');
@@ -75,55 +90,94 @@ document.addEventListener('DOMContentLoaded', async () => {
             cancel.textContent = 'CANCEL';
             cancel.addEventListener('click', async () => {
                 await echelonMemberClient.from('session_bookings').update({ status: 'canceled' }).eq('id', row.id);
-                loadMySessions();
-                loadOpenSlots();
                 efcSyncBookingToCalendar(row.id, 'cancel');
+                loadMySessions();
+                refreshAvailability();
             });
             item.append(label, cancel);
             upcomingList.append(item);
         });
     }
 
-    async function loadOpenSlots() {
-        feedback.textContent = '';
-        const rangeStart = new Date();
-        const rangeEnd = new Date(Date.now() + EFC_BOOKING_LOOKAHEAD_DAYS * 24 * 60 * 60 * 1000);
-
-        const [windowsResult, bookedResult, busyRanges] = await Promise.all([
-            echelonMemberClient.from('coach_availability_windows').select('day_of_week, start_time, end_time, session_type').eq('active', true),
-            echelonMemberClient.from('booked_session_times').select('scheduled_at').gte('scheduled_at', rangeStart.toISOString()).lte('scheduled_at', rangeEnd.toISOString()),
-            efcFetchBusyRanges()
-        ]);
-
-        slotList.innerHTML = '';
-        if (windowsResult.error || bookedResult.error) { slotList.textContent = 'Could not load open windows.'; return; }
-
-        const windows = windowsResult.data;
-        if (!windows.length) { slotList.textContent = 'No standing availability has been set yet, check back soon.'; return; }
-        const bookedTimes = new Set(bookedResult.data.map((row) => new Date(row.scheduled_at).getTime()));
-
+    function slotsForDate(date) {
+        if (date < today || date > horizonEnd) return [];
         const slots = [];
-        for (let offset = 0; offset < EFC_BOOKING_LOOKAHEAD_DAYS; offset++) {
-            const date = new Date();
-            date.setDate(date.getDate() + offset);
-            windows.filter((window) => window.day_of_week === date.getDay()).forEach((window) => {
-                const [hours, minutes] = window.start_time.split(':').map(Number);
-                const scheduledAt = new Date(date.getFullYear(), date.getMonth(), date.getDate(), hours, minutes);
-                if (scheduledAt < new Date()) return;
-                if (bookedTimes.has(scheduledAt.getTime())) return;
-                const slotEnd = new Date(scheduledAt.getTime() + efcWindowDurationMinutes(window) * 60 * 1000);
-                if (busyRanges.some((busy) => scheduledAt < busy.end && slotEnd > busy.start)) return;
-                slots.push({ scheduledAt, window });
-            });
-        }
-        slots.sort((a, b) => a.scheduledAt - b.scheduledAt);
+        windows.filter((window) => window.day_of_week === date.getDay()).forEach((window) => {
+            const [hours, minutes] = window.start_time.split(':').map(Number);
+            const scheduledAt = new Date(date.getFullYear(), date.getMonth(), date.getDate(), hours, minutes);
+            if (scheduledAt < new Date()) return;
+            if (bookedTimes.has(scheduledAt.getTime())) return;
+            const slotEnd = new Date(scheduledAt.getTime() + efcWindowDurationMinutes(window) * 60 * 1000);
+            if (busyRanges.some((busy) => scheduledAt < busy.end && slotEnd > busy.start)) return;
+            slots.push({ scheduledAt, window });
+        });
+        return slots.sort((a, b) => a.scheduledAt - b.scheduledAt);
+    }
 
-        if (!slots.length) { slotList.textContent = 'Nothing open in the next two weeks, check back soon.'; return; }
+    function renderGrid() {
+        const beforeHorizon = cursor <= new Date(today.getFullYear(), today.getMonth(), 1);
+        prevBtn.disabled = beforeHorizon;
+        const nextMonthStart = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1);
+        nextBtn.disabled = nextMonthStart > horizonEnd;
+
+        calendarLabel.textContent = cursor.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+        grid.innerHTML = '';
+        ['S', 'M', 'T', 'W', 'T', 'F', 'S'].forEach((weekday) => {
+            const heading = document.createElement('div');
+            heading.className = 'month-calendar-weekday';
+            heading.textContent = weekday;
+            grid.append(heading);
+        });
+        const firstWeekday = cursor.getDay();
+        const daysInMonth = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 0).getDate();
+        for (let i = 0; i < firstWeekday; i++) {
+            const empty = document.createElement('div');
+            empty.className = 'month-calendar-day month-calendar-day-empty';
+            grid.append(empty);
+        }
+        const todayKey = efcDateKey(today);
+        for (let day = 1; day <= daysInMonth; day++) {
+            const date = new Date(cursor.getFullYear(), cursor.getMonth(), day);
+            const key = efcDateKey(date);
+            const inRange = date >= today && date <= horizonEnd;
+            const cell = document.createElement(inRange ? 'button' : 'div');
+            if (inRange) cell.type = 'button';
+            cell.className = `month-calendar-day${inRange ? ' month-calendar-day-active' : ''}`;
+            if (key === todayKey) cell.classList.add('month-calendar-day-today');
+            if (key === selectedKey) cell.classList.add('month-calendar-day-selected');
+            cell.append(document.createTextNode(String(day)));
+            if (inRange && slotsForDate(date).length) {
+                const dot = document.createElement('span');
+                dot.className = 'month-calendar-day-dot';
+                cell.append(dot);
+            }
+            if (inRange) cell.addEventListener('click', () => { selectedKey = key; renderGrid(); renderDetail(); });
+            grid.append(cell);
+        }
+    }
+
+    function renderDetail() {
+        detail.innerHTML = '';
+        const [year, month, day] = selectedKey.split('-').map(Number);
+        const date = new Date(year, month - 1, day);
+        const heading = document.createElement('h4');
+        heading.textContent = date.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+        detail.append(heading);
+
+        const slots = slotsForDate(date);
+        if (!slots.length) {
+            const empty = document.createElement('p');
+            empty.className = 'admin-detail-empty';
+            empty.textContent = 'No open windows this day.';
+            detail.append(empty);
+            return;
+        }
         slots.forEach(({ scheduledAt, window }) => {
             const item = document.createElement('div');
             item.className = 'availability-window-item';
+            const end = new Date(scheduledAt.getTime() + efcWindowDurationMinutes(window) * 60 * 1000);
             const label = document.createElement('span');
-            label.textContent = `${scheduledAt.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })} · ${scheduledAt.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })} – ${efcFormatBookingEndTime(scheduledAt, window)} · ${efcBookingTypeLabel(window.session_type)}`;
+            label.textContent = `${scheduledAt.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })} – ${end.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })} · ${efcBookingTypeLabel(window.session_type)}`;
             const book = document.createElement('button');
             book.type = 'button'; book.className = 'btn-primary';
             book.textContent = 'BOOK';
@@ -140,23 +194,36 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (error) {
                     feedback.textContent = error.code === '23505' ? 'That time was just booked, pick another.' : 'Could not book that session.';
                     book.disabled = false; book.textContent = 'BOOK';
-                    loadOpenSlots();
+                    refreshAvailability();
                     return;
                 }
+                feedback.textContent = '';
                 loadMySessions();
-                loadOpenSlots();
+                refreshAvailability();
                 efcSyncBookingToCalendar(data.id, 'create');
             });
             item.append(label, book);
-            slotList.append(item);
+            detail.append(item);
         });
     }
 
-    function efcFormatBookingEndTime(scheduledAt, window) {
-        const end = new Date(scheduledAt.getTime() + efcWindowDurationMinutes(window) * 60 * 1000);
-        return end.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+    async function refreshAvailability() {
+        const [windowsResult, bookedResult, freshBusyRanges] = await Promise.all([
+            echelonMemberClient.from('coach_availability_windows').select('day_of_week, start_time, end_time, session_type').eq('active', true),
+            echelonMemberClient.from('booked_session_times').select('scheduled_at').gte('scheduled_at', today.toISOString()).lte('scheduled_at', horizonEnd.toISOString()),
+            efcFetchBusyRanges()
+        ]);
+        if (windowsResult.error || bookedResult.error) { feedback.textContent = 'Could not load open windows.'; return; }
+        windows = windowsResult.data;
+        bookedTimes = new Set(bookedResult.data.map((row) => new Date(row.scheduled_at).getTime()));
+        busyRanges = freshBusyRanges;
+        renderGrid();
+        renderDetail();
     }
 
+    prevBtn.addEventListener('click', () => { cursor.setMonth(cursor.getMonth() - 1); renderGrid(); });
+    nextBtn.addEventListener('click', () => { cursor.setMonth(cursor.getMonth() + 1); renderGrid(); });
+
     loadMySessions();
-    loadOpenSlots();
+    refreshAvailability();
 });

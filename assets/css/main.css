@@ -3408,6 +3408,24 @@ COACHING PLAYBOOK
 .availability-window-item .btn-primary,.availability-window-item .btn-secondary{flex:0 0 auto;margin:0;padding:9px 14px;font-size:.62rem}
 @media(max-width:600px){.availability-window-item{flex-direction:column;align-items:flex-start}}
 
+.month-calendar{margin-top:14px}
+.month-calendar-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.month-calendar-header span{color:#fff;font-family:var(--heading-font);font-size:1.3rem;letter-spacing:.04em}
+.month-calendar-header button{margin:0;padding:8px 14px;font-size:.7rem}
+.month-calendar-header button:disabled{opacity:.35;cursor:default}
+.month-calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.month-calendar-weekday{padding:6px 0;text-align:center;color:#8f8f8f;font:700 .6rem 'Montserrat',sans-serif;letter-spacing:.08em}
+.month-calendar-day{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.02);color:#8f8f8f;font-size:.78rem;cursor:default}
+.month-calendar-day-empty{border:none;background:transparent}
+.month-calendar-day-active{color:#e2e2e2;cursor:pointer}
+.month-calendar-day-active:hover{border-color:rgba(215,181,91,.5)}
+.month-calendar-day-today{border-color:rgba(215,181,91,.6)}
+.month-calendar-day-selected{background:rgba(215,181,91,.14);border-color:var(--primary);color:#fff}
+.month-calendar-day-dot{width:5px;height:5px;border-radius:50%;background:var(--primary)}
+.month-calendar-day-detail{margin-top:16px}
+.month-calendar-day-detail h4{margin:0 0 10px;color:#fff;font-size:.95rem;letter-spacing:.03em}
+@media(max-width:600px){.month-calendar-day{font-size:.68rem}}
+
 .admin-bulk-upload{
     grid-column:1 / -1;
     margin-top:20px;

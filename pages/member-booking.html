@@ -43,9 +43,17 @@
                 <div class="form-section-header"><h2>YOUR UPCOMING SESSIONS</h2></div>
                 <div id="my-upcoming-sessions" class="availability-window-list">Loading…</div>
 
-                <div class="form-section-header"><h2>OPEN WINDOWS · NEXT 14 DAYS</h2></div>
+                <div class="form-section-header"><h2>PICK A DAY</h2></div>
                 <p id="booking-feedback" class="form-error" role="status"></p>
-                <div id="open-slot-list" class="availability-window-list">Loading…</div>
+                <div class="month-calendar" id="booking-calendar">
+                    <div class="month-calendar-header">
+                        <button type="button" id="booking-calendar-prev" class="btn-secondary" aria-label="Previous month">←</button>
+                        <span id="booking-calendar-label"></span>
+                        <button type="button" id="booking-calendar-next" class="btn-secondary" aria-label="Next month">→</button>
+                    </div>
+                    <div class="month-calendar-grid" id="booking-calendar-grid"></div>
+                    <div class="month-calendar-day-detail" id="booking-calendar-day-detail"></div>
+                </div>
             </div>
         </div>
     </main>
