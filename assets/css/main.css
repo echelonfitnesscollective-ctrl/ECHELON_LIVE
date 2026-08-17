@@ -3631,6 +3631,11 @@ COACHING PLAYBOOK
 .coach-task p{ margin:5px 0 0; }
 .coach-task-detail{ color:#d4d4d4 !important; }
 .coach-task.is-overdue strong{ color:#e6bc5c; }
+.coach-task-edit-form[hidden]{display:none}
+.coach-task-edit-form{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px}
+.coach-task-edit-form input,.coach-task-edit-form select{margin:0;padding:8px;border:1px solid rgba(255,255,255,.17);background:#1A1917;color:#d8d8d8;font:600 .68rem 'Montserrat',sans-serif;letter-spacing:.02em}
+.coach-task-edit-form input[type="text"]{width:160px;max-width:100%}
+.coach-task-edit-form textarea{flex:1 1 100%;margin:0;padding:8px;border:1px solid rgba(255,255,255,.17);background:#1A1917;color:#d8d8d8;font:400 .7rem/1.5 'Montserrat',sans-serif;resize:vertical}
 
 .coach-task-complete{
 

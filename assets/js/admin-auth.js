@@ -577,6 +577,70 @@ function taskIsOverdue(task) {
     return new Date(`${task.due_at}T23:59:59`) < new Date();
 }
 
+function buildCoachTaskEditor(task, copy, title, metadata, detail) {
+    const form = document.createElement('form');
+    form.className = 'coach-task-edit-form';
+    form.hidden = true;
+
+    const titleInput = document.createElement('input'); titleInput.type = 'text'; titleInput.value = task.title; titleInput.required = true; titleInput.setAttribute('aria-label', 'Task title');
+    const relatedInput = document.createElement('input'); relatedInput.type = 'text'; relatedInput.value = task.related_name || ''; relatedInput.placeholder = 'Member or lead name'; relatedInput.setAttribute('aria-label', 'Member or lead name');
+    const dueInput = document.createElement('input'); dueInput.type = 'date'; dueInput.value = task.due_at || ''; dueInput.setAttribute('aria-label', 'Due at');
+
+    const typeSelect = document.createElement('select'); typeSelect.setAttribute('aria-label', 'Task type');
+    ['Follow-up', 'Check-in review', 'Onboarding', 'Programming', 'Billing', 'Other'].forEach((value) => { const option = document.createElement('option'); option.textContent = value; if (value === task.task_type) option.selected = true; typeSelect.append(option); });
+
+    const prioritySelect = document.createElement('select'); prioritySelect.setAttribute('aria-label', 'Priority');
+    ['Normal', 'Low', 'High', 'Urgent'].forEach((value) => { const option = document.createElement('option'); option.textContent = value; if (value === task.priority) option.selected = true; prioritySelect.append(option); });
+
+    const descriptionInput = document.createElement('textarea'); descriptionInput.rows = 3; descriptionInput.value = task.description || ''; descriptionInput.placeholder = 'Private context or next action'; descriptionInput.setAttribute('aria-label', 'Description');
+
+    const save = document.createElement('button'); save.type = 'submit'; save.className = 'application-contact-save'; save.textContent = 'SAVE';
+    const cancel = document.createElement('button'); cancel.type = 'button'; cancel.className = 'application-contact-cancel'; cancel.textContent = 'CANCEL';
+    const feedback = document.createElement('span'); feedback.className = 'application-contact-feedback'; feedback.setAttribute('role', 'status');
+
+    form.append(titleInput, relatedInput, dueInput, typeSelect, prioritySelect, descriptionInput, save, cancel, feedback);
+
+    const closeForm = () => { form.hidden = true; copy.hidden = false; };
+
+    cancel.addEventListener('click', () => {
+        titleInput.value = task.title;
+        relatedInput.value = task.related_name || '';
+        dueInput.value = task.due_at || '';
+        typeSelect.value = task.task_type;
+        prioritySelect.value = task.priority;
+        descriptionInput.value = task.description || '';
+        feedback.textContent = '';
+        closeForm();
+    });
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        feedback.textContent = '';
+        const updated = {
+            title: titleInput.value.trim(),
+            related_name: relatedInput.value.trim() || null,
+            due_at: dueInput.value || null,
+            task_type: typeSelect.value,
+            priority: prioritySelect.value,
+            description: descriptionInput.value.trim() || null
+        };
+        if (!updated.title) { feedback.textContent = 'Title required.'; return; }
+
+        save.disabled = true;
+        const { error } = await echelonAdminClient.from('coach_tasks').update(updated).eq('id', task.id);
+        save.disabled = false;
+        if (error) { feedback.textContent = 'Could not save.'; return; }
+
+        Object.assign(task, updated);
+        title.textContent = task.title;
+        metadata.textContent = [task.related_name, task.task_type, coachTaskDate(task.due_at)].filter(Boolean).join(' · ');
+        detail.textContent = task.description || `${task.priority} priority`;
+        closeForm();
+    });
+
+    return form;
+}
+
 function createCoachTask(task) {
     const article = document.createElement('article');
     article.className = `coach-task ${taskIsOverdue(task) ? 'is-overdue' : ''}`;
@@ -589,6 +653,7 @@ function createCoachTask(task) {
     detail.className = 'coach-task-detail';
     detail.textContent = task.description || `${task.priority} priority`;
     copy.append(title, metadata, detail);
+    const editForm = buildCoachTaskEditor(task, copy, title, metadata, detail);
     const actions = document.createElement('div');
     actions.className = 'coach-task-actions';
     const action = document.createElement('button');
@@ -602,6 +667,11 @@ function createCoachTask(task) {
         if (!error) initializeCoachCommand();
         else action.disabled = false;
     });
+    const edit = document.createElement('button');
+    edit.type = 'button';
+    edit.className = 'coach-task-delete';
+    edit.textContent = 'EDIT';
+    edit.addEventListener('click', () => { copy.hidden = true; editForm.hidden = false; });
     const remove = document.createElement('button');
     remove.type = 'button';
     remove.className = 'coach-task-delete';
@@ -613,8 +683,8 @@ function createCoachTask(task) {
         if (!error) initializeCoachCommand();
         else { remove.disabled = false; window.alert('That task could not be removed. Please try again.'); }
     });
-    actions.append(action, remove);
-    article.append(copy, actions);
+    actions.append(action, edit, remove);
+    article.append(copy, editForm, actions);
     return article;
 }
 
