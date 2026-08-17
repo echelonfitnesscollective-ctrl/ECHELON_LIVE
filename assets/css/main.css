@@ -2762,6 +2762,7 @@ MOBILE
 }
 
 .member-portal-card-featured{grid-column:span 2;min-height:250px;border-color:rgba(215,181,91,.58);background:radial-gradient(circle at 85% 8%,rgba(215,181,91,.16),transparent 38%),linear-gradient(135deg,rgba(215,181,91,.12),rgba(8,8,8,.98))}.member-portal-card-featured h2{font-size:2.5rem}.member-portal-card-featured p{max-width:590px}.member-setup-section{margin-top:20px;border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.025)}.member-setup-section>summary{position:relative;display:grid;gap:8px;padding:24px 60px 24px 26px;cursor:pointer;list-style:none}.member-setup-section>summary::-webkit-details-marker{display:none}.member-setup-section>summary>strong{color:#fff;font-size:.8rem;letter-spacing:.1em}.member-setup-section>summary p{margin:0;color:#aaa;font-size:.76rem;line-height:1.55}.member-setup-section>summary i{position:absolute;right:25px;top:50%;color:var(--primary);font:400 1.7rem/1 var(--heading-font);transform:translateY(-50%);font-style:normal}.member-setup-section[open]>summary{border-bottom:1px solid rgba(215,181,91,.3);background:rgba(215,181,91,.055)}.member-setup-section[open]>summary i{transform:translateY(-50%) rotate(45deg)}.member-setup-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding:16px}.member-setup-links a{display:block;padding:24px;border:1px solid rgba(255,255,255,.12);background:#0D0D0C;color:#fff;text-decoration:none}.member-setup-links a:hover{border-color:var(--primary)}.member-setup-links span,.member-setup-links a>strong{color:var(--primary);font-family:var(--heading-font);letter-spacing:1px}.member-setup-links h2{margin:18px 0 10px;font-size:1.65rem}.member-setup-links p{margin:0;color:#aaa;font-size:.78rem;line-height:1.6}.member-setup-links a>strong{display:block;margin-top:20px;font-size:.76rem}@media(max-width:720px){.member-portal-card-featured{grid-column:auto}.member-setup-links{grid-template-columns:1fr}}@media(max-width:480px){.member-portal-card-featured h2{font-size:2rem}.member-setup-section>summary{padding:22px 55px 22px 22px}.member-setup-links{padding:10px}}
+.member-settings-body{padding:16px 26px 26px}.member-settings-body .echelon-form{margin-bottom:18px}.member-settings-password-btn{width:100%}
 
 .member-sign-out{
 
@@ -3600,6 +3601,17 @@ COACHING PLAYBOOK
 .coach-attention-list strong{ color:#fff; font-size:.82rem; }
 .coach-attention-list span,
 .coach-task p{ color:#a8a8a8; font-size:.75rem; line-height:1.45; }
+
+.admin-audit-log-section{margin-top:18px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.02)}
+.admin-audit-log-section>summary{display:flex;align-items:center;gap:14px;padding:16px 20px;cursor:pointer;list-style:none}
+.admin-audit-log-section>summary::-webkit-details-marker{display:none}
+.admin-audit-log-section>summary>strong{color:#fff;font-size:.78rem;letter-spacing:.08em}
+.admin-audit-log-list{padding:4px 20px 18px;color:#bdbdbd}
+.admin-audit-log-list article{display:flex;flex-direction:column;gap:3px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:.75rem}
+.admin-audit-log-list article:last-child{border-bottom:0}
+.admin-audit-log-list article strong{color:#fff}
+.admin-audit-log-list article span{color:#888}
+.admin-audit-log-empty{padding:4px 0;color:#888;font-size:.75rem}
 
 .coach-task{
 

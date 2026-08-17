@@ -109,6 +109,22 @@
                 </div>
             </details>
 
+            <details class="member-setup-section">
+                <summary><span class="checkin-tag">ACCOUNT</span><strong>ACCOUNT SETTINGS <i>+</i></strong><p>Update your contact details or change your password.</p></summary>
+                <div class="member-settings-body">
+                    <form id="member-settings-form" class="echelon-form">
+                        <label for="member-settings-name">FULL NAME</label>
+                        <input id="member-settings-name" name="full_name" type="text" autocomplete="name" required>
+                        <label for="member-settings-phone">PHONE NUMBER</label>
+                        <input id="member-settings-phone" name="phone" type="tel" autocomplete="tel">
+                        <button type="submit" class="btn-secondary">SAVE CHANGES</button>
+                        <p id="member-settings-feedback" class="form-error" role="status"></p>
+                    </form>
+                    <button id="member-settings-password" class="btn-secondary member-settings-password-btn" type="button">SEND PASSWORD RESET LINK</button>
+                    <p id="member-settings-password-feedback" class="form-error" role="status"></p>
+                </div>
+            </details>
+
             <button id="member-sign-out" class="btn-secondary member-sign-out">SIGN OUT</button>
         </div>
     </main>

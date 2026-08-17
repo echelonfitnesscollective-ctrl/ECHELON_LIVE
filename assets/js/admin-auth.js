@@ -487,9 +487,42 @@ function createCoachTask(task) {
     return article;
 }
 
+async function initializeAdminAuditLog() {
+    const list = document.getElementById('admin-audit-log-list');
+    if (!list) return;
+
+    const { data, error } = await echelonAdminClient
+        .from('audit_logs')
+        .select('actor_id, action, entity_type, detail, created_at')
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+    list.replaceChildren();
+    if (error || !data || !data.length) {
+        const empty = document.createElement('p');
+        empty.className = 'admin-audit-log-empty';
+        empty.textContent = error ? 'Admin activity is not connected yet.' : 'No admin activity recorded yet.';
+        list.append(empty);
+        return;
+    }
+
+    data.forEach((entry) => {
+        const row = document.createElement('article');
+        const title = document.createElement('strong');
+        const label = entry.action === 'member_deleted' ? 'Member deleted' : entry.action;
+        title.textContent = `${label} — ${entry.entity_type}`;
+        const meta = document.createElement('span');
+        const detailText = entry.detail && entry.detail.email ? entry.detail.email : '';
+        meta.textContent = [detailText, new Date(entry.created_at).toLocaleString()].filter(Boolean).join(' · ');
+        row.append(title, meta);
+        list.append(row);
+    });
+}
+
 async function initializeCoachCommand() {
     const taskList = document.getElementById('coach-task-list');
     if (!taskList) return;
+    initializeAdminAuditLog();
     const attentionList = document.getElementById('coach-attention-list');
     const status = document.getElementById('coach-command-status');
     const [tasksResult, applicationsResult, leadsResult] = await Promise.all([

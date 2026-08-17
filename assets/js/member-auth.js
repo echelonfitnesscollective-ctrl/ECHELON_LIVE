@@ -239,6 +239,59 @@ async function initializeMemberPortal() {
         await echelonMemberClient.auth.signOut();
         window.location.replace('member-login.html');
     });
+
+    await initializeMemberSettings(member);
+}
+
+async function initializeMemberSettings(member) {
+    const form = document.getElementById('member-settings-form');
+    if (!form) return;
+
+    const feedback = document.getElementById('member-settings-feedback');
+    const { data: profile } = await echelonMemberClient
+        .from('member_profiles')
+        .select('full_name, phone')
+        .eq('user_id', member.id)
+        .maybeSingle();
+    if (profile) {
+        form.elements.full_name.value = profile.full_name || '';
+        form.elements.phone.value = profile.phone || '';
+    }
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        feedback.textContent = '';
+        const submitButton = form.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        submitButton.textContent = 'SAVING…';
+
+        const { error } = await echelonMemberClient.from('member_profiles').update({
+            full_name: form.elements.full_name.value.trim(),
+            phone: form.elements.phone.value.trim() || null
+        }).eq('user_id', member.id);
+
+        submitButton.disabled = false;
+        submitButton.textContent = 'SAVE CHANGES';
+        feedback.textContent = error ? 'We could not save your changes. Please try again.' : 'Saved.';
+    });
+
+    const passwordButton = document.getElementById('member-settings-password');
+    const passwordFeedback = document.getElementById('member-settings-password-feedback');
+    if (passwordButton) {
+        passwordButton.addEventListener('click', async () => {
+            passwordButton.disabled = true;
+            passwordButton.textContent = 'SENDING…';
+            const { error } = await echelonMemberClient.auth.resetPasswordForEmail(
+                member.email,
+                { redirectTo: `${window.location.origin}/pages/member-reset.html` }
+            );
+            passwordButton.disabled = false;
+            passwordButton.textContent = 'SEND PASSWORD RESET LINK';
+            passwordFeedback.textContent = error
+                ? 'We could not send a reset link. Please try again.'
+                : `Check ${member.email} for a secure link to set your password.`;
+        });
+    }
 }
 
 // Invite/reset emails used to link straight to Supabase's own verify endpoint,

@@ -27,8 +27,11 @@ module.exports = async function activateMember(request, response) {
   if (request.body?.action === 'delete-member') {
     const userId = request.body?.userId;
     if (!userId) return response.status(400).json({ error: 'Choose a member to delete first.' });
+    const before = await serviceRequest(`/auth/v1/admin/users/${encodeURIComponent(userId)}`);
+    const email = before.result.ok ? before.body?.email : null;
     const deletion = await serviceRequest(`/auth/v1/admin/users/${encodeURIComponent(userId)}`, { method: 'DELETE' });
     if (!deletion.result.ok) return response.status(502).json({ error: 'This member could not be deleted.' });
+    await serviceRequest('/rest/v1/audit_logs', { method: 'POST', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ actor_id: admin.id, action: 'member_deleted', entity_type: 'member', entity_id: userId, detail: { email } }) });
     return response.status(200).json({ message: 'Member deleted.' });
   }
 
