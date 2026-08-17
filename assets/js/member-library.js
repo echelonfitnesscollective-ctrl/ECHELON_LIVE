@@ -1,3 +1,7 @@
+function escapeLibraryHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+}
+
 function matchGoalCategory(rawCategory) {
     const c = (rawCategory || '').toLowerCase();
     if (c.includes('weight')) return 'weight-loss';
@@ -47,9 +51,9 @@ function buildPremiumCard(resource, catLabel, openFn) {
     card.className = 'resource-card-tile';
     card.setAttribute('aria-haspopup', 'dialog');
     card.innerHTML = `
-        <span class="resource-card-badge">${catLabel}</span>
-        <h3>${resource.title}</h3>
-        <p>${resource.description || 'Member-only Echelon resource.'}</p>
+        <span class="resource-card-badge">${escapeLibraryHtml(catLabel)}</span>
+        <h3>${escapeLibraryHtml(resource.title)}</h3>
+        <p>${escapeLibraryHtml(resource.description) || 'Member-only Echelon resource.'}</p>
         <span class="resource-card-foot"><span class="resource-card-cta">OPEN GUIDE &rarr;</span><span class="resource-exclusive-flag">EXCLUSIVE</span></span>
     `;
     card.addEventListener('click', openFn);
@@ -62,13 +66,13 @@ function openPremiumModal(resource, catLabel) {
     if (!overlay || !panel) return;
 
     const fullContent = (typeof PREMIUM_LIBRARY_CONTENT !== 'undefined' && PREMIUM_LIBRARY_CONTENT[resource.storage_path]) || null;
-    const bodyHtml = fullContent || `<p>${resource.description || 'A member-only Echelon resource, added by your coach.'}</p>`;
+    const bodyHtml = fullContent || `<p>${escapeLibraryHtml(resource.description) || 'A member-only Echelon resource, added by your coach.'}</p>`;
 
     panel.classList.remove('resource-modal-panel-wide');
     panel.innerHTML = `
         <button type="button" class="resource-modal-close" aria-label="Close">&times;</button>
-        <span class="resource-card-badge">${catLabel} <span class="resource-exclusive-flag">MEMBER ONLY</span></span>
-        <h2>${resource.title}</h2>
+        <span class="resource-card-badge">${escapeLibraryHtml(catLabel)} <span class="resource-exclusive-flag">MEMBER ONLY</span></span>
+        <h2>${escapeLibraryHtml(resource.title)}</h2>
         <div class="resource-modal-body">${bodyHtml}</div>
         <div class="resource-modal-footer" hidden><span class="resource-download-pending">Preparing your download&hellip;</span></div>
     `;
@@ -92,7 +96,7 @@ function openPremiumModal(resource, catLabel) {
         }
         const url = signed.data.signedUrl;
         if (!isPdf && !fullContent) {
-            body.innerHTML += `<img src="${url}" alt="${resource.title}" class="resource-modal-image">`;
+            body.innerHTML += `<img src="${url}" alt="${escapeLibraryHtml(resource.title)}" class="resource-modal-image">`;
         }
         footer.innerHTML = `<a class="btn-primary resource-download-btn" href="${url}" target="_blank" rel="noopener" download>DOWNLOAD RESOURCE &darr;</a>`;
     });

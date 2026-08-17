@@ -14,6 +14,30 @@ const { randomBytes } = require('node:crypto');
 
 const EFC_SESSION_TYPE_LABELS = { one_on_one: '1-on-1 Coaching', private_group: 'Private Training Group', group_fitness: 'Group Fitness' };
 
+// group-join is the one route here a stranger can call with no admin/member
+// session at all (that's the point, guests join via link), so it's the one
+// that needs its own IP throttle rather than relying on auth to gate abuse.
+const groupJoinRateLimit = new Map();
+const GROUP_JOIN_WINDOW_MS = 60_000;
+const GROUP_JOIN_MAX_PER_WINDOW = 5;
+
+function clientIp(request) {
+  return String(request.headers['x-forwarded-for'] || request.socket?.remoteAddress || 'unknown').split(',')[0].trim();
+}
+
+function isGroupJoinRateLimited(ip) {
+  const now = Date.now();
+  const entry = groupJoinRateLimit.get(ip) || { count: 0, windowStart: now };
+  if (now - entry.windowStart > GROUP_JOIN_WINDOW_MS) { entry.count = 0; entry.windowStart = now; }
+  entry.count += 1;
+  groupJoinRateLimit.set(ip, entry);
+  if (groupJoinRateLimit.size > 1000) {
+    const cutoff = now - GROUP_JOIN_WINDOW_MS;
+    for (const [key, value] of groupJoinRateLimit) if (value.windowStart < cutoff) groupJoinRateLimit.delete(key);
+  }
+  return entry.count > GROUP_JOIN_MAX_PER_WINDOW;
+}
+
 function siteUrl() { return String(process.env.SITE_URL || 'https://www.echelonfitness.co').replace(/\/$/, ''); }
 function jsonHeaders(key) { return { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }; }
 function redirectUri() { return `${siteUrl()}/api/calendar/oauth-callback`; }
@@ -337,6 +361,7 @@ async function handleGroupInfo(request, response) {
 
 async function handleGroupJoin(request, response) {
   if (request.method !== 'POST') return response.status(405).json({ error: 'Method not allowed.' });
+  if (isGroupJoinRateLimited(clientIp(request))) return response.status(429).json({ error: 'Too many requests. Please wait a minute and try again.' });
   const { token, fullName, email, phone, waiverAgreed } = request.body || {};
   if (!token || !fullName?.trim() || !waiverAgreed) return response.status(400).json({ error: 'Your name and a signed waiver are required.' });
 

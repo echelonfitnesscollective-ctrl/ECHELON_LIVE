@@ -2391,12 +2391,14 @@ function renderDetailRows(container, details) {
 function addDetailRow(container, label = '', value = '') {
     const row = document.createElement('div');
     row.className = 'detail-row';
-    row.innerHTML = `
-        <input type="text" class="detail-row-label" placeholder="Label" value="${label.replace(/"/g, '&quot;')}">
-        <input type="text" class="detail-row-value" placeholder="Value" value="${value.replace(/"/g, '&quot;')}">
-        <button type="button" class="detail-row-remove" data-remove-row aria-label="Remove row">×</button>
-    `;
-    row.querySelector('[data-remove-row]').addEventListener('click', () => row.remove());
+    const labelInput = document.createElement('input');
+    labelInput.type = 'text'; labelInput.className = 'detail-row-label'; labelInput.placeholder = 'Label'; labelInput.value = label;
+    const valueInput = document.createElement('input');
+    valueInput.type = 'text'; valueInput.className = 'detail-row-value'; valueInput.placeholder = 'Value'; valueInput.value = value;
+    const remove = document.createElement('button');
+    remove.type = 'button'; remove.className = 'detail-row-remove'; remove.setAttribute('aria-label', 'Remove row'); remove.textContent = '×';
+    remove.addEventListener('click', () => row.remove());
+    row.append(labelInput, valueInput, remove);
     container.appendChild(row);
 }
 
