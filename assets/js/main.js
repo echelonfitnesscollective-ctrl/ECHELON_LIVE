@@ -38,7 +38,7 @@ function installLaunchBasics() {
     if (!document.querySelector('link[rel="icon"]')) {
         const icon = document.createElement('link');
         icon.rel = 'icon'; icon.type = 'image/png';
-        icon.href = '/assets/images/favicon.png?v=8';
+        icon.href = '/assets/images/favicon.png?v=10';
         document.head.append(icon);
     }
     document.querySelectorAll('a[target="_blank"]').forEach((link) => {
