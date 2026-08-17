@@ -347,6 +347,84 @@ function renderPaymentLinkButtons(actions, item, paymentUrl, label, paymentFeedb
     actions.append(copy, email);
 }
 
+function suggestTemplateIndex(value) {
+    const v = String(value || '').toLowerCase();
+    if (v.includes('waitlist')) return 3;
+    if (v.includes('free class')) return 4;
+    if (v.includes('partnership')) return 0;
+    if (v.includes('coach') || v.includes('application') || v.includes('1-on-1') || v.includes('one-on-one') || v.includes('group') || v.includes('12-week') || v.includes('transformation')) return 1;
+    return 0;
+}
+
+function appendSuggestedScript(container, guessIndex) {
+    const wrap = document.createElement('div');
+    wrap.className = 'suggested-script';
+    const label = document.createElement('span'); label.className = 'checkin-tag'; label.textContent = 'SUGGESTED RESPONSE';
+    const select = document.createElement('select'); select.setAttribute('aria-label', 'Choose a response script');
+    EFC_COMMUNICATION_TEMPLATES.forEach((template, index) => {
+        const option = document.createElement('option');
+        option.value = String(index);
+        option.textContent = template.title;
+        if (index === guessIndex) option.selected = true;
+        select.append(option);
+    });
+    const preview = document.createElement('textarea'); preview.readOnly = true; preview.setAttribute('aria-label', 'Script preview');
+    const setPreview = () => { const template = EFC_COMMUNICATION_TEMPLATES[Number(select.value)]; preview.value = `Subject: ${template.subject}\n\n${template.body}`; };
+    setPreview();
+    select.addEventListener('change', setPreview);
+    const copy = document.createElement('button'); copy.type = 'button'; copy.className = 'template-copy'; copy.textContent = 'COPY SCRIPT';
+    const feedback = document.createElement('p'); feedback.className = 'template-feedback'; feedback.setAttribute('aria-live', 'polite');
+    copy.addEventListener('click', async () => {
+        try { await navigator.clipboard.writeText(preview.value); feedback.textContent = 'Copied. Personalize the bracketed details before sending.'; }
+        catch (_) { preview.focus(); preview.select(); feedback.textContent = 'Script selected. Press Command + C to copy.'; }
+    });
+    wrap.append(label, select, preview, copy, feedback);
+    container.append(wrap);
+}
+
+function appendFollowUpTaskAction(container, { title, relatedName, taskType, leadId, applicationId }) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'btn-secondary';
+    button.textContent = 'ADD FOLLOW-UP TASK';
+    const feedback = document.createElement('span'); feedback.className = 'application-payment-feedback'; feedback.setAttribute('role', 'status');
+    button.addEventListener('click', async () => {
+        button.disabled = true;
+        const { error } = await echelonAdminClient.from('coach_tasks').insert({
+            title,
+            related_name: relatedName,
+            task_type: taskType,
+            lead_id: leadId || null,
+            application_id: applicationId || null
+        });
+        if (error) { feedback.textContent = 'Could not add task.'; button.disabled = false; return; }
+        feedback.textContent = 'Added to your task queue.';
+        button.textContent = 'TASK ADDED';
+        initializeCoachCommand();
+    });
+    container.append(button, feedback);
+}
+
+function appendCloseToggle(container, item, table, onUpdated) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'btn-secondary';
+    const setLabel = () => { button.textContent = item.closed_at ? 'REOPEN' : 'MARK CLOSED'; };
+    setLabel();
+    button.addEventListener('click', async () => {
+        button.disabled = true;
+        const nextClosedAt = item.closed_at ? null : new Date().toISOString();
+        const admin = await getAdminUser();
+        const { error } = await echelonAdminClient.from(table).update({ closed_at: nextClosedAt, closed_by: nextClosedAt ? (admin?.id || null) : null }).eq('id', item.id);
+        button.disabled = false;
+        if (error) return;
+        item.closed_at = nextClosedAt;
+        setLabel();
+        onUpdated?.();
+    });
+    container.append(button);
+}
+
 function createApplicationRecord(item) {
     const record = document.createElement('article');
     record.className = 'admin-record application-record';
@@ -354,6 +432,7 @@ function createApplicationRecord(item) {
     const name = document.createElement('strong'); name.textContent = item.full_name;
     const state = document.createElement('span'); state.className = `application-state ${item.payment_status === 'paid' ? 'is-paid' : ''}`; state.textContent = item.status || 'New';
     top.append(name, state);
+    if (item.closed_at) { const closedBadge = document.createElement('span'); closedBadge.className = 'application-state is-closed'; closedBadge.textContent = 'CLOSED'; top.append(closedBadge); }
     const details = document.createElement('span');
     const detailsText = document.createElement('span'); detailsText.textContent = `${item.program_interest || 'Coaching'} · ${item.email || 'Email not provided'}`;
     details.append(detailsText, buildApplicationContactEditor(item, (updated) => {
@@ -372,6 +451,9 @@ function createApplicationRecord(item) {
     });
     const actions = document.createElement('div'); actions.className = 'application-record-actions';
     actions.append(detailToggle);
+    appendCloseToggle(actions, item, 'coaching_applications', () => { state.textContent = item.status || 'New'; record.querySelectorAll('.is-closed').forEach((el) => el.remove()); if (item.closed_at) { const closedBadge = document.createElement('span'); closedBadge.className = 'application-state is-closed'; closedBadge.textContent = 'CLOSED'; top.append(closedBadge); } });
+    appendFollowUpTaskAction(actions, { title: `Follow up: ${item.full_name}`, relatedName: item.full_name, taskType: 'Follow-up', applicationId: item.id });
+    appendSuggestedScript(detailPanel, suggestTemplateIndex(item.program_interest));
     const paymentFeedback = document.createElement('p'); paymentFeedback.className = 'application-payment-feedback'; paymentFeedback.setAttribute('role', 'status');
 
     function buildCreateOfferForm(reopenLabel) {
@@ -432,6 +514,55 @@ function createApplicationRecord(item) {
         actions.append(invite);
     }
     record.append(top, details, reference, actions, detailPanel, paymentFeedback);
+    return record;
+}
+
+function createLeadRecord(item) {
+    const record = document.createElement('article');
+    record.className = 'admin-record application-record';
+
+    const top = document.createElement('div'); top.className = 'application-record-top';
+    const name = document.createElement('strong'); name.textContent = item.full_name;
+    const state = document.createElement('span'); state.className = `application-state ${item.closed_at ? 'is-closed' : ''}`; state.textContent = item.closed_at ? 'CLOSED' : 'OPEN';
+    top.append(name, state);
+
+    const details = document.createElement('span');
+    details.textContent = `${item.lead_type}${item.category ? ` · ${item.category}` : ''} · ${item.email || 'Email not provided'}`;
+
+    const detailPanel = document.createElement('div'); detailPanel.className = 'application-detail-panel'; detailPanel.hidden = true;
+    const dl = document.createElement('dl'); dl.className = 'application-detail-list';
+    [
+        ['Phone', item.phone],
+        ['Message', item.message]
+    ].forEach(([label, value]) => {
+        if (!value) return;
+        const dt = document.createElement('dt'); dt.textContent = label;
+        const dd = document.createElement('dd'); dd.textContent = value;
+        dl.append(dt, dd);
+    });
+    if (dl.children.length) detailPanel.append(dl);
+    else { const empty = document.createElement('p'); empty.className = 'application-detail-empty'; empty.textContent = 'No additional details were submitted.'; detailPanel.append(empty); }
+    if (item.admin_notes) {
+        const notesLabel = document.createElement('p'); notesLabel.className = 'application-detail-notes-label'; notesLabel.textContent = 'NOTES';
+        const notes = document.createElement('p'); notes.className = 'application-detail-notes'; notes.textContent = item.admin_notes;
+        detailPanel.append(notesLabel, notes);
+    }
+    appendSuggestedScript(detailPanel, suggestTemplateIndex(item.lead_type));
+
+    const detailToggle = document.createElement('button'); detailToggle.type = 'button'; detailToggle.className = 'btn-secondary application-detail-toggle'; detailToggle.textContent = 'VIEW DETAILS';
+    detailToggle.addEventListener('click', () => {
+        detailPanel.hidden = !detailPanel.hidden;
+        detailToggle.textContent = detailPanel.hidden ? 'VIEW DETAILS' : 'HIDE DETAILS';
+    });
+
+    const actions = document.createElement('div'); actions.className = 'application-record-actions';
+    actions.append(detailToggle);
+    appendCloseToggle(actions, item, 'website_leads', () => { state.textContent = item.closed_at ? 'CLOSED' : 'OPEN'; state.className = `application-state ${item.closed_at ? 'is-closed' : ''}`; });
+    appendFollowUpTaskAction(actions, { title: `Follow up: ${item.full_name}`, relatedName: item.full_name, taskType: 'Follow-up', leadId: item.id });
+
+    const timestamp = document.createElement('span'); timestamp.className = 'application-reference'; timestamp.textContent = new Date(item.created_at).toLocaleString();
+
+    record.append(top, details, timestamp, actions, detailPanel);
     return record;
 }
 
@@ -581,8 +712,8 @@ async function initializeOperationsConsole() {
     if (!applicationsList) return;
 
     const [applicationsResult, leadsResult, checkinsResult, resourcesResult] = await Promise.all([
-        echelonAdminClient.from('coaching_applications').select('id, full_name, email, phone, program_interest, application_data, status, application_reference, application_status, payment_status, invited_at, admin_notes, created_at').order('created_at', { ascending: false }).limit(25),
-        echelonAdminClient.from('website_leads').select('full_name, email, lead_type, category, status, created_at').order('created_at', { ascending: false }).limit(25),
+        echelonAdminClient.from('coaching_applications').select('id, full_name, email, phone, program_interest, application_data, status, application_reference, application_status, payment_status, invited_at, admin_notes, closed_at, created_at').order('created_at', { ascending: false }).limit(25),
+        echelonAdminClient.from('website_leads').select('id, full_name, email, phone, lead_type, category, message, status, admin_notes, closed_at, created_at').order('created_at', { ascending: false }).limit(25),
         echelonAdminClient.from('session_checkins').select('full_name, email, program, status, checked_in_at').order('checked_in_at', { ascending: false }).limit(25),
         echelonAdminClient.from('trainer_resources').select('title, category, resource_url, notes, created_at').order('created_at', { ascending: false })
     ]);
@@ -594,17 +725,25 @@ async function initializeOperationsConsole() {
     document.getElementById('admin-application-count').textContent = applications.filter((item) => item.status === 'New' || item.application_status === 'submitted').length;
     document.getElementById('admin-checkin-count').textContent = checkins.filter((item) => new Date(item.checked_in_at).toDateString() === new Date().toDateString()).length;
 
+    const applicationsShowClosed = document.getElementById('admin-applications-show-closed');
     const applicationsStatus = document.getElementById('admin-applications-status');
-    applicationsStatus.textContent = applicationsResult.error ? 'Unable to load applications.' : `${applications.length} recent application${applications.length === 1 ? '' : 's'}`;
-    renderAdminRecords(applicationsList, applications, 'Applications will appear here when submitted.', createApplicationRecord);
+    const renderApplications = () => {
+        const visible = applicationsShowClosed?.checked ? applications : applications.filter((item) => !item.closed_at);
+        applicationsStatus.textContent = applicationsResult.error ? 'Unable to load applications.' : `${visible.length} application${visible.length === 1 ? '' : 's'}${applicationsShowClosed?.checked ? '' : ' (open)'}`;
+        renderAdminRecords(applicationsList, visible, 'Applications will appear here when submitted.', createApplicationRecord);
+    };
+    renderApplications();
+    if (applicationsShowClosed) applicationsShowClosed.onchange = renderApplications;
 
+    const leadsShowClosed = document.getElementById('admin-leads-show-closed');
     const leadsStatus = document.getElementById('admin-leads-status');
-    leadsStatus.textContent = leadsResult.error ? 'Unable to load website leads.' : `${leads.length} recent site lead${leads.length === 1 ? '' : 's'}`;
-    renderAdminRecords(document.getElementById('admin-leads-list'), leads, 'Contact requests and waitlist entries will appear here.', (item) => createAdminRecord([
-        { text: item.full_name, strong: true },
-        { text: `${item.lead_type} · ${item.category || item.email}` },
-        { text: new Date(item.created_at).toLocaleString() }
-    ]));
+    const renderLeads = () => {
+        const visible = leadsShowClosed?.checked ? leads : leads.filter((item) => !item.closed_at);
+        leadsStatus.textContent = leadsResult.error ? 'Unable to load website leads.' : `${visible.length} site lead${visible.length === 1 ? '' : 's'}${leadsShowClosed?.checked ? '' : ' (open)'}`;
+        renderAdminRecords(document.getElementById('admin-leads-list'), visible, 'Contact requests and waitlist entries will appear here.', createLeadRecord);
+    };
+    renderLeads();
+    if (leadsShowClosed) leadsShowClosed.onchange = renderLeads;
 
     const checkinsStatus = document.getElementById('admin-checkins-status');
     checkinsStatus.textContent = checkinsResult.error ? 'Unable to load check-ins.' : `${checkins.length} recent check-in${checkins.length === 1 ? '' : 's'}`;
