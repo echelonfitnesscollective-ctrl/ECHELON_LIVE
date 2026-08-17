@@ -97,6 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const checkinForm = document.getElementById('checkin-form');
     if (checkinForm) {
         const success = document.getElementById('success-message');
+        const checkinFeedback = document.getElementById('checkin-feedback');
         const submitButton = checkinForm.querySelector('button[type="submit"]');
         prefillMemberCheckin(checkinForm).catch(() => {
             // Public guests can still submit when no member profile is available.
@@ -122,10 +123,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (submitError) {
                 submitButton.disabled = false;
                 submitButton.textContent = 'COMPLETE CHECK-IN';
-                alert(submitError);
+                if (checkinFeedback) checkinFeedback.textContent = submitError;
                 return;
             }
 
+            if (checkinFeedback) checkinFeedback.textContent = '';
             checkinForm.reset();
             checkinForm.style.display = 'none';
             window.efcTrack?.('checkin_complete', { program: values.program });
@@ -170,6 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const waitlistForm = document.getElementById('waitlist-form');
     if (waitlistForm) {
         const success = document.getElementById('waitlist-success');
+        const waitlistFeedback = document.getElementById('waitlist-feedback');
         const submitButton = waitlistForm.querySelector('button[type="submit"]');
         waitlistForm.addEventListener('submit', async (event) => {
             event.preventDefault();
@@ -191,9 +194,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (submitError) {
                 submitButton.disabled = false;
                 submitButton.textContent = 'JOIN THE WAITLIST';
-                alert(submitError);
+                if (waitlistFeedback) waitlistFeedback.textContent = submitError;
                 return;
             }
+            if (waitlistFeedback) waitlistFeedback.textContent = '';
             waitlistForm.reset();
             waitlistForm.style.display = 'none';
             window.efcTrack?.('waitlist_join', { interest: values.interest });

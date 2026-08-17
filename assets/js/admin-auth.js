@@ -1735,6 +1735,10 @@ function appendMemberProfileEditor(detail, row, email) {
     save.className = 'btn-secondary';
     save.textContent = 'SAVE MEMBER PROFILE';
     form.append(name, phone, save);
+    const profileFeedback = document.createElement('p');
+    profileFeedback.className = 'form-error';
+    profileFeedback.setAttribute('role', 'status');
+    form.append(profileFeedback);
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
         const { error } = await echelonAdminClient.from('member_profiles').update({
@@ -1744,6 +1748,8 @@ function appendMemberProfileEditor(detail, row, email) {
         if (!error) {
             row.profile = { ...profile, full_name: name.value.trim(), phone: phone.value.trim(), email };
             renderIntakeDetail(row);
+        } else {
+            profileFeedback.textContent = 'Could not save this member\'s profile, try again.';
         }
     });
     section.append(heading, emailDisplay, form);
@@ -1911,10 +1917,14 @@ async function appendMemberTracker(detail, row, memberName) {
     goalButton.className = 'btn-secondary';
     goalButton.type = 'submit';
     goalButton.textContent = 'SAVE GOAL';
-    goalForm.append(goalInput, goalButton);
+    const goalFeedback = document.createElement('p');
+    goalFeedback.className = 'form-error';
+    goalFeedback.setAttribute('role', 'status');
+    goalForm.append(goalInput, goalButton, goalFeedback);
     goalForm.addEventListener('submit', async (event) => {
         event.preventDefault();
-        await echelonAdminClient.from('member_goals').insert({ user_id: row.user_id, member_name: memberName, goal: goalInput.value.trim() });
+        const { error } = await echelonAdminClient.from('member_goals').insert({ user_id: row.user_id, member_name: memberName, goal: goalInput.value.trim() });
+        if (error) { goalFeedback.textContent = 'Could not save that goal, try again.'; return; }
         renderIntakeDetail(row);
     });
 
@@ -1928,10 +1938,14 @@ async function appendMemberTracker(detail, row, memberName) {
     noteButton.className = 'btn-secondary';
     noteButton.type = 'submit';
     noteButton.textContent = 'SAVE NOTE';
-    noteForm.append(noteInput, noteButton);
+    const noteFeedback = document.createElement('p');
+    noteFeedback.className = 'form-error';
+    noteFeedback.setAttribute('role', 'status');
+    noteForm.append(noteInput, noteButton, noteFeedback);
     noteForm.addEventListener('submit', async (event) => {
         event.preventDefault();
-        await echelonAdminClient.from('member_notes').insert({ user_id: row.user_id, member_name: memberName, note: noteInput.value.trim() });
+        const { error } = await echelonAdminClient.from('member_notes').insert({ user_id: row.user_id, member_name: memberName, note: noteInput.value.trim() });
+        if (error) { noteFeedback.textContent = 'Could not save that note, try again.'; return; }
         renderIntakeDetail(row);
     });
     tracker.append(goalForm, noteForm);

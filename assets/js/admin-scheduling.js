@@ -229,6 +229,7 @@ async function initializeAdminScheduling() {
             remove.type = 'button'; remove.className = 'btn-secondary';
             remove.textContent = 'DELETE';
             remove.addEventListener('click', async () => {
+                if (!window.confirm('Delete this standing availability window? Members will no longer be able to book it.')) return;
                 await echelonAdminClient.from('coach_availability_windows').delete().eq('id', row.id);
                 loadAvailabilityWindows();
             });
