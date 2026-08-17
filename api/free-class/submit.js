@@ -2,6 +2,8 @@
 // this is a lead-capture form; the coach follows up to confirm and schedule.
 // Required Vercel environment variables: SUPABASE_URL, SUPABASE_ANON_KEY.
 
+const { notifyOwner } = require('../_lib/email');
+
 const inMemoryRateLimit = new Map();
 const WINDOW_MS = 60_000;
 const MAX_PER_WINDOW = 3;
@@ -85,6 +87,11 @@ module.exports = async function submitFreeClass(req, res) {
       console.error('Free-class form insert failed', insertResponse.status, await insertResponse.text());
       return res.status(502).json({ error: 'We could not send your request. Please try again.' });
     }
+
+    await notifyOwner({
+      subject: `New Free Class Request: ${name}`,
+      text: `Name: ${name}\nEmail: ${email}\nPhone: ${phone || 'Not provided'}\nPreferred day/time: ${preferredDay || 'Not provided'}`,
+    });
 
     return res.status(200).json({ ok: true });
   } catch (error) {

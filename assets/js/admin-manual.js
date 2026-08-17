@@ -4,9 +4,10 @@ const EFC_MANUAL_SECTIONS = [
         ['GitHub', 'Source control', 'https://github.com/echelonfitnesscollective-ctrl/ECHELON_LIVE', 'The live site source. Every approved update is recorded here and triggers the Vercel deployment.'],
         ['Vercel', 'Hosting & deployments', 'https://vercel.com/dashboard', 'Hosts echelonfitness.co. Review the fresh deployment after every approved update.'],
         ['Supabase', 'Members, forms, admin data & site content', 'https://supabase.com/dashboard/project/plkdyvtriajpzcfgtwzp', 'Source of truth for member data, check-ins, goals, plans, messages, photos, the Admin Console, published Site Content, and the public Media Gallery.'],
-        ['Formspree', 'Form delivery inbox', 'https://formspree.io/', 'Delivers contact and coaching application submissions to the Echelon inbox. Use it for fast notification, then track the actual follow-up in Coach Command.'],
+        ['Resend', 'Owner notification emails', 'https://resend.com/', 'Sends an email to echelonfitnesscollective@gmail.com the moment any public form is submitted (coaching application, contact, free class, partnerships, check-in, waitlist). Requires a RESEND_API_KEY set in Vercel.'],
+        ['Formspree', 'Message-your-coach relay', 'https://formspree.io/', 'Still used for the in-portal "message your coach" notification only. Form submissions are now emailed via Resend instead.'],
         ['Stripe', 'Payments & enrollment checkout', 'https://dashboard.stripe.com/', 'Processes secure group fitness and approved-coaching payments. Keep Stripe in test mode until the full applicant-to-invite flow has been tested once.'],
-        ['Calendly', 'Protected scheduling · activation pending', 'https://calendly.com/', 'Use for unlisted 1-on-1, private-group, and discovery-call booking links. Connect it to both the Burn-shift calendar and Echelon calendar before adding the URLs to assets/js/calendar-config.js.'],
+        ['Google Calendar', 'Session scheduling sync', 'https://calendar.google.com/', 'Connected from the Admin Console SESSIONS tab. Native booking (1-on-1, corporate groups, drop-in Group Fitness) lives entirely in the site’s own booking tables now; Calendly is no longer used.'],
         ['Google Business Profile', 'Reviews & discovery', 'https://business.google.com/', 'Manage business details, verification, and the link used in Echelon review-request messages.'],
         ['Instagram', 'Social channel', 'https://www.instagram.com/EchelonFitness.co', 'Primary social presence and community touchpoint.'],
         ['TikTok', 'Social channel', 'https://tr.ee/pO3gLtovXy', 'Short-form content and discovery channel.'],
@@ -47,7 +48,7 @@ const EFC_MANUAL_SECTIONS = [
         ['Move forward or close out', 'Keep the task open until there is a real next step. Mark it complete once the handoff or decision is final.']
     ]},
     { id: 'accepted-applicant', tag: 'ACCEPTED APPLICANT FLOW', title: 'FROM APPLICATION TO ACTIVE MEMBER', intro: 'The Admin Console now turns an approval into a clear, trackable handoff. Payment happens privately through Stripe; the Member Portal invitation only unlocks after Stripe confirms it.', steps: [
-        ['Applicant submits', 'Formspree delivers the application notification and Supabase saves the record. A NEW MEMBER LAUNCH project and its private checklist are created automatically.'],
+        ['Applicant submits', 'Resend emails echelonfitnesscollective@gmail.com the application notification and Supabase saves the record. A NEW MEMBER LAUNCH project and its private checklist are created automatically.'],
         ['Coach reviews', 'Open Leads → Coaching Applications. Read the application, select the aligned program and payment choice, then choose Create Payment Link. The checklist marks the review, program choice, and payment-link handoff complete.'],
         ['Applicant pays', 'Use Copy Payment Link and Open Payment Email to send the applicant their private Stripe link. They see only their coaching selection and complete secure Stripe checkout. Do not collect card details yourself.'],
         ['Stripe confirms', 'Stripe records the completed payment, changes the application to Paid: Ready to Invite, and completes the payment-verification step in the launch checklist. A failed or expired payment link stays inactive.'],
@@ -95,7 +96,7 @@ const EFC_MANUAL_SECTIONS = [
     ]},
     { id: 'access', tag: 'CREDENTIAL DIRECTORY', title: 'SECURE ACCESS, NOT SHARED PASSWORDS', notice: 'Do not store passwords, recovery codes, or payment details in this website or in the Admin Console. Keep them in a dedicated password manager and grant each operator their own access.', steps: [
         ['Password manager record', 'For each system above, store the sign-in URL, account owner, recovery contact, 2FA method, and emergency recovery instructions.'],
-        ['Individual access only', 'Invite each operator to Vercel, Supabase, Formspree, and Etsy using their own email whenever that platform supports it.'],
+        ['Individual access only', 'Invite each operator to Vercel, Supabase, Resend, Formspree, and Etsy using their own email whenever that platform supports it.'],
         ['Handoff checklist', 'Before someone operates alone, have them complete a preview deployment, review a test lead, create a test task, and send a test member message.'],
         ['Offboarding', 'Remove their access from each system and your password manager as soon as their role ends.']
     ]},

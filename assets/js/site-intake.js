@@ -42,18 +42,6 @@ async function prefillMemberCheckin(form) {
     }
 }
 
-async function sendFormspreeCopy(form) {
-    try {
-        await fetch(form.action, {
-            method: 'POST',
-            body: new FormData(form),
-            headers: { Accept: 'application/json' }
-        });
-    } catch {
-        // The console copy is the source of truth; email delivery is secondary.
-    }
-}
-
 document.addEventListener('DOMContentLoaded', () => {
     const coachingForm = document.getElementById('coaching-form');
     if (coachingForm) {
@@ -84,7 +72,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            await sendFormspreeCopy(coachingForm);
             const isPrivateGroup = values.program_interest === 'Private Group Training / Organization Wellness';
             window.efcTrack?.(isPrivateGroup ? 'private_group_inquiry_submit' : 'coaching_application_submit', { program_interest: values.program_interest });
             coachingForm.reset();
@@ -161,7 +148,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 submitButton.textContent = 'SUBMIT REQUEST';
                 return;
             }
-            await sendFormspreeCopy(contactForm);
             contactForm.reset();
             showEchelonSuccess(feedback, 'MESSAGE RECEIVED', 'Thank you for reaching out. An Echelon team member will be in touch shortly.');
             submitButton.disabled = false;

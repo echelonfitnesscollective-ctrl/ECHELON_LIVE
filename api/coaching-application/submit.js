@@ -3,6 +3,8 @@
 // written directly from the browser with no server in the request path).
 // Required Vercel environment variables: SUPABASE_URL, SUPABASE_ANON_KEY.
 
+const { notifyOwner } = require('../_lib/email');
+
 const inMemoryRateLimit = new Map();
 const WINDOW_MS = 60_000;
 const MAX_PER_WINDOW = 3;
@@ -84,6 +86,11 @@ module.exports = async function submitCoachingApplication(req, res) {
       console.error('Coaching application insert failed', insertResponse.status, await insertResponse.text());
       return res.status(502).json({ error: 'We could not save your application. Please try again.' });
     }
+
+    await notifyOwner({
+      subject: `New Coaching Application: ${fullName}`,
+      text: `Program interest: ${programInterest}\nName: ${fullName}\nEmail: ${email}\nPhone: ${phone || 'Not provided'}`,
+    });
 
     return res.status(200).json({ ok: true });
   } catch (error) {

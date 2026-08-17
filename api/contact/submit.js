@@ -3,6 +3,8 @@
 // from the browser with no server in the request path at all).
 // Required Vercel environment variables: SUPABASE_URL, SUPABASE_ANON_KEY.
 
+const { notifyOwner } = require('../_lib/email');
+
 const inMemoryRateLimit = new Map();
 const WINDOW_MS = 60_000;
 const MAX_PER_WINDOW = 3;
@@ -85,6 +87,11 @@ module.exports = async function submitContact(req, res) {
       console.error('Contact form insert failed', insertResponse.status, await insertResponse.text());
       return res.status(502).json({ error: 'We could not send your request. Please try again.' });
     }
+
+    await notifyOwner({
+      subject: `New Contact Message: ${name}`,
+      text: `Inquiry type: ${inquiryType}\nName: ${name}\nEmail: ${email}\nMessage: ${message || 'Not provided'}`,
+    });
 
     return res.status(200).json({ ok: true });
   } catch (error) {

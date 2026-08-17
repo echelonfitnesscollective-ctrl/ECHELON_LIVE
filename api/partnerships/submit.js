@@ -3,6 +3,8 @@
 // conversation, not a self-serve purchase; the owner follows up manually.
 // Required Vercel environment variables: SUPABASE_URL, SUPABASE_ANON_KEY.
 
+const { notifyOwner } = require('../_lib/email');
+
 const inMemoryRateLimit = new Map();
 const WINDOW_MS = 60_000;
 const MAX_PER_WINDOW = 3;
@@ -100,6 +102,11 @@ module.exports = async function submitPartnershipInquiry(req, res) {
       console.error('Partnership inquiry insert failed', insertResponse.status, await insertResponse.text());
       return res.status(502).json({ error: 'We could not send your request. Please try again.' });
     }
+
+    await notifyOwner({
+      subject: `New Partnership Inquiry: ${organization}`,
+      text: `Contact: ${contactName}\nEmail: ${email}\nPhone: ${phone || 'Not provided'}\n\n${summaryLines}`,
+    });
 
     return res.status(200).json({ ok: true });
   } catch (error) {

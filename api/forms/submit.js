@@ -10,6 +10,8 @@
 // commit history / admin manual changelog "Security audit fixes" for context.
 // Required Vercel environment variables: SUPABASE_URL, SUPABASE_ANON_KEY.
 
+const { notifyOwner } = require('../_lib/email');
+
 const inMemoryRateLimit = new Map();
 const WINDOW_MS = 60_000;
 const MAX_PER_WINDOW = 5;
@@ -142,6 +144,19 @@ module.exports = async function submitSiteForm(req, res) {
 
   try {
     await insertRow(result.table, result.payload);
+
+    if (form === 'checkin') {
+      await notifyOwner({
+        subject: `New Session Check-In: ${result.payload.full_name}`,
+        text: `Program: ${result.payload.program}\nName: ${result.payload.full_name}\nEmail: ${result.payload.email}\nPhone: ${result.payload.phone || 'Not provided'}\nCoach note: ${result.payload.coach_note || 'None'}`,
+      });
+    } else if (form === 'waitlist') {
+      await notifyOwner({
+        subject: `New Waitlist Signup: ${result.payload.full_name}`,
+        text: `Interest: ${result.payload.category || 'Not specified'}\nName: ${result.payload.full_name}\nEmail: ${result.payload.email}\nPhone: ${result.payload.phone || 'Not provided'}`,
+      });
+    }
+
     return res.status(200).json({ ok: true });
   } catch (error) {
     console.error('Site form submission error', error && error.message);
