@@ -133,7 +133,9 @@ function initializeSessionsCalendar() {
             item.className = 'availability-window-item';
             const when = new Date(row.scheduled_at);
             const itemLabel = document.createElement('span');
-            itemLabel.textContent = `${row.member_name} · ${when.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })} · ${efcSessionTypeLabel(row.session_type)} · ${row.duration_minutes} min`;
+            const typeName = row.class_label || efcSessionTypeLabel(row.session_type);
+            const waitlistTag = row.status === 'waitlisted' ? ' · WAITLISTED' : '';
+            itemLabel.textContent = `${row.member_name} · ${when.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })} · ${typeName} · ${row.duration_minutes} min${waitlistTag}`;
             const cancel = document.createElement('button');
             cancel.type = 'button'; cancel.className = 'btn-secondary';
             cancel.textContent = 'CANCEL';
@@ -152,8 +154,8 @@ function initializeSessionsCalendar() {
         const monthEnd = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1);
         const { data, error } = await echelonAdminClient
             .from('session_bookings')
-            .select('id, member_name, session_type, scheduled_at, duration_minutes')
-            .eq('status', 'confirmed')
+            .select('id, member_name, session_type, class_label, scheduled_at, duration_minutes, status')
+            .in('status', ['confirmed', 'waitlisted'])
             .gte('scheduled_at', monthStart.toISOString())
             .lt('scheduled_at', monthEnd.toISOString())
             .order('scheduled_at', { ascending: true });
@@ -191,10 +193,64 @@ async function initializeAdminScheduling() {
     const groupWindowSelect = groupForm ? groupForm.elements.window_id : null;
     const sessionsCalendar = initializeSessionsCalendar();
 
+    function windowSummary(row) {
+        const name = row.class_label || efcSessionTypeLabel(row.session_type);
+        const sessionsNote = row.session_type === 'one_on_one'
+            ? (row.capacity > 1 ? ` · ${row.capacity} appointments, ${row.session_length_minutes} min each` : ` · ${row.session_length_minutes} min`)
+            : (row.capacity > 1 ? ` · up to ${row.capacity}` : '');
+        return `${EFC_WEEKDAY_LABELS[row.day_of_week]} · ${efcFormatTime(row.start_time)} – ${efcFormatTime(row.end_time)} · ${name}${sessionsNote}${row.active ? '' : ' (inactive)'}`;
+    }
+
+    function buildWindowEditForm(row, copy) {
+        const form = document.createElement('form');
+        form.className = 'coach-task-edit-form';
+        form.hidden = true;
+
+        const daySelect = document.createElement('select'); daySelect.setAttribute('aria-label', 'Day of week');
+        EFC_WEEKDAY_LABELS.forEach((name, index) => { const option = document.createElement('option'); option.value = index; option.textContent = name; if (index === row.day_of_week) option.selected = true; daySelect.append(option); });
+        const startInput = document.createElement('input'); startInput.type = 'time'; startInput.value = row.start_time.slice(0, 5); startInput.setAttribute('aria-label', 'Start time');
+        const endInput = document.createElement('input'); endInput.type = 'time'; endInput.value = row.end_time.slice(0, 5); endInput.setAttribute('aria-label', 'End time');
+        const typeSelect = document.createElement('select'); typeSelect.setAttribute('aria-label', 'Session type');
+        [['one_on_one', '1-on-1'], ['private_group', 'Private Training Group'], ['group_fitness', 'Group Fitness']].forEach(([value, text]) => { const option = document.createElement('option'); option.value = value; option.textContent = text; if (value === row.session_type) option.selected = true; typeSelect.append(option); });
+        const labelInput = document.createElement('input'); labelInput.type = 'text'; labelInput.value = row.class_label || ''; labelInput.placeholder = 'Class name (optional)'; labelInput.setAttribute('aria-label', 'Class name');
+        const capacityInput = document.createElement('input'); capacityInput.type = 'number'; capacityInput.min = '1'; capacityInput.max = '200'; capacityInput.value = row.capacity; capacityInput.setAttribute('aria-label', 'Sessions in this window');
+        const lengthInput = document.createElement('input'); lengthInput.type = 'number'; lengthInput.min = '15'; lengthInput.max = '240'; lengthInput.step = '5'; lengthInput.value = row.session_length_minutes; lengthInput.setAttribute('aria-label', '1-on-1 session length in minutes');
+
+        const save = document.createElement('button'); save.type = 'submit'; save.className = 'application-contact-save'; save.textContent = 'SAVE';
+        const cancel = document.createElement('button'); cancel.type = 'button'; cancel.className = 'application-contact-cancel'; cancel.textContent = 'CANCEL';
+        const feedback = document.createElement('span'); feedback.className = 'application-contact-feedback'; feedback.setAttribute('role', 'status');
+
+        form.append(daySelect, startInput, endInput, typeSelect, labelInput, capacityInput, lengthInput, save, cancel, feedback);
+
+        const closeForm = () => { form.hidden = true; copy.hidden = false; };
+        cancel.addEventListener('click', closeForm);
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            feedback.textContent = '';
+            const updated = {
+                day_of_week: Number(daySelect.value),
+                start_time: startInput.value,
+                end_time: endInput.value,
+                session_type: typeSelect.value,
+                class_label: labelInput.value.trim() || null,
+                capacity: Math.max(1, Number(capacityInput.value) || 1),
+                session_length_minutes: Math.max(15, Number(lengthInput.value) || 60)
+            };
+            save.disabled = true;
+            const { error } = await echelonAdminClient.from('coach_availability_windows').update(updated).eq('id', row.id);
+            save.disabled = false;
+            if (error) { feedback.textContent = 'Could not save. Make sure end time is after start time.'; return; }
+            loadAvailabilityWindows();
+        });
+
+        return form;
+    }
+
     async function loadAvailabilityWindows() {
         const { data, error } = await echelonAdminClient
             .from('coach_availability_windows')
-            .select('id, day_of_week, start_time, end_time, session_type, capacity, active')
+            .select('id, day_of_week, start_time, end_time, session_type, class_label, capacity, session_length_minutes, active')
             .order('day_of_week', { ascending: true })
             .order('start_time', { ascending: true });
         windowList.innerHTML = '';
@@ -206,7 +262,7 @@ async function initializeAdminScheduling() {
             (data || []).filter((row) => row.active).forEach((row) => {
                 const option = document.createElement('option');
                 option.value = row.id;
-                option.textContent = `${EFC_WEEKDAY_LABELS[row.day_of_week]} · ${efcFormatTime(row.start_time)} · ${efcSessionTypeLabel(row.session_type)} (cap ${row.capacity})`;
+                option.textContent = windowSummary(row);
                 groupWindowSelect.append(option);
             });
             groupWindowSelect.value = previous;
@@ -216,8 +272,13 @@ async function initializeAdminScheduling() {
         data.forEach((row) => {
             const item = document.createElement('div');
             item.className = 'availability-window-item';
-            const label = document.createElement('span');
-            label.textContent = `${EFC_WEEKDAY_LABELS[row.day_of_week]} · ${efcFormatTime(row.start_time)} – ${efcFormatTime(row.end_time)} · ${efcSessionTypeLabel(row.session_type)}${row.capacity > 1 ? ` · up to ${row.capacity}` : ''}${row.active ? '' : ' (inactive)'}`;
+            const copy = document.createElement('span');
+            copy.textContent = windowSummary(row);
+            const editForm = buildWindowEditForm(row, copy);
+            const edit = document.createElement('button');
+            edit.type = 'button'; edit.className = 'btn-secondary';
+            edit.textContent = 'EDIT';
+            edit.addEventListener('click', () => { copy.hidden = true; editForm.hidden = false; });
             const toggle = document.createElement('button');
             toggle.type = 'button'; toggle.className = 'btn-secondary';
             toggle.textContent = row.active ? 'DEACTIVATE' : 'ACTIVATE';
@@ -233,7 +294,7 @@ async function initializeAdminScheduling() {
                 await echelonAdminClient.from('coach_availability_windows').delete().eq('id', row.id);
                 loadAvailabilityWindows();
             });
-            item.append(label, toggle, remove);
+            item.append(copy, editForm, edit, toggle, remove);
             windowList.append(item);
         });
     }
@@ -241,13 +302,15 @@ async function initializeAdminScheduling() {
     windowForm.addEventListener('submit', async (event) => {
         event.preventDefault();
         windowFeedback.textContent = '';
-        const { day_of_week, start_time, end_time, session_type, capacity } = windowForm.elements;
+        const { day_of_week, start_time, end_time, session_type, class_label, capacity, session_length_minutes } = windowForm.elements;
         const { error } = await echelonAdminClient.from('coach_availability_windows').insert({
             day_of_week: Number(day_of_week.value),
             start_time: start_time.value,
             end_time: end_time.value,
             session_type: session_type.value,
-            capacity: Math.max(1, Number(capacity.value) || 1)
+            class_label: class_label.value.trim() || null,
+            capacity: Math.max(1, Number(capacity.value) || 1),
+            session_length_minutes: Math.max(15, Number(session_length_minutes.value) || 60)
         });
         if (error) { windowFeedback.textContent = 'Could not save that window. Make sure the end time is after the start time.'; return; }
         windowForm.reset();
@@ -309,7 +372,7 @@ async function initializeAdminScheduling() {
             event.preventDefault();
             groupFeedback.textContent = '';
             groupResult.innerHTML = '';
-            const { session_type, window_id, date, time, duration_minutes, capacity, host_name, host_email, notes } = groupForm.elements;
+            const { session_type, window_id, date, time, duration_minutes, capacity, class_label, host_name, host_email, notes } = groupForm.elements;
             const submit = groupForm.querySelector('button[type="submit"]');
             submit.disabled = true; submit.textContent = 'CREATING…';
             const { data: sessionData } = await echelonAdminClient.auth.getSession();
@@ -323,6 +386,7 @@ async function initializeAdminScheduling() {
                     time: time.value,
                     durationMinutes: Number(duration_minutes.value),
                     capacity: Number(capacity.value),
+                    classLabel: class_label.value.trim() || null,
                     hostName: host_name.value,
                     hostEmail: host_email.value,
                     notes: notes.value

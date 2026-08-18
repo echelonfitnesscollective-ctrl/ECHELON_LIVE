@@ -65,15 +65,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     const cursor = new Date(today.getFullYear(), today.getMonth(), 1);
     let selectedKey = efcDateKey(today);
     let windows = [];
-    let bookedCounts = new Map();
+    let confirmedCounts = new Map();
+    let waitlistedCounts = new Map();
     let busyRanges = [];
 
     async function loadMySessions() {
         const { data, error } = await echelonMemberClient
             .from('session_bookings')
-            .select('id, session_type, scheduled_at, duration_minutes')
+            .select('id, session_type, class_label, scheduled_at, duration_minutes, status')
             .eq('user_id', member.id)
-            .eq('status', 'confirmed')
+            .in('status', ['confirmed', 'waitlisted'])
             .gte('scheduled_at', new Date().toISOString())
             .order('scheduled_at', { ascending: true });
         upcomingList.innerHTML = '';
@@ -84,7 +85,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             const item = document.createElement('div');
             item.className = 'availability-window-item';
             const label = document.createElement('span');
-            label.textContent = `${when.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })} · ${when.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })} · ${efcBookingTypeLabel(row.session_type)}`;
+            const typeName = row.class_label || efcBookingTypeLabel(row.session_type);
+            const waitlistTag = row.status === 'waitlisted' ? ' · Waitlisted' : '';
+            label.textContent = `${when.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })} · ${when.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })} · ${typeName}${waitlistTag}`;
             const cancel = document.createElement('button');
             cancel.type = 'button'; cancel.className = 'btn-secondary';
             cancel.textContent = 'CANCEL';
@@ -104,13 +107,36 @@ document.addEventListener('DOMContentLoaded', async () => {
         const slots = [];
         windows.filter((window) => window.day_of_week === date.getDay()).forEach((window) => {
             const [hours, minutes] = window.start_time.split(':').map(Number);
-            const scheduledAt = new Date(date.getFullYear(), date.getMonth(), date.getDate(), hours, minutes);
-            if (scheduledAt < new Date()) return;
-            const taken = bookedCounts.get(scheduledAt.getTime()) || 0;
-            if (taken >= window.capacity) return;
-            const slotEnd = new Date(scheduledAt.getTime() + efcWindowDurationMinutes(window) * 60 * 1000);
-            if (busyRanges.some((busy) => scheduledAt < busy.end && slotEnd > busy.start)) return;
-            slots.push({ scheduledAt, window, taken });
+            const windowStart = new Date(date.getFullYear(), date.getMonth(), date.getDate(), hours, minutes);
+            const windowEnd = new Date(windowStart.getTime() + efcWindowDurationMinutes(window) * 60 * 1000);
+
+            if (window.session_type === 'one_on_one') {
+                // Distinct-slot mode: up to `capacity` back-to-back appointments,
+                // each `session_length_minutes` long, one member per slot.
+                const stepMs = window.session_length_minutes * 60 * 1000;
+                for (let i = 0; i < window.capacity; i++) {
+                    const scheduledAt = new Date(windowStart.getTime() + i * stepMs);
+                    const slotEnd = new Date(scheduledAt.getTime() + stepMs);
+                    if (slotEnd > windowEnd) break;
+                    if (scheduledAt < new Date()) continue;
+                    if ((confirmedCounts.get(scheduledAt.getTime()) || 0) >= 1) continue;
+                    if (busyRanges.some((busy) => scheduledAt < busy.end && slotEnd > busy.start)) continue;
+                    slots.push({ scheduledAt, window, taken: 0, durationMinutes: window.session_length_minutes, isWaitlist: false });
+                }
+                return;
+            }
+
+            // Group-style window: one shared start time, shared capacity, one waitlist spot.
+            if (windowStart < new Date()) return;
+            const confirmedTaken = confirmedCounts.get(windowStart.getTime()) || 0;
+            const waitlistedTaken = waitlistedCounts.get(windowStart.getTime()) || 0;
+            if (confirmedTaken >= window.capacity && waitlistedTaken >= 1) return;
+            if (busyRanges.some((busy) => windowStart < busy.end && windowEnd > busy.start)) return;
+            slots.push({
+                scheduledAt: windowStart, window, taken: confirmedTaken,
+                durationMinutes: efcWindowDurationMinutes(window),
+                isWaitlist: confirmedTaken >= window.capacity,
+            });
         });
         return slots.sort((a, b) => a.scheduledAt - b.scheduledAt);
     }
@@ -173,33 +199,37 @@ document.addEventListener('DOMContentLoaded', async () => {
             detail.append(empty);
             return;
         }
-        slots.forEach(({ scheduledAt, window, taken }) => {
+        slots.forEach(({ scheduledAt, window, taken, durationMinutes, isWaitlist }) => {
             const item = document.createElement('div');
             item.className = 'availability-window-item';
-            const end = new Date(scheduledAt.getTime() + efcWindowDurationMinutes(window) * 60 * 1000);
+            const end = new Date(scheduledAt.getTime() + durationMinutes * 60 * 1000);
+            const typeName = window.class_label || efcBookingTypeLabel(window.session_type);
+            const countNote = window.capacity > 1 ? (isWaitlist ? ' · full, waitlist open' : ` · ${taken}/${window.capacity} booked`) : '';
             const label = document.createElement('span');
-            label.textContent = `${scheduledAt.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })} – ${end.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })} · ${efcBookingTypeLabel(window.session_type)}${window.capacity > 1 ? ` · ${taken}/${window.capacity} booked` : ''}`;
+            label.textContent = `${scheduledAt.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })} – ${end.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })} · ${typeName}${countNote}`;
             const book = document.createElement('button');
             book.type = 'button'; book.className = 'btn-primary';
-            book.textContent = 'BOOK';
+            book.textContent = isWaitlist ? 'JOIN WAITLIST' : 'BOOK';
             book.addEventListener('click', async () => {
-                book.disabled = true; book.textContent = 'BOOKING…';
+                const bookingLabel = isWaitlist ? 'JOIN WAITLIST' : 'BOOK';
+                book.disabled = true; book.textContent = isWaitlist ? 'JOINING…' : 'BOOKING…';
                 const { data, error } = await echelonMemberClient.from('session_bookings').insert({
                     user_id: member.id,
                     member_name: memberName,
                     session_type: window.session_type,
+                    class_label: window.class_label || null,
                     scheduled_at: scheduledAt.toISOString(),
-                    duration_minutes: efcWindowDurationMinutes(window),
+                    duration_minutes: durationMinutes,
                     booked_by: 'member',
                     window_id: window.id
-                }).select('id').single();
+                }).select('id, status').single();
                 if (error) {
                     feedback.textContent = (error.code === '23505' || error.code === '23514') ? 'That slot just filled up, pick another.' : 'Could not book that session.';
-                    book.disabled = false; book.textContent = 'BOOK';
+                    book.disabled = false; book.textContent = bookingLabel;
                     refreshAvailability();
                     return;
                 }
-                feedback.textContent = '';
+                feedback.textContent = data.status === 'waitlisted' ? "You're on the waitlist — we'll confirm you if a spot opens up." : '';
                 loadMySessions();
                 refreshAvailability();
                 efcSyncBookingToCalendar(data.id, 'create');
@@ -211,16 +241,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function refreshAvailability() {
         const [windowsResult, bookedResult, freshBusyRanges] = await Promise.all([
-            echelonMemberClient.from('coach_availability_windows').select('id, day_of_week, start_time, end_time, session_type, capacity').eq('active', true),
-            echelonMemberClient.from('booked_session_times').select('scheduled_at').gte('scheduled_at', today.toISOString()).lte('scheduled_at', horizonEnd.toISOString()),
+            echelonMemberClient.from('coach_availability_windows').select('id, day_of_week, start_time, end_time, session_type, class_label, capacity, session_length_minutes').eq('active', true),
+            echelonMemberClient.from('booked_session_times').select('scheduled_at, status').gte('scheduled_at', today.toISOString()).lte('scheduled_at', horizonEnd.toISOString()),
             efcFetchBusyRanges()
         ]);
         if (windowsResult.error || bookedResult.error) { feedback.textContent = 'Could not load open windows.'; return; }
         windows = windowsResult.data;
-        bookedCounts = new Map();
+        confirmedCounts = new Map();
+        waitlistedCounts = new Map();
         bookedResult.data.forEach((row) => {
             const time = new Date(row.scheduled_at).getTime();
-            bookedCounts.set(time, (bookedCounts.get(time) || 0) + 1);
+            const map = row.status === 'waitlisted' ? waitlistedCounts : confirmedCounts;
+            map.set(time, (map.get(time) || 0) + 1);
         });
         busyRanges = freshBusyRanges;
         renderGrid();

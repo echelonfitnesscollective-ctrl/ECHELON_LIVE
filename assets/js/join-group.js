@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const form = document.getElementById('join-form');
     const feedback = document.getElementById('join-feedback');
     const success = document.getElementById('join-success');
+    const successHeading = document.getElementById('join-success-heading');
     const successDetail = document.getElementById('join-success-detail');
     if (!copy) return;
 
@@ -20,18 +21,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const when = new Date(body.scheduledAt);
         scheduledAtText = when.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' }) + ' · ' + when.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
-        const typeLabel = EFC_JOIN_TYPE_LABELS[body.sessionType] || body.sessionType;
+        const typeLabel = body.classLabel || EFC_JOIN_TYPE_LABELS[body.sessionType] || body.sessionType;
 
         if (body.full) {
             copy.textContent = `${typeLabel} · ${scheduledAtText} is full.`;
             info.hidden = false;
-            info.textContent = `${body.taken}/${body.capacity} spots taken. Contact your host or Echelon for another option.`;
+            info.textContent = `${body.taken}/${body.capacity} spots taken, plus the waitlist. Contact your host or Echelon for another option.`;
             return;
         }
 
         copy.textContent = `You're joining ${typeLabel}${body.hostName ? ` with ${body.hostName}` : ''}.`;
         info.hidden = false;
-        info.textContent = `${scheduledAtText} · ${body.taken}/${body.capacity} spots taken`;
+        info.textContent = body.waitlistOpen
+            ? `${scheduledAtText} · Session is full, but a waitlist spot is open.`
+            : `${scheduledAtText} · ${body.taken}/${body.capacity} spots taken`;
         form.hidden = false;
     } catch (error) {
         copy.textContent = error.message || 'This link is not valid. Ask your host for a new one.';
@@ -61,7 +64,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             form.hidden = true;
             info.hidden = true;
             copy.hidden = true;
-            successDetail.textContent = `${scheduledAtText}. See you there.`;
+            if (body.waitlisted) {
+                successHeading.textContent = "YOU'RE ON THE WAITLIST";
+                successDetail.textContent = `${scheduledAtText}. We'll confirm you if a spot opens up.`;
+            } else {
+                successHeading.textContent = "YOU'RE CONFIRMED";
+                successDetail.textContent = `${scheduledAtText}. See you there.`;
+            }
             success.hidden = false;
         } catch (error) {
             feedback.textContent = error.message;

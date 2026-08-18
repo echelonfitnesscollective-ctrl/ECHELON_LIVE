@@ -280,7 +280,7 @@ async function createCalendarEventForBooking(booking) {
       method: 'POST',
       headers: { Authorization: `Bearer ${session.accessToken}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        summary: `${EFC_SESSION_TYPE_LABELS[booking.session_type] || booking.session_type} · ${booking.member_name}`,
+        summary: `${booking.class_label || EFC_SESSION_TYPE_LABELS[booking.session_type] || booking.session_type} · ${booking.member_name}`,
         description: booking.notes || undefined,
         start: { dateTime: start.toISOString() },
         end: { dateTime: end.toISOString() }
@@ -301,7 +301,7 @@ async function handleGroupCreate(request, response) {
   const admin = await requireAdmin(request);
   if (!admin) return response.status(401).json({ error: 'Your admin session is required.' });
 
-  const { sessionType, windowId, date, time, durationMinutes, capacity, hostName, hostEmail, notes } = request.body || {};
+  const { sessionType, windowId, date, time, durationMinutes, capacity, classLabel, hostName, hostEmail, notes } = request.body || {};
   if (!date || !time || !['private_group', 'group_fitness'].includes(sessionType)) {
     return response.status(400).json({ error: 'A session type, date, and time are required.' });
   }
@@ -317,6 +317,7 @@ async function handleGroupCreate(request, response) {
         scheduled_at: scheduledAt.toISOString(),
         duration_minutes: Math.max(15, Number(durationMinutes) || 60),
         capacity: Math.max(1, Number(capacity) || 1),
+        class_label: classLabel?.trim() || null,
         host_name: hostName?.trim() || null,
         host_email: hostEmail?.trim() || null,
         notes: notes?.trim() || null
@@ -337,20 +338,25 @@ async function handleGroupInfo(request, response) {
   if (!token) return response.status(400).json({ error: 'A link token is required.' });
 
   try {
-    const groupResult = await supabase(`/rest/v1/session_groups?join_token=eq.${encodeURIComponent(token)}&select=id,session_type,scheduled_at,duration_minutes,capacity,host_name&limit=1`);
+    const groupResult = await supabase(`/rest/v1/session_groups?join_token=eq.${encodeURIComponent(token)}&select=id,session_type,class_label,scheduled_at,duration_minutes,capacity,host_name&limit=1`);
     const group = Array.isArray(groupResult.body) ? groupResult.body[0] : null;
     if (!group) return response.status(404).json({ error: 'This link is not valid. Ask your host for a new one.' });
 
-    const takenResult = await supabase(`/rest/v1/session_bookings?scheduled_at=eq.${encodeURIComponent(group.scheduled_at)}&status=eq.confirmed&select=id`);
-    const taken = Array.isArray(takenResult.body) ? takenResult.body.length : 0;
+    const takenResult = await supabase(`/rest/v1/session_bookings?scheduled_at=eq.${encodeURIComponent(group.scheduled_at)}&status=in.(confirmed,waitlisted)&select=status`);
+    const takenRows = Array.isArray(takenResult.body) ? takenResult.body : [];
+    const taken = takenRows.filter((row) => row.status === 'confirmed').length;
+    const waitlisted = takenRows.filter((row) => row.status === 'waitlisted').length;
+    const waitlistOpen = taken >= group.capacity && waitlisted < 1;
 
     return response.status(200).json({
       sessionType: group.session_type,
+      classLabel: group.class_label,
       scheduledAt: group.scheduled_at,
       durationMinutes: group.duration_minutes,
       capacity: group.capacity,
       taken,
-      full: taken >= group.capacity,
+      full: taken >= group.capacity && waitlisted >= 1,
+      waitlistOpen,
       hostName: group.host_name
     });
   } catch (error) {
@@ -366,7 +372,7 @@ async function handleGroupJoin(request, response) {
   if (!token || !fullName?.trim() || !waiverAgreed) return response.status(400).json({ error: 'Your name and a signed waiver are required.' });
 
   try {
-    const groupResult = await supabase(`/rest/v1/session_groups?join_token=eq.${encodeURIComponent(token)}&select=id,window_id,session_type,scheduled_at,duration_minutes&limit=1`);
+    const groupResult = await supabase(`/rest/v1/session_groups?join_token=eq.${encodeURIComponent(token)}&select=id,window_id,session_type,class_label,scheduled_at,duration_minutes&limit=1`);
     const group = Array.isArray(groupResult.body) ? groupResult.body[0] : null;
     if (!group) return response.status(404).json({ error: 'This link is not valid. Ask your host for a new one.' });
 
@@ -379,6 +385,7 @@ async function handleGroupJoin(request, response) {
         guest_phone: phone?.trim() || null,
         waiver_agreed: true,
         session_type: group.session_type,
+        class_label: group.class_label,
         scheduled_at: group.scheduled_at,
         duration_minutes: group.duration_minutes,
         booked_by: 'guest',
@@ -392,8 +399,8 @@ async function handleGroupJoin(request, response) {
       return response.status(502).json({ error: 'Could not save your spot, try again.' });
     }
 
-    createCalendarEventForBooking(booking);
-    return response.status(200).json({ confirmed: true, scheduledAt: booking.scheduled_at });
+    if (booking.status === 'confirmed') createCalendarEventForBooking(booking);
+    return response.status(200).json({ confirmed: booking.status === 'confirmed', waitlisted: booking.status === 'waitlisted', scheduledAt: booking.scheduled_at });
   } catch (error) {
     console.error('Group join error', error && error.message);
     return response.status(503).json({ error: 'Could not save your spot right now.' });
@@ -409,7 +416,7 @@ async function handleSyncBooking(request, response) {
   if (!bookingId || !['create', 'cancel'].includes(action)) return response.status(400).json({ error: 'A booking and a valid action are required.' });
 
   try {
-    const bookingResult = await supabase(`/rest/v1/session_bookings?id=eq.${encodeURIComponent(bookingId)}&select=id,user_id,member_name,session_type,scheduled_at,duration_minutes,notes,google_event_id&limit=1`);
+    const bookingResult = await supabase(`/rest/v1/session_bookings?id=eq.${encodeURIComponent(bookingId)}&select=id,user_id,member_name,session_type,class_label,scheduled_at,duration_minutes,notes,status,google_event_id&limit=1`);
     const booking = Array.isArray(bookingResult.body) ? bookingResult.body[0] : null;
     if (!booking) return response.status(404).json({ error: 'That booking could not be found.' });
     if (booking.user_id !== user.id && !(await isAdmin(user.id))) return response.status(403).json({ error: 'You cannot sync this booking.' });
@@ -425,6 +432,8 @@ async function handleSyncBooking(request, response) {
       }
       return response.status(200).json({ synced: true });
     }
+
+    if (booking.status !== 'confirmed') return response.status(200).json({ synced: false, reason: 'waitlisted' });
 
     await createCalendarEventForBooking(booking);
     return response.status(200).json({ synced: true });
