@@ -112,16 +112,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (window.session_type === 'one_on_one') {
                 // Distinct-slot mode: up to `capacity` back-to-back appointments,
-                // each `session_length_minutes` long, one member per slot.
+                // each `session_length_minutes` long, one confirmed member per
+                // slot plus 1 waitlist spot (for a same-location back-to-back).
                 const stepMs = window.session_length_minutes * 60 * 1000;
                 for (let i = 0; i < window.capacity; i++) {
                     const scheduledAt = new Date(windowStart.getTime() + i * stepMs);
                     const slotEnd = new Date(scheduledAt.getTime() + stepMs);
                     if (slotEnd > windowEnd) break;
                     if (scheduledAt < new Date()) continue;
-                    if ((confirmedCounts.get(scheduledAt.getTime()) || 0) >= 1) continue;
+                    const confirmedTaken = confirmedCounts.get(scheduledAt.getTime()) || 0;
+                    const waitlistedTaken = waitlistedCounts.get(scheduledAt.getTime()) || 0;
+                    if (confirmedTaken >= 1 && waitlistedTaken >= 1) continue;
                     if (busyRanges.some((busy) => scheduledAt < busy.end && slotEnd > busy.start)) continue;
-                    slots.push({ scheduledAt, window, taken: 0, durationMinutes: window.session_length_minutes, isWaitlist: false });
+                    slots.push({ scheduledAt, window, taken: confirmedTaken, durationMinutes: window.session_length_minutes, isWaitlist: confirmedTaken >= 1 });
                 }
                 return;
             }
@@ -204,7 +207,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             item.className = 'availability-window-item';
             const end = new Date(scheduledAt.getTime() + durationMinutes * 60 * 1000);
             const typeName = window.class_label || efcBookingTypeLabel(window.session_type);
-            const countNote = window.capacity > 1 ? (isWaitlist ? ' · full, waitlist open' : ` · ${taken}/${window.capacity} booked`) : '';
+            const countNote = window.session_type === 'one_on_one'
+                ? (isWaitlist ? ' · full, waitlist open' : '')
+                : (window.capacity > 1 ? (isWaitlist ? ' · full, waitlist open' : ` · ${taken}/${window.capacity} booked`) : '');
             const label = document.createElement('span');
             label.textContent = `${scheduledAt.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })} – ${end.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })} · ${typeName}${countNote}`;
             const book = document.createElement('button');
