@@ -15,6 +15,16 @@ function efcDateKey(date) {
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }
 
+function efcProgramIsLive(row) {
+    if (!row) return false;
+    if (row.status !== 'launched' && row.status !== 'live') return false;
+    if (row.status === 'live') return true;
+    const now = new Date();
+    if (row.launch_at && new Date(row.launch_at) > now) return false;
+    if (row.expires_at && new Date(row.expires_at) <= now) return false;
+    return true;
+}
+
 async function efcSyncBookingToCalendar(bookingId, action) {
     try {
         const { data: sessionData } = await echelonAdminClient.auth.getSession();
@@ -192,13 +202,32 @@ async function initializeAdminScheduling() {
     const groupResult = document.getElementById('group-create-result');
     const groupWindowSelect = groupForm ? groupForm.elements.window_id : null;
     const sessionsCalendar = initializeSessionsCalendar();
+    let programsByKey = new Map();
+
+    async function loadPrograms() {
+        const { data } = await echelonAdminClient.from('training_programs').select('program_key, name, status, launch_at, expires_at');
+        programsByKey = new Map((data || []).map((row) => [row.program_key, row]));
+        document.querySelectorAll('select[name="program_key"]').forEach((select) => {
+            const previous = select.value;
+            select.innerHTML = '<option value="">Not linked to a Training Hub program</option>';
+            programsByKey.forEach((row) => {
+                const option = document.createElement('option');
+                option.value = row.program_key;
+                option.textContent = row.name;
+                select.append(option);
+            });
+            select.value = previous;
+        });
+    }
 
     function windowSummary(row) {
         const name = row.class_label || efcSessionTypeLabel(row.session_type);
         const sessionsNote = row.session_type === 'one_on_one'
             ? (row.capacity > 1 ? ` · ${row.capacity} appointments, ${row.session_length_minutes} min each` : ` · ${row.session_length_minutes} min`)
             : (row.capacity > 1 ? ` · up to ${row.capacity}` : '');
-        return `${EFC_WEEKDAY_LABELS[row.day_of_week]} · ${efcFormatTime(row.start_time)} – ${efcFormatTime(row.end_time)} · ${name}${sessionsNote}${row.active ? '' : ' (inactive)'}`;
+        const program = row.program_key ? programsByKey.get(row.program_key) : null;
+        const programNote = row.program_key ? (efcProgramIsLive(program) ? ` · linked: ${program ? program.name : row.program_key}` : ` · linked: ${program ? program.name : row.program_key} (NOT LIVE — hidden from booking)`) : '';
+        return `${EFC_WEEKDAY_LABELS[row.day_of_week]} · ${efcFormatTime(row.start_time)} – ${efcFormatTime(row.end_time)} · ${name}${sessionsNote}${programNote}${row.active ? '' : ' (inactive)'}`;
     }
 
     function buildWindowEditForm(row, copy) {
@@ -215,12 +244,15 @@ async function initializeAdminScheduling() {
         const labelInput = document.createElement('input'); labelInput.type = 'text'; labelInput.value = row.class_label || ''; labelInput.placeholder = 'Class name (optional)'; labelInput.setAttribute('aria-label', 'Class name');
         const capacityInput = document.createElement('input'); capacityInput.type = 'number'; capacityInput.min = '1'; capacityInput.max = '200'; capacityInput.value = row.capacity; capacityInput.setAttribute('aria-label', 'Sessions in this window');
         const lengthInput = document.createElement('input'); lengthInput.type = 'number'; lengthInput.min = '15'; lengthInput.max = '240'; lengthInput.step = '5'; lengthInput.value = row.session_length_minutes; lengthInput.setAttribute('aria-label', '1-on-1 session length in minutes');
+        const programSelect = document.createElement('select'); programSelect.name = 'program_key'; programSelect.setAttribute('aria-label', 'Linked Training Hub program (optional)');
+        programSelect.innerHTML = '<option value="">Not linked to a Training Hub program</option>';
+        programsByKey.forEach((program) => { const option = document.createElement('option'); option.value = program.program_key; option.textContent = program.name; if (program.program_key === row.program_key) option.selected = true; programSelect.append(option); });
 
         const save = document.createElement('button'); save.type = 'submit'; save.className = 'application-contact-save'; save.textContent = 'SAVE';
         const cancel = document.createElement('button'); cancel.type = 'button'; cancel.className = 'application-contact-cancel'; cancel.textContent = 'CANCEL';
         const feedback = document.createElement('span'); feedback.className = 'application-contact-feedback'; feedback.setAttribute('role', 'status');
 
-        form.append(daySelect, startInput, endInput, typeSelect, labelInput, capacityInput, lengthInput, save, cancel, feedback);
+        form.append(daySelect, startInput, endInput, typeSelect, labelInput, capacityInput, lengthInput, programSelect, save, cancel, feedback);
 
         const closeForm = () => { form.hidden = true; copy.hidden = false; };
         cancel.addEventListener('click', closeForm);
@@ -235,7 +267,8 @@ async function initializeAdminScheduling() {
                 session_type: typeSelect.value,
                 class_label: labelInput.value.trim() || null,
                 capacity: Math.max(1, Number(capacityInput.value) || 1),
-                session_length_minutes: Math.max(15, Number(lengthInput.value) || 60)
+                session_length_minutes: Math.max(15, Number(lengthInput.value) || 60),
+                program_key: programSelect.value || null
             };
             save.disabled = true;
             const { error } = await echelonAdminClient.from('coach_availability_windows').update(updated).eq('id', row.id);
@@ -250,7 +283,7 @@ async function initializeAdminScheduling() {
     async function loadAvailabilityWindows() {
         const { data, error } = await echelonAdminClient
             .from('coach_availability_windows')
-            .select('id, day_of_week, start_time, end_time, session_type, class_label, capacity, session_length_minutes, active')
+            .select('id, day_of_week, start_time, end_time, session_type, class_label, capacity, session_length_minutes, program_key, active')
             .order('day_of_week', { ascending: true })
             .order('start_time', { ascending: true });
         windowList.innerHTML = '';
@@ -302,7 +335,7 @@ async function initializeAdminScheduling() {
     windowForm.addEventListener('submit', async (event) => {
         event.preventDefault();
         windowFeedback.textContent = '';
-        const { day_of_week, start_time, end_time, session_type, class_label, capacity, session_length_minutes } = windowForm.elements;
+        const { day_of_week, start_time, end_time, session_type, class_label, capacity, session_length_minutes, program_key } = windowForm.elements;
         const { error } = await echelonAdminClient.from('coach_availability_windows').insert({
             day_of_week: Number(day_of_week.value),
             start_time: start_time.value,
@@ -310,7 +343,8 @@ async function initializeAdminScheduling() {
             session_type: session_type.value,
             class_label: class_label.value.trim() || null,
             capacity: Math.max(1, Number(capacity.value) || 1),
-            session_length_minutes: Math.max(15, Number(session_length_minutes.value) || 60)
+            session_length_minutes: Math.max(15, Number(session_length_minutes.value) || 60),
+            program_key: program_key.value || null
         });
         if (error) { windowFeedback.textContent = 'Could not save that window. Make sure the end time is after the start time.'; return; }
         windowForm.reset();
@@ -413,7 +447,7 @@ async function initializeAdminScheduling() {
         });
     }
 
-    loadAvailabilityWindows();
+    loadPrograms().then(loadAvailabilityWindows);
     loadMembersForBooking();
     initializeCalendarConnection();
 }

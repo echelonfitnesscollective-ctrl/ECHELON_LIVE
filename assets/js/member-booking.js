@@ -15,6 +15,16 @@ function efcDateKey(date) {
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }
 
+function efcProgramIsLive(row) {
+    if (!row) return false;
+    if (row.status !== 'launched' && row.status !== 'live') return false;
+    if (row.status === 'live') return true;
+    const now = new Date();
+    if (row.launch_at && new Date(row.launch_at) > now) return false;
+    if (row.expires_at && new Date(row.expires_at) <= now) return false;
+    return true;
+}
+
 async function efcSyncBookingToCalendar(bookingId, action) {
     try {
         const { data: sessionData } = await echelonMemberClient.auth.getSession();
@@ -245,13 +255,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function refreshAvailability() {
-        const [windowsResult, bookedResult, freshBusyRanges] = await Promise.all([
-            echelonMemberClient.from('coach_availability_windows').select('id, day_of_week, start_time, end_time, session_type, class_label, capacity, session_length_minutes').eq('active', true),
+        const [windowsResult, bookedResult, programsResult, freshBusyRanges] = await Promise.all([
+            echelonMemberClient.from('coach_availability_windows').select('id, day_of_week, start_time, end_time, session_type, class_label, capacity, session_length_minutes, program_key').eq('active', true),
             echelonMemberClient.from('booked_session_times').select('scheduled_at, status').gte('scheduled_at', today.toISOString()).lte('scheduled_at', horizonEnd.toISOString()),
+            echelonMemberClient.from('training_programs').select('program_key, status, launch_at, expires_at'),
             efcFetchBusyRanges()
         ]);
         if (windowsResult.error || bookedResult.error) { feedback.textContent = 'Could not load open windows.'; return; }
-        windows = windowsResult.data;
+        const programsByKey = new Map((programsResult.data || []).map((row) => [row.program_key, row]));
+        windows = windowsResult.data.filter((window) => !window.program_key || efcProgramIsLive(programsByKey.get(window.program_key)));
         confirmedCounts = new Map();
         waitlistedCounts = new Map();
         bookedResult.data.forEach((row) => {

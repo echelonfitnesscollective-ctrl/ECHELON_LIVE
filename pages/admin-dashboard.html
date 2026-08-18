@@ -594,6 +594,7 @@
                             <input name="class_label" type="text" placeholder="Class name (optional, e.g. VL Body Lab)" aria-label="Class name (optional)">
                             <label>Sessions in this window<input name="capacity" type="number" min="1" max="200" value="1" aria-label="For 1-on-1: how many separate appointments to offer. For a class: how many people can book the same start time."></label>
                             <label>1-on-1 session length (minutes)<input name="session_length_minutes" type="number" min="15" max="240" step="5" value="60" aria-label="1-on-1 session length in minutes"></label>
+                            <select name="program_key" aria-label="Linked Training Hub program (optional)"><option value="">Not linked to a Training Hub program</option></select>
                             <button type="submit" class="btn-secondary">ADD WINDOW</button>
                             <p id="availability-window-feedback" class="form-error" role="status"></p>
                         </form>
