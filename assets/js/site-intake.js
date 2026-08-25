@@ -42,11 +42,34 @@ async function prefillMemberCheckin(form) {
     }
 }
 
+async function loadDynamicApplicationQuestions(form) {
+    const placeholder = document.getElementById('dynamic-application-questions');
+    const status = document.getElementById('dynamic-questions-status');
+    const submitButton = form.querySelector('button[type="submit"]');
+    if (!placeholder) return;
+
+    const { data, error } = await echelonSiteClient
+        .from('application_questions')
+        .select('question_key, label, field_type, options, help_text, section_label, required')
+        .eq('active', true)
+        .order('sort_order', { ascending: true });
+
+    if (error || !data) {
+        if (status) status.textContent = 'We could not load the full application. Please refresh the page, or contact us directly if this continues.';
+        return;
+    }
+
+    placeholder.replaceWith(buildApplicationQuestionFields(data));
+    if (status) status.remove();
+    if (submitButton) submitButton.disabled = false;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const coachingForm = document.getElementById('coaching-form');
     if (coachingForm) {
         const feedback = document.getElementById('coaching-form-feedback');
         const submitButton = coachingForm.querySelector('button[type="submit"]');
+        loadDynamicApplicationQuestions(coachingForm);
         coachingForm.addEventListener('submit', async (event) => {
             event.preventDefault();
             submitButton.disabled = true;

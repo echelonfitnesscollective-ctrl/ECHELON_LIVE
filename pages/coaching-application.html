@@ -31,6 +31,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 <script src="../assets/js/main.js" defer></script>
 <script src="../assets/js/analytics.js" defer></script>
+<script src="../assets/js/application-questions-renderer.js" defer></script>
 <script src="../assets/js/site-intake.js" defer></script>
 </head>
 
@@ -261,252 +262,16 @@ function changeProductImage(imageId, newImage, dot){
                     placeholder="Group size (3–15), preferred date or monthly schedule, location, and what you want the experience to accomplish."></textarea>
             </div>
 
-            <input
-                type="text"
-                name="instagram_handle"
-                placeholder="Instagram Handle (Optional)" aria-label="Instagram Handle">
-
             <!-- ==========================
-                 FITNESS PROFILE
+                 FITNESS PROFILE, GOAL DISCOVERY, LIFESTYLE, COACHING
+                 READINESS: rendered from the admin-editable question bank
+                 (application_questions) instead of being hardcoded here, so
+                 the owner can add/edit/reorder these from the Admin Console.
+                 See assets/js/application-questions-renderer.js.
             ========================== -->
 
-            <div class="form-section-header">
-
-                <h2>
-                    CURRENT FITNESS PROFILE
-                </h2>
-
-            </div>
-
-            <select
-                name="fitness_level"
-                required aria-label="Current Fitness Level">
-
-                <option value="">
-                    Current Fitness Level
-                </option>
-
-                <option>
-                    Beginner
-                </option>
-
-                <option>
-                    Intermediate
-                </option>
-
-                <option>
-                    Advanced
-                </option>
-
-            </select>
-
-            <select
-                name="primary_goal"
-                required aria-label="Primary Goal">
-
-                <option value="">
-                    Primary Goal
-                </option>
-
-                <option>
-                    Fat Loss
-                </option>
-
-                <option>
-                    Body Recomposition
-                </option>
-
-                <option>
-                    Muscle Gain
-                </option>
-
-                <option>
-                    Athletic Performance
-                </option>
-
-                <option>
-                    Lifestyle Accountability
-                </option>
-
-            </select>
-
-            <input
-                type="text"
-                name="training_days_per_week"
-                placeholder="How many days per week can you realistically train?"
-                required aria-label="How many days per week can you realistically train?">
-
-            <select
-                name="commitment_level"
-                required aria-label="Commitment Level (1-10)">
-
-                <option value="">
-                    Commitment Level (1-10)
-                </option>
-
-                <option>1</option>
-                <option>2</option>
-                <option>3</option>
-                <option>4</option>
-                <option>5</option>
-                <option>6</option>
-                <option>7</option>
-                <option>8</option>
-                <option>9</option>
-                <option>10</option>
-
-            </select>
-
-            <!-- ==========================
-                 GOAL DISCOVERY
-            ========================== -->
-
-            <div class="form-section-header">
-
-                <h2>
-                    GOAL DISCOVERY
-                </h2>
-
-            </div>
-
-            <textarea
-                name="goal_and_why"
-                rows="5"
-                placeholder="What is your primary goal and why is it important to you?"
-                required aria-label="What is your primary goal and why is it important to you?"></textarea>
-
-            <input
-                type="text"
-                name="goal_timeline"
-                placeholder="When would you like to reach this goal?" aria-label="When would you like to reach this goal?">
-
-            <textarea
-                name="past_attempts"
-                rows="5"
-                placeholder="What have you tried in the past that didn't work?"
-                required aria-label="What have you tried in the past that didn't work?"></textarea>
-
-            <textarea
-                name="current_barriers"
-                rows="5"
-                placeholder="What is currently holding you back from reaching your goals?"
-                required aria-label="What is currently holding you back from reaching your goals?"></textarea>
-
-            <textarea
-                name="six_month_success"
-                rows="5"
-                placeholder="What would success look like for you 6 months from now?"
-                required aria-label="What would success look like for you 6 months from now?"></textarea>
-
-            <textarea
-                name="support_system"
-                rows="4"
-                placeholder="Who, if anyone, is supporting you in reaching this goal?" aria-label="Who, if anyone, is supporting you in reaching this goal?"></textarea>
-
-            <!-- ==========================
-                 LIFESTYLE
-            ========================== -->
-
-            <div class="form-section-header">
-
-                <h2>
-                    LIFESTYLE & HABITS
-                </h2>
-
-            </div>
-
-            <select
-                name="activity_level"
-                required aria-label="Current Activity Level">
-
-                <option value="">
-                    Current Activity Level
-                </option>
-
-                <option>
-                    Mostly Sedentary
-                </option>
-
-                <option>
-                    Lightly Active
-                </option>
-
-                <option>
-                    Moderately Active
-                </option>
-
-                <option>
-                    Highly Active
-                </option>
-
-            </select>
-
-            <select
-                name="nutrition_rating"
-                required aria-label="How would you rate your nutrition?">
-
-                <option value="">
-                    How would you rate your nutrition?
-                </option>
-
-                <option>
-                    Poor
-                </option>
-
-                <option>
-                    Fair
-                </option>
-
-                <option>
-                    Good
-                </option>
-
-                <option>
-                    Excellent
-                </option>
-
-            </select>
-
-            <input
-                type="text"
-                name="sleep_hours"
-                placeholder="Average Hours of Sleep Per Night" aria-label="Average Hours of Sleep Per Night">
-
-            <!-- ==========================
-                 COACHING READINESS
-            ========================== -->
-
-            <div class="form-section-header">
-
-                <h2>
-                    COACHING READINESS
-                </h2>
-
-            </div>
-
-            <textarea
-                name="coaching_why"
-                rows="5"
-                placeholder="Why do you believe coaching will help you succeed where you've struggled before?"
-                required aria-label="Why do you believe coaching will help you succeed where you've struggled before?"></textarea>
-
-            <select
-                name="structured_program_ready"
-                required aria-label="Are you prepared to follow a structured coaching program?">
-
-                <option value="">
-                    Are you prepared to follow a structured coaching program?
-                </option>
-
-                <option>
-                    Yes
-                </option>
-
-                <option>
-                    No
-                </option>
-
-            </select>
+            <p id="dynamic-questions-status" class="submit-note">Loading application questions…</p>
+            <div id="dynamic-application-questions"></div>
 
             <!-- ==========================
                  NEXT STEPS
@@ -541,6 +306,7 @@ function changeProductImage(imageId, newImage, dot){
             <button
                 type="submit"
                 class="btn-primary"
+                disabled
                 >
 
                 SUBMIT APPLICATION

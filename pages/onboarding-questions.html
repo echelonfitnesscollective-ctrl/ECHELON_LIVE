@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<link rel="icon" href="/assets/images/favicon.png?v=10" type="image/png">
+<link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png?v=10">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Private onboarding questions for Echelon Fitness Collective.">
+
+<title>Echelon Fitness Collective | Onboarding Questions</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="../assets/css/main.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+<script src="../assets/js/main.js" defer></script>
+<script src="../assets/js/analytics.js" defer></script>
+<script src="../assets/js/application-questions-renderer.js" defer></script>
+<script src="../assets/js/onboarding-questions.js" defer></script>
+</head>
+
+<body>
+<a href="#main-content" class="skip-link">Skip to content</a>
+
+
+<!-- NAVIGATION -->
+
+<header class="site-header">
+
+    <div class="container">
+
+        <a href="../index.html" class="logo">
+
+            ECHELON
+            <span>FITNESS COLLECTIVE</span>
+
+        </a>
+
+        <nav class="desktop-nav">
+
+            <a href="../index.html#about">About</a>
+<a href="../index.html#training">Training</a>
+<a href="../index.html#resources">Resources </a>
+<a href="../index.html#shop">Shop</a>
+<a href="../index.html#contact">Contact</a>
+<a href="member-login.html" class="nav-portal-link">Member Login</a>
+
+        </nav>
+
+        <button
+            class="mobile-toggle"
+            aria-label="Open Menu">
+
+            ☰
+
+        </button>
+
+    </div>
+
+</header>
+
+<!-- MOBILE MENU -->
+
+<div class="mobile-menu">
+
+    <a href="../index.html#about">About</a>
+    <a href="../index.html#training">Training</a>
+    <a href="../index.html#resources">Resources</a>
+    <a href="../index.html#shop">Shop</a>
+    <a href="../index.html#contact">Contact</a>
+    <a href="member-login.html" class="nav-portal-link">Member Login</a>
+
+</div>
+
+
+<!-- ==========================
+     ONBOARDING QUESTIONS HEADER
+========================== -->
+
+<header class="checkin-header" id="main-content">
+
+
+<div class="container">
+
+    <span class="checkin-tag">
+        ECHELON COACHING
+    </span>
+
+    <h1>
+        ONBOARDING QUESTIONS
+    </h1>
+
+    <p>
+        You were sent this link so you can answer a few questions on your own time
+        instead of on a call. Your answers go straight to your coach.
+    </p>
+
+</div>
+
+
+</header>
+
+<!-- ==========================
+     ONBOARDING QUESTIONS FORM
+========================== -->
+
+<section class="portal-section">
+
+
+<div class="container">
+
+    <div class="portal-card">
+
+        <p id="onboarding-link-status" class="submit-note">Loading your questions…</p>
+
+        <form
+            id="onboarding-questions-form"
+            class="echelon-form"
+            hidden>
+
+            <input type="text" name="efc_hp" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;">
+
+            <div class="form-section-header">
+                <h2>WHAT ARE YOU APPLYING FOR?</h2>
+            </div>
+
+            <select
+                id="onboarding-program-interest"
+                name="program_interest"
+                required aria-label="Select a Coaching Option">
+
+                <option value="">Select a Coaching Option</option>
+                <option>1-On-1 Coaching</option>
+                <option>12-Week Transformation</option>
+                <option>Private Group Training / Organization Wellness</option>
+
+            </select>
+
+            <div class="form-section-header">
+                <h2>PERSONAL INFORMATION</h2>
+            </div>
+
+            <input
+                type="text"
+                name="full_name"
+                placeholder="First & Last Name"
+                required aria-label="First & Last Name">
+
+            <input
+                type="email"
+                name="email"
+                placeholder="Email Address"
+                required aria-label="Email Address">
+
+            <input
+                type="tel"
+                name="phone"
+                placeholder="Phone Number"
+                required aria-label="Phone Number">
+
+            <div id="onboarding-dynamic-questions"></div>
+
+            <button
+                type="submit"
+                class="btn-primary">
+
+                SUBMIT ANSWERS
+
+            </button>
+
+            <p class="submit-note">
+
+                Your answers go directly to your coach at Echelon.
+
+            </p>
+
+            <div id="onboarding-questions-feedback" class="form-success" role="status"></div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+</section>
+
+
+<!-- ==========================================
+SITE FOOTER
+========================================== -->
+
+<footer class="footer">
+
+    <div class="container">
+
+        <!-- BRAND -->
+
+        <div class="footer-brand">
+
+            <h2>
+                ECHELON <span>FITNESS COLLECTIVE</span>
+            </h2>
+
+            <p class="footer-tagline">
+                Building Strength Through Structure.
+            </p>
+
+            <div class="footer-socials">
+
+                <a href="https://www.instagram.com/EchelonFitness.co" target="_blank">
+                    <i class="fab fa-instagram"></i>
+                </a>
+
+                <a href="https://tr.ee/pO3gLtovXy" target="_blank">
+                    <i class="fab fa-tiktok"></i>
+                </a>
+
+            </div>
+
+        </div>
+
+        <!-- NAVIGATION -->
+
+        <div class="footer-links-row">
+
+            <a href="../index.html">HOME</a>
+            <a href="../index.html#about">ABOUT</a>
+            <a href="../index.html#training">TRAINING</a>
+            <a href="../index.html#resources">RESOURCES</a>
+            <a href="../index.html#shop">SHOP</a>
+            <a href="../index.html#contact">CONTACT</a>
+
+        </div>
+
+        <!-- MEMBER ACTIONS -->
+
+        <div class="footer-actions">
+
+            <a href="member-login.html" class="btn-primary">
+                MEMBER PORTAL
+            </a>
+
+            <a href="admin-login.html" class="btn-secondary">
+    ADMIN PORTAL
+</a>
+        </div>
+
+    </div>
+
+    <!-- LEGAL -->
+
+    <div class="footer-bottom">
+
+        <p>
+            © 2026 Echelon Fitness Collective. All Rights Reserved.
+        </p>
+
+        <div class="footer-legal">
+
+            <a href="privacy.html">
+                Privacy Policy
+            </a>
+
+            <a href="terms.html">
+                Terms & Conditions
+            </a>
+
+            <a href="disclaimer.html">
+                Disclaimer
+            </a>
+
+        </div>
+
+    </div>
+
+</footer>
+</body>
+</html>

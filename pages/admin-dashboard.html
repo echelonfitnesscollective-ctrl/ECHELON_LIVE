@@ -342,6 +342,39 @@
                 <div id="admin-leads-list" class="admin-record-list"></div>
             </details>
 
+            <details class="admin-intake-section admin-console-section admin-tab-panel" data-admin-panel="leads" id="admin-panel-leads-3" role="tabpanel">
+                <summary class="admin-section-heading">
+                    <div><span class="checkin-tag">APPLICATION SETTINGS</span><h2>APPLICATION QUESTIONS</h2></div>
+                    <p id="application-questions-status">Loading questions…</p>
+                </summary>
+                <p class="submit-note">These are the profile/goal questions on the coaching application and on any onboarding link you send. Add, edit, reorder, or retire them here, no code changes needed.</p>
+                <div class="admin-resource-layout">
+                    <form id="application-question-form" class="echelon-form">
+                        <input type="hidden" name="id">
+                        <input name="label" type="text" placeholder="Question text" required aria-label="Question text">
+                        <select name="field_type" aria-label="Answer type">
+                            <option value="text">Short answer</option>
+                            <option value="textarea">Long answer</option>
+                            <option value="select">Multiple choice dropdown</option>
+                        </select>
+                        <input name="options" type="text" placeholder="Choices, comma separated (dropdown only)" aria-label="Choices, comma separated">
+                        <input name="section_label" type="text" list="application-question-sections" placeholder="Section heading (ex: Goal Discovery)" required aria-label="Section heading">
+                        <datalist id="application-question-sections">
+                            <option value="Current Fitness Profile">
+                            <option value="Goal Discovery">
+                            <option value="Lifestyle &amp; Habits">
+                            <option value="Coaching Readiness">
+                        </datalist>
+                        <input name="help_text" type="text" placeholder="Optional helper text shown under the question" aria-label="Optional helper text">
+                        <label class="admin-show-closed-toggle"><input type="checkbox" name="required"> Required</label>
+                        <button type="submit" class="btn-secondary">SAVE QUESTION</button>
+                        <button type="button" class="btn-secondary" id="application-question-cancel-edit" hidden>CANCEL EDIT</button>
+                        <p id="application-question-feedback" class="form-error" role="status"></p>
+                    </form>
+                    <div id="application-questions-list" class="admin-record-list"></div>
+                </div>
+            </details>
+
             <details class="admin-intake-section admin-console-section admin-member-activity-section admin-tab-panel" data-admin-panel="members" id="admin-panel-members" role="tabpanel">
                 <summary class="admin-section-heading">
                     <div><span class="checkin-tag">ATTENDANCE</span><h2 id="checkins-heading">RECENT CHECK-INS</h2></div>

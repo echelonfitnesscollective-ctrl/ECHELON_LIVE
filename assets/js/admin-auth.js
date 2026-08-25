@@ -14,6 +14,11 @@ const echelonAdminClient = window.supabase.createClient(
     EFC_ADMIN_SUPABASE_KEY
 );
 
+// Populated by initializeApplicationQuestions(), reused by
+// buildApplicationDetailPanel() so the applicant detail view can label any
+// admin-added question without a code change.
+let applicationQuestionsCache = [];
+
 async function getAdminUser() {
     const { data, error } = await echelonAdminClient.auth.getUser();
     return error ? null : data.user;
@@ -219,27 +224,20 @@ function paymentOptionForApplication(application) {
     return 'echelon_12_monthly';
 }
 
-const APPLICATION_DETAIL_FIELDS = [
-    ['primary_goal', 'Primary Goal'],
-    ['fitness_level', 'Current Fitness Level'],
-    ['training_days_per_week', 'Training Days Per Week'],
-    ['commitment_level', 'Commitment Level (1-10)'],
-    ['goal_and_why', 'Goal & Why It Matters'],
-    ['goal_timeline', 'Goal Timeline'],
-    ['past_attempts', "What They've Tried Before"],
-    ['current_barriers', 'Current Barriers'],
-    ['six_month_success', '6-Month Success Vision'],
-    ['support_system', 'Support System'],
-    ['activity_level', 'Current Activity Level'],
-    ['nutrition_rating', 'Nutrition Rating'],
-    ['sleep_hours', 'Average Sleep (Hours)'],
-    ['coaching_why', 'Why Coaching Will Help'],
-    ['structured_program_ready', 'Ready for a Structured Program?'],
-    ['group_experience_details', 'Private Group / Organization Details'],
-    ['instagram_handle', 'Instagram Handle']
+// Static fallback labels for fields that stay hardcoded in the application
+// form (identity/contact fields drive business logic elsewhere and aren't
+// part of the admin-editable application_questions bank). Everything else
+// shown here comes from initializeOperationsConsole()'s live fetch of
+// application_questions, so admin-added questions render automatically.
+const APPLICATION_STATIC_DETAIL_FIELDS = [
+    ['group_experience_details', 'Private Group / Organization Details']
 ];
 
-function buildApplicationDetailPanel(item) {
+function titleizeApplicationKey(key) {
+    return String(key).replace(/_/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function buildApplicationDetailPanel(item, questionLabelMap) {
     const panel = document.createElement('div');
     panel.className = 'application-detail-panel';
     panel.hidden = true;
@@ -252,13 +250,22 @@ function buildApplicationDetailPanel(item) {
         dl.append(dt, dd);
     }
     const data = item.application_data && typeof item.application_data === 'object' ? item.application_data : {};
-    APPLICATION_DETAIL_FIELDS.forEach(([key, label]) => {
+    const labelMap = questionLabelMap instanceof Map ? questionLabelMap : new Map();
+    const shownKeys = new Set();
+    const appendField = (key, label) => {
+        if (shownKeys.has(key)) return;
         const value = data[key];
         if (value === undefined || value === null || String(value).trim() === '') return;
+        shownKeys.add(key);
         const dt = document.createElement('dt'); dt.textContent = label;
         const dd = document.createElement('dd'); dd.textContent = String(value);
         dl.append(dt, dd);
-    });
+    };
+    labelMap.forEach((label, key) => appendField(key, label));
+    APPLICATION_STATIC_DETAIL_FIELDS.forEach(([key, label]) => appendField(key, label));
+    // Anything left (ex: answers to a question that's since been retired or
+    // deleted) still shows, rather than silently disappearing from view.
+    Object.keys(data).forEach((key) => { if (key !== 'efc_hp') appendField(key, titleizeApplicationKey(key)); });
     if (!dl.children.length) {
         const empty = document.createElement('p'); empty.className = 'application-detail-empty'; empty.textContent = 'No additional application details were submitted.';
         panel.append(empty);
@@ -425,7 +432,40 @@ function appendCloseToggle(container, item, table, onUpdated) {
     container.append(button);
 }
 
-function createApplicationRecord(item) {
+function appendAssignOnboardingLinkAction(container, { name, email, phone, programInterest }) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'btn-secondary';
+    button.textContent = 'ASSIGN ONBOARDING QUESTIONS';
+    const feedback = document.createElement('span'); feedback.className = 'application-payment-feedback'; feedback.setAttribute('role', 'status');
+    button.addEventListener('click', async () => {
+        button.disabled = true; button.textContent = 'GENERATING…'; feedback.textContent = '';
+        const { data: sessionData } = await echelonAdminClient.auth.getSession();
+        const result = await fetch('/api/onboarding-link/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionData.session?.access_token || ''}` },
+            body: JSON.stringify({ prospect_name: name, prospect_email: email, prospect_phone: phone, program_interest: programInterest })
+        });
+        const body = await result.json();
+        if (!result.ok || !body.link) { feedback.textContent = body.error || 'The link could not be created.'; button.disabled = false; button.textContent = 'ASSIGN ONBOARDING QUESTIONS'; return; }
+        button.remove();
+        const copy = document.createElement('button'); copy.type = 'button'; copy.className = 'btn-secondary'; copy.textContent = 'COPY ONBOARDING LINK';
+        copy.addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(body.link);
+                copy.textContent = 'LINK COPIED';
+                setTimeout(() => { copy.textContent = 'COPY ONBOARDING LINK'; }, 2000);
+            } catch (_) {
+                window.prompt('Copy this onboarding link:', body.link);
+            }
+        });
+        feedback.textContent = "Link ready, one-time use. Send it however you like, their answers land back in this list once they submit.";
+        container.append(copy);
+    });
+    container.append(button, feedback);
+}
+
+function createApplicationRecord(item, questionLabelMap) {
     const record = document.createElement('article');
     record.className = 'admin-record application-record';
     const top = document.createElement('div'); top.className = 'application-record-top';
@@ -433,6 +473,7 @@ function createApplicationRecord(item) {
     const state = document.createElement('span'); state.className = `application-state ${item.payment_status === 'paid' ? 'is-paid' : ''}`; state.textContent = item.status || 'New';
     top.append(name, state);
     if (item.closed_at) { const closedBadge = document.createElement('span'); closedBadge.className = 'application-state is-closed'; closedBadge.textContent = 'CLOSED'; top.append(closedBadge); }
+    if (item.source === 'admin_assigned_link') { const linkBadge = document.createElement('span'); linkBadge.className = 'application-state'; linkBadge.textContent = 'VIA ASSIGNED LINK'; top.append(linkBadge); }
     const details = document.createElement('span');
     const detailsText = document.createElement('span'); detailsText.textContent = `${item.program_interest || 'Coaching'} · ${item.email || 'Email not provided'}`;
     details.append(detailsText, buildApplicationContactEditor(item, (updated) => {
@@ -443,7 +484,7 @@ function createApplicationRecord(item) {
         detailsText.textContent = `${item.program_interest || 'Coaching'} · ${item.email || 'Email not provided'}`;
     }));
     const reference = document.createElement('span'); reference.className = 'application-reference'; reference.textContent = item.application_reference ? `REFERENCE · ${item.application_reference}` : 'PRIVATE APPLICATION';
-    const detailPanel = buildApplicationDetailPanel(item);
+    const detailPanel = buildApplicationDetailPanel(item, questionLabelMap);
     const detailToggle = document.createElement('button'); detailToggle.type = 'button'; detailToggle.className = 'btn-secondary application-detail-toggle'; detailToggle.textContent = 'VIEW DETAILS';
     detailToggle.addEventListener('click', () => {
         detailPanel.hidden = !detailPanel.hidden;
@@ -453,6 +494,7 @@ function createApplicationRecord(item) {
     actions.append(detailToggle);
     appendCloseToggle(actions, item, 'coaching_applications', () => { state.textContent = item.status || 'New'; record.querySelectorAll('.is-closed').forEach((el) => el.remove()); if (item.closed_at) { const closedBadge = document.createElement('span'); closedBadge.className = 'application-state is-closed'; closedBadge.textContent = 'CLOSED'; top.append(closedBadge); } });
     appendFollowUpTaskAction(actions, { title: `Follow up: ${item.full_name}`, relatedName: item.full_name, taskType: 'Follow-up', applicationId: item.id });
+    appendAssignOnboardingLinkAction(actions, { name: item.full_name, email: item.email, phone: item.phone, programInterest: item.program_interest });
     appendSuggestedScript(detailPanel, suggestTemplateIndex(item.program_interest));
     const paymentFeedback = document.createElement('p'); paymentFeedback.className = 'application-payment-feedback'; paymentFeedback.setAttribute('role', 'status');
 
@@ -559,6 +601,7 @@ function createLeadRecord(item) {
     actions.append(detailToggle);
     appendCloseToggle(actions, item, 'website_leads', () => { state.textContent = item.closed_at ? 'CLOSED' : 'OPEN'; state.className = `application-state ${item.closed_at ? 'is-closed' : ''}`; });
     appendFollowUpTaskAction(actions, { title: `Follow up: ${item.full_name}`, relatedName: item.full_name, taskType: 'Follow-up', leadId: item.id });
+    appendAssignOnboardingLinkAction(actions, { name: item.full_name, email: item.email, phone: item.phone, programInterest: '' });
 
     const timestamp = document.createElement('span'); timestamp.className = 'application-reference'; timestamp.textContent = new Date(item.created_at).toLocaleString();
 
@@ -781,17 +824,19 @@ async function initializeOperationsConsole() {
     const applicationsList = document.getElementById('admin-applications-list');
     if (!applicationsList) return;
 
-    const [applicationsResult, leadsResult, checkinsResult, resourcesResult] = await Promise.all([
-        echelonAdminClient.from('coaching_applications').select('id, full_name, email, phone, program_interest, application_data, status, application_reference, application_status, payment_status, invited_at, admin_notes, closed_at, created_at').order('created_at', { ascending: false }).limit(25),
+    const [applicationsResult, leadsResult, checkinsResult, resourcesResult, questionsResult] = await Promise.all([
+        echelonAdminClient.from('coaching_applications').select('id, full_name, email, phone, program_interest, application_data, status, application_reference, application_status, payment_status, invited_at, admin_notes, closed_at, source, created_at').order('created_at', { ascending: false }).limit(25),
         echelonAdminClient.from('website_leads').select('id, full_name, email, phone, lead_type, category, message, status, admin_notes, closed_at, created_at').order('created_at', { ascending: false }).limit(25),
         echelonAdminClient.from('session_checkins').select('full_name, email, program, status, checked_in_at').order('checked_in_at', { ascending: false }).limit(25),
-        echelonAdminClient.from('trainer_resources').select('title, category, resource_url, notes, created_at').order('created_at', { ascending: false })
+        echelonAdminClient.from('trainer_resources').select('title, category, resource_url, notes, created_at').order('created_at', { ascending: false }),
+        echelonAdminClient.from('application_questions').select('question_key, label').order('sort_order', { ascending: true })
     ]);
 
     const applications = applicationsResult.data || [];
     const leads = leadsResult.data || [];
     const checkins = checkinsResult.data || [];
     const resources = resourcesResult.data || [];
+    const questionLabelMap = new Map((questionsResult.data || []).map((question) => [question.question_key, question.label]));
     document.getElementById('admin-application-count').textContent = applications.filter((item) => item.status === 'New' || item.application_status === 'submitted').length;
     document.getElementById('admin-checkin-count').textContent = checkins.filter((item) => new Date(item.checked_in_at).toDateString() === new Date().toDateString()).length;
 
@@ -800,7 +845,7 @@ async function initializeOperationsConsole() {
     const renderApplications = () => {
         const visible = applicationsShowClosed?.checked ? applications : applications.filter((item) => !item.closed_at);
         applicationsStatus.textContent = applicationsResult.error ? 'Unable to load applications.' : `${visible.length} application${visible.length === 1 ? '' : 's'}${applicationsShowClosed?.checked ? '' : ' (open)'}`;
-        renderAdminRecords(applicationsList, visible, 'Applications will appear here when submitted.', createApplicationRecord);
+        renderAdminRecords(applicationsList, visible, 'Applications will appear here when submitted.', (item) => createApplicationRecord(item, questionLabelMap));
     };
     renderApplications();
     if (applicationsShowClosed) applicationsShowClosed.onchange = renderApplications;
@@ -1063,6 +1108,141 @@ async function initializeEquipmentManager() {
         form.reset();
         feedback.textContent = 'Equipment added.';
         refreshEquipment();
+    });
+}
+
+function slugifyQuestionKey(label) {
+    return String(label || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 60) || `question_${Date.now()}`;
+}
+
+async function initializeApplicationQuestions() {
+    const form = document.getElementById('application-question-form');
+    if (!form) return;
+    const list = document.getElementById('application-questions-list');
+    const status = document.getElementById('application-questions-status');
+    const feedback = document.getElementById('application-question-feedback');
+    const cancelEditBtn = document.getElementById('application-question-cancel-edit');
+    const optionsField = form.elements.options;
+
+    function toggleOptionsVisibility() {
+        optionsField.hidden = form.elements.field_type.value !== 'select';
+    }
+    form.elements.field_type.addEventListener('change', toggleOptionsVisibility);
+    toggleOptionsVisibility();
+
+    function resetForm() {
+        form.reset();
+        form.elements.id.value = '';
+        toggleOptionsVisibility();
+        cancelEditBtn.hidden = true;
+        feedback.textContent = '';
+    }
+    cancelEditBtn.addEventListener('click', resetForm);
+
+    async function refresh() {
+        const { data, error } = await echelonAdminClient
+            .from('application_questions')
+            .select('id, question_key, label, field_type, options, help_text, section_label, required, sort_order, active')
+            .order('sort_order', { ascending: true });
+
+        if (error) { status.textContent = 'Run the onboarding-questions database update to activate this section.'; return; }
+        applicationQuestionsCache = data || [];
+        status.textContent = `${applicationQuestionsCache.length} question${applicationQuestionsCache.length === 1 ? '' : 's'}`;
+        list.replaceChildren();
+        if (!applicationQuestionsCache.length) { list.textContent = 'No questions yet.'; return; }
+
+        applicationQuestionsCache.forEach((question, index) => {
+            const record = document.createElement('article');
+            record.className = 'admin-record application-record';
+
+            const top = document.createElement('div'); top.className = 'application-record-top';
+            const label = document.createElement('strong'); label.textContent = question.label;
+            const state = document.createElement('span'); state.className = `application-state ${question.active ? '' : 'is-closed'}`; state.textContent = question.active ? 'ACTIVE' : 'RETIRED';
+            top.append(label, state);
+
+            const details = document.createElement('span');
+            const typeLabel = question.field_type === 'select' ? 'Dropdown' : question.field_type === 'textarea' ? 'Long answer' : 'Short answer';
+            details.textContent = `${question.section_label} · ${typeLabel}${question.required ? ' · Required' : ''}`;
+
+            const actions = document.createElement('div'); actions.className = 'application-record-actions';
+
+            const editBtn = document.createElement('button'); editBtn.type = 'button'; editBtn.className = 'btn-secondary'; editBtn.textContent = 'EDIT';
+            editBtn.addEventListener('click', () => {
+                form.elements.id.value = question.id;
+                form.elements.label.value = question.label;
+                form.elements.field_type.value = question.field_type;
+                form.elements.options.value = Array.isArray(question.options) ? question.options.join(', ') : '';
+                form.elements.section_label.value = question.section_label;
+                form.elements.help_text.value = question.help_text || '';
+                form.elements.required.checked = Boolean(question.required);
+                toggleOptionsVisibility();
+                cancelEditBtn.hidden = false;
+                form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+
+            const toggleBtn = document.createElement('button'); toggleBtn.type = 'button'; toggleBtn.className = 'btn-secondary'; toggleBtn.textContent = question.active ? 'RETIRE' : 'REACTIVATE';
+            toggleBtn.addEventListener('click', async () => {
+                toggleBtn.disabled = true;
+                const { error: toggleError } = await echelonAdminClient.from('application_questions').update({ active: !question.active }).eq('id', question.id);
+                if (!toggleError) refresh(); else toggleBtn.disabled = false;
+            });
+
+            const upBtn = document.createElement('button'); upBtn.type = 'button'; upBtn.className = 'btn-secondary'; upBtn.textContent = '↑'; upBtn.disabled = index === 0; upBtn.setAttribute('aria-label', `Move "${question.label}" up`);
+            const downBtn = document.createElement('button'); downBtn.type = 'button'; downBtn.className = 'btn-secondary'; downBtn.textContent = '↓'; downBtn.disabled = index === applicationQuestionsCache.length - 1; downBtn.setAttribute('aria-label', `Move "${question.label}" down`);
+            async function swapWith(otherIndex) {
+                const other = applicationQuestionsCache[otherIndex];
+                if (!other) return;
+                upBtn.disabled = true; downBtn.disabled = true;
+                await Promise.all([
+                    echelonAdminClient.from('application_questions').update({ sort_order: other.sort_order }).eq('id', question.id),
+                    echelonAdminClient.from('application_questions').update({ sort_order: question.sort_order }).eq('id', other.id)
+                ]);
+                refresh();
+            }
+            upBtn.addEventListener('click', () => swapWith(index - 1));
+            downBtn.addEventListener('click', () => swapWith(index + 1));
+
+            actions.append(editBtn, toggleBtn, upBtn, downBtn);
+            record.append(top, details, actions);
+            list.append(record);
+        });
+    }
+
+    await refresh();
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        feedback.textContent = '';
+        const label = form.elements.label.value.trim();
+        const sectionLabel = form.elements.section_label.value.trim();
+        if (!label || !sectionLabel) { feedback.textContent = 'Question text and section heading are required.'; return; }
+        const fieldType = form.elements.field_type.value;
+        const options = fieldType === 'select'
+            ? form.elements.options.value.split(',').map((value) => value.trim()).filter(Boolean)
+            : null;
+        if (fieldType === 'select' && (!options || options.length < 2)) { feedback.textContent = 'Add at least two comma-separated choices for a dropdown.'; return; }
+
+        const editingId = form.elements.id.value;
+        const record = {
+            label,
+            field_type: fieldType,
+            options,
+            help_text: form.elements.help_text.value.trim() || null,
+            section_label: sectionLabel,
+            required: form.elements.required.checked
+        };
+
+        let saveError;
+        if (editingId) {
+            ({ error: saveError } = await echelonAdminClient.from('application_questions').update(record).eq('id', editingId));
+        } else {
+            const maxSortOrder = applicationQuestionsCache.reduce((max, question) => Math.max(max, question.sort_order || 0), 0);
+            ({ error: saveError } = await echelonAdminClient.from('application_questions').insert({ ...record, question_key: slugifyQuestionKey(label), sort_order: maxSortOrder + 10 }));
+        }
+        if (saveError) { feedback.textContent = 'We could not save that question. Please try again.'; return; }
+        resetForm();
+        feedback.textContent = 'Question saved.';
+        refresh();
     });
 }
 
@@ -2528,6 +2708,7 @@ document.addEventListener('DOMContentLoaded', () => {
         initializeCommunicationsLibrary();
         initializeSectionControl();
         initializeEquipmentManager();
+        initializeApplicationQuestions();
         initializeWorkoutLibraryManager();
         initializeCoachingPlaybook();
         initializeAdminScheduling();
