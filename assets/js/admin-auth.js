@@ -441,10 +441,10 @@ function appendAssignOnboardingLinkAction(container, { name, email, phone, progr
     button.addEventListener('click', async () => {
         button.disabled = true; button.textContent = 'GENERATING…'; feedback.textContent = '';
         const { data: sessionData } = await echelonAdminClient.auth.getSession();
-        const result = await fetch('/api/onboarding-link/create', {
+        const result = await fetch('/api/enrollment/create-offer', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionData.session?.access_token || ''}` },
-            body: JSON.stringify({ prospect_name: name, prospect_email: email, prospect_phone: phone, program_interest: programInterest })
+            body: JSON.stringify({ action: 'create-onboarding-link', prospect_name: name, prospect_email: email, prospect_phone: phone, program_interest: programInterest })
         });
         const body = await result.json();
         if (!result.ok || !body.link) { feedback.textContent = body.error || 'The link could not be created.'; button.disabled = false; button.textContent = 'ASSIGN ONBOARDING QUESTIONS'; return; }

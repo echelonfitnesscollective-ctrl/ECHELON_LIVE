@@ -87,12 +87,52 @@ async function sendPaymentEmail(admin, applicationId, response) {
   }
 }
 
+// Generates a one-time "ASSIGN ONBOARDING QUESTIONS" link (a
+// prospect_onboarding_links row) for a lead/applicant the owner didn't get
+// on a call with. Folded into this file, rather than a new one under
+// api/onboarding-link/, because Vercel's Hobby plan caps a deployment at 12
+// serverless functions and this project is already at that limit; this file
+// already does admin-gated action dispatch (see sendPaymentEmail above), so
+// it's the natural home. The public-facing half of this feature (info
+// lookup + answer submission) lives in api/coaching-application/submit.js.
+async function createOnboardingLink(admin, body, response) {
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) return response.status(503).json({ error: 'This is being prepared. Please try again shortly.' });
+  const prospectName = String(body?.prospect_name || '').trim().slice(0, 200);
+  const prospectEmail = String(body?.prospect_email || '').trim().slice(0, 200);
+  const prospectPhone = String(body?.prospect_phone || '').trim().slice(0, 60);
+  const programInterest = String(body?.program_interest || '').trim().slice(0, 200);
+  if (!prospectName) return response.status(400).json({ error: "Enter the prospect's name first." });
+
+  try {
+    const token = randomBytes(24).toString('hex');
+    const insertResult = await supabase('/rest/v1/prospect_onboarding_links', {
+      method: 'POST',
+      headers: { Prefer: 'return=representation' },
+      body: JSON.stringify({
+        token,
+        prospect_name: prospectName,
+        prospect_email: prospectEmail || null,
+        prospect_phone: prospectPhone || null,
+        program_interest: programInterest || null,
+        created_by: admin.id,
+      }),
+    });
+    const link = Array.isArray(insertResult.body) ? insertResult.body[0] : null;
+    if (!insertResult.response.ok || !link) return response.status(502).json({ error: 'The link could not be created.' });
+    return response.status(200).json({ link: `${siteUrl()}/pages/onboarding-questions.html?token=${token}` });
+  } catch (error) {
+    console.error('Create onboarding link error', error && error.message);
+    return response.status(503).json({ error: 'The link could not be created right now.' });
+  }
+}
+
 module.exports = async function createEnrollmentOffer(request, response) {
   response.setHeader('Cache-Control', 'no-store'); response.setHeader('X-Content-Type-Options', 'nosniff');
   if (request.method !== 'POST') return response.status(405).json({ error: 'Method not allowed.' });
   const admin = await requireAdmin(request);
   if (!admin) return response.status(401).json({ error: 'Your admin session is required.' });
   if (request.body?.action === 'send-email') return sendPaymentEmail(admin, request.body?.applicationId, response);
+  if (request.body?.action === 'create-onboarding-link') return createOnboardingLink(admin, request.body, response);
   const { applicationId, paymentOption, groupSize } = request.body || {};
   const option = PAYMENT_OPTIONS[paymentOption];
   if (!applicationId || !option) return response.status(400).json({ error: 'Choose a configured Echelon payment option.' });

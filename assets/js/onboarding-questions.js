@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     let payload;
     try {
-        const response = await fetch(`/api/onboarding-link/info?token=${encodeURIComponent(token)}`);
+        const response = await fetch(`/api/coaching-application/submit?token=${encodeURIComponent(token)}`);
         payload = await response.json();
         if (!response.ok) throw new Error(payload.error || 'This link could not be loaded.');
     } catch (error) {
@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         try {
-            const response = await fetch('/api/onboarding-link/submit', {
+            const response = await fetch('/api/coaching-application/submit', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
