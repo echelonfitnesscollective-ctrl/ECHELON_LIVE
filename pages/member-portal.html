@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="../assets/css/main.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <script src="../assets/js/main.js" defer></script>
+    <script src="../assets/js/application-questions-renderer.js" defer></script>
     <script src="../assets/js/member-auth.js" defer></script>
 </head>
 <body>
@@ -106,6 +107,18 @@
                 <div class="member-setup-links">
                     <a href="member-onboarding.html"><span>06</span><h2>ONBOARDING</h2><p>Complete your health, readiness, goals, and training information.</p><strong>BEGIN ONBOARDING →</strong></a>
                     <a href="member-waiver.html"><span>07</span><h2>MEMBER WAIVER</h2><p>Review and electronically sign your Echelon participation agreement.</p><strong>REVIEW &amp; SIGN →</strong></a>
+                </div>
+            </details>
+
+            <details class="member-setup-section">
+                <summary><span class="checkin-tag">COACHING PROFILE</span><strong>YOUR PROFILE &amp; GOALS <i>+</i></strong><p>Update your goals, fitness level, and lifestyle answers any time, your coach sees the current version alongside your original application.</p></summary>
+                <div class="member-settings-body">
+                    <form id="member-profile-form" class="echelon-form">
+                        <p id="member-profile-status" class="submit-note">Loading your profile…</p>
+                        <div id="member-profile-fields"></div>
+                        <button type="submit" class="btn-secondary" disabled>SAVE PROFILE</button>
+                        <p id="member-profile-feedback" class="form-error" role="status"></p>
+                    </form>
                 </div>
             </details>
 

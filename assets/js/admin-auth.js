@@ -1911,6 +1911,7 @@ function renderIntakeDetail(row) {
     appendCopyIntakeSummary(detail, row, memberName);
     appendMemberTracker(detail, row, memberName);
     appendMemberTrainingProfile(detail, row);
+    appendMemberProfileAnswers(detail, row);
     appendMemberNutritionTargets(detail, row);
     appendMemberCoachingControls(detail, row, memberName);
 
@@ -2488,6 +2489,52 @@ async function appendMemberTrainingProfile(detail, row) {
             call_notes: callNotesInput.value.trim() || null
         };
         const { error: saveError } = await echelonAdminClient.from('member_training_profiles').upsert(payload, { onConflict: 'user_id' });
+        if (saveError) { feedback.textContent = 'We could not save this profile. Please try again.'; return; }
+        feedback.textContent = 'Saved.';
+        renderIntakeDetail(row);
+    });
+
+    section.append(form);
+}
+
+async function appendMemberProfileAnswers(detail, row) {
+    const section = document.createElement('section');
+    const heading = document.createElement('h4');
+    heading.textContent = 'COACHING PROFILE (SELF-EDITABLE)';
+    const summary = document.createElement('p');
+    summary.className = 'admin-detail-date';
+    summary.textContent = 'Loading current profile…';
+    section.append(heading, summary);
+    detail.append(section);
+
+    const [{ data: questions, error: questionsError }, { data: answers }] = await Promise.all([
+        echelonAdminClient.from('application_questions').select('question_key, label, field_type, options, help_text, section_label, required').eq('active', true).order('sort_order', { ascending: true }),
+        echelonAdminClient.from('member_profile_answers').select('question_key, answer, updated_at').eq('user_id', row.user_id)
+    ]);
+    if (questionsError || !questions) { summary.textContent = 'Coaching Profile will be ready after its database update is run.'; return; }
+
+    const answerRows = answers || [];
+    const answerMap = Object.fromEntries(answerRows.map((item) => [item.question_key, item.answer || '']));
+    const latestUpdate = answerRows.reduce((latest, item) => (item.updated_at && (!latest || item.updated_at > latest) ? item.updated_at : latest), null);
+    summary.textContent = latestUpdate
+        ? `This member last updated their own profile on ${new Date(latestUpdate).toLocaleDateString()}. Same question set as the Coaching Application, editable here too.`
+        : 'No self-reported profile yet, this member has not saved their Coaching Profile from the Member Portal. The fields below match their original application; edits here save to their live profile.';
+
+    const form = document.createElement('form'); form.className = 'echelon-form';
+    form.append(buildApplicationQuestionFields(questions, answerMap));
+    const saveButton = document.createElement('button'); saveButton.type = 'submit'; saveButton.className = 'btn-secondary'; saveButton.textContent = 'SAVE COACHING PROFILE';
+    const feedback = document.createElement('p'); feedback.className = 'form-error'; feedback.setAttribute('role', 'status');
+    form.append(saveButton, feedback);
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        feedback.textContent = '';
+        const rows = questions.map((question) => ({
+            user_id: row.user_id,
+            question_key: question.question_key,
+            answer: (form.elements[question.question_key]?.value || '').trim() || null
+        }));
+        const { error: saveError } = await echelonAdminClient.from('member_profile_answers').upsert(rows, { onConflict: 'user_id,question_key' });
         if (saveError) { feedback.textContent = 'We could not save this profile. Please try again.'; return; }
         feedback.textContent = 'Saved.';
         renderIntakeDetail(row);

@@ -5,9 +5,10 @@
 // keeps the two forms in lockstep since they read the same
 // application_questions rows.
 
-function buildApplicationQuestionFields(questions) {
+function buildApplicationQuestionFields(questions, answers) {
     const fragment = document.createDocumentFragment();
     let currentSection = null;
+    const answerMap = answers || {};
 
     (questions || []).forEach((question) => {
         if (question.section_label && question.section_label !== currentSection) {
@@ -44,6 +45,9 @@ function buildApplicationQuestionFields(questions) {
         field.name = question.question_key;
         field.setAttribute('aria-label', question.label);
         if (question.required) field.required = true;
+        if (Object.prototype.hasOwnProperty.call(answerMap, question.question_key)) {
+            field.value = answerMap[question.question_key] || '';
+        }
         fragment.append(field);
 
         if (question.help_text) {

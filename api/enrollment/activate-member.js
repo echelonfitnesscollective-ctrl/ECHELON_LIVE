@@ -37,7 +37,7 @@ module.exports = async function activateMember(request, response) {
 
   const applicationId = request.body?.applicationId;
   if (!applicationId) return response.status(400).json({ error: 'Choose an accepted applicant first.' });
-  const appResult = await serviceRequest(`/rest/v1/coaching_applications?id=eq.${encodeURIComponent(applicationId)}&select=id,full_name,email,approved_program,payment_status&limit=1`);
+  const appResult = await serviceRequest(`/rest/v1/coaching_applications?id=eq.${encodeURIComponent(applicationId)}&select=id,full_name,email,approved_program,payment_status,application_data&limit=1`);
   const application = Array.isArray(appResult.body) ? appResult.body[0] : null;
   if (!application) return response.status(404).json({ error: 'That applicant could not be found.' });
   if (application.payment_status !== 'paid') return response.status(409).json({ error: 'Member access stays locked until Stripe confirms payment.' });
@@ -49,6 +49,14 @@ module.exports = async function activateMember(request, response) {
   if (!invite.result.ok || !invite.body?.id) return response.status(409).json({ error: 'The invite could not be sent. This person may already have an account; confirm their access in Supabase, then try again.' });
   const now = new Date().toISOString();
   await serviceRequest('/rest/v1/account_access?on_conflict=user_id', { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify({ user_id: invite.body.id, role: 'member', membership_status: 'active', program: application.approved_program || 'Echelon Coaching', assigned_coach_id: admin.id, approved_by: admin.id, approved_at: now }) });
+  const questionKeysResult = await serviceRequest('/rest/v1/application_questions?select=question_key');
+  const knownQuestionKeys = new Set((questionKeysResult.body || []).map((question) => question.question_key));
+  const profileAnswers = Object.entries(application.application_data || {})
+    .filter(([key, value]) => knownQuestionKeys.has(key) && value !== null && value !== undefined && String(value).trim() !== '')
+    .map(([question_key, answer]) => ({ user_id: invite.body.id, question_key, answer: String(answer) }));
+  if (profileAnswers.length) {
+    await serviceRequest('/rest/v1/member_profile_answers?on_conflict=user_id,question_key', { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify(profileAnswers) });
+  }
   await serviceRequest(`/rest/v1/onboarding_projects?id=eq.${encodeURIComponent(project.id)}`, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ user_id: invite.body.id, account_status: 'invitation_sent', membership_status: 'active', onboarding_status: 'in_progress', start_date: new Date().toISOString().slice(0, 10) }) });
   await serviceRequest(`/rest/v1/coaching_applications?id=eq.${encodeURIComponent(applicationId)}`, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ status: 'Member Invite Sent', invited_at: now }) });
   await completeTask(project.id, 'Approve and invite member securely', admin.id);

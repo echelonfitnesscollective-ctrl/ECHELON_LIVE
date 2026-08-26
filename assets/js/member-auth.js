@@ -241,6 +241,52 @@ async function initializeMemberPortal() {
     });
 
     await initializeMemberSettings(member);
+    await initializeMemberProfileAnswers(member);
+}
+
+async function initializeMemberProfileAnswers(member) {
+    const form = document.getElementById('member-profile-form');
+    if (!form) return;
+
+    const status = document.getElementById('member-profile-status');
+    const feedback = document.getElementById('member-profile-feedback');
+    const fieldsPlaceholder = document.getElementById('member-profile-fields');
+    const submitButton = form.querySelector('button[type="submit"]');
+
+    const [questionsResult, answersResult] = await Promise.all([
+        echelonMemberClient.from('application_questions').select('question_key, label, field_type, options, help_text, section_label, required').eq('active', true).order('sort_order', { ascending: true }),
+        echelonMemberClient.from('member_profile_answers').select('question_key, answer').eq('user_id', member.id)
+    ]);
+
+    if (questionsResult.error || !questionsResult.data) {
+        if (status) status.textContent = 'We could not load your coaching profile. Please refresh and try again.';
+        return;
+    }
+
+    const questions = questionsResult.data;
+    const answerMap = Object.fromEntries((answersResult.data || []).map((row) => [row.question_key, row.answer || '']));
+    fieldsPlaceholder.replaceWith(buildApplicationQuestionFields(questions, answerMap));
+    if (status) status.remove();
+    if (submitButton) submitButton.disabled = false;
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        feedback.textContent = '';
+        submitButton.disabled = true;
+        submitButton.textContent = 'SAVING…';
+
+        const rows = questions.map((question) => ({
+            user_id: member.id,
+            question_key: question.question_key,
+            answer: (form.elements[question.question_key]?.value || '').trim() || null
+        }));
+
+        const { error } = await echelonMemberClient.from('member_profile_answers').upsert(rows, { onConflict: 'user_id,question_key' });
+
+        submitButton.disabled = false;
+        submitButton.textContent = 'SAVE PROFILE';
+        feedback.textContent = error ? 'We could not save your profile. Please try again.' : 'Saved.';
+    });
 }
 
 async function initializeMemberSettings(member) {
