@@ -194,8 +194,8 @@ module.exports = async function createEnrollmentOffer(request, response) {
   let price, label, lineItems = null, resolvedGroupSize = null;
   if (paymentOption === 'private_group_training') {
     resolvedGroupSize = Number(groupSize);
-    if (!Number.isInteger(resolvedGroupSize) || resolvedGroupSize < 3 || resolvedGroupSize > 15) {
-      return response.status(400).json({ error: 'Enter a group size between 3 and 15.' });
+    if (!Number.isInteger(resolvedGroupSize) || resolvedGroupSize < 3 || resolvedGroupSize > 25) {
+      return response.status(400).json({ error: 'Enter a group size between 3 and 25.' });
     }
     const basePrice = process.env[option.basePriceEnv];
     const addonPrice = process.env[option.addonPriceEnv];

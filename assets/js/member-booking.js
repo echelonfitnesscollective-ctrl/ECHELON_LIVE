@@ -112,10 +112,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    function windowRecursOnDate(window, date) {
+        if (window.day_of_week !== date.getDay()) return false;
+        const interval = window.recurrence_interval_weeks || 1;
+        if (interval <= 1 || !window.recurrence_anchor_date) return true;
+        const anchor = new Date(`${window.recurrence_anchor_date}T00:00:00`);
+        const weeksSinceAnchor = Math.round((date - anchor) / (7 * 24 * 60 * 60 * 1000));
+        return weeksSinceAnchor >= 0 && weeksSinceAnchor % interval === 0;
+    }
+
     function slotsForDate(date) {
         if (date < today || date > horizonEnd) return [];
         const slots = [];
-        windows.filter((window) => window.day_of_week === date.getDay()).forEach((window) => {
+        windows.filter((window) => windowRecursOnDate(window, date)).forEach((window) => {
             const [hours, minutes] = window.start_time.split(':').map(Number);
             const windowStart = new Date(date.getFullYear(), date.getMonth(), date.getDate(), hours, minutes);
             const windowEnd = new Date(windowStart.getTime() + efcWindowDurationMinutes(window) * 60 * 1000);
@@ -256,7 +265,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function refreshAvailability() {
         const [windowsResult, bookedResult, programsResult, freshBusyRanges] = await Promise.all([
-            echelonMemberClient.from('coach_availability_windows').select('id, day_of_week, start_time, end_time, session_type, class_label, capacity, session_length_minutes, program_key').eq('active', true),
+            echelonMemberClient.from('coach_availability_windows').select('id, day_of_week, start_time, end_time, session_type, class_label, capacity, session_length_minutes, program_key, recurrence_interval_weeks, recurrence_anchor_date').eq('active', true),
             echelonMemberClient.from('booked_session_times').select('scheduled_at, status').gte('scheduled_at', today.toISOString()).lte('scheduled_at', horizonEnd.toISOString()),
             echelonMemberClient.from('training_programs').select('program_key, status, launch_at, expires_at'),
             efcFetchBusyRanges()

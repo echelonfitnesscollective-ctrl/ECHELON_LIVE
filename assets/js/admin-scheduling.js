@@ -227,7 +227,10 @@ async function initializeAdminScheduling() {
             : (row.capacity > 1 ? ` · up to ${row.capacity}` : '');
         const program = row.program_key ? programsByKey.get(row.program_key) : null;
         const programNote = row.program_key ? (efcProgramIsLive(program) ? ` · linked: ${program ? program.name : row.program_key}` : ` · linked: ${program ? program.name : row.program_key} (NOT LIVE — hidden from booking)`) : '';
-        return `${EFC_WEEKDAY_LABELS[row.day_of_week]} · ${efcFormatTime(row.start_time)} – ${efcFormatTime(row.end_time)} · ${name}${sessionsNote}${programNote}${row.active ? '' : ' (inactive)'}`;
+        const recurrenceNote = row.recurrence_interval_weeks > 1
+            ? ` · every ${row.recurrence_interval_weeks} weeks from ${row.recurrence_anchor_date || 'unset'}`
+            : '';
+        return `${EFC_WEEKDAY_LABELS[row.day_of_week]} · ${efcFormatTime(row.start_time)} – ${efcFormatTime(row.end_time)} · ${name}${sessionsNote}${programNote}${recurrenceNote}${row.active ? '' : ' (inactive)'}`;
     }
 
     function buildWindowEditForm(row, copy) {
@@ -247,12 +250,14 @@ async function initializeAdminScheduling() {
         const programSelect = document.createElement('select'); programSelect.name = 'program_key'; programSelect.setAttribute('aria-label', 'Linked Training Hub program (optional)');
         programSelect.innerHTML = '<option value="">Not linked to a Training Hub program</option>';
         programsByKey.forEach((program) => { const option = document.createElement('option'); option.value = program.program_key; option.textContent = program.name; if (program.program_key === row.program_key) option.selected = true; programSelect.append(option); });
+        const intervalInput = document.createElement('input'); intervalInput.type = 'number'; intervalInput.min = '1'; intervalInput.max = '8'; intervalInput.value = row.recurrence_interval_weeks || 1; intervalInput.setAttribute('aria-label', 'Repeats every how many weeks (1 = every week, 2 = every other week)');
+        const anchorInput = document.createElement('input'); anchorInput.type = 'date'; anchorInput.value = row.recurrence_anchor_date || ''; anchorInput.setAttribute('aria-label', 'First occurrence date (required if repeating every 2+ weeks)');
 
         const save = document.createElement('button'); save.type = 'submit'; save.className = 'application-contact-save'; save.textContent = 'SAVE';
         const cancel = document.createElement('button'); cancel.type = 'button'; cancel.className = 'application-contact-cancel'; cancel.textContent = 'CANCEL';
         const feedback = document.createElement('span'); feedback.className = 'application-contact-feedback'; feedback.setAttribute('role', 'status');
 
-        form.append(daySelect, startInput, endInput, typeSelect, labelInput, capacityInput, lengthInput, programSelect, save, cancel, feedback);
+        form.append(daySelect, startInput, endInput, typeSelect, labelInput, capacityInput, lengthInput, programSelect, intervalInput, anchorInput, save, cancel, feedback);
 
         const closeForm = () => { form.hidden = true; copy.hidden = false; };
         cancel.addEventListener('click', closeForm);
@@ -268,7 +273,9 @@ async function initializeAdminScheduling() {
                 class_label: labelInput.value.trim() || null,
                 capacity: Math.max(1, Number(capacityInput.value) || 1),
                 session_length_minutes: Math.max(15, Number(lengthInput.value) || 60),
-                program_key: programSelect.value || null
+                program_key: programSelect.value || null,
+                recurrence_interval_weeks: Math.max(1, Number(intervalInput.value) || 1),
+                recurrence_anchor_date: anchorInput.value || null
             };
             save.disabled = true;
             const { error } = await echelonAdminClient.from('coach_availability_windows').update(updated).eq('id', row.id);
@@ -283,7 +290,7 @@ async function initializeAdminScheduling() {
     async function loadAvailabilityWindows() {
         const { data, error } = await echelonAdminClient
             .from('coach_availability_windows')
-            .select('id, day_of_week, start_time, end_time, session_type, class_label, capacity, session_length_minutes, program_key, active')
+            .select('id, day_of_week, start_time, end_time, session_type, class_label, capacity, session_length_minutes, program_key, recurrence_interval_weeks, recurrence_anchor_date, active')
             .order('day_of_week', { ascending: true })
             .order('start_time', { ascending: true });
         windowList.innerHTML = '';
@@ -335,7 +342,7 @@ async function initializeAdminScheduling() {
     windowForm.addEventListener('submit', async (event) => {
         event.preventDefault();
         windowFeedback.textContent = '';
-        const { day_of_week, start_time, end_time, session_type, class_label, capacity, session_length_minutes, program_key } = windowForm.elements;
+        const { day_of_week, start_time, end_time, session_type, class_label, capacity, session_length_minutes, program_key, recurrence_interval_weeks, recurrence_anchor_date } = windowForm.elements;
         const { error } = await echelonAdminClient.from('coach_availability_windows').insert({
             day_of_week: Number(day_of_week.value),
             start_time: start_time.value,
@@ -344,7 +351,9 @@ async function initializeAdminScheduling() {
             class_label: class_label.value.trim() || null,
             capacity: Math.max(1, Number(capacity.value) || 1),
             session_length_minutes: Math.max(15, Number(session_length_minutes.value) || 60),
-            program_key: program_key.value || null
+            program_key: program_key.value || null,
+            recurrence_interval_weeks: Math.max(1, Number(recurrence_interval_weeks.value) || 1),
+            recurrence_anchor_date: recurrence_anchor_date.value || null
         });
         if (error) { windowFeedback.textContent = 'Could not save that window. Make sure the end time is after the start time.'; return; }
         windowForm.reset();

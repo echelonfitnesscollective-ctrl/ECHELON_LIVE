@@ -502,12 +502,12 @@ function createApplicationRecord(item, questionLabelMap) {
         const choice = document.createElement('select'); choice.setAttribute('aria-label', `Payment option for ${item.full_name}`);
         [['echelon_12_monthly', 'ECHELON 12 · $149 / MO'], ['echelon_12_paid_in_full', 'ECHELON 12 · $399 PAID IN FULL'], ['one_on_one_monthly', '1-ON-1 COACHING · MONTHLY'], ['private_group_training', 'PRIVATE GROUP TRAINING · BY SIZE']].forEach(([value, label]) => { const option = document.createElement('option'); option.value = value; option.textContent = label; choice.append(option); });
         choice.value = paymentOptionForApplication(item);
-        const groupSizeInput = document.createElement('input'); groupSizeInput.type = 'number'; groupSizeInput.min = '3'; groupSizeInput.max = '15'; groupSizeInput.placeholder = 'GROUP SIZE (3–15)'; groupSizeInput.setAttribute('aria-label', `Group size for ${item.full_name}`); groupSizeInput.hidden = choice.value !== 'private_group_training';
+        const groupSizeInput = document.createElement('input'); groupSizeInput.type = 'number'; groupSizeInput.min = '3'; groupSizeInput.max = '25'; groupSizeInput.placeholder = 'GROUP SIZE (3–25)'; groupSizeInput.setAttribute('aria-label', `Group size for ${item.full_name}`); groupSizeInput.hidden = choice.value !== 'private_group_training';
         choice.addEventListener('change', () => { groupSizeInput.hidden = choice.value !== 'private_group_training'; });
         const createOffer = document.createElement('button'); createOffer.type = 'button'; createOffer.className = 'btn-secondary'; createOffer.textContent = reopenLabel || 'CREATE PAYMENT LINK';
         createOffer.addEventListener('click', async () => {
             const groupSize = Number(groupSizeInput.value);
-            if (choice.value === 'private_group_training' && (!Number.isInteger(groupSize) || groupSize < 3 || groupSize > 15)) { paymentFeedback.textContent = 'Enter a group size between 3 and 15.'; return; }
+            if (choice.value === 'private_group_training' && (!Number.isInteger(groupSize) || groupSize < 3 || groupSize > 25)) { paymentFeedback.textContent = 'Enter a group size between 3 and 25.'; return; }
             createOffer.disabled = true; createOffer.textContent = 'CREATING…'; paymentFeedback.textContent = '';
             const { data: sessionData } = await echelonAdminClient.auth.getSession();
             const payload = { applicationId: item.id, paymentOption: choice.value };
@@ -2525,6 +2525,7 @@ async function appendMemberCoachingControls(detail, row, memberName) {
 
     const membershipBlock = document.createElement('div'); membershipBlock.className = 'echelon-form';
     const membershipHeading = document.createElement('h5'); membershipHeading.textContent = 'Coaching Membership, $149/month';
+    const membershipNote = document.createElement('p'); membershipNote.className = 'admin-detail-date'; membershipNote.textContent = 'For 12-Week Transformation graduates who want to keep coaching support (programming, check-ins, Member Portal access) without re-enrolling in a full new 12-week cycle.';
     const membershipButton = document.createElement('button'); membershipButton.type = 'button'; membershipButton.className = 'btn-secondary'; membershipButton.textContent = 'GENERATE CHECKOUT LINK';
     const membershipOutput = document.createElement('input'); membershipOutput.type = 'text'; membershipOutput.readOnly = true; membershipOutput.setAttribute('aria-label', 'Coaching Membership checkout link'); membershipOutput.placeholder = `Send this to ${row.profile?.email || memberName} once generated`;
     const membershipFeedback = document.createElement('p'); membershipFeedback.className = 'form-error'; membershipFeedback.setAttribute('role', 'status');
@@ -2543,7 +2544,7 @@ async function appendMemberCoachingControls(detail, row, memberName) {
             membershipButton.disabled = false; membershipButton.textContent = 'GENERATE CHECKOUT LINK';
         }
     });
-    membershipBlock.append(membershipHeading, membershipButton, membershipOutput, membershipFeedback);
+    membershipBlock.append(membershipHeading, membershipNote, membershipButton, membershipOutput, membershipFeedback);
     section.append(membershipBlock);
 
     const enrollForm = document.createElement('form'); enrollForm.className = 'echelon-form';
