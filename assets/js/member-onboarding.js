@@ -67,5 +67,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         showEchelonSuccess(feedback, 'ONBOARDING SAVED', 'Your information is securely on file. Your coach can now prepare for your first steps with Echelon.', { dismissLabel: 'RETURN TO MEMBER HUB', onDismiss: () => { window.location.href = 'member-portal.html'; } });
         submitButton.disabled = false;
         submitButton.textContent = 'SAVE ONBOARDING';
+
+        const { data: sessionData } = await echelonMemberClient.auth.getSession();
+        fetch('/api/forms/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionData.session?.access_token || ''}` },
+            body: JSON.stringify({ form: 'onboarding-complete' })
+        }).catch(() => {
+            // Onboarding is already saved; a failed owner-notification email
+            // is not something the member needs to see or retry.
+        });
     });
 });

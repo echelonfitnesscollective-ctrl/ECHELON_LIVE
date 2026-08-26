@@ -49,5 +49,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         showEchelonSuccess(feedback, 'WAIVER COMPLETE', 'Your participation agreement is securely on file. You are one step closer to training with Echelon.', { dismissLabel: 'RETURN TO MEMBER HUB', onDismiss: () => { window.location.href = 'member-portal.html'; } });
         submitButton.disabled = false;
         submitButton.textContent = 'SIGN & SAVE WAIVER';
+
+        const { data: sessionData } = await echelonMemberClient.auth.getSession();
+        fetch('/api/forms/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionData.session?.access_token || ''}` },
+            body: JSON.stringify({ form: 'waiver-complete' })
+        }).catch(() => {
+            // The waiver is already saved; a failed owner-notification email
+            // is not something the member needs to see or retry.
+        });
     });
 });

@@ -40,6 +40,25 @@ function rateLimited(ip) {
   return entry.count > MAX_PER_WINDOW;
 }
 
+// Verifies the caller's own member session (same trick as requireAdmin
+// elsewhere: forward their bearer token so RLS scopes the query to their
+// own row) rather than trusting client-supplied name/email. Used only by
+// the waiver-complete/onboarding-complete notify actions below, which don't
+// write anything themselves, member-waiver.js and member-onboarding.js
+// already wrote directly to Supabase with the member's own client before
+// calling this; this just sends the owner a heads-up email.
+async function verifiedMember(req) {
+  const token = String(req.headers.authorization || '').replace(/^Bearer\s+/i, '');
+  if (!token) return null;
+  const userResponse = await fetch(`${process.env.SUPABASE_URL}/auth/v1/user`, { headers: { apikey: process.env.SUPABASE_ANON_KEY, Authorization: `Bearer ${token}` } });
+  if (!userResponse.ok) return null;
+  const user = await userResponse.json();
+  const profileResponse = await fetch(`${process.env.SUPABASE_URL}/rest/v1/member_profiles?user_id=eq.${encodeURIComponent(user.id)}&select=full_name,email&limit=1`, { headers: { apikey: process.env.SUPABASE_ANON_KEY, Authorization: `Bearer ${token}` } });
+  const profiles = profileResponse.ok ? await profileResponse.json() : [];
+  const profile = Array.isArray(profiles) ? profiles[0] : null;
+  return { email: profile?.email || user.email, fullName: profile?.full_name || user.email || 'A member' };
+}
+
 async function insertRow(table, payload) {
   const response = await fetch(`${process.env.SUPABASE_URL}/rest/v1/${table}`, {
     method: 'POST',
@@ -134,6 +153,16 @@ module.exports = async function submitSiteForm(req, res) {
   const body = req.body || {};
   if (String(body.efc_hp || '').trim()) return res.status(200).json({ ok: true });
   const form = String(body.form || '').trim();
+
+  if (form === 'waiver-complete' || form === 'onboarding-complete') {
+    const member = await verifiedMember(req);
+    if (!member) return res.status(401).json({ error: 'Your session could not be verified.' });
+    await notifyOwner({
+      subject: form === 'waiver-complete' ? `Waiver Signed: ${member.fullName}` : `Onboarding Completed: ${member.fullName}`,
+      text: `${member.fullName} (${member.email}) just ${form === 'waiver-complete' ? 'signed their waiver' : 'completed their onboarding'} in the Member Portal.`,
+    });
+    return res.status(200).json({ ok: true });
+  }
 
   let result;
   if (form === 'checkin') result = submitCheckin(body);
