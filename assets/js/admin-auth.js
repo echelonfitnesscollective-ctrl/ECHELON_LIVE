@@ -1961,14 +1961,38 @@ const EFC_ONBOARDING_FIELDS = [
 ];
 const EFC_ONBOARDING_PARQ_KEYS = new Set(['heart_condition', 'heart_medication', 'chest_pain_activity', 'dizziness_or_fainting', 'bone_joint_tissue', 'recent_chest_pain', 'other_activity_concern']);
 
+function appendMemberReminderAction(container, { name, email, kind }) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'btn-secondary';
+    button.textContent = kind === 'waiver' ? 'RESEND WAIVER REMINDER' : 'RESEND ONBOARDING REMINDER';
+    const feedback = document.createElement('span'); feedback.className = 'application-payment-feedback'; feedback.setAttribute('role', 'status');
+    button.addEventListener('click', async () => {
+        if (!email) { feedback.textContent = 'This member has no email on file.'; return; }
+        button.disabled = true; button.textContent = 'SENDING…'; feedback.textContent = '';
+        const { data: sessionData } = await echelonAdminClient.auth.getSession();
+        const result = await fetch('/api/enrollment/create-offer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionData.session?.access_token || ''}` },
+            body: JSON.stringify({ action: kind === 'waiver' ? 'send-waiver-reminder' : 'send-onboarding-reminder', name, email })
+        });
+        const body = await result.json();
+        feedback.textContent = result.ok ? body.message : (body.error || 'The reminder could not be sent.');
+        button.disabled = false; button.textContent = kind === 'waiver' ? 'RESEND WAIVER REMINDER' : 'RESEND ONBOARDING REMINDER';
+    });
+    container.append(button, feedback);
+}
+
 function appendOnboardingEntryForm(detail, row) {
     const section = document.createElement('section');
     section.className = 'admin-manual-entry';
     const heading = document.createElement('h4');
     heading.textContent = 'ENTER ONBOARDING FOR THIS MEMBER';
+    section.append(heading);
+    appendMemberReminderAction(section, { name: row.profile?.full_name, email: row.profile?.email, kind: 'onboarding' });
     const note = document.createElement('p');
     note.className = 'admin-detail-date';
-    note.textContent = 'Use this if you are walking through PAR-Q and health history with them on the phone or in person, instead of them filling out the form themselves.';
+    note.textContent = 'Use this if you are walking through PAR-Q and health history with them on the phone or in person, instead of them filling out the form themselves. Or send a reminder above and let them complete it themselves in the Member Portal.';
     const form = document.createElement('form');
     form.className = 'echelon-form';
 
@@ -2021,7 +2045,7 @@ function appendOnboardingEntryForm(detail, row) {
         initializeAdminDashboard();
     });
 
-    section.append(heading, note, form);
+    section.append(note, form);
     detail.append(section);
 }
 
@@ -2030,9 +2054,11 @@ function appendWaiverEntryForm(detail, row, memberName) {
     section.className = 'admin-manual-entry';
     const heading = document.createElement('h4');
     heading.textContent = 'ENTER WAIVER FOR THIS MEMBER';
+    section.append(heading);
+    appendMemberReminderAction(section, { name: row.profile?.full_name, email: row.profile?.email, kind: 'waiver' });
     const note = document.createElement('p');
     note.className = 'admin-detail-date';
-    note.textContent = 'Use this only when they have verbally agreed to the participation agreement with you directly, phone or in person.';
+    note.textContent = 'Use this only when they have verbally agreed to the participation agreement with you directly, phone or in person. Or send a reminder above and let them sign it themselves in the Member Portal.';
     const form = document.createElement('form');
     form.className = 'echelon-form';
 
@@ -2051,7 +2077,7 @@ function appendWaiverEntryForm(detail, row, memberName) {
     const consentCheckbox = document.createElement('input');
     consentCheckbox.type = 'checkbox';
     consentCheckbox.required = true;
-    consentLabel.append(consentCheckbox, document.createTextNode(' She verbally agreed to the Echelon participation agreement.'));
+    consentLabel.append(consentCheckbox, document.createTextNode(' They verbally agreed to the Echelon participation agreement.'));
 
     const submit = document.createElement('button');
     submit.type = 'submit';
@@ -2081,7 +2107,7 @@ function appendWaiverEntryForm(detail, row, memberName) {
         initializeAdminDashboard();
     });
 
-    section.append(heading, note, form);
+    section.append(note, form);
     detail.append(section);
 }
 

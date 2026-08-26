@@ -126,6 +126,58 @@ async function createOnboardingLink(admin, body, response) {
   }
 }
 
+// "RESEND WAIVER REMINDER" / "RESEND ONBOARDING REMINDER" in the Member
+// Records detail view. Both just email the member a link back to the page
+// that's still outstanding; assets/js/member-auth.js's requireMember()
+// guard already auto-redirects a signed-in member to member-onboarding.html
+// or member-waiver.html for anything they haven't finished, so a plain link
+// to either page (or to member-login.html if they're signed out) always
+// lands them in the right place. Folded into this file for the same
+// 12-function-cap reason as createOnboardingLink above.
+function reminderEmailCopy(kind) {
+  return kind === 'waiver'
+    ? { subject: 'Please sign your Echelon waiver', page: 'member-waiver.html', label: 'liability waiver', action: 'sign your waiver' }
+    : { subject: 'Finish your Echelon onboarding', page: 'member-onboarding.html', label: 'health and readiness onboarding', action: 'complete your onboarding' };
+}
+
+function reminderEmailHtml(name, copy, url) {
+  const greetingName = (name || '').split(/\s+/)[0] || 'there';
+  return `<div style="max-width:520px;margin:0 auto;padding:40px 32px;background:#0d0d0c;color:#ffffff;font-family:'Helvetica Neue',Arial,sans-serif;"><p style="margin:0 0 28px;font-size:11px;letter-spacing:2px;color:#d7b55b;font-weight:700;">ECHELON FITNESS COLLECTIVE</p><h2 style="margin:0 0 16px;font-size:26px;line-height:1.2;color:#ffffff;">One quick step left.</h2><p style="margin:0 0 20px;font-size:15px;line-height:1.6;color:#cccccc;">Hi ${greetingName}, you're almost set. Before we get you fully underway, please ${copy.action} in the Member Portal.</p><p style="margin:0 0 28px;"><a href="${url}" style="display:inline-block;padding:14px 28px;background:#d7b55b;color:#0d0d0c;text-decoration:none;font-weight:700;font-size:13px;letter-spacing:1px;">${copy.action.toUpperCase()}</a></p><p style="margin:0;font-size:13px;line-height:1.6;color:#888888;">Respectfully,<br>Echelon Fitness Collective</p></div>`;
+}
+
+function reminderEmailText(name, copy, url) {
+  const greetingName = (name || '').split(/\s+/)[0] || 'there';
+  return `Hi ${greetingName},\n\nYou're almost set. Before we get you fully underway, please ${copy.action} in the Member Portal.\n\n${url}\n\nRespectfully,\nEchelon Fitness Collective`;
+}
+
+async function sendMemberReminder(body, kind, response) {
+  if (!process.env.RESEND_API_KEY) return response.status(500).json({ error: 'Email sending is not configured yet. Add RESEND_API_KEY in Vercel.' });
+  const email = String(body?.email || '').trim();
+  const name = String(body?.name || '').trim();
+  if (!email) return response.status(400).json({ error: 'This member has no email on file.' });
+
+  const copy = reminderEmailCopy(kind);
+  const url = `${siteUrl()}/pages/${copy.page}`;
+  try {
+    const emailResult = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: 'Echelon Fitness Collective <welcome@echelonfitness.co>',
+        to: email,
+        subject: copy.subject,
+        html: reminderEmailHtml(name, copy, url),
+        text: reminderEmailText(name, copy, url),
+      }),
+    });
+    if (!emailResult.ok) return response.status(502).json({ error: 'The reminder email could not be sent.' });
+    return response.status(200).json({ message: `Reminder sent to ${email}.` });
+  } catch (error) {
+    console.error('Send member reminder error', error && error.message);
+    return response.status(503).json({ error: 'The reminder could not be sent right now.' });
+  }
+}
+
 module.exports = async function createEnrollmentOffer(request, response) {
   response.setHeader('Cache-Control', 'no-store'); response.setHeader('X-Content-Type-Options', 'nosniff');
   if (request.method !== 'POST') return response.status(405).json({ error: 'Method not allowed.' });
@@ -133,6 +185,8 @@ module.exports = async function createEnrollmentOffer(request, response) {
   if (!admin) return response.status(401).json({ error: 'Your admin session is required.' });
   if (request.body?.action === 'send-email') return sendPaymentEmail(admin, request.body?.applicationId, response);
   if (request.body?.action === 'create-onboarding-link') return createOnboardingLink(admin, request.body, response);
+  if (request.body?.action === 'send-waiver-reminder') return sendMemberReminder(request.body, 'waiver', response);
+  if (request.body?.action === 'send-onboarding-reminder') return sendMemberReminder(request.body, 'onboarding', response);
   const { applicationId, paymentOption, groupSize } = request.body || {};
   const option = PAYMENT_OPTIONS[paymentOption];
   if (!applicationId || !option) return response.status(400).json({ error: 'Choose a configured Echelon payment option.' });
