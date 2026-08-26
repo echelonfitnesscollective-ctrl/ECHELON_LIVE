@@ -500,7 +500,7 @@ function createApplicationRecord(item, questionLabelMap) {
 
     function buildCreateOfferForm(reopenLabel) {
         const choice = document.createElement('select'); choice.setAttribute('aria-label', `Payment option for ${item.full_name}`);
-        [['echelon_12_monthly', 'ECHELON 12 · $149 / MO'], ['echelon_12_paid_in_full', 'ECHELON 12 · $399 PAID IN FULL'], ['one_on_one_monthly', '1-ON-1 COACHING · MONTHLY'], ['private_group_training', 'PRIVATE GROUP TRAINING · BY SIZE']].forEach(([value, label]) => { const option = document.createElement('option'); option.value = value; option.textContent = label; choice.append(option); });
+        [['echelon_12_monthly', 'ECHELON 12 · $149 / MO'], ['echelon_12_paid_in_full', 'ECHELON 12 · $399 PAID IN FULL'], ['one_on_one_monthly', '1-ON-1 COACHING · MONTHLY (UNLIMITED ACCESS)'], ['one_on_one_starter', '1-ON-1 COACHING · $55 STARTER SESSION'], ['one_on_one_20pack', '1-ON-1 COACHING · $950 20-SESSION PACK'], ['private_group_training', 'PRIVATE GROUP TRAINING · BY SIZE']].forEach(([value, label]) => { const option = document.createElement('option'); option.value = value; option.textContent = label; choice.append(option); });
         choice.value = paymentOptionForApplication(item);
         const groupSizeInput = document.createElement('input'); groupSizeInput.type = 'number'; groupSizeInput.min = '3'; groupSizeInput.max = '25'; groupSizeInput.placeholder = 'GROUP SIZE (3–25)'; groupSizeInput.setAttribute('aria-label', `Group size for ${item.full_name}`); groupSizeInput.hidden = choice.value !== 'private_group_training';
         choice.addEventListener('change', () => { groupSizeInput.hidden = choice.value !== 'private_group_training'; });

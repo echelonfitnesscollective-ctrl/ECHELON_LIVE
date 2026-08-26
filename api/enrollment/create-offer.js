@@ -6,6 +6,8 @@ const PAYMENT_OPTIONS = {
   echelon_12_monthly: { priceEnv: 'STRIPE_PRICE_12_WEEK_MONTHLY', mode: 'subscription', label: 'Echelon 12 · $149 / month' },
   echelon_12_paid_in_full: { priceEnv: 'STRIPE_PRICE_12_WEEK_FULL', mode: 'payment', label: 'Echelon 12 · $399 paid in full' },
   one_on_one_monthly: { priceEnv: 'STRIPE_PRICE_ONE_ON_ONE_MONTHLY', mode: 'subscription', label: '1-on-1 Coaching · monthly' },
+  one_on_one_starter: { priceEnv: 'STRIPE_PRICE_ONE_ON_ONE_STARTER', mode: 'payment', label: '1-on-1 Coaching · $55 starter session' },
+  one_on_one_20pack: { priceEnv: 'STRIPE_PRICE_ONE_ON_ONE_20PACK', mode: 'payment', label: '1-on-1 Coaching · $950 20-session pack' },
   private_group_training: { basePriceEnv: 'STRIPE_PRICE_PRIVATE_GROUP_BASE', addonPriceEnv: 'STRIPE_PRICE_PRIVATE_GROUP_ADDON', mode: 'payment', basePeople: 5, baseAmount: 199, addonAmount: 25 }
 };
 
