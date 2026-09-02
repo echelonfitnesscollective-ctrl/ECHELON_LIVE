@@ -1,0 +1,15 @@
+{
+  "name": "Josh: Cut to 160 Program",
+  "short_name": "Josh Program",
+  "description": "Josh's 24-week Cut to 160 Program, Echelon Fitness Collective.",
+  "start_url": "/pages/programs/josh-cut-to-160-program.html",
+  "scope": "/pages/programs/josh-cut-to-160-program.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0D0D0C",
+  "theme_color": "#0D0D0C",
+  "icons": [
+    { "src": "/assets/images/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "/assets/images/favicon.png", "sizes": "256x256", "type": "image/png", "purpose": "any" }
+  ]
+}
