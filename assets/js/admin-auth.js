@@ -2219,51 +2219,79 @@ function appendCopyIntakeSummary(detail, row, memberName) {
     const feedback = document.createElement('p');
     feedback.className = 'form-error';
     feedback.setAttribute('role', 'status');
+    const fallbackBox = document.createElement('textarea');
+    fallbackBox.className = 'echelon-form';
+    fallbackBox.rows = 6;
+    fallbackBox.readOnly = true;
+    fallbackBox.hidden = true;
+    fallbackBox.setAttribute('aria-label', 'Program build prompt text, select and copy manually');
 
     button.addEventListener('click', async () => {
         button.disabled = true; button.textContent = 'GATHERING…';
-        const email = row.profile?.email;
-        const [appResult, profileResult] = await Promise.all([
-            email
-                ? echelonAdminClient.from('coaching_applications').select('application_data, program_interest, approved_program').eq('email', email).order('created_at', { ascending: false }).limit(1).maybeSingle()
-                : Promise.resolve({ data: null }),
-            echelonAdminClient.from('member_training_profiles').select('*').eq('user_id', row.user_id).maybeSingle()
-        ]);
-        const appData = appResult.data?.application_data || {};
-        const profile = profileResult.data || {};
-        const skip = new Set(['user_id', 'created_at', 'updated_at', 'call_notes']);
-
-        const lines = [
-            `I have a new coaching client, ${memberName}. I want a program PDF and webpage built for them just like Zamiyah's Elite Performance & Shape Program, use docs/coaching-programs/client-programs/zamiyah-elite-performance-program.md as the exact template for structure, tone, and design.`,
-            ''
-        ];
-        lines.push("Here's their full intake application data:");
-        if (appResult.data?.program_interest) lines.push(`Program interest: ${appResult.data.program_interest}`);
-        Object.entries(appData).forEach(([key, value]) => { if (value !== undefined && value !== null && String(value).trim() !== '') lines.push(`${formatFieldLabel(key)}: ${value}`); });
-        lines.push('', "Here's their Training Profile:");
-        Object.entries(profile).forEach(([key, value]) => { if (!skip.has(key) && value !== undefined && value !== null && String(value).trim() !== '') lines.push(`${formatFieldLabel(key)}: ${value}`); });
-        lines.push('', "Here's what I learned from our call that isn't in the system:");
-        lines.push(profile.call_notes && profile.call_notes.trim() ? profile.call_notes.trim() : '(none on file yet, add them in the Training Profile section below before building their program)');
-        lines.push(
-            '',
-            'Build me:',
-            '1. The PDF + a standalone webpage at pages/programs/<name>.html, same black/gold style as Zamiyah\'s, with its own PWA manifest so it can be added to their phone\'s home screen like an app.',
-            '2. The Workout Library entries and however many training days their split needs, published. Reuse existing exercise_library rows by exact name wherever they fit, don\'t duplicate what\'s already there.',
-            '3. If I didn\'t give you their current working weights, don\'t invent numbers, use "Establish Week 1, log in Hub" as the Load value and say so plainly in the program.',
-            '4. Once I give you their start date, populate their Hub exactly like Zamiyah\'s: a program_template covering their full timeline, program_template_workouts for every week, member_program_enrollments, and their nutrition_profiles targets.'
-        );
-
-        const text = lines.join('\n');
+        feedback.textContent = '';
+        fallbackBox.hidden = true;
         try {
-            await navigator.clipboard.writeText(text);
-            feedback.textContent = 'Copied. Paste into a new conversation along with the New Client template.';
-        } catch (_) {
-            window.prompt('Copy this:', text);
+            const email = row.profile?.email;
+            const [appResult, profileResult] = await Promise.all([
+                email
+                    ? echelonAdminClient.from('coaching_applications').select('application_data, program_interest, approved_program').eq('email', email).order('created_at', { ascending: false }).limit(1).maybeSingle()
+                    : Promise.resolve({ data: null }),
+                echelonAdminClient.from('member_training_profiles').select('*').eq('user_id', row.user_id).maybeSingle()
+            ]);
+            const appData = appResult.data?.application_data || {};
+            const profile = profileResult.data || {};
+            const skip = new Set(['user_id', 'created_at', 'updated_at', 'call_notes']);
+
+            const lines = [
+                `I have a new coaching client, ${memberName}. I want a program PDF and webpage built for them just like Zamiyah's Elite Performance & Shape Program, use docs/coaching-programs/client-programs/zamiyah-elite-performance-program.md as the exact template for structure, tone, and design.`,
+                ''
+            ];
+            lines.push("Here's their full intake application data:");
+            if (appResult.data?.program_interest) lines.push(`Program interest: ${appResult.data.program_interest}`);
+            Object.entries(appData).forEach(([key, value]) => { if (value !== undefined && value !== null && String(value).trim() !== '') lines.push(`${formatFieldLabel(key)}: ${value}`); });
+            lines.push('', "Here's their Training Profile:");
+            Object.entries(profile).forEach(([key, value]) => { if (!skip.has(key) && value !== undefined && value !== null && String(value).trim() !== '') lines.push(`${formatFieldLabel(key)}: ${value}`); });
+            lines.push('', "Here's what I learned from our call that isn't in the system:");
+            lines.push(profile.call_notes && profile.call_notes.trim() ? profile.call_notes.trim() : '(none on file yet, add them in the Training Profile section below before building their program)');
+            lines.push(
+                '',
+                'Build me:',
+                '1. The PDF + a standalone webpage at pages/programs/<name>.html, same black/gold style as Zamiyah\'s, with its own PWA manifest so it can be added to their phone\'s home screen like an app.',
+                '2. The Workout Library entries and however many training days their split needs, published. Reuse existing exercise_library rows by exact name wherever they fit, don\'t duplicate what\'s already there.',
+                '3. If I didn\'t give you their current working weights, don\'t invent numbers, use "Establish Week 1, log in Hub" as the Load value and say so plainly in the program.',
+                '4. Once I give you their start date, populate their Hub exactly like Zamiyah\'s: a program_template covering their full timeline, program_template_workouts for every week, member_program_enrollments, and their nutrition_profiles targets.'
+            );
+
+            const text = lines.join('\n');
+            let copied = false;
+            try {
+                // Clipboard writes can silently hang behind a browser permission
+                // prompt with no timeout, this race guarantees we always move on.
+                await Promise.race([
+                    navigator.clipboard.writeText(text),
+                    new Promise((_, reject) => setTimeout(() => reject(new Error('clipboard timeout')), 2500))
+                ]);
+                copied = true;
+            } catch (_) {
+                copied = false;
+            }
+            if (copied) {
+                feedback.textContent = 'Copied. Paste into a new conversation along with the New Client template.';
+            } else {
+                feedback.textContent = 'Could not access the clipboard, select the text below and copy it manually.';
+                fallbackBox.value = text;
+                fallbackBox.hidden = false;
+                fallbackBox.focus();
+                fallbackBox.select();
+            }
+        } catch (err) {
+            feedback.textContent = 'Could not gather this member\'s data, try again.';
+        } finally {
+            button.disabled = false; button.textContent = 'COPY PROGRAM BUILD PROMPT';
         }
-        button.disabled = false; button.textContent = 'COPY INTAKE SUMMARY';
     });
 
-    section.append(heading, note, button, feedback);
+    section.append(heading, note, button, feedback, fallbackBox);
     detail.append(section);
 }
 
