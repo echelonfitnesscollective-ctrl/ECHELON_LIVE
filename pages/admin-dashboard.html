@@ -524,6 +524,7 @@
                             <input name="rest_seconds" type="number" min="0" placeholder="Rest (seconds)" aria-label="Rest seconds">
                             <input name="notes" type="text" placeholder="Notes (optional)" aria-label="Notes">
                             <button type="submit" class="btn-secondary">ADD EXERCISE TO WORKOUT</button>
+                            <p id="workout-exercise-feedback" class="form-error" role="status"></p>
                         </form>
                         <div id="workout-exercise-list" class="admin-record-list"></div>
                     </div>
@@ -563,6 +564,7 @@
                             <select name="workout_id" required aria-label="Workout"></select>
                             <input name="notes" type="text" placeholder="Notes (optional)" aria-label="Notes">
                             <button type="submit" class="btn-secondary">ASSIGN</button>
+                            <p id="program-calendar-feedback" class="form-error" role="status"></p>
                         </form>
                         <div id="program-calendar-list" class="admin-record-list"></div>
                     </div>

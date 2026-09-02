@@ -357,6 +357,7 @@ async function initializeAdminScheduling() {
         });
         if (error) { windowFeedback.textContent = 'Could not save that window. Make sure the end time is after the start time.'; return; }
         windowForm.reset();
+        showEchelonSuccess(windowFeedback, 'WINDOW SAVED', 'That availability window is live for booking.');
         loadAvailabilityWindows();
     });
 
@@ -406,6 +407,7 @@ async function initializeAdminScheduling() {
             return;
         }
         bookForm.reset();
+        showEchelonSuccess(bookFeedback, 'SESSION BOOKED', `${memberName} is booked in.`);
         if (sessionsCalendar) sessionsCalendar.reload();
         efcSyncBookingToCalendar(data.id, 'create');
     });

@@ -1378,6 +1378,7 @@ async function initializeWorkoutLibraryManager() {
     const workoutExerciseEditor = document.getElementById('workout-exercise-editor');
     const workoutExerciseEditorTitle = document.getElementById('workout-exercise-editor-title');
     const workoutExerciseForm = document.getElementById('workout-exercise-form');
+    const workoutExerciseFeedback = document.getElementById('workout-exercise-feedback');
     const workoutExerciseList = document.getElementById('workout-exercise-list');
     let activeWorkoutId = null;
     let workouts = [];
@@ -1454,6 +1455,7 @@ async function initializeWorkoutLibraryManager() {
     workoutExerciseForm.addEventListener('submit', async (event) => {
         event.preventDefault();
         if (!activeWorkoutId) return;
+        workoutExerciseFeedback.textContent = '';
         const { data: existing } = await echelonAdminClient.from('workout_exercises').select('sort_order').eq('workout_id', activeWorkoutId).order('sort_order', { ascending: false }).limit(1);
         const nextSort = existing && existing.length ? existing[0].sort_order + 1 : 0;
         const { error } = await echelonAdminClient.from('workout_exercises').insert({
@@ -1465,7 +1467,10 @@ async function initializeWorkoutLibraryManager() {
             rest_seconds: workoutExerciseForm.elements.rest_seconds.value ? Number(workoutExerciseForm.elements.rest_seconds.value) : null,
             notes: workoutExerciseForm.elements.notes.value.trim() || null
         });
-        if (!error) { workoutExerciseForm.reset(); refreshWorkoutExercises(); }
+        if (error) { workoutExerciseFeedback.textContent = 'Could not add that exercise, try again.'; return; }
+        workoutExerciseForm.reset();
+        workoutExerciseFeedback.textContent = 'Added.';
+        refreshWorkoutExercises();
     });
 
     workoutCancelBtn.addEventListener('click', () => {
@@ -1507,6 +1512,7 @@ async function initializeWorkoutLibraryManager() {
     const programCalendarEditor = document.getElementById('program-calendar-editor');
     const programCalendarEditorTitle = document.getElementById('program-calendar-editor-title');
     const programCalendarForm = document.getElementById('program-calendar-form');
+    const programCalendarFeedback = document.getElementById('program-calendar-feedback');
     const programCalendarList = document.getElementById('program-calendar-list');
     let activeProgramId = null;
 
@@ -1587,6 +1593,7 @@ async function initializeWorkoutLibraryManager() {
     programCalendarForm.addEventListener('submit', async (event) => {
         event.preventDefault();
         if (!activeProgramId) return;
+        programCalendarFeedback.textContent = '';
         const { error } = await echelonAdminClient.from('program_template_workouts').upsert({
             program_template_id: activeProgramId,
             week_number: Number(programCalendarForm.elements.week_number.value),
@@ -1594,7 +1601,10 @@ async function initializeWorkoutLibraryManager() {
             workout_id: programCalendarForm.elements.workout_id.value,
             notes: programCalendarForm.elements.notes.value.trim() || null
         }, { onConflict: 'program_template_id,week_number,day_number' });
-        if (!error) { programCalendarForm.reset(); refreshProgramCalendar(); }
+        if (error) { programCalendarFeedback.textContent = 'Could not assign that workout, try again.'; return; }
+        programCalendarForm.reset();
+        programCalendarFeedback.textContent = 'Assigned.';
+        refreshProgramCalendar();
     });
 
     programCancelBtn.addEventListener('click', () => {

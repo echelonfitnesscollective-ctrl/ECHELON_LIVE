@@ -285,7 +285,8 @@ async function initializeMemberProfileAnswers(member) {
 
         submitButton.disabled = false;
         submitButton.textContent = 'SAVE PROFILE';
-        feedback.textContent = error ? 'We could not save your profile. Please try again.' : 'Saved.';
+        if (error) feedback.textContent = 'We could not save your profile. Please try again.';
+        else showEchelonSuccess(feedback, 'PROFILE SAVED', 'Your Coaching Profile is up to date.');
     });
 }
 
@@ -318,7 +319,8 @@ async function initializeMemberSettings(member) {
 
         submitButton.disabled = false;
         submitButton.textContent = 'SAVE CHANGES';
-        feedback.textContent = error ? 'We could not save your changes. Please try again.' : 'Saved.';
+        if (error) feedback.textContent = 'We could not save your changes. Please try again.';
+        else showEchelonSuccess(feedback, 'CHANGES SAVED', 'Your account details are up to date.');
     });
 
     const passwordButton = document.getElementById('member-settings-password');
@@ -395,9 +397,8 @@ async function initializeMemberPasswordReset() {
             { redirectTo: `${window.location.origin}/pages/member-reset.html` }
         );
 
-        requestFeedback.textContent = error
-            ? 'We could not send a reset link. Please try again or contact Echelon.'
-            : 'Check your email for a secure link to set your password.';
+        if (error) requestFeedback.textContent = 'We could not send a reset link. Please try again or contact Echelon.';
+        else showEchelonSuccess(requestFeedback, 'CHECK YOUR EMAIL', 'We sent a secure link to set your password.');
     });
 
     updateForm.addEventListener('submit', async (event) => {
@@ -424,9 +425,7 @@ async function initializeMemberPasswordReset() {
         }
 
         const destination = EFC_AUTH_HASH_TYPE === 'invite' ? 'member-welcome.html' : 'member-portal.html';
-        updateFeedback.textContent = destination === 'member-welcome.html'
-            ? 'Password set. Welcome to Echelon…'
-            : 'Password updated. Taking you to your member portal…';
+        showEchelonSuccess(updateFeedback, 'PASSWORD UPDATED', destination === 'member-welcome.html' ? 'Welcome to Echelon, taking you there now…' : 'Taking you to your member portal…');
         window.setTimeout(() => window.location.replace(destination), 900);
     });
 }
