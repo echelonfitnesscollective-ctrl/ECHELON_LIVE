@@ -2578,6 +2578,17 @@ async function appendMemberProfileAnswers(detail, row) {
     section.append(form);
 }
 
+function buildDailyWorkoutRows(templateWorkouts, deloadWeek, startDateStr, userId) {
+    const start = new Date(`${startDateStr}T00:00:00`);
+    return templateWorkouts.map(tw => {
+        const date = new Date(start);
+        date.setDate(date.getDate() + (tw.week_number - 1) * 7 + (tw.day_number - 1));
+        const deloadNote = tw.week_number === deloadWeek ? 'Deload week: same exercises, reduce load about 40% and add extra rest between sets.' : null;
+        const coachNote = [tw.notes, deloadNote].filter(Boolean).join(' ') || null;
+        return { user_id: userId, workout_id: tw.workout_id, assigned_date: date.toISOString().slice(0, 10), coach_note: coachNote };
+    });
+}
+
 async function appendMemberCoachingControls(detail, row, memberName) {
     const section = document.createElement('section');
     const heading = document.createElement('h4');
@@ -2592,7 +2603,7 @@ async function appendMemberCoachingControls(detail, row, memberName) {
         echelonAdminClient.from('member_daily_workouts').select('id, assigned_date, status, coach_note, workouts(title)').eq('user_id', row.user_id).order('assigned_date', { ascending: false }).limit(6),
         echelonAdminClient.from('workouts').select('id, title, setting').eq('status', 'published').order('title', { ascending: true }),
         echelonAdminClient.from('program_templates').select('id, title, duration_weeks').eq('status', 'published').order('title', { ascending: true }),
-        echelonAdminClient.from('member_program_enrollments').select('start_date, status, program_templates(title)').eq('user_id', row.user_id).eq('status', 'active').order('start_date', { ascending: false }).limit(1),
+        echelonAdminClient.from('member_program_enrollments').select('id, program_template_id, start_date, status, program_templates(title)').eq('user_id', row.user_id).eq('status', 'active').order('start_date', { ascending: false }).limit(1),
         echelonAdminClient.from('coach_messages').select('sender_id, message, created_at').or(`sender_id.eq.${row.user_id},recipient_id.eq.${row.user_id}`).order('created_at', { ascending: false }).limit(6)
     ]);
     if (assignmentsResult.error || workoutsResult.error || messagesResult.error || !admin) { summary.textContent = 'Coaching Hub will be ready after its database update is run.'; return; }
@@ -2603,6 +2614,39 @@ async function appendMemberCoachingControls(detail, row, memberName) {
         const enrolledNote = document.createElement('p'); enrolledNote.className = 'admin-detail-date';
         enrolledNote.textContent = `Currently enrolled: ${active.program_templates?.title || 'Unknown program'} · started ${active.start_date}`;
         section.append(enrolledNote);
+
+        const adjustForm = document.createElement('form'); adjustForm.className = 'echelon-form';
+        const adjustDateInput = document.createElement('input'); adjustDateInput.type = 'date'; adjustDateInput.required = true; adjustDateInput.setAttribute('aria-label', 'Adjusted start date'); adjustDateInput.value = active.start_date;
+        const adjustButton = document.createElement('button'); adjustButton.type = 'submit'; adjustButton.className = 'btn-secondary'; adjustButton.textContent = 'ADJUST START DATE';
+        const adjustFeedback = document.createElement('p'); adjustFeedback.className = 'form-error'; adjustFeedback.setAttribute('role', 'status');
+        adjustForm.append(adjustDateInput, adjustButton, adjustFeedback);
+        adjustForm.addEventListener('submit', async event => {
+            event.preventDefault();
+            adjustFeedback.textContent = '';
+            if (adjustDateInput.value === active.start_date) { adjustFeedback.textContent = 'That\'s already the start date on file.'; return; }
+            adjustButton.disabled = true; adjustButton.textContent = 'ADJUSTING…';
+            try {
+                const [{ data: templateWorkouts, error: fetchError }, { data: templateRow }] = await Promise.all([
+                    echelonAdminClient.from('program_template_workouts').select('week_number, day_number, workout_id, notes').eq('program_template_id', active.program_template_id),
+                    echelonAdminClient.from('program_templates').select('deload_week').eq('id', active.program_template_id).single()
+                ]);
+                if (fetchError || !templateWorkouts.length) { adjustFeedback.textContent = 'Could not load this program\'s workout calendar.'; return; }
+                // Only rows the member hasn't already completed get regenerated, real
+                // logged progress is never touched by a start-date correction.
+                const { error: deleteError } = await echelonAdminClient.from('member_daily_workouts').delete().eq('user_id', row.user_id).eq('status', 'assigned');
+                if (deleteError) { adjustFeedback.textContent = 'Could not clear the existing calendar, try again.'; return; }
+                const rows = buildDailyWorkoutRows(templateWorkouts, templateRow?.deload_week || null, adjustDateInput.value, row.user_id);
+                const { error: insertError } = await echelonAdminClient.from('member_daily_workouts').insert(rows);
+                if (insertError) { adjustFeedback.textContent = 'Could not rebuild the calendar on the new date, try again.'; return; }
+                const { error: updateError } = await echelonAdminClient.from('member_program_enrollments').update({ start_date: adjustDateInput.value }).eq('id', active.id);
+                if (updateError) { adjustFeedback.textContent = 'Calendar rebuilt, but the enrollment date could not be updated.'; return; }
+                showEchelonSuccess(adjustFeedback, 'START DATE UPDATED', `Calendar rebuilt from ${adjustDateInput.value}.`);
+                renderIntakeDetail(row);
+            } finally {
+                adjustButton.disabled = false; adjustButton.textContent = 'ADJUST START DATE';
+            }
+        });
+        section.append(adjustForm);
     }
 
     const membershipBlock = document.createElement('div'); membershipBlock.className = 'echelon-form';
@@ -2649,15 +2693,7 @@ async function appendMemberCoachingControls(detail, row, memberName) {
             echelonAdminClient.from('program_templates').select('deload_week').eq('id', programSelect.value).single()
         ]);
         if (fetchError || !templateWorkouts.length) { enrollFeedback.textContent = 'This program has no workouts assigned yet.'; return; }
-        const deloadWeek = templateRow?.deload_week || null;
-        const start = new Date(`${enrollDateInput.value}T00:00:00`);
-        const rows = templateWorkouts.map(tw => {
-            const date = new Date(start);
-            date.setDate(date.getDate() + (tw.week_number - 1) * 7 + (tw.day_number - 1));
-            const deloadNote = tw.week_number === deloadWeek ? 'Deload week: same exercises, reduce load about 40% and add extra rest between sets.' : null;
-            const coachNote = [tw.notes, deloadNote].filter(Boolean).join(' ') || null;
-            return { user_id: row.user_id, workout_id: tw.workout_id, assigned_date: date.toISOString().slice(0, 10), coach_note: coachNote };
-        });
+        const rows = buildDailyWorkoutRows(templateWorkouts, templateRow?.deload_week || null, enrollDateInput.value, row.user_id);
         const { error: insertError } = await echelonAdminClient.from('member_daily_workouts').insert(rows);
         if (insertError) { enrollFeedback.textContent = 'We could not enroll this member. Please try again.'; return; }
         await echelonAdminClient.from('member_program_enrollments').insert({ user_id: row.user_id, program_template_id: programSelect.value, start_date: enrollDateInput.value });
