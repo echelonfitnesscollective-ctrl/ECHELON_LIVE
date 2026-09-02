@@ -1267,6 +1267,34 @@ html{
     margin-bottom:16px;
 }
 
+/* STANDARD STATEMENT */
+
+.standard-statement{
+    max-width:780px;
+    margin:0 auto 70px;
+    padding:40px 20px;
+    text-align:center;
+    border-top:1px solid rgba(212,175,55,.25);
+    border-bottom:1px solid rgba(212,175,55,.25);
+}
+
+.standard-statement p{
+    font-family:'Cormorant Garamond',serif;
+    font-style:italic;
+    font-size:clamp(1.6rem,3.2vw,2.3rem);
+    line-height:1.4;
+    color:#fff;
+    margin-bottom:14px;
+}
+
+.standard-statement span{
+    display:block;
+    color:var(--primary);
+    font-size:.75rem;
+    letter-spacing:.2em;
+    text-transform:uppercase;
+}
+
 /* PRINCIPLES */
 
 .principles-grid{
