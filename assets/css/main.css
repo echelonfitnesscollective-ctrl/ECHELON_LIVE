@@ -539,6 +539,25 @@ textarea{
 }
 
 /* ==========================================
+   PHILOSOPHY LINE
+========================================== */
+
+.hero-philosophy{
+
+    font-family:var(--heading-font);
+
+    font-size:clamp(1rem,2.2vw,1.4rem);
+
+    letter-spacing:.14em;
+
+    color:var(--primary);
+
+    text-transform:uppercase;
+
+    margin-bottom:14px;
+}
+
+/* ==========================================
    SUBTITLE
 ========================================== */
 
