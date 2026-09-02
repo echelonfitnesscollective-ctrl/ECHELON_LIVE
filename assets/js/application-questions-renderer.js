@@ -48,6 +48,15 @@ function buildApplicationQuestionFields(questions, answers) {
         if (Object.prototype.hasOwnProperty.call(answerMap, question.question_key)) {
             field.value = answerMap[question.question_key] || '';
         }
+        // Long questions clip inside a single-line placeholder on narrow
+        // screens (placeholders never wrap), so plain text inputs get a
+        // real label above them instead of relying on the placeholder alone.
+        if (question.field_type !== 'select' && question.field_type !== 'textarea') {
+            const label = document.createElement('label');
+            label.textContent = question.label;
+            field.removeAttribute('placeholder');
+            fragment.append(label);
+        }
         fragment.append(field);
 
         if (question.help_text) {
