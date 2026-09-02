@@ -1249,7 +1249,6 @@ html{
     aspect-ratio:4/5;
     object-fit:cover;
     object-position:center;
-    filter:saturate(.92) sepia(.06) contrast(1.02);
 }
 
 .coach-image:hover img{
@@ -1383,11 +1382,12 @@ html{
     background:rgba(255,215,0,.04);
 }
 
-.population-tags span em{
-    font-style:normal;
-    font-weight:500;
+.population-tags-note{
+    margin:14px 0 0;
+    text-align:center;
     color:#9a9a98;
     font-size:.78rem;
+    letter-spacing:.02em;
 }
 
 /* CTA */
