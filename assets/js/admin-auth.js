@@ -2232,13 +2232,20 @@ function appendCopyIntakeSummary(detail, row, memberName) {
         fallbackBox.hidden = true;
         try {
             const email = row.profile?.email;
-            const [appResult, profileResult] = await Promise.all([
+            const [appResult, profileResult, selfAnswersResult] = await Promise.all([
                 email
                     ? echelonAdminClient.from('coaching_applications').select('application_data, program_interest, approved_program').eq('email', email).order('created_at', { ascending: false }).limit(1).maybeSingle()
                     : Promise.resolve({ data: null }),
-                echelonAdminClient.from('member_training_profiles').select('*').eq('user_id', row.user_id).maybeSingle()
+                echelonAdminClient.from('member_training_profiles').select('*').eq('user_id', row.user_id).maybeSingle(),
+                echelonAdminClient.from('member_profile_answers').select('question_key, answer').eq('user_id', row.user_id)
             ]);
-            const appData = appResult.data?.application_data || {};
+            // The Coaching Profile (member_profile_answers) is self-editable from the
+            // Member Portal, so it's the freshest source, it overwrites matching keys
+            // from the original application instead of just supplementing them.
+            const appData = { ...(appResult.data?.application_data || {}) };
+            (selfAnswersResult.data || []).forEach(({ question_key, answer }) => {
+                if (answer !== undefined && answer !== null && String(answer).trim() !== '') appData[question_key] = answer;
+            });
             const profile = profileResult.data || {};
             const skip = new Set(['user_id', 'created_at', 'updated_at', 'call_notes']);
 
