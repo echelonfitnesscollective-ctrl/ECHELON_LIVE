@@ -286,12 +286,42 @@ document.addEventListener('DOMContentLoaded', async () => {
         renderTodaysWorkSlide();
     }
 
+    async function loadYourProgram() {
+        const panel = document.getElementById('member-program-panel');
+        if (!panel) return;
+        const { data: enrollment } = await echelonMemberClient
+            .from('member_program_enrollments')
+            .select('start_date, program_templates(title, duration_weeks, webpage_url, pdf_url)')
+            .eq('user_id', member.id)
+            .eq('status', 'active')
+            .order('start_date', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+        const template = enrollment?.program_templates;
+        if (!template) { panel.textContent = 'Your coach hasn\'t assigned a program yet.'; return; }
+        panel.replaceChildren();
+        const card = document.createElement('div'); card.className = 'member-program-card';
+        const info = document.createElement('div');
+        const title = document.createElement('strong'); title.textContent = template.title;
+        const meta = document.createElement('span'); meta.textContent = `${template.duration_weeks ? `${template.duration_weeks}-week program` : 'Program'} · started ${enrollment.start_date}`;
+        info.append(title, meta);
+        card.append(info);
+        if (template.webpage_url || template.pdf_url) {
+            const links = document.createElement('div'); links.className = 'member-program-links';
+            if (template.webpage_url) { const view = document.createElement('a'); view.className = 'btn-secondary'; view.href = template.webpage_url; view.target = '_blank'; view.rel = 'noopener'; view.textContent = 'VIEW YOUR PROGRAM'; links.append(view); }
+            if (template.pdf_url) { const dl = document.createElement('a'); dl.className = 'btn-secondary'; dl.href = template.pdf_url; dl.target = '_blank'; dl.rel = 'noopener'; dl.textContent = 'DOWNLOAD PDF'; links.append(dl); }
+            card.append(links);
+        }
+        panel.append(card);
+    }
+
     async function loadHub() {
         const [photos, messages] = await Promise.all([
             echelonMemberClient.from('member_progress_photos').select('storage_path, caption, taken_on, created_at').eq('user_id', member.id).order('taken_on', { ascending: false }).limit(12),
             echelonMemberClient.from('coach_messages').select('sender_id, message, created_at').or(`sender_id.eq.${member.id},recipient_id.eq.${member.id}`).order('created_at', { ascending: true }).limit(50),
             loadTodaysWork(),
-            loadStreak()
+            loadStreak(),
+            loadYourProgram()
         ]);
         const photoList = document.getElementById('progress-photo-list'); photoList.replaceChildren();
         for (const photo of (photos.data || [])) { const urlResult = await echelonMemberClient.storage.from('progress-photos').createSignedUrl(photo.storage_path, 3600); if (!urlResult.data?.signedUrl) continue; const figure = document.createElement('figure'); const image = document.createElement('img'); image.src = urlResult.data.signedUrl; image.alt = photo.caption || `Progress photo from ${photo.taken_on}`; const caption = document.createElement('figcaption'); caption.textContent = `${photo.taken_on}${photo.caption ? ` · ${photo.caption}` : ''}`; figure.append(image, caption); photoList.append(figure); }

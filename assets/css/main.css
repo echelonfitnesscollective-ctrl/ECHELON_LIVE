@@ -3696,6 +3696,12 @@ COACHING PLAYBOOK
 .coaching-subheading{ margin-top:24px; color:var(--primary); font-size:.65rem; font-weight:700; letter-spacing:.16em; }
 .training-panel{ min-height:420px; }
 .message-panel{ background:linear-gradient(145deg,rgba(215,181,91,.09),rgba(4,4,4,.88)); }
+.member-program-panel{ color:#c4c4c4; font-size:.82rem; }
+.member-program-card{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:16px; }
+.member-program-card strong{ display:block; color:#fff; font-size:.95rem; margin-bottom:4px; }
+.member-program-card span{ color:#aaa; font-size:.72rem; letter-spacing:.04em; }
+.member-program-links{ display:flex; gap:10px; flex-wrap:wrap; }
+.member-program-links a{ white-space:nowrap; }
 .coaching-history,
 .photo-timeline,
 .message-thread{ margin-top:22px; }
