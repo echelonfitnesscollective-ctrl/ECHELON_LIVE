@@ -32,7 +32,7 @@ She walked me through all of it on the phone: the lifts she already loves, the h
 | Phase | Weeks | Focus |
 |---|---|---|
 | **Phase 1: Foundation & Reconnection** | 1–7 | Rebuild the habit first. Technique on every lift, light plyo to teach landing mechanics before intensity, tracking habit starts here. Baseline photos, measurements, and split-depth check in Week 1. Deload Week 7. |
-| **Phase 2: Shape & Strength Build** | 8–15 | Progressive overload on hip thrust, sumo squat, and RDL. Hip-dip shelf work and Day 3 arm volume both step up. Plyo/agility complexity increases. Deload Week 15. |
+| **Phase 2: Shape & Strength Build** | 8–15 | Progressive overload on hip thrust, sumo squat, back squat, and RDL. Hip-dip shelf work and Day 3 arm volume both step up. Plyo/agility complexity increases. Deload Week 15. |
 | **Phase 3: Recomposition Push** | 16–23 | Nutrition tightens to a modest deficit (see Nutrition Protocol). Metabolic finishers added to Day 2 and Day 4, ab definition work stays consistent. Deload Week 23. |
 | **Phase 4: Peak & Polish** | 24–28 | Volume tapers ~15% so she walks into her birthday recovered, not depleted. Splits progression gets its final push. Week 28: photo check-in against Week 1 baseline. |
 
@@ -55,15 +55,16 @@ She walked me through all of it on the phone: the lifts she already loves, the h
 
 **Warm-Up**
 - Glute Bridges — 2 × 15
-- Banded Lateral Walks — 2 × 15 steps/side
+- Lunges — 2 × 15/side
 - Clamshells (bodyweight) — 2 × 15/side
-- Pogo Hops (new, primes landing mechanics) — 2 × 20
+- Bodyweight Squats — 2 × 20
 
 **Main Lifts**
 
 | Exercise | Sets × Reps | Load |
 |---|---|---|
 | Hip Thrust | 4 × 6–8 | 45 lb |
+| Sumo Squat (Heavy) | 4 × 6–8 | 45 lb |
 | Cable Kickback | 3 × 8–10/leg | 25 lb |
 | Romanian Deadlift | 3 × 8–10 | 25 lb |
 | Step-Ups (lean-forward, glute bias) | 3 × 10/leg | 15 lb |
@@ -74,7 +75,7 @@ Cues: Hip thrust, ribs down, chin tucked, drive through heels, not a lower-back 
 
 | Exercise | Sets × Reps | Load |
 |---|---|---|
-| 5A · Standing Cable Abduction, torso leaned forward | 3 × 15–20/leg | 40 lb |
+| 5A · Single-Leg Squats | 3 × 15–20/leg | bodyweight |
 | 5B · Cable Clamshells | 3 × 12–15/side | 10 lb |
 | 5C · Side-Lying Hip Abduction Pulses (new) | 2 × 20/side | bodyweight |
 
@@ -148,14 +149,14 @@ Three angles (pushdown, overhead, skull crusher) cover the whole triceps without
 *Volume · ~55 min*
 
 **Warm-Up**
-- Banded Lateral Walks: 2 × 15 steps/side
+- Lunges: 2 × 15/side
 - Glute Bridges: 2 × 15
 
 **Main Lifts**
 
 | Exercise | Sets × Reps | Load |
 |---|---|---|
-| Sumo Squat (Heavy) | 4 × 6–8 | 45 lb |
+| Back Squat (Heavy) | 4 × 6–8 | 45 lb |
 | Single-Leg RDL | 3 × 8–10/leg | 25 lb |
 | Hyperextensions (glute bias) | 3 × 12–15 | 25 lb |
 | Seated Leg Press (glute stance, feet high & wide) | 3 × 10–12 | 45 lb |
@@ -206,6 +207,7 @@ Recomposition happens on the plate more than on the platform. At 154 lb, here's 
 - **Phase 4 (Weeks 24–28):** back up to ~1,900 kcal so she's recovered and full, not depleted, going into her birthday.
 - Protein at every meal: chicken, fish, eggs, Greek yogurt, cottage cheese, lean beef. The one number that matters most for keeping the muscle being built while the fat comes off.
 - Water climbs on Day 1 and Day 4; add 16–24 oz on top of baseline on heavy lift days.
+- She's already averaging 10,000 steps/day outside of training; that daily activity is already baked into the calorie targets above, so the Phase 3 deficit doesn't need to go any deeper to compensate for it.
 - Sleep is currently averaging 6 hours, that's the quiet limiter on both glute recovery and appetite control. Even pushing toward 7 hours will show up faster than any dietary change.
 
 *General fitness and nutrition guidance from her coach, not a substitute for individualized clinical dietary advice. Check with a physician before starting the plyometric or splits work if there is any joint, hip, or back history.*
