@@ -8,6 +8,14 @@ function efcPic(src, alt, eager) {
     return `<picture><source srcset="${webp}" type="image/webp"><img src="${src}" alt="${alt}"${loading}></picture>`;
 }
 
+// Merch photos aren't shot yet, so every card falls back to a plain
+// branded placeholder instead of a broken-image icon until the real
+// file lands at that path (onerror only fires once, so a card heals
+// itself automatically the moment the real photo is dropped in).
+function efcMerchPic(src, alt) {
+    return `<picture><img src="${src}" alt="${alt}" loading="lazy" onerror="this.closest('.merch-card-image').classList.add('img-missing');this.remove()"></picture>`;
+}
+
 // The real merch line, priced for a boutique training-brand catalog.
 // Every image lives under assets/images/merch/ - drop the real photos
 // in with these exact filenames and the carousel just picks them up,
@@ -26,7 +34,7 @@ const EFC_MERCH = [
 ];
 
 function merchCard(item) {
-    return `<article class="merch-card"><div class="merch-card-image">${efcPic(item.image, item.alt, false)}<span class="merch-coming-soon">COMING SOON</span></div><div class="merch-card-info"><h4>${item.name}</h4><p class="merch-card-colors">${item.colors}</p><p class="merch-card-price">${item.price}</p></div></article>`;
+    return `<article class="merch-card"><div class="merch-card-image">${efcMerchPic(item.image, item.alt)}<span class="merch-coming-soon">COMING SOON</span></div><div class="merch-card-info"><h4>${item.name}</h4><p class="merch-card-colors">${item.colors}</p><p class="merch-card-price">${item.price}</p></div></article>`;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
