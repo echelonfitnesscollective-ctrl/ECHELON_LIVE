@@ -8,21 +8,36 @@ function efcPic(src, alt, eager) {
     return `<picture><source srcset="${webp}" type="image/webp"><img src="${src}" alt="${alt}"${loading}></picture>`;
 }
 
+// The real merch line, priced for a boutique training-brand catalog.
+// Every image lives under assets/images/merch/ - drop the real photos
+// in with these exact filenames and the carousel just picks them up,
+// nothing else to change. Every card shows COMING SOON until
+// EFC_ETSY_SHOP_URL above is filled in with the live storefront link.
+const EFC_MERCH = [
+    { image: 'assets/images/merch/echelon-cap.jpg', alt: 'Echelon classic cap, black, EC monogram', name: 'Echelon Classic Cap', colors: 'Black', price: '$28' },
+    { image: 'assets/images/merch/echelon-visor.jpg', alt: 'Echelon performance visor, black, EC monogram', name: 'Echelon Performance Visor', colors: 'Black', price: '$22' },
+    { image: 'assets/images/merch/echelon-tee-black.jpg', alt: 'Echelon classic tee, black', name: 'Echelon Classic Tee', colors: 'Black / White / Heather Grey', price: '$32' },
+    { image: 'assets/images/merch/echelon-tank-black.jpg', alt: 'Echelon tank top, black', name: 'Echelon Tank Top', colors: 'Black', price: '$26' },
+    { image: 'assets/images/merch/echelon-crop-white.jpg', alt: 'Echelon cropped tee, white', name: 'Echelon Cropped Tee', colors: 'White / Black', price: '$30' },
+    { image: 'assets/images/merch/echelon-longsleeve-black.jpg', alt: 'Echelon long sleeve performance tee, black', name: 'Echelon Long Sleeve Performance Tee', colors: 'Black / White', price: '$42' },
+    { image: 'assets/images/merch/echelon-quarterzip-black.jpg', alt: 'Echelon quarter-zip pullover, black', name: 'Echelon Quarter-Zip Pullover', colors: 'Black', price: '$56' },
+    { image: 'assets/images/merch/echelon-hoodie-black.jpg', alt: 'Echelon pullover hoodie, black', name: 'Echelon Pullover Hoodie', colors: 'Black / White', price: '$64' },
+    { image: 'assets/images/merch/echelon-leggings.jpg', alt: 'Echelon performance leggings, black', name: 'Echelon Performance Leggings', colors: 'Black', price: '$58' }
+];
+
+function merchCard(item) {
+    return `<article class="merch-card"><div class="merch-card-image">${efcPic(item.image, item.alt, false)}<span class="merch-coming-soon">COMING SOON</span></div><div class="merch-card-info"><h4>${item.name}</h4><p class="merch-card-colors">${item.colors}</p><p class="merch-card-price">${item.price}</p></div></article>`;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const shop = document.getElementById('shop');
     const container = shop?.querySelector('.container');
     if (!container) return;
 
-    const collections = [
-        { image: 'assets/images/BLACKECHELONTEE.jpg', alt: 'Echelon black training tee', number: '01', label: 'CORE COLLECTION', title: 'THE ECHELON TRAINING TEE', copy: 'A clean, performance-minded staple designed to move from training to everyday life without losing its edge.', details: 'BLACK / WHITE / GREY' },
-        { image: 'assets/images/BLACKHOODIE.jpg', alt: 'Echelon black performance hoodie', number: '02', label: 'RECOVERY COLLECTION', title: 'THE PERFORMANCE HOODIE', copy: 'Heavyweight comfort for warm-ups, recovery, and the hours beyond the work.', details: 'BLACK / SIGNATURE MARK' },
-        { image: 'assets/images/hat_blk_1.jpg', alt: 'Echelon black trucker cap', number: '03', label: 'FIELD COLLECTION', title: 'THE ECHELON TRAINING CAP', copy: 'An everyday finishing piece made for early sessions, long days, and a disciplined point of view.', details: 'BLACK / ADJUSTABLE FIT' }
-    ];
+    // Doubled so the CSS animation can loop seamlessly from 0 to -50%.
+    const cards = EFC_MERCH.map(merchCard).join('');
 
-    const slides = collections.map((item, index) => `<article class="collection-slide${index === 0 ? ' active' : ''}" data-collection-slide aria-hidden="${index === 0 ? 'false' : 'true'}"><div class="collection-visual">${efcPic(item.image, item.alt, index === 0)}<span>DROP 01 / ${item.number}</span></div><div class="collection-copy"><span class="checkin-tag">${item.label}</span><h3>${item.title}</h3><p>${item.copy}</p><div class="goods-detail-row"><span>${item.details}</span><span>AVAILABLE VIA ETSY</span></div></div></article>`).join('');
-    const dots = collections.map((item, index) => `<button class="collection-dot${index === 0 ? ' active' : ''}" data-collection-dot="${index}" aria-label="Show ${item.title}" aria-current="${index === 0 ? 'true' : 'false'}"></button>`).join('');
-
-    container.innerHTML = `<div class="shop-showcase-heading"><span class="section-tag">ECHELON GOODS</span><h2 class="section-title">WEAR THE STANDARD.</h2><p>Purpose-built essentials and performance nutrition, organized around how you train, recover, and live.</p></div><div class="goods-tabs"><button class="goods-tab active" data-goods-view="apparel">ECHELON GOODS</button><button class="goods-tab" data-goods-view="nutrition">PERFORMANCE NUTRITION</button></div><section class="goods-panel active" data-goods-panel="apparel"><div class="collection-carousel" aria-label="Echelon Goods collections"><div class="collection-slides">${slides}</div><div class="collection-carousel-controls"><button type="button" class="collection-arrow" data-collection-previous aria-label="Previous collection">←</button><div class="collection-dots" aria-label="Choose a collection">${dots}</div><button type="button" class="collection-arrow" data-collection-next aria-label="Next collection">→</button></div></div><div class="goods-launch"><div><span class="checkin-tag">ECHELON GOODS</span><h3>THE COLLECTION IS HERE.</h3><p>Performance-minded essentials for training, recovery, and the work beyond the session.</p></div><a data-etsy-link href="https://www.etsy.com/" target="_blank" rel="noopener" class="btn-primary">SHOP THE COLLECTION →</a></div></section><section class="goods-panel" data-goods-panel="nutrition"><div class="nutrition-showcase-intro"><span class="checkin-tag">AMWAY PERFORMANCE NUTRITION</span><h3>SUPPORT THE WORK.</h3><p>Selected products available through Echelon’s independent Amway distributor links. Review product details and use only as appropriate for your own goals and needs.</p></div><div class="nutrition-showcase-grid"><article class="nutrition-showcase-card">${efcPic("assets/images/amway_prod_1.jpg", "XS Whey Protein", false)}<span>MUSCLE RECOVERY</span><h3>XS™ WHEY PROTEIN</h3><p>A protein option for members looking to support their daily nutrition routine.</p><a href="https://amway.com/share-link/tKb6jO81I" target="_blank" rel="noopener" class="btn-secondary">VIEW PRODUCT →</a></article><article class="nutrition-showcase-card">${efcPic("assets/images/amway_prod_2.jpg", "XS Creatine Plus", false)}<span>POWER &amp; PERFORMANCE</span><h3>XS™ CREATINE+</h3><p>A performance-focused option for structured training and strength work.</p><a href="https://www.amway.com/en_US/XS™-Creatine%2B-p-128463" target="_blank" rel="noopener" class="btn-secondary">VIEW PRODUCT →</a></article><article class="nutrition-showcase-card">${efcPic("assets/images/amway_prod_3.jpg", "XS Muscle Multiplier", false)}<span>TRAINING SUPPORT</span><h3>XS™ MUSCLE MULTIPLIER</h3><p>A nutrition option to explore alongside your training and recovery plan.</p><a href="https://www.amway.com/en_US/XS™-Muscle-Multiplier---Berry-Blast-p-126753?searchTerm=MUS" target="_blank" rel="noopener" class="btn-secondary">VIEW PRODUCT →</a></article></div><div class="amway-showcase-disclaimer"><strong>Independent Distributor Disclaimer:</strong> Echelon Fitness Collective is an Independent Business Owner of Amway products. XS™, Nutrilite™, and Double X™ are registered trademarks of Amway Corp. Purchases are processed through official distributor links.</div></section>`;
+    container.innerHTML = `<div class="shop-showcase-heading"><span class="section-tag">ECHELON GOODS</span><h2 class="section-title">WEAR THE STANDARD.</h2><p>Purpose-built essentials and performance nutrition, organized around how you train, recover, and live.</p></div><div class="goods-tabs"><button class="goods-tab active" data-goods-view="apparel">ECHELON GOODS</button><button class="goods-tab" data-goods-view="nutrition">PERFORMANCE NUTRITION</button></div><section class="goods-panel active" data-goods-panel="apparel"><div class="merch-marquee" aria-label="Echelon Goods, coming soon"><div class="merch-track">${cards}${cards}</div></div><div class="goods-launch"><div><span class="checkin-tag">ECHELON GOODS</span><h3>THE COLLECTION IS COMING.</h3><p>Performance-minded essentials for training, recovery, and the work beyond the session. Be the first to know when the shop goes live.</p></div><a data-etsy-link href="pages/waitlist.html" class="btn-primary">NOTIFY ME WHEN IT LAUNCHES →</a></div></section><section class="goods-panel" data-goods-panel="nutrition"><div class="nutrition-showcase-intro"><span class="checkin-tag">AMWAY PERFORMANCE NUTRITION</span><h3>SUPPORT THE WORK.</h3><p>Selected products available through Echelon’s independent Amway distributor links. Review product details and use only as appropriate for your own goals and needs.</p></div><div class="nutrition-showcase-grid"><article class="nutrition-showcase-card">${efcPic("assets/images/amway_prod_1.jpg", "XS Whey Protein", false)}<span>MUSCLE RECOVERY</span><h3>XS™ WHEY PROTEIN</h3><p>A protein option for members looking to support their daily nutrition routine.</p><a href="https://amway.com/share-link/tKb6jO81I" target="_blank" rel="noopener" class="btn-secondary">VIEW PRODUCT →</a></article><article class="nutrition-showcase-card">${efcPic("assets/images/amway_prod_2.jpg", "XS Creatine Plus", false)}<span>POWER &amp; PERFORMANCE</span><h3>XS™ CREATINE+</h3><p>A performance-focused option for structured training and strength work.</p><a href="https://www.amway.com/en_US/XS™-Creatine%2B-p-128463" target="_blank" rel="noopener" class="btn-secondary">VIEW PRODUCT →</a></article><article class="nutrition-showcase-card">${efcPic("assets/images/amway_prod_3.jpg", "XS Muscle Multiplier", false)}<span>TRAINING SUPPORT</span><h3>XS™ MUSCLE MULTIPLIER</h3><p>A nutrition option to explore alongside your training and recovery plan.</p><a href="https://www.amway.com/en_US/XS™-Muscle-Multiplier---Berry-Blast-p-126753?searchTerm=MUS" target="_blank" rel="noopener" class="btn-secondary">VIEW PRODUCT →</a></article></div><div class="amway-showcase-disclaimer"><strong>Independent Distributor Disclaimer:</strong> Echelon Fitness Collective is an Independent Business Owner of Amway products. XS™, Nutrilite™, and Double X™ are registered trademarks of Amway Corp. Purchases are processed through official distributor links.</div></section>`;
 
     const nutritionGrid = container.querySelector('.nutrition-showcase-grid');
     if (nutritionGrid) {
@@ -54,32 +69,4 @@ document.addEventListener('DOMContentLoaded', () => {
         container.querySelectorAll('[data-goods-view]').forEach(item => item.classList.toggle('active', item === button));
         container.querySelectorAll('[data-goods-panel]').forEach(panel => panel.classList.toggle('active', panel.dataset.goodsPanel === view));
     }));
-
-    const slidesElements = [...container.querySelectorAll('[data-collection-slide]')];
-    const dotsElements = [...container.querySelectorAll('[data-collection-dot]')];
-    let activeSlide = 0;
-    let rotation;
-    const showCollection = index => {
-        activeSlide = (index + slidesElements.length) % slidesElements.length;
-        slidesElements.forEach((slide, slideIndex) => {
-            const active = slideIndex === activeSlide;
-            slide.classList.toggle('active', active);
-            slide.setAttribute('aria-hidden', String(!active));
-        });
-        dotsElements.forEach((dot, dotIndex) => {
-            const active = dotIndex === activeSlide;
-            dot.classList.toggle('active', active);
-            dot.setAttribute('aria-current', String(active));
-        });
-    };
-    const restartRotation = () => {
-        window.clearInterval(rotation);
-        rotation = window.setInterval(() => showCollection(activeSlide + 1), 6000);
-    };
-    container.querySelector('[data-collection-previous]')?.addEventListener('click', () => { showCollection(activeSlide - 1); restartRotation(); });
-    container.querySelector('[data-collection-next]')?.addEventListener('click', () => { showCollection(activeSlide + 1); restartRotation(); });
-    dotsElements.forEach((dot, index) => dot.addEventListener('click', () => { showCollection(index); restartRotation(); }));
-    container.querySelector('.collection-carousel')?.addEventListener('mouseenter', () => window.clearInterval(rotation));
-    container.querySelector('.collection-carousel')?.addEventListener('mouseleave', restartRotation);
-    restartRotation();
 });
