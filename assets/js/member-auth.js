@@ -331,7 +331,7 @@ async function initializeMemberSettings(member) {
             passwordButton.textContent = 'SENDING…';
             const { error } = await echelonMemberClient.auth.resetPasswordForEmail(
                 member.email,
-                { redirectTo: `${window.location.origin}/pages/member-reset.html` }
+                { redirectTo: 'https://app.echelonfitness.co/reset-password' }
             );
             passwordButton.disabled = false;
             passwordButton.textContent = 'SEND PASSWORD RESET LINK';
@@ -394,7 +394,7 @@ async function initializeMemberPasswordReset() {
 
         const { error } = await echelonMemberClient.auth.resetPasswordForEmail(
             requestForm.elements.email.value.trim(),
-            { redirectTo: `${window.location.origin}/pages/member-reset.html` }
+            { redirectTo: 'https://app.echelonfitness.co/reset-password' }
         );
 
         if (error) requestFeedback.textContent = 'We could not send a reset link. Please try again or contact Echelon.';
