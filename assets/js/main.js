@@ -12,8 +12,59 @@ document.addEventListener("DOMContentLoaded", () => {
     initializeMobileMenu();
     initializeSmoothScroll();
     initializeRevealAnimations();
+    initializeHeaderScrollBehavior();
 
 });
+
+// ========================================
+// HEADER SHOW/HIDE ON SCROLL (mobile)
+// ========================================
+// On a long page like the shop, a header that's always visible eats
+// screen space and a header that scrolls away with the page means
+// scrolling all the way back to the top just to reach a nav link.
+// This hides the sticky header while scrolling down and brings it
+// right back on the smallest scroll upward, same as most native apps.
+function initializeHeaderScrollBehavior() {
+
+    const header = document.querySelector('.site-header');
+    if (!header) return;
+
+    const mobileQuery = window.matchMedia('(max-width:900px)');
+    let lastY = window.scrollY;
+    let ticking = false;
+
+    function update() {
+        ticking = false;
+        const currentY = window.scrollY;
+
+        if (!mobileQuery.matches) {
+            header.classList.remove('header-hidden');
+            lastY = currentY;
+            return;
+        }
+
+        const menuOpen = document.querySelector('.mobile-menu.active');
+        const delta = currentY - lastY;
+
+        if (menuOpen || currentY <= 60) {
+            header.classList.remove('header-hidden');
+        } else if (delta > 6) {
+            header.classList.add('header-hidden');
+        } else if (delta < -6) {
+            header.classList.remove('header-hidden');
+        }
+
+        lastY = currentY;
+    }
+
+    window.addEventListener('scroll', () => {
+        if (ticking) return;
+        ticking = true;
+        window.requestAnimationFrame(update);
+    }, { passive: true });
+
+    mobileQuery.addEventListener('change', () => header.classList.remove('header-hidden'));
+}
 
 function initializePhilosophyToggle() {
     const toggle = document.querySelector('.philosophy-toggle');
@@ -208,8 +259,12 @@ function initializeSmoothScroll() {
 
 function initializeRevealAnimations() {
 
+    // #shop is excluded: its cards render their own product photos
+    // against a near-black backdrop, so fading the whole section in
+    // from opacity:0 reads as the section going black for a moment
+    // before content pops in, rather than a subtle entrance.
     const sections = document.querySelectorAll(
-        ".section, .card, .card-link"
+        ".section:not(#shop), .card, .card-link"
     );
 
     if (!sections.length) return;
