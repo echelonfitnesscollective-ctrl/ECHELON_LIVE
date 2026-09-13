@@ -324,7 +324,17 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        if (event.target.closest('#shop-lightbox-close') || event.target === document.getElementById('shop-lightbox-overlay')) {
+        // The modal itself (not just the overlay behind it) fills the
+        // whole viewport so the image can sit centered in it - meaning
+        // a click on the letterboxed area around the image lands on
+        // #shop-lightbox, not on #shop-lightbox-overlay underneath it.
+        // Without checking for that too, "click outside the image"
+        // silently did nothing.
+        if (
+            event.target.closest('#shop-lightbox-close') ||
+            event.target === document.getElementById('shop-lightbox-overlay') ||
+            event.target === document.getElementById('shop-lightbox')
+        ) {
             closeLightbox();
             return;
         }
