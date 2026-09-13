@@ -1,6 +1,15 @@
-// Replace this with your full Etsy storefront URL when it is ready.
-// Leave blank to show a "notify me" state instead of a link to Etsy's generic homepage.
-const EFC_ETSY_SHOP_URL = '';
+// Echelon Goods: a real, cart-enabled storefront. Products, prices,
+// colors, sizes and photos all come from shop-catalog.js (loaded before
+// this file) - edit that file, not this one, to change what's for sale.
+//
+// The cart lives in localStorage under EFC_CART_KEY so it survives a
+// reload or a trip to another page. Checkout POSTs the cart's product
+// IDs, colors, sizes and quantities to /api/shop/checkout, which looks
+// up the real price server-side and builds the Stripe Checkout Session
+// - the browser's cart is never a source of truth for price.
+
+const EFC_CART_KEY = 'efc_shop_cart_v1';
+const EFC_CART_ENDPOINT = 'api/shop/checkout';
 
 function efcPic(src, alt, eager) {
     const webp = src.replace(/\.(jpe?g|png)$/i, '.webp');
@@ -8,44 +17,134 @@ function efcPic(src, alt, eager) {
     return `<picture><source srcset="${webp}" type="image/webp"><img src="${src}" alt="${alt}"${loading}></picture>`;
 }
 
-// Merch photos aren't shot yet, so every card falls back to a plain
-// branded placeholder instead of a broken-image icon until the real
-// file lands at that path (onerror only fires once, so a card heals
-// itself automatically the moment the real photo is dropped in).
-function efcMerchPic(src, alt) {
-    return `<picture><img src="${src}" alt="${alt}" loading="lazy" onerror="this.closest('.merch-card-image').classList.add('img-missing');this.remove()"></picture>`;
+function efcMoney(cents) {
+    return `$${(cents / 100).toFixed(2)}`;
 }
 
-// The real merch line, priced for a boutique training-brand catalog.
-// Every image lives under assets/images/merch/ - drop the real photos
-// in with these exact filenames and the carousel just picks them up,
-// nothing else to change. Every card shows COMING SOON until
-// EFC_ETSY_SHOP_URL above is filled in with the live storefront link.
-const EFC_MERCH = [
-    { image: 'assets/images/merch/echelon-cap.jpg', alt: 'Echelon classic cap, black, EC monogram', name: 'Echelon Classic Cap', colors: 'Black', price: '$28' },
-    { image: 'assets/images/merch/echelon-visor.jpg', alt: 'Echelon performance visor, black, EC monogram', name: 'Echelon Performance Visor', colors: 'Black', price: '$22' },
-    { image: 'assets/images/merch/echelon-tee-black.jpg', alt: 'Echelon classic tee, black', name: 'Echelon Classic Tee', colors: 'Black / White / Heather Grey', price: '$32' },
-    { image: 'assets/images/merch/echelon-tank-black.jpg', alt: 'Echelon tank top, black', name: 'Echelon Tank Top', colors: 'Black', price: '$26' },
-    { image: 'assets/images/merch/echelon-crop-white.jpg', alt: 'Echelon cropped tee, white', name: 'Echelon Cropped Tee', colors: 'White / Black', price: '$30' },
-    { image: 'assets/images/merch/echelon-longsleeve-black.jpg', alt: 'Echelon long sleeve performance tee, black', name: 'Echelon Long Sleeve Performance Tee', colors: 'Black / White', price: '$42' },
-    { image: 'assets/images/merch/echelon-quarterzip-black.jpg', alt: 'Echelon quarter-zip pullover, black', name: 'Echelon Quarter-Zip Pullover', colors: 'Black', price: '$56' },
-    { image: 'assets/images/merch/echelon-hoodie-black.jpg', alt: 'Echelon pullover hoodie, black', name: 'Echelon Pullover Hoodie', colors: 'Black / White', price: '$64' },
-    { image: 'assets/images/merch/echelon-leggings.jpg', alt: 'Echelon performance leggings, black', name: 'Echelon Performance Leggings', colors: 'Black', price: '$58' }
-];
+function efcLoadCart() {
+    try {
+        const raw = localStorage.getItem(EFC_CART_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (_) {
+        return [];
+    }
+}
 
-function merchCard(item) {
-    return `<article class="merch-card"><div class="merch-card-image">${efcMerchPic(item.image, item.alt)}<span class="merch-coming-soon">COMING SOON</span></div><div class="merch-card-info"><h4>${item.name}</h4><p class="merch-card-colors">${item.colors}</p><p class="merch-card-price">${item.price}</p></div></article>`;
+function efcSaveCart(cart) {
+    try {
+        localStorage.setItem(EFC_CART_KEY, JSON.stringify(cart));
+    } catch (_) {
+        // Private browsing or a full quota - the cart just won't persist
+        // across a reload, the shop itself still works this session.
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     const shop = document.getElementById('shop');
     const container = shop?.querySelector('.container');
-    if (!container) return;
+    const catalog = window.EFC_SHOP_CATALOG;
+    if (!container || !Array.isArray(catalog)) return;
 
-    // Doubled so the CSS animation can loop seamlessly from 0 to -50%.
-    const cards = EFC_MERCH.map(merchCard).join('');
+    let cart = efcLoadCart();
+    // Per-card UI state: which color/size is currently selected, keyed
+    // by product id. Not persisted - only the cart itself is.
+    const selection = new Map(catalog.map((p) => [p.id, { color: p.colors[0]?.name || null, size: null }]));
 
-    container.innerHTML = `<div class="shop-showcase-heading"><span class="section-tag">ECHELON GOODS</span><h2 class="section-title">WEAR THE STANDARD.</h2><p>Purpose-built essentials and performance nutrition, organized around how you train, recover, and live.</p></div><div class="goods-tabs"><button class="goods-tab active" data-goods-view="apparel">ECHELON GOODS</button><button class="goods-tab" data-goods-view="nutrition">PERFORMANCE NUTRITION</button></div><section class="goods-panel active" data-goods-panel="apparel"><div class="merch-marquee" aria-label="Echelon Goods, coming soon"><div class="merch-track">${cards}${cards}</div></div><div class="goods-launch"><div><span class="checkin-tag">ECHELON GOODS</span><h3>THE COLLECTION IS COMING.</h3><p>Performance-minded essentials for training, recovery, and the work beyond the session. Be the first to know when the shop goes live.</p></div><a data-etsy-link href="pages/waitlist.html" class="btn-primary">NOTIFY ME WHEN IT LAUNCHES →</a></div></section><section class="goods-panel" data-goods-panel="nutrition"><div class="nutrition-showcase-intro"><span class="checkin-tag">AMWAY PERFORMANCE NUTRITION</span><h3>SUPPORT THE WORK.</h3><p>Selected products available through Echelon’s independent Amway distributor links. Review product details and use only as appropriate for your own goals and needs.</p></div><div class="nutrition-showcase-grid"><article class="nutrition-showcase-card">${efcPic("assets/images/amway_prod_1.jpg", "XS Whey Protein", false)}<span>MUSCLE RECOVERY</span><h3>XS™ WHEY PROTEIN</h3><p>A protein option for members looking to support their daily nutrition routine.</p><a href="https://amway.com/share-link/tKb6jO81I" target="_blank" rel="noopener" class="btn-secondary">VIEW PRODUCT →</a></article><article class="nutrition-showcase-card">${efcPic("assets/images/amway_prod_2.jpg", "XS Creatine Plus", false)}<span>POWER &amp; PERFORMANCE</span><h3>XS™ CREATINE+</h3><p>A performance-focused option for structured training and strength work.</p><a href="https://www.amway.com/en_US/XS™-Creatine%2B-p-128463" target="_blank" rel="noopener" class="btn-secondary">VIEW PRODUCT →</a></article><article class="nutrition-showcase-card">${efcPic("assets/images/amway_prod_3.jpg", "XS Muscle Multiplier", false)}<span>TRAINING SUPPORT</span><h3>XS™ MUSCLE MULTIPLIER</h3><p>A nutrition option to explore alongside your training and recovery plan.</p><a href="https://www.amway.com/en_US/XS™-Muscle-Multiplier---Berry-Blast-p-126753?searchTerm=MUS" target="_blank" rel="noopener" class="btn-secondary">VIEW PRODUCT →</a></article></div><div class="amway-showcase-disclaimer"><strong>Independent Distributor Disclaimer:</strong> Echelon Fitness Collective is an Independent Business Owner of Amway products. XS™, Nutrilite™, and Double X™ are registered trademarks of Amway Corp. Purchases are processed through official distributor links.</div></section>`;
+    function productCard(product) {
+        const sel = selection.get(product.id);
+        const activeColor = product.colors.find((c) => c.name === sel.color) || product.colors[0];
+        const swatches = product.colors
+            .map((c) => `<button type="button" class="shop-swatch${c.name === sel.color ? ' active' : ''}" style="background:${c.hex}" data-product="${product.id}" data-color="${c.name}" title="${c.name}" aria-label="${c.name}" aria-pressed="${c.name === sel.color}"></button>`)
+            .join('');
+        const sizes = product.sizes
+            .map((s) => `<button type="button" class="shop-size${s === sel.size ? ' active' : ''}" data-product="${product.id}" data-size="${s}" aria-pressed="${s === sel.size}">${s}</button>`)
+            .join('');
+        return `<article class="shop-card" data-product-card="${product.id}">
+            <div class="shop-card-image" data-product-image="${product.id}">${efcPic(activeColor.image, `${product.name}, ${activeColor.name}`, false)}</div>
+            <div class="shop-card-info">
+                <h4>${product.name}</h4>
+                <p class="shop-card-desc">${product.description}</p>
+                <p class="shop-card-price">${efcMoney(product.priceCents)}</p>
+                <div class="shop-card-field">
+                    <span class="shop-field-label">Color: <em data-color-label="${product.id}">${activeColor.name}</em></span>
+                    <div class="shop-swatches" role="group" aria-label="Color">${swatches}</div>
+                </div>
+                <div class="shop-card-field">
+                    <span class="shop-field-label">Size${sel.size ? '' : ' <em class="shop-field-required">(select one)</em>'}</span>
+                    <div class="shop-sizes" role="group" aria-label="Size">${sizes}</div>
+                </div>
+                <button type="button" class="btn-secondary shop-add-btn" data-add-to-cart="${product.id}" ${sel.size ? '' : 'disabled'}>${sel.size ? 'ADD TO CART' : 'SELECT A SIZE'}</button>
+            </div>
+        </article>`;
+    }
+
+    function renderGrid() {
+        const grid = container.querySelector('.shop-grid');
+        if (grid) grid.innerHTML = catalog.map(productCard).join('');
+    }
+
+    function cartLine(item, index) {
+        return `<li class="cart-line" data-cart-index="${index}">
+            <img src="${item.image}" alt="${item.name}">
+            <div class="cart-line-info">
+                <p class="cart-line-name">${item.name}</p>
+                <p class="cart-line-variant">${item.color} / ${item.size}</p>
+                <div class="cart-line-qty">
+                    <button type="button" data-qty-step="-1" data-cart-index="${index}" aria-label="Decrease quantity">-</button>
+                    <span>${item.qty}</span>
+                    <button type="button" data-qty-step="1" data-cart-index="${index}" aria-label="Increase quantity">+</button>
+                </div>
+            </div>
+            <div class="cart-line-end">
+                <p class="cart-line-total">${efcMoney(item.priceCents * item.qty)}</p>
+                <button type="button" class="cart-line-remove" data-cart-remove="${index}" aria-label="Remove item">Remove</button>
+            </div>
+        </li>`;
+    }
+
+    function renderCart() {
+        const countEl = document.getElementById('shop-cart-count');
+        const listEl = document.getElementById('shop-cart-list');
+        const subtotalEl = document.getElementById('shop-cart-subtotal');
+        const emptyEl = document.getElementById('shop-cart-empty');
+        const checkoutBtn = document.getElementById('shop-cart-checkout');
+        const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
+        if (countEl) countEl.textContent = String(totalQty);
+        if (listEl) listEl.innerHTML = cart.map(cartLine).join('');
+        if (emptyEl) emptyEl.hidden = cart.length > 0;
+        if (listEl) listEl.hidden = cart.length === 0;
+        const subtotal = cart.reduce((sum, item) => sum + item.priceCents * item.qty, 0);
+        if (subtotalEl) subtotalEl.textContent = efcMoney(subtotal);
+        if (checkoutBtn) checkoutBtn.disabled = cart.length === 0;
+        efcSaveCart(cart);
+    }
+
+    function openCart() {
+        document.getElementById('shop-cart-drawer')?.classList.add('open');
+        document.getElementById('shop-cart-overlay')?.classList.add('open');
+    }
+
+    function closeCart() {
+        document.getElementById('shop-cart-drawer')?.classList.remove('open');
+        document.getElementById('shop-cart-overlay')?.classList.remove('open');
+    }
+
+    // The cart drawer and its overlay are appended straight to <body>
+    // rather than left inside .container. #shop has a scroll-reveal
+    // class that applies a CSS transform, and a transform on any
+    // ancestor turns it into the containing block for a
+    // position:fixed descendant - the drawer would then be "fixed"
+    // relative to that section instead of the viewport and render in
+    // the wrong place.
+    const cartHost = document.createElement('div');
+    cartHost.innerHTML = '<div class="cart-overlay" id="shop-cart-overlay"></div><aside class="cart-drawer" id="shop-cart-drawer" aria-label="Shopping cart"><div class="cart-drawer-header"><h3>YOUR CART</h3><button type="button" class="cart-close" id="shop-cart-close" aria-label="Close cart">&times;</button></div><p class="cart-empty" id="shop-cart-empty">Your cart is empty.</p><ul class="cart-list" id="shop-cart-list" hidden></ul><div class="cart-drawer-footer"><div class="cart-subtotal-row"><span>Subtotal</span><span id="shop-cart-subtotal">$0.00</span></div><p class="cart-fine-print">Shipping calculated at checkout. Made to order and printed locally, ships in 5-7 business days.</p><button type="button" class="btn-primary cart-checkout-btn" id="shop-cart-checkout" disabled>CHECKOUT</button><p class="cart-error" id="shop-cart-error" hidden></p></div></aside>';
+    while (cartHost.firstChild) document.body.appendChild(cartHost.firstChild);
+
+    container.innerHTML = `<div class="shop-showcase-heading"><span class="section-tag">ECHELON GOODS</span><h2 class="section-title">WEAR THE STANDARD.</h2><p>Purpose-built essentials and performance nutrition, organized around how you train, recover, and live.</p></div><div class="goods-tabs"><button class="goods-tab active" data-goods-view="apparel">ECHELON GOODS</button><button class="goods-tab" data-goods-view="nutrition">PERFORMANCE NUTRITION</button></div><section class="goods-panel active" data-goods-panel="apparel"><div class="shop-toolbar"><p class="shop-toolbar-note">Made to order and printed locally. Ships in 5-7 business days.</p><button type="button" class="cart-toggle" id="shop-cart-toggle">CART <span class="cart-count" id="shop-cart-count">0</span></button></div><div class="shop-grid"></div></section><section class="goods-panel" data-goods-panel="nutrition"><div class="nutrition-showcase-intro"><span class="checkin-tag">AMWAY PERFORMANCE NUTRITION</span><h3>SUPPORT THE WORK.</h3><p>Selected products available through Echelon’s independent Amway distributor links. Review product details and use only as appropriate for your own goals and needs.</p></div><div class="nutrition-showcase-grid"><article class="nutrition-showcase-card">${efcPic("assets/images/amway_prod_1.jpg", "XS Whey Protein", false)}<span>MUSCLE RECOVERY</span><h3>XS™ WHEY PROTEIN</h3><p>A protein option for members looking to support their daily nutrition routine.</p><a href="https://amway.com/share-link/tKb6jO81I" target="_blank" rel="noopener" class="btn-secondary">VIEW PRODUCT →</a></article><article class="nutrition-showcase-card">${efcPic("assets/images/amway_prod_2.jpg", "XS Creatine Plus", false)}<span>POWER &amp; PERFORMANCE</span><h3>XS™ CREATINE+</h3><p>A performance-focused option for structured training and strength work.</p><a href="https://www.amway.com/en_US/XS™-Creatine%2B-p-128463" target="_blank" rel="noopener" class="btn-secondary">VIEW PRODUCT →</a></article><article class="nutrition-showcase-card">${efcPic("assets/images/amway_prod_3.jpg", "XS Muscle Multiplier", false)}<span>TRAINING SUPPORT</span><h3>XS™ MUSCLE MULTIPLIER</h3><p>A nutrition option to explore alongside your training and recovery plan.</p><a href="https://www.amway.com/en_US/XS™-Muscle-Multiplier---Berry-Blast-p-126753?searchTerm=MUS" target="_blank" rel="noopener" class="btn-secondary">VIEW PRODUCT →</a></article></div><div class="amway-showcase-disclaimer"><strong>Independent Distributor Disclaimer:</strong> Echelon Fitness Collective is an Independent Business Owner of Amway products. XS™, Nutrilite™, and Double X™ are registered trademarks of Amway Corp. Purchases are processed through official distributor links.</div></section>`;
+
+    renderGrid();
+    renderCart();
 
     const nutritionGrid = container.querySelector('.nutrition-showcase-grid');
     if (nutritionGrid) {
@@ -58,23 +157,121 @@ document.addEventListener('DOMContentLoaded', () => {
         nutritionGrid.after(catalogLink);
     }
 
-    container.querySelectorAll('[data-etsy-link]').forEach(link => {
-        if (EFC_ETSY_SHOP_URL.trim()) {
-            link.href = EFC_ETSY_SHOP_URL.trim();
-            link.target = '_blank';
-            link.rel = 'noopener';
-            link.textContent = 'SHOP ON ETSY →';
-        } else {
-            link.href = 'pages/waitlist.html';
-            link.removeAttribute('target');
-            link.removeAttribute('rel');
-            link.textContent = 'NOTIFY ME WHEN IT LAUNCHES →';
-        }
-    });
-
     container.querySelectorAll('[data-goods-view]').forEach(button => button.addEventListener('click', () => {
         const view = button.dataset.goodsView;
         container.querySelectorAll('[data-goods-view]').forEach(item => item.classList.toggle('active', item === button));
         container.querySelectorAll('[data-goods-panel]').forEach(panel => panel.classList.toggle('active', panel.dataset.goodsPanel === view));
     }));
+
+    // Event delegation on the container: the grid re-renders whenever a
+    // swatch or size changes, so listeners are bound once here rather
+    // than re-attached after every render.
+    // Bound to <body>, not .container: the cart drawer and overlay now
+    // live outside .container (see the reveal-transform note above), so
+    // a listener scoped to .container would miss every click inside them.
+    document.body.addEventListener('click', (event) => {
+        const swatchBtn = event.target.closest('[data-color]');
+        if (swatchBtn) {
+            const productId = swatchBtn.dataset.product;
+            const sel = selection.get(productId);
+            sel.color = swatchBtn.dataset.color;
+            renderGrid();
+            return;
+        }
+
+        const sizeBtn = event.target.closest('[data-size]');
+        if (sizeBtn) {
+            const productId = sizeBtn.dataset.product;
+            const sel = selection.get(productId);
+            sel.size = sizeBtn.dataset.size;
+            renderGrid();
+            return;
+        }
+
+        const addBtn = event.target.closest('[data-add-to-cart]');
+        if (addBtn) {
+            const productId = addBtn.dataset.addToCart;
+            const product = catalog.find((p) => p.id === productId);
+            const sel = selection.get(productId);
+            if (!product || !sel.size) return;
+            const color = product.colors.find((c) => c.name === sel.color) || product.colors[0];
+            const existing = cart.find((item) => item.productId === productId && item.color === color.name && item.size === sel.size);
+            if (existing) {
+                existing.qty = Math.min(existing.qty + 1, 10);
+            } else {
+                cart.push({
+                    productId,
+                    name: product.name,
+                    color: color.name,
+                    size: sel.size,
+                    priceCents: product.priceCents,
+                    image: color.image,
+                    qty: 1,
+                });
+            }
+            renderCart();
+            openCart();
+            return;
+        }
+
+        if (event.target.closest('#shop-cart-toggle')) {
+            openCart();
+            return;
+        }
+        if (event.target.closest('#shop-cart-close') || event.target === document.getElementById('shop-cart-overlay')) {
+            closeCart();
+            return;
+        }
+
+        const qtyBtn = event.target.closest('[data-qty-step]');
+        if (qtyBtn) {
+            const index = Number(qtyBtn.dataset.cartIndex);
+            const step = Number(qtyBtn.dataset.qtyStep);
+            const item = cart[index];
+            if (!item) return;
+            item.qty = Math.max(1, Math.min(10, item.qty + step));
+            renderCart();
+            return;
+        }
+
+        const removeBtn = event.target.closest('[data-cart-remove]');
+        if (removeBtn) {
+            const index = Number(removeBtn.dataset.cartRemove);
+            cart.splice(index, 1);
+            renderCart();
+            return;
+        }
+
+        if (event.target.closest('#shop-cart-checkout')) {
+            const errorEl = document.getElementById('shop-cart-error');
+            const checkoutBtn = document.getElementById('shop-cart-checkout');
+            if (!cart.length || !checkoutBtn) return;
+            if (errorEl) errorEl.hidden = true;
+            checkoutBtn.disabled = true;
+            checkoutBtn.textContent = 'REDIRECTING…';
+            fetch(EFC_CART_ENDPOINT, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    items: cart.map((item) => ({ productId: item.productId, color: item.color, size: item.size, qty: item.qty })),
+                }),
+            })
+                .then((response) => response.json().then((data) => ({ ok: response.ok, data })))
+                .then(({ ok, data }) => {
+                    if (ok && data && data.url) {
+                        window.location.href = data.url;
+                        return;
+                    }
+                    throw new Error((data && data.error) || 'We could not begin checkout. Please try again.');
+                })
+                .catch((error) => {
+                    if (errorEl) {
+                        errorEl.textContent = error.message || 'We could not begin checkout. Please try again.';
+                        errorEl.hidden = false;
+                    }
+                    checkoutBtn.disabled = false;
+                    checkoutBtn.textContent = 'CHECKOUT';
+                });
+        }
+    });
 });

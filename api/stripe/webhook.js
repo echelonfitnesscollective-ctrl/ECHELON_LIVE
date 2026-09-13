@@ -1,6 +1,7 @@
 'use strict';
 
 const { createHmac, timingSafeEqual } = require('node:crypto');
+const { notifyOwner } = require('../_lib/email.js');
 
 async function rawBody(request) {
   const chunks = [];
@@ -87,6 +88,34 @@ async function processGroupFitnessPayment(event) {
   await serviceRequest('/rest/v1/website_leads', { method: 'POST', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ lead_type: 'Group fitness purchase', full_name: name, email, category: object?.metadata?.offer_label || offerKey, message: '', source_data: { checkout_session_id: object?.id || null, offer_key: offerKey, mode: object?.mode || null, amount_total: object?.amount_total ?? null } }) });
 }
 
+// Echelon Goods orders are flagged by metadata[order_type]=shop (set in
+// api/shop/checkout.js) rather than an offer-key lookup, since a shop
+// order has no fixed catalog of Stripe Price IDs to match against - the
+// line items are built with price_data at checkout time.
+async function processShopOrder(event) {
+  const object = event.data && event.data.object;
+  if (object?.metadata?.order_type !== 'shop') return;
+  const paid = event.type === 'checkout.session.completed' || event.type === 'checkout.session.async_payment_succeeded';
+  if (!paid) return;
+  if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    const prior = await serviceRequest(`/rest/v1/stripe_payment_events?stripe_event_id=eq.${encodeURIComponent(event.id)}&select=stripe_event_id&limit=1`);
+    if (Array.isArray(prior.body) && prior.body.length) return;
+    await serviceRequest('/rest/v1/stripe_payment_events', { method: 'POST', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ stripe_event_id: event.id, event_type: event.type, payload: { checkout_session_id: object?.id || null, order_summary: object?.metadata?.order_summary || null, amount_total: object?.amount_total ?? null } }) });
+  }
+  const email = object?.customer_details?.email || object?.customer_email || 'unknown email';
+  const name = object?.customer_details?.name || 'Shop customer';
+  const address = object?.shipping_details?.address || object?.customer_details?.address || null;
+  const addressLines = address
+    ? [address.line1, address.line2, [address.city, address.state, address.postal_code].filter(Boolean).join(', '), address.country].filter(Boolean).join('\n')
+    : 'No shipping address collected.';
+  const summary = object?.metadata?.order_summary || 'Order details unavailable, check the Stripe dashboard.';
+  const amount = typeof object?.amount_total === 'number' ? `$${(object.amount_total / 100).toFixed(2)}` : 'unknown amount';
+  await notifyOwner({
+    subject: `New Echelon Goods order: ${amount}`,
+    text: `${name} (${email}) just placed an Echelon Goods order.\n\nItems:\n${summary}\n\nTotal: ${amount}\n\nShip to:\n${addressLines}\n\nStripe checkout session: ${object?.id || 'unknown'}`,
+  });
+}
+
 module.exports = async function stripeWebhook(request, response) {
   response.setHeader('X-Content-Type-Options', 'nosniff');
   response.setHeader('Cache-Control', 'no-store');
@@ -99,6 +128,7 @@ module.exports = async function stripeWebhook(request, response) {
     console.info('Verified Stripe event', event.type, event.id);
     await processEnrollmentPayment(event);
     await processGroupFitnessPayment(event);
+    await processShopOrder(event);
     return response.status(200).json({ received: true });
   } catch (error) {
     console.error('Stripe webhook error', error && error.message);
