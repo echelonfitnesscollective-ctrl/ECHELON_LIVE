@@ -11,10 +11,11 @@
 const EFC_CART_KEY = 'efc_shop_cart_v1';
 const EFC_CART_ENDPOINT = 'api/shop/checkout';
 
-function efcPic(src, alt, eager) {
+function efcPic(src, alt, eager, imgClass) {
     const webp = src.replace(/\.(jpe?g|png)$/i, '.webp');
     const loading = eager ? '' : ' loading="lazy"';
-    return `<picture><source srcset="${webp}" type="image/webp"><img src="${src}" alt="${alt}"${loading}></picture>`;
+    const cls = imgClass ? ` class="${imgClass}"` : '';
+    return `<picture><source srcset="${webp}" type="image/webp"><img src="${src}" alt="${alt}"${loading}${cls}></picture>`;
 }
 
 function efcMoney(cents) {
@@ -61,7 +62,13 @@ document.addEventListener('DOMContentLoaded', () => {
             .map((s) => `<button type="button" class="shop-size${s === sel.size ? ' active' : ''}" data-product="${product.id}" data-size="${s}" aria-pressed="${s === sel.size}">${s}</button>`)
             .join('');
         return `<article class="shop-card" data-product-card="${product.id}">
-            <div class="shop-card-image" data-product-image="${product.id}">${efcPic(activeColor.image, `${product.name}, ${activeColor.name}`, false)}</div>
+            <div class="shop-card-image" data-product-image="${product.id}">
+                <div class="shop-card-image-bg" style="background-image:url('${activeColor.image}')" aria-hidden="true"></div>
+                <button type="button" class="shop-card-zoom" data-zoom-src="${activeColor.image}" data-zoom-alt="${product.name}, ${activeColor.name}" aria-label="Enlarge photo of ${product.name}, ${activeColor.name}">
+                    ${efcPic(activeColor.image, `${product.name}, ${activeColor.name}`, false, 'shop-card-fg')}
+                    <span class="shop-zoom-icon" aria-hidden="true">⤢</span>
+                </button>
+            </div>
             <div class="shop-card-info">
                 <h4>${product.name}</h4>
                 <p class="shop-card-desc">${product.description}</p>
@@ -120,6 +127,28 @@ document.addEventListener('DOMContentLoaded', () => {
         efcSaveCart(cart);
     }
 
+    function openLightbox(src, alt) {
+        const overlay = document.getElementById('shop-lightbox-overlay');
+        const modal = document.getElementById('shop-lightbox');
+        const img = document.getElementById('shop-lightbox-img');
+        if (!overlay || !modal || !img) return;
+        img.src = src;
+        img.alt = alt || '';
+        overlay.classList.add('open');
+        modal.classList.add('open');
+        modal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeLightbox() {
+        const overlay = document.getElementById('shop-lightbox-overlay');
+        const modal = document.getElementById('shop-lightbox');
+        if (overlay) overlay.classList.remove('open');
+        if (modal) {
+            modal.classList.remove('open');
+            modal.setAttribute('aria-hidden', 'true');
+        }
+    }
+
     function openCart() {
         document.getElementById('shop-cart-drawer')?.classList.add('open');
         document.getElementById('shop-cart-overlay')?.classList.add('open');
@@ -140,6 +169,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const cartHost = document.createElement('div');
     cartHost.innerHTML = '<div class="cart-overlay" id="shop-cart-overlay"></div><aside class="cart-drawer" id="shop-cart-drawer" aria-label="Shopping cart"><div class="cart-drawer-header"><h3>YOUR CART</h3><button type="button" class="cart-close" id="shop-cart-close" aria-label="Close cart">&times;</button></div><p class="cart-empty" id="shop-cart-empty">Your cart is empty.</p><ul class="cart-list" id="shop-cart-list" hidden></ul><div class="cart-drawer-footer"><div class="cart-subtotal-row"><span>Subtotal</span><span id="shop-cart-subtotal">$0.00</span></div><p class="cart-fine-print">Shipping calculated at checkout. Made to order and printed locally, ships in 5-7 business days.</p><button type="button" class="btn-primary cart-checkout-btn" id="shop-cart-checkout" disabled>CHECKOUT</button><p class="cart-error" id="shop-cart-error" hidden></p></div></aside>';
     while (cartHost.firstChild) document.body.appendChild(cartHost.firstChild);
+
+    // Same reason as the cart drawer above: appended to <body>, not
+    // .container, so the reveal-transform on #shop can't hijack its
+    // position:fixed.
+    const lightboxHost = document.createElement('div');
+    lightboxHost.innerHTML = '<div class="lightbox-overlay" id="shop-lightbox-overlay"></div><div class="lightbox-modal" id="shop-lightbox" role="dialog" aria-modal="true" aria-label="Product photo" aria-hidden="true"><button type="button" class="lightbox-close" id="shop-lightbox-close" aria-label="Close">&times;</button><img id="shop-lightbox-img" src="" alt=""></div>';
+    while (lightboxHost.firstChild) document.body.appendChild(lightboxHost.firstChild);
 
     container.innerHTML = `<div class="shop-showcase-heading"><span class="section-tag">ECHELON GOODS</span><h2 class="section-title">WEAR THE STANDARD.</h2><p>Purpose-built essentials and performance nutrition, organized around how you train, recover, and live.</p></div><div class="goods-tabs"><button class="goods-tab active" data-goods-view="apparel">ECHELON GOODS</button><button class="goods-tab" data-goods-view="nutrition">PERFORMANCE NUTRITION</button></div><section class="goods-panel active" data-goods-panel="apparel"><div class="shop-toolbar"><p class="shop-toolbar-note">Made to order and printed locally. Ships in 5-7 business days.</p><button type="button" class="cart-toggle" id="shop-cart-toggle">CART <span class="cart-count" id="shop-cart-count">0</span></button></div><div class="shop-grid"></div></section><section class="goods-panel" data-goods-panel="nutrition"><div class="nutrition-showcase-intro"><span class="checkin-tag">AMWAY PERFORMANCE NUTRITION</span><h3>SUPPORT THE WORK.</h3><p>Selected products available through Echelon’s independent Amway distributor links. Review product details and use only as appropriate for your own goals and needs.</p></div><div class="nutrition-showcase-grid"><article class="nutrition-showcase-card">${efcPic("assets/images/amway_prod_1.jpg", "XS Whey Protein", false)}<span>MUSCLE RECOVERY</span><h3>XS™ WHEY PROTEIN</h3><p>A protein option for members looking to support their daily nutrition routine.</p><a href="https://amway.com/share-link/tKb6jO81I" target="_blank" rel="noopener" class="btn-secondary">VIEW PRODUCT →</a></article><article class="nutrition-showcase-card">${efcPic("assets/images/amway_prod_2.jpg", "XS Creatine Plus", false)}<span>POWER &amp; PERFORMANCE</span><h3>XS™ CREATINE+</h3><p>A performance-focused option for structured training and strength work.</p><a href="https://www.amway.com/en_US/XS™-Creatine%2B-p-128463" target="_blank" rel="noopener" class="btn-secondary">VIEW PRODUCT →</a></article><article class="nutrition-showcase-card">${efcPic("assets/images/amway_prod_3.jpg", "XS Muscle Multiplier", false)}<span>TRAINING SUPPORT</span><h3>XS™ MUSCLE MULTIPLIER</h3><p>A nutrition option to explore alongside your training and recovery plan.</p><a href="https://www.amway.com/en_US/XS™-Muscle-Multiplier---Berry-Blast-p-126753?searchTerm=MUS" target="_blank" rel="noopener" class="btn-secondary">VIEW PRODUCT →</a></article></div><div class="amway-showcase-disclaimer"><strong>Independent Distributor Disclaimer:</strong> Echelon Fitness Collective is an Independent Business Owner of Amway products. XS™, Nutrilite™, and Double X™ are registered trademarks of Amway Corp. Purchases are processed through official distributor links.</div></section>`;
 
@@ -170,6 +206,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // live outside .container (see the reveal-transform note above), so
     // a listener scoped to .container would miss every click inside them.
     document.body.addEventListener('click', (event) => {
+        const zoomBtn = event.target.closest('[data-zoom-src]');
+        if (zoomBtn) {
+            openLightbox(zoomBtn.dataset.zoomSrc, zoomBtn.dataset.zoomAlt);
+            return;
+        }
+
+        if (event.target.closest('#shop-lightbox-close') || event.target === document.getElementById('shop-lightbox-overlay')) {
+            closeLightbox();
+            return;
+        }
+
         const swatchBtn = event.target.closest('[data-color]');
         if (swatchBtn) {
             const productId = swatchBtn.dataset.product;
@@ -272,6 +319,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     checkoutBtn.disabled = false;
                     checkoutBtn.textContent = 'CHECKOUT';
                 });
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            closeLightbox();
+            closeCart();
         }
     });
 });
