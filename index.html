@@ -104,7 +104,11 @@
                 class="mobile-toggle"
                 aria-label="Open Menu">
 
-                ☰
+                <span class="hamburger-icon">☰</span>
+                <!-- Filled in by shop-showcase.js (index.html only):
+                     cart quantity, shown only while the menu is
+                     closed and the cart has something in it. -->
+                <span class="mobile-cart-badge cart-count" id="mobile-toggle-cart-badge" hidden>0</span>
 
             </button>
 
@@ -124,6 +128,9 @@
     <a href="#shop">Shop</a>
     <a href="#contact">Contact</a>
     <a href="https://app.echelonfitness.co/home" class="nav-portal-link">Member Login</a>
+    <!-- Filled in by shop-showcase.js (index.html only) - opens the
+         cart drawer and closes this menu. -->
+    <button type="button" id="mobile-view-cart" class="nav-portal-link mobile-view-cart">VIEW CART <span class="cart-count">0</span></button>
 
 </div>
 

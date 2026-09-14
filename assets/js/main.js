@@ -197,25 +197,26 @@ function initializeMobileMenu() {
         document.body.append(menu);
     }
 
+    // A cart-quantity badge can live inside this button (added by
+    // shop-showcase.js on index.html) - swapping only the icon span's
+    // text, rather than the whole button's innerHTML, keeps that badge
+    // intact across every open/close instead of wiping it out.
+    const hamburgerIcon = toggle.querySelector('.hamburger-icon');
+
+    function setMenuOpen(isOpen) {
+        menu.classList.toggle("active", isOpen);
+        if (hamburgerIcon) hamburgerIcon.textContent = isOpen ? "✕" : "☰";
+        else toggle.textContent = isOpen ? "✕" : "☰";
+    }
+
     toggle.addEventListener("click", () => {
-
-        menu.classList.toggle("active");
-
-        if (menu.classList.contains("active")) {
-            toggle.innerHTML = "✕";
-        } else {
-            toggle.innerHTML = "☰";
-        }
-
+        setMenuOpen(!menu.classList.contains("active"));
     });
 
     menu.querySelectorAll("a").forEach(link => {
 
         link.addEventListener("click", () => {
-
-            menu.classList.remove("active");
-            toggle.innerHTML = "☰";
-
+            setMenuOpen(false);
         });
 
     });

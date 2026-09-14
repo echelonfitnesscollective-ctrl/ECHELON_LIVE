@@ -195,14 +195,35 @@ document.addEventListener('DOMContentLoaded', () => {
         </li>`;
     }
 
+    // Every place a cart count shows up (the desktop header icon, the
+    // "VIEW CART" line in the mobile menu, and the small badge on the
+    // hamburger itself) shares the .cart-count class, so one pass
+    // keeps them all in sync. The hamburger's badge is the one
+    // exception with its own visibility rule: it's only useful as a
+    // reminder while the menu is closed - once it's open, the "VIEW
+    // CART" line already says the same thing.
+    function updateCartBadges() {
+        const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
+        document.querySelectorAll('.cart-count').forEach((el) => {
+            el.textContent = String(totalQty);
+            // Gold only means something when there's actually
+            // something in the cart - otherwise it's just a muted
+            // outline showing "0".
+            el.classList.toggle('has-items', totalQty > 0);
+        });
+        const hamburgerBadge = document.getElementById('mobile-toggle-cart-badge');
+        if (hamburgerBadge) {
+            const menuOpen = document.querySelector('.mobile-menu')?.classList.contains('active');
+            hamburgerBadge.hidden = totalQty === 0 || Boolean(menuOpen);
+        }
+    }
+
     function renderCart() {
-        const countEl = document.getElementById('shop-cart-count');
         const listEl = document.getElementById('shop-cart-list');
         const subtotalEl = document.getElementById('shop-cart-subtotal');
         const emptyEl = document.getElementById('shop-cart-empty');
         const checkoutBtn = document.getElementById('shop-cart-checkout');
-        const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
-        if (countEl) countEl.textContent = String(totalQty);
+        updateCartBadges();
         if (listEl) listEl.innerHTML = cart.map(cartLine).join('');
         if (emptyEl) emptyEl.hidden = cart.length > 0;
         if (listEl) listEl.hidden = cart.length === 0;
@@ -387,6 +408,16 @@ document.addEventListener('DOMContentLoaded', () => {
             openCart();
             return;
         }
+        if (event.target.closest('#mobile-view-cart')) {
+            // "View Cart" lives inside the mobile dropdown menu - close
+            // that first (and reset the hamburger back to its closed
+            // icon) so it isn't still sitting open behind the drawer.
+            document.querySelector('.mobile-menu')?.classList.remove('active');
+            const hamburgerIcon = document.querySelector('.mobile-toggle .hamburger-icon');
+            if (hamburgerIcon) hamburgerIcon.textContent = '☰';
+            openCart();
+            return;
+        }
         if (event.target.closest('#shop-cart-close') || event.target === document.getElementById('shop-cart-overlay')) {
             closeCart();
             return;
@@ -442,6 +473,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     checkoutBtn.textContent = 'CHECKOUT';
                 });
         }
+
+        // Catches everything else this listener doesn't already handle
+        // and return early for - most importantly a hamburger click
+        // (main.js's own listener on the button itself always runs
+        // first and already toggled .mobile-menu.active by the time
+        // this bubbles up here) and a tap on any of the plain nav
+        // links inside that menu, both of which change whether the
+        // hamburger's cart badge should be showing.
+        updateCartBadges();
     });
 
     document.addEventListener('keydown', (event) => {
