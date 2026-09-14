@@ -52,13 +52,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // by product id. Not persisted - only the cart itself is.
     const selection = new Map(catalog.map((p) => [p.id, { color: p.colors[0]?.name || null, size: null }]));
 
-    // Mobile carousel autoplay state. carouselInteracted latches true
-    // the first time the visitor touches, drags, or scrolls the
-    // carousel themselves and never resets (short of a viewport resize
-    // across the mobile breakpoint), so autoplay never fights a swipe
-    // already in progress.
-    let carouselAutoplayTimer = null;
-    let carouselInteracted = false;
+    // Mobile carousel autoplay state, one entry per carousel (the
+    // apparel grid and the nutrition grid both get this treatment).
+    // `interacted` latches true the first time the visitor touches,
+    // drags, or scrolls that carousel themselves and never resets
+    // (short of a viewport resize across the mobile breakpoint), so
+    // autoplay never fights a swipe already in progress.
+    const carouselStates = new Map();
+    function carouselState(grid) {
+        if (!carouselStates.has(grid)) carouselStates.set(grid, { timer: null, interacted: false });
+        return carouselStates.get(grid);
+    }
 
     function productCard(product) {
         const sel = selection.get(product.id);
@@ -96,11 +100,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const mobileCarouselQuery = window.matchMedia('(max-width:600px)');
 
-    // On the mobile carousel, .shop-card is a full-width scroll-snap
-    // slide - "current slide" is just whichever card's left edge sits
-    // closest to the current scroll position.
+    // On a mobile carousel, each direct child is a full-width
+    // scroll-snap slide (works for .shop-card and .nutrition-
+    // showcase-card alike, since both grids only ever hold their own
+    // cards as direct children) - "current slide" is just whichever
+    // one's left edge sits closest to the current scroll position.
     function carouselIndex(grid) {
-        const cards = [...grid.querySelectorAll('.shop-card')];
+        const cards = [...grid.children];
         if (!cards.length) return 0;
         let closest = 0;
         let closestDist = Infinity;
@@ -115,53 +121,58 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function carouselGoTo(grid, index, smooth) {
-        const cards = grid.querySelectorAll('.shop-card');
+        const cards = grid.children;
         if (!cards.length) return;
         const clamped = ((index % cards.length) + cards.length) % cards.length;
         grid.scrollTo({ left: cards[clamped].offsetLeft, behavior: smooth ? 'smooth' : 'auto' });
     }
 
-    function stopCarouselAutoplay() {
-        if (carouselAutoplayTimer) {
-            clearInterval(carouselAutoplayTimer);
-            carouselAutoplayTimer = null;
+    function stopCarouselAutoplay(grid) {
+        const state = carouselState(grid);
+        if (state.timer) {
+            clearInterval(state.timer);
+            state.timer = null;
         }
     }
 
-    function startCarouselAutoplay() {
-        stopCarouselAutoplay();
-        if (!mobileCarouselQuery.matches || carouselInteracted) return;
-        const grid = container.querySelector('.shop-grid');
-        if (!grid) return;
-        carouselAutoplayTimer = setInterval(() => {
+    // Autoplay only runs for whichever carousel is actually showing -
+    // the apparel and nutrition tabs are mutually exclusive, so there's
+    // no reason to animate a grid sitting in a hidden tab panel.
+    function startCarouselAutoplay(grid) {
+        stopCarouselAutoplay(grid);
+        const state = carouselState(grid);
+        if (!mobileCarouselQuery.matches || state.interacted) return;
+        const panel = grid.closest('.goods-panel');
+        if (panel && !panel.classList.contains('active')) return;
+        state.timer = setInterval(() => {
             carouselGoTo(grid, carouselIndex(grid) + 1, true);
         }, 4500);
     }
 
-    function markCarouselInteracted() {
-        if (carouselInteracted) return;
-        carouselInteracted = true;
-        stopCarouselAutoplay();
+    function markCarouselInteracted(grid) {
+        const state = carouselState(grid);
+        if (state.interacted) return;
+        state.interacted = true;
+        stopCarouselAutoplay(grid);
     }
 
-    function initializeShopCarousel() {
-        const grid = container.querySelector('.shop-grid');
+    function initializeCarousel(grid) {
         if (!grid) return;
         // Any real touch, drag, or wheel input on the carousel means the
         // visitor is browsing on their own - autoplay stops for good so
         // it never fights a swipe already in progress.
-        grid.addEventListener('touchstart', markCarouselInteracted, { passive: true });
-        grid.addEventListener('pointerdown', markCarouselInteracted);
-        grid.addEventListener('wheel', markCarouselInteracted, { passive: true });
+        grid.addEventListener('touchstart', () => markCarouselInteracted(grid), { passive: true });
+        grid.addEventListener('pointerdown', () => markCarouselInteracted(grid));
+        grid.addEventListener('wheel', () => markCarouselInteracted(grid), { passive: true });
 
         if (typeof mobileCarouselQuery.addEventListener === 'function') {
             mobileCarouselQuery.addEventListener('change', () => {
-                carouselInteracted = false;
-                startCarouselAutoplay();
+                carouselState(grid).interacted = false;
+                startCarouselAutoplay(grid);
             });
         }
 
-        startCarouselAutoplay();
+        startCarouselAutoplay(grid);
     }
 
     function renderGrid() {
@@ -301,27 +312,37 @@ document.addEventListener('DOMContentLoaded', () => {
         else navActions.append(cartButton);
     }
 
-    container.innerHTML = `<div class="shop-showcase-heading"><span class="section-tag">ECHELON GOODS</span><h2 class="section-title">WEAR THE STANDARD.</h2><p>Purpose-built essentials and performance nutrition, organized around how you train, recover, and live.</p></div><div class="goods-tabs"><button class="goods-tab active" data-goods-view="apparel">ECHELON GOODS</button><button class="goods-tab" data-goods-view="nutrition">PERFORMANCE NUTRITION</button></div><section class="goods-panel active" data-goods-panel="apparel"><div class="shop-toolbar"><p class="shop-toolbar-note">Made to order and printed locally. Ships in 5-7 business days.</p></div><div class="shop-carousel-wrap"><button type="button" class="shop-carousel-arrow shop-carousel-prev" data-carousel-nav="prev" aria-label="Previous product">‹</button><div class="shop-grid"></div><button type="button" class="shop-carousel-arrow shop-carousel-next" data-carousel-nav="next" aria-label="Next product">›</button></div></section><section class="goods-panel" data-goods-panel="nutrition"><div class="nutrition-showcase-intro"><span class="checkin-tag">AMWAY PERFORMANCE NUTRITION</span><h3>SUPPORT THE WORK.</h3><p>Selected products available through Echelon’s independent Amway distributor links. Review product details and use only as appropriate for your own goals and needs.</p></div><div class="nutrition-showcase-grid"><article class="nutrition-showcase-card">${efcPic("assets/images/amway_prod_1.jpg", "XS Whey Protein", false)}<span>MUSCLE RECOVERY</span><h3>XS™ WHEY PROTEIN</h3><p>A protein option for members looking to support their daily nutrition routine.</p><a href="https://amway.com/share-link/tKb6jO81I" target="_blank" rel="noopener" class="btn-secondary">VIEW PRODUCT →</a></article><article class="nutrition-showcase-card">${efcPic("assets/images/amway_prod_2.jpg", "XS Creatine Plus", false)}<span>POWER &amp; PERFORMANCE</span><h3>XS™ CREATINE+</h3><p>A performance-focused option for structured training and strength work.</p><a href="https://www.amway.com/en_US/XS™-Creatine%2B-p-128463" target="_blank" rel="noopener" class="btn-secondary">VIEW PRODUCT →</a></article><article class="nutrition-showcase-card">${efcPic("assets/images/amway_prod_3.jpg", "XS Muscle Multiplier", false)}<span>TRAINING SUPPORT</span><h3>XS™ MUSCLE MULTIPLIER</h3><p>A nutrition option to explore alongside your training and recovery plan.</p><a href="https://www.amway.com/en_US/XS™-Muscle-Multiplier---Berry-Blast-p-126753?searchTerm=MUS" target="_blank" rel="noopener" class="btn-secondary">VIEW PRODUCT →</a></article></div><div class="amway-showcase-disclaimer"><strong>Independent Distributor Disclaimer:</strong> Echelon Fitness Collective is an Independent Business Owner of Amway products. XS™, Nutrilite™, and Double X™ are registered trademarks of Amway Corp. Purchases are processed through official distributor links.</div></section>`;
+    container.innerHTML = `<div class="shop-showcase-heading"><span class="section-tag">ECHELON GOODS</span><h2 class="section-title">WEAR THE STANDARD.</h2><p>Purpose-built essentials and performance nutrition, organized around how you train, recover, and live.</p></div><div class="goods-tabs"><button class="goods-tab active" data-goods-view="apparel">ECHELON GOODS</button><button class="goods-tab" data-goods-view="nutrition">PERFORMANCE NUTRITION</button></div><section class="goods-panel active" data-goods-panel="apparel"><div class="shop-toolbar"><p class="shop-toolbar-note">Made to order and printed locally. Ships in 5-7 business days.</p></div><div class="shop-carousel-wrap"><button type="button" class="shop-carousel-arrow shop-carousel-prev" data-carousel-nav="prev" aria-label="Previous product">‹</button><div class="shop-grid"></div><button type="button" class="shop-carousel-arrow shop-carousel-next" data-carousel-nav="next" aria-label="Next product">›</button></div></section><section class="goods-panel" data-goods-panel="nutrition"><div class="nutrition-showcase-intro"><span class="checkin-tag">AMWAY PERFORMANCE NUTRITION</span><h3>SUPPORT THE WORK.</h3><p>Selected products available through Echelon’s independent Amway distributor links. Review product details and use only as appropriate for your own goals and needs.</p></div><div class="shop-carousel-wrap nutrition-carousel-wrap"><button type="button" class="shop-carousel-arrow shop-carousel-prev" data-carousel-nav="prev" aria-label="Previous product">‹</button><div class="nutrition-showcase-grid"><article class="nutrition-showcase-card">${efcPic("assets/images/amway_prod_1.jpg", "XS Whey Protein", false)}<span>MUSCLE RECOVERY</span><h3>XS™ WHEY PROTEIN</h3><p>A protein option for members looking to support their daily nutrition routine.</p><a href="https://amway.com/share-link/tKb6jO81I" target="_blank" rel="noopener" class="btn-secondary">VIEW PRODUCT →</a></article><article class="nutrition-showcase-card">${efcPic("assets/images/amway_prod_2.jpg", "XS Creatine Plus", false)}<span>POWER &amp; PERFORMANCE</span><h3>XS™ CREATINE+</h3><p>A performance-focused option for structured training and strength work.</p><a href="https://www.amway.com/en_US/XS™-Creatine%2B-p-128463" target="_blank" rel="noopener" class="btn-secondary">VIEW PRODUCT →</a></article><article class="nutrition-showcase-card">${efcPic("assets/images/amway_prod_3.jpg", "XS Muscle Multiplier", false)}<span>TRAINING SUPPORT</span><h3>XS™ MUSCLE MULTIPLIER</h3><p>A nutrition option to explore alongside your training and recovery plan.</p><a href="https://www.amway.com/en_US/XS™-Muscle-Multiplier---Berry-Blast-p-126753?searchTerm=MUS" target="_blank" rel="noopener" class="btn-secondary">VIEW PRODUCT →</a></article></div><button type="button" class="shop-carousel-arrow shop-carousel-next" data-carousel-nav="next" aria-label="Next product">›</button></div><div class="amway-showcase-disclaimer"><strong>Independent Distributor Disclaimer:</strong> Echelon Fitness Collective is an Independent Business Owner of Amway products. XS™, Nutrilite™, and Double X™ are registered trademarks of Amway Corp. Purchases are processed through official distributor links.</div></section>`;
 
     renderGrid();
     renderCart();
-    initializeShopCarousel();
+    initializeCarousel(container.querySelector('.shop-grid'));
+    initializeCarousel(container.querySelector('.nutrition-showcase-grid'));
 
-    const nutritionGrid = container.querySelector('.nutrition-showcase-grid');
-    if (nutritionGrid) {
+    const nutritionCarouselWrap = container.querySelector('.nutrition-carousel-wrap');
+    if (nutritionCarouselWrap) {
         const catalogLink = document.createElement('a');
         catalogLink.className = 'nutrition-catalog-link';
         catalogLink.href = 'https://amway.com/share-link/ClXesZdrf';
         catalogLink.target = '_blank';
         catalogLink.rel = 'noopener';
         catalogLink.textContent = 'VIEW FULL CATALOG →';
-        nutritionGrid.after(catalogLink);
+        nutritionCarouselWrap.after(catalogLink);
     }
 
     container.querySelectorAll('[data-goods-view]').forEach(button => button.addEventListener('click', () => {
         const view = button.dataset.goodsView;
         container.querySelectorAll('[data-goods-view]').forEach(item => item.classList.toggle('active', item === button));
-        container.querySelectorAll('[data-goods-panel]').forEach(panel => panel.classList.toggle('active', panel.dataset.goodsPanel === view));
+        container.querySelectorAll('[data-goods-panel]').forEach((panel) => {
+            const isActive = panel.dataset.goodsPanel === view;
+            panel.classList.toggle('active', isActive);
+            // Autoplay only makes sense for whichever carousel the
+            // visitor can actually see.
+            const grid = panel.querySelector('.shop-grid, .nutrition-showcase-grid');
+            if (!grid) return;
+            if (isActive) startCarouselAutoplay(grid);
+            else stopCarouselAutoplay(grid);
+        });
     }));
 
     // Event delegation on the container: the grid re-renders whenever a
@@ -333,9 +354,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.addEventListener('click', (event) => {
         const carouselNav = event.target.closest('[data-carousel-nav]');
         if (carouselNav) {
-            markCarouselInteracted();
-            const grid = container.querySelector('.shop-grid');
-            if (grid) carouselGoTo(grid, carouselIndex(grid) + (carouselNav.dataset.carouselNav === 'next' ? 1 : -1), true);
+            const grid = carouselNav.closest('.shop-carousel-wrap')?.querySelector('.shop-grid, .nutrition-showcase-grid');
+            if (grid) {
+                markCarouselInteracted(grid);
+                carouselGoTo(grid, carouselIndex(grid) + (carouselNav.dataset.carouselNav === 'next' ? 1 : -1), true);
+            }
             return;
         }
 

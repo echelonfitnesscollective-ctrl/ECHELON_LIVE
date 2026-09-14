@@ -65,14 +65,21 @@ html{
 }
 
 body{
+    /* background-attachment:scroll, not fixed - a fixed background
+       combined with the header's own position:sticky + transform (the
+       hide-on-scroll-down behavior) is a well-documented trigger for
+       a white repaint flash in Safari, both mobile and desktop. This
+       already had to be overridden to scroll on mobile below for the
+       same reason - applying it everywhere removes the bug outright
+       instead of only working around it on one breakpoint. */
     background:
         linear-gradient(90deg,rgba(13, 13, 12,.96) 0%,rgba(13, 13, 12,.91) 52%,rgba(13, 13, 12,.86) 100%),
         linear-gradient(180deg,rgba(13, 13, 12,.35),rgba(13, 13, 12,.7)),
-        url('../images/efc-studio-dawn.png') center top / cover fixed;
+        url('../images/efc-studio-dawn.png') center top / cover scroll;
     background:
         linear-gradient(90deg,rgba(13, 13, 12,.96) 0%,rgba(13, 13, 12,.91) 52%,rgba(13, 13, 12,.86) 100%),
         linear-gradient(180deg,rgba(13, 13, 12,.35),rgba(13, 13, 12,.7)),
-        image-set(url('../images/efc-studio-dawn.webp') type('image/webp'), url('../images/efc-studio-dawn.png') type('image/png')) center top / cover fixed;
+        image-set(url('../images/efc-studio-dawn.webp') type('image/webp'), url('../images/efc-studio-dawn.png') type('image/png')) center top / cover scroll;
     color:var(--white);
     font-family:var(--body-font);
     line-height:1.6;
@@ -80,7 +87,7 @@ body{
 }
 
 @media(max-width:720px){
-    body{background-attachment:scroll;background-position:62% top;}
+    body{background-position:62% top;}
 }
 
 img{
@@ -4242,7 +4249,12 @@ COACHING PLAYBOOK
 
 .shop-showcase-heading{max-width:680px;margin:0 auto 44px;text-align:center}.shop-showcase-heading h2{margin:10px 0}.shop-showcase-heading p{color:#bbb;line-height:1.65}
 
-.goods-tabs{display:flex;justify-content:center;gap:10px;margin:-18px 0 30px}.goods-tab{padding:12px 18px;border:1px solid rgba(255,255,255,.2);background:transparent;color:#bdbdbd;font:700 .7rem 'Montserrat',sans-serif;letter-spacing:.1em;cursor:pointer}.goods-tab.active{border-color:var(--primary);background:rgba(215,181,91,.12);color:var(--primary)}.goods-panel{display:none}.goods-panel.active{display:block}.nutrition-showcase-intro{max-width:700px;margin:0 auto 28px;text-align:center}.nutrition-showcase-intro h3{margin:10px 0;font-size:2.1rem}.nutrition-showcase-intro p{color:#bbb;line-height:1.65}.nutrition-showcase-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.nutrition-showcase-card{padding:18px;border:1px solid rgba(255,255,255,.14);background:linear-gradient(145deg,rgba(255,255,255,.04),rgba(13, 13, 12,.25));transition:.4s ease}.nutrition-showcase-card:hover{transform:translateY(-6px);border-color:var(--primary);box-shadow:0 0 24px rgba(212,175,55,.15)}.nutrition-showcase-card img{width:100%;height:180px;object-fit:contain;background:rgba(255,255,255,.025)}.nutrition-showcase-card>span{display:block;margin-top:18px;color:var(--primary);font-size:.64rem;font-weight:700;letter-spacing:.11em}.nutrition-showcase-card h3{margin:9px 0;font-size:1.4rem}.nutrition-showcase-card p{min-height:60px;color:#aaa;font-size:.78rem;line-height:1.55}.amway-showcase-disclaimer{margin-top:18px;padding:20px;border-left:2px solid var(--primary);background:rgba(255,255,255,.035);color:#a9a9a9;font-size:.73rem;line-height:1.65}.amway-showcase-disclaimer strong{color:#d7b55b}@media(max-width:800px){.nutrition-showcase-grid{grid-template-columns:1fr}.nutrition-showcase-card img{height:260px}}@media(max-width:480px){.goods-tabs{flex-direction:column}.goods-tab{width:100%}}
+.goods-tabs{display:flex;justify-content:center;gap:10px;margin:-18px 0 30px}.goods-tab{padding:12px 18px;border:1px solid rgba(255,255,255,.2);background:transparent;color:#bdbdbd;font:700 .7rem 'Montserrat',sans-serif;letter-spacing:.1em;cursor:pointer}.goods-tab.active{border-color:var(--primary);background:rgba(215,181,91,.12);color:var(--primary)}.goods-panel{display:none}.goods-panel.active{display:block}.nutrition-showcase-intro{max-width:700px;margin:0 auto 28px;text-align:center}.nutrition-showcase-intro h3{margin:10px 0;font-size:2.1rem}.nutrition-showcase-intro p{color:#bbb;line-height:1.65}.nutrition-showcase-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.nutrition-showcase-card{padding:18px;border:1px solid rgba(255,255,255,.14);background:linear-gradient(145deg,rgba(255,255,255,.04),rgba(13, 13, 12,.25));transition:.4s ease}.nutrition-showcase-card:hover{transform:translateY(-6px);border-color:var(--primary);box-shadow:0 0 24px rgba(212,175,55,.15)}.nutrition-showcase-card img{width:100%;height:180px;object-fit:contain;background:rgba(255,255,255,.025)}.nutrition-showcase-card>span{display:block;margin-top:18px;color:var(--primary);font-size:.64rem;font-weight:700;letter-spacing:.11em}.nutrition-showcase-card h3{margin:9px 0;font-size:1.4rem}.nutrition-showcase-card p{min-height:60px;color:#aaa;font-size:.78rem;line-height:1.55}.amway-showcase-disclaimer{margin-top:18px;padding:20px;border-left:2px solid var(--primary);background:rgba(255,255,255,.035);color:#a9a9a9;font-size:.73rem;line-height:1.65}.amway-showcase-disclaimer strong{color:#d7b55b}@media(max-width:800px){.nutrition-showcase-grid{grid-template-columns:1fr}.nutrition-showcase-card img{height:260px}}
+@media(max-width:600px){
+.nutrition-showcase-grid{display:flex;grid-template-columns:unset;gap:0;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.nutrition-showcase-grid::-webkit-scrollbar{display:none}
+.nutrition-showcase-card{flex:0 0 100%;width:100%;scroll-snap-align:start}
+}@media(max-width:480px){.goods-tabs{flex-direction:column}.goods-tab{width:100%}}
 .nutrition-catalog-link{display:flex;align-items:center;justify-content:center;width:100%;min-height:62px;margin:18px 0 0;border:1px solid rgba(215,181,91,.72);background:linear-gradient(90deg,rgba(215,181,91,.18),rgba(215,181,91,.06));color:var(--primary);font:700 .75rem 'Montserrat',sans-serif;letter-spacing:.14em;text-decoration:none}.nutrition-catalog-link:hover{background:rgba(215,181,91,.24);color:#fff}
 
 /* Echelon Goods storefront: product grid, swatches, sizes, cart drawer */
