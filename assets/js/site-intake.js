@@ -66,6 +66,10 @@ async function loadDynamicApplicationQuestions(form) {
     }
 
     placeholder.replaceWith(buildApplicationQuestionFields(data));
+    // The dynamic fields didn't exist yet when the program-select's own
+    // change/initial-load handling ran, so apply the current program's
+    // field adjustments now that they do.
+    window.applyProgramFieldAdjustments?.(document.getElementById('program-interest')?.value || '');
     if (status) status.remove();
     if (submitButton) submitButton.disabled = false;
 }

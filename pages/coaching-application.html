@@ -50,18 +50,14 @@ document.addEventListener('DOMContentLoaded', () => {
         programInterest.value = programMap[selectedProgram];
     }
 
-    const groupFields = document.getElementById('group-experience-fields');
-    const toggleGroupFields = () => {
-        const isGroupInquiry = programInterest?.value === 'Private Group Training / Organization Wellness';
-        if (!groupFields) return;
-        groupFields.hidden = !isGroupInquiry;
-        groupFields.querySelectorAll('textarea, input, select').forEach(field => {
-            field.disabled = !isGroupInquiry;
-        });
-    };
-
-    programInterest?.addEventListener('change', toggleGroupFields);
-    toggleGroupFields();
+    // Shows/hides both the static group-details field and any dynamic
+    // application_questions fields this program doesn't need - see
+    // EFC_PROGRAM_FIELD_ADJUSTMENTS in application-questions-renderer.js.
+    // Runs again once the dynamic fields actually exist, from
+    // site-intake.js's loadDynamicApplicationQuestions.
+    const applyAdjustments = () => window.applyProgramFieldAdjustments?.(programInterest?.value || '');
+    programInterest?.addEventListener('change', applyAdjustments);
+    applyAdjustments();
 });
 
 function changeProductImage(imageId, newImage, dot){
