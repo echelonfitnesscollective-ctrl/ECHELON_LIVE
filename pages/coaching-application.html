@@ -42,8 +42,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectedProgram = new URLSearchParams(window.location.search).get('program');
     const programMap = {
         '12-week-transformation': '12-Week Transformation',
+        '1-on-1-coaching': '1-On-1 Coaching',
         'private-group-training': 'Private Group Training / Organization Wellness',
-        'organization-wellness': 'Private Group Training / Organization Wellness'
+        'organization-wellness': 'Private Group Training / Organization Wellness',
+        // Matches the Training Hub cards' own data-program-key values -
+        // that's the raw value applyProgramGate() puts in the CTA's
+        // ?program= once a card goes live (see section-control.js), so
+        // these need to stay in sync with index.html's data-program-key
+        // attributes, not with what the card displays.
+        'vl-body-lab': 'VL Body Lab',
+        'faith-favor-mobility': 'Faith & Favor Mobility'
     };
 
     if (programInterest && programMap[selectedProgram]) {
@@ -215,6 +223,14 @@ function changeProductImage(imageId, newImage, dot){
 
                 <option>
                     Private Group Training / Organization Wellness
+                </option>
+
+                <option>
+                    VL Body Lab
+                </option>
+
+                <option>
+                    Faith &amp; Favor Mobility
                 </option>
 
             </select>
