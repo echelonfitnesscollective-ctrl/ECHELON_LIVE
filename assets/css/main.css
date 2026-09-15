@@ -5329,6 +5329,7 @@ MOBILE
     line-height: 1.3;
     margin-bottom: 20px;
     min-height: calc(1.3em * 2);
+    transition: .3s;
 }
 
 #training .training-card p {
@@ -5337,6 +5338,15 @@ MOBILE
     font-size: 0.95rem;
     margin: 0;
     min-height: calc(1.6em * 5);
+    transition: .3s;
+}
+
+#training .training-card:hover p {
+    color: #d5d5d5;
+}
+
+#training .training-card:hover .coach-name {
+    color: #ffe680;
 }
 
 #training .training-card-tag-slot {
