@@ -1,4 +1,25 @@
 {
+  "redirects": [
+    { "source": "/admin-dashboard.html", "destination": "/pages/admin-dashboard.html", "permanent": true },
+    { "source": "/admin-login.html", "destination": "/pages/admin-login.html", "permanent": true },
+    { "source": "/admin-operations-manual.html", "destination": "/pages/admin-operations-manual.html", "permanent": true },
+    { "source": "/checkin.html", "destination": "/pages/checkin.html", "permanent": true },
+    { "source": "/coaching-application.html", "destination": "/pages/coaching-application.html", "permanent": true },
+    { "source": "/disclaimer.html", "destination": "/pages/disclaimer.html", "permanent": true },
+    { "source": "/member-coaching.html", "destination": "/pages/member-coaching.html", "permanent": true },
+    { "source": "/member-library.html", "destination": "/pages/member-library.html", "permanent": true },
+    { "source": "/member-login.html", "destination": "/pages/member-login.html", "permanent": true },
+    { "source": "/member-nutrition.html", "destination": "/pages/member-nutrition.html", "permanent": true },
+    { "source": "/member-onboarding.html", "destination": "/pages/member-onboarding.html", "permanent": true },
+    { "source": "/member-performance.html", "destination": "/pages/member-performance.html", "permanent": true },
+    { "source": "/member-portal.html", "destination": "/pages/member-portal.html", "permanent": true },
+    { "source": "/member-reset.html", "destination": "/pages/member-reset.html", "permanent": true },
+    { "source": "/member-waiver.html", "destination": "/pages/member-waiver.html", "permanent": true },
+    { "source": "/privacy.html", "destination": "/pages/privacy.html", "permanent": true },
+    { "source": "/resources-hub.html", "destination": "/pages/resources-hub.html", "permanent": true },
+    { "source": "/terms.html", "destination": "/pages/terms.html", "permanent": true },
+    { "source": "/waitlist.html", "destination": "/pages/waitlist.html", "permanent": true }
+  ],
   "rewrites": [
     { "source": "/api/health", "destination": "/api/calendar/gateway?route=health" },
     { "source": "/api/calendar/oauth-start", "destination": "/api/calendar/gateway?route=oauth-start" },
