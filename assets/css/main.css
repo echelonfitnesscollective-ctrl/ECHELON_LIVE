@@ -924,7 +924,7 @@ textarea{
 
     flex-direction:column;
 
-    gap:18px;
+    gap:20px;
 
 }
 
@@ -2619,7 +2619,10 @@ MOBILE
 
 .form-group{
 
-    margin-bottom:5px;
+    display:flex;
+    flex-direction:column;
+    gap:15px;
+    margin-bottom:30px;
 }
 
 .form-group label{
@@ -4424,15 +4427,21 @@ WAIVER
 
     background:#0D0D0C;
 
-    border:1px solid var(--primary);
+    border:1px solid #333;
 
-    padding:30px;
+    border-radius:4px;
 
-    height:280px;
+    padding:20px;
+
+    height:300px;
 
     overflow-y:auto;
 
-    margin-bottom:20px;
+    margin:25px 0;
+
+    font-size:.85rem;
+
+    color:#888;
 
 }
 
@@ -4474,11 +4483,19 @@ WAIVER
 
 .waiver-content{
 
-    color:#b5b5b5;
+    color:#AAA;
 
     font-size:.9rem;
 
-    line-height:1.9;
+    line-height:1.6;
+
+    height:200px;
+
+    overflow-y:auto;
+
+    margin-bottom:20px;
+
+    padding:20px;
 
 }
 
@@ -4508,7 +4525,7 @@ WAIVER
 
     align-items:flex-start;
 
-    gap:12px;
+    gap:10px;
 
     cursor:pointer;
 
@@ -4517,6 +4534,8 @@ WAIVER
     font-size:.9rem;
 
     line-height:1.6;
+
+    margin:20px 0;
 
 }
 
@@ -4532,15 +4551,6 @@ WAIVER
 
     flex-shrink:0;
 
-}
-/* Fix waiver checkbox */
-
-.waiver-agreement{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    margin-top:20px;
-    cursor:pointer;
 }
 
 .waiver-agreement input[type="checkbox"]{
@@ -4795,15 +4805,6 @@ INPUTS
 /* ==========================================
 WAIVER
 ========================================== */
-
-.waiver-box{
-    background:#0D0D0C;
-    border:1px solid #2A2822;
-    padding:25px;
-    height:300px;
-    overflow-y:auto;
-    margin-top:20px;
-}
 
 .waiver-box h3{
     color:var(--primary);
@@ -5506,10 +5507,7 @@ MOBILE
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-.portal-card { background: #0D0D0C; padding: 50px; border: 1px solid #1A1917; max-width: 700px; margin: 0 auto; }
-.echelon-form { display: flex; flex-direction: column; gap: 20px; }
 .echelon-form[hidden] { display: none !important; }
-.form-group { display: flex; flex-direction: column; gap: 15px; margin-bottom: 30px; }
 .form-group h3 { color: var(--primary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
 
 input, select, textarea {
@@ -5517,9 +5515,6 @@ input, select, textarea {
     font-family: inherit; transition: 0.3s;
 }
 input:focus { border-color: var(--primary); outline: none; }
-
-.waiver-box { border: 1px solid #2A2822; padding: 20px; font-size: 0.85rem; color: #888; }
-.waiver-content { height: 150px; overflow-y: scroll; margin-bottom: 20px; }
 
 
 
@@ -5546,21 +5541,12 @@ input:focus { border-color: var(--primary); outline: none; }
 
 
 
-:root {
-    --primary: #FFD700; /* Your Brand Gold */
-    --bg: #0D0D0C;
-    --card-bg: #0D0D0C;
-    --border: #1A1917;
-}
-
 /* Base Layout */
 .hub-container { padding: 80px 20px; max-width: 900px; margin: 0 auto; }
 .hub-header { text-align: center; margin-bottom: 60px; }
 .hub-header h1 { font-family: 'Bebas Neue', sans-serif; color: white; font-size: 3rem; letter-spacing: 4px; text-transform: uppercase; }
 
 /* Unified Portal Card */
-.portal-card { background: var(--card-bg); padding: 50px; border: 1px solid var(--border); }
-.echelon-form { display: flex; flex-direction: column; gap: 20px; }
 input, select, textarea { background: #1A1917; border: 1px solid #2A2822; color: white; padding: 15px; width: 100%; }
 .btn-primary { background: var(--primary); color: #0D0D0C; padding: 15px; text-align: center; font-weight: bold; cursor: pointer; border: none; }
 
@@ -6132,11 +6118,8 @@ MOBILE
 .form-section-header h2, .form-section-header h3 { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; color: #FFD700; }
 .group-experience-fields{margin:2px 0 22px}.group-experience-fields[hidden]{display:none}.group-experience-fields label{display:block;margin:0 0 9px;color:#d7b55b;font-size:.67rem;font-weight:700;letter-spacing:.12em}.group-experience-fields textarea{margin:0}
 .form-helper-text { margin: -4px 0 22px; max-width: 680px; color: #b9b5ab; font-size: .88rem; line-height: 1.65; }
-.waiver-box { background: #0D0D0C; border: 1px solid #333; border-radius: 4px; margin: 25px 0; }
 .waiver-header { background: #0D0D0C; padding: 15px; color: #0D0D0C; }
 .waiver-header h3 { font-family: 'Bebas Neue'; margin: 0; }
-.waiver-content { padding: 20px; height: 200px; overflow-y: auto; font-size: 0.9rem; color: #AAA; line-height: 1.6; }
-.waiver-agreement { display: flex; align-items: flex-start; gap: 10px; margin: 20px 0; font-size: 0.9rem; }
 #checkin-success { padding: 40px; text-align: center; }
 #checkin-success h2 { font-family: 'Bebas Neue'; color: #FFD700; font-size: 2rem; }
 .member-checkin-note{margin:0 0 20px;padding:14px 16px;border-left:2px solid var(--primary);background:rgba(215,181,91,.1);color:#e4c96e;font:700 .66rem 'Montserrat',sans-serif;letter-spacing:.08em;line-height:1.55}
