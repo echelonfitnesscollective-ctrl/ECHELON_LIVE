@@ -27,8 +27,9 @@ const EFC_SHOP_CATALOG = [
     priceCents: 3200,
     sizes: ["S", "M", "L", "XL"],
     colors: [
-      { name: "Black", hex: "#0d0d0c", image: "assets/images/merch/classic-tee-black.jpg" },
+      { name: "White", hex: "#ffffff", image: "assets/images/merch/classic-tee-white.jpg" },
       { name: "Heather Grey", hex: "#9a9a9a", image: "assets/images/merch/classic-tee-heather-grey.jpg" },
+      { name: "Black", hex: "#0d0d0c", image: "assets/images/merch/classic-tee-black.jpg" },
     ],
   },
   {
@@ -59,7 +60,10 @@ const EFC_SHOP_CATALOG = [
     description: "Heavyweight fleece, front pouch pocket, full front lockup and sleeve mark.",
     priceCents: 6400,
     sizes: ["S", "M", "L", "XL"],
-    colors: [{ name: "Black", hex: "#0d0d0c", image: "assets/images/merch/pullover-hoodie-black.jpg" }],
+    colors: [
+      { name: "White", hex: "#ffffff", image: "assets/images/merch/pullover-hoodie-white.jpg" },
+      { name: "Black", hex: "#0d0d0c", image: "assets/images/merch/pullover-hoodie-black.jpg" },
+    ],
   },
   {
     id: "quarter-zip",
