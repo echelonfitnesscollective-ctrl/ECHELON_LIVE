@@ -48,10 +48,16 @@ async function loadDynamicApplicationQuestions(form) {
     const submitButton = form.querySelector('button[type="submit"]');
     if (!placeholder) return;
 
+    // show_on_initial_form (not active): the public form only shows the
+    // quick handful of fields meant for a first touch. The rest of the
+    // question bank stays active=true and available through the coach's
+    // "ASSIGN ONBOARDING QUESTIONS" admin action instead, filled in live
+    // on the follow-up call.
     const { data, error } = await echelonSiteClient
         .from('application_questions')
         .select('question_key, label, field_type, options, help_text, section_label, required')
         .eq('active', true)
+        .eq('show_on_initial_form', true)
         .order('sort_order', { ascending: true });
 
     if (error || !data) {

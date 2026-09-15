@@ -172,7 +172,10 @@ module.exports = async function submitCoachingApplication(req, res) {
         apikey: process.env.SUPABASE_ANON_KEY,
         authorization: `Bearer ${process.env.SUPABASE_ANON_KEY}`,
         'content-type': 'application/json',
-        prefer: 'return=minimal',
+        // return=representation (not minimal): the new row's id is
+        // needed below to link the auto-created follow-up task back
+        // to this application.
+        prefer: 'return=representation',
       },
       body: JSON.stringify({
         full_name: fullName,
@@ -188,10 +191,42 @@ module.exports = async function submitCoachingApplication(req, res) {
       return res.status(502).json({ error: 'We could not save your application. Please try again.' });
     }
 
+    const inserted = await insertResponse.json().catch(() => null);
+    const application = Array.isArray(inserted) ? inserted[0] : null;
+
     await notifyOwner({
       subject: `New Coaching Application: ${fullName}`,
       text: `Program interest: ${programInterest}\nName: ${fullName}\nEmail: ${email}\nPhone: ${phone || 'Not provided'}`,
     });
+
+    // Auto-add a follow-up task to the coach's task board so a new lead
+    // never depends on someone remembering to add it by hand. coach_tasks
+    // has no anon RLS policy (admin-only table), so this needs the
+    // service-role client, same as the onboarding-link path above.
+    if (application?.id && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      const answers = body || {};
+      const contextLines = [
+        `Program interest: ${programInterest}`,
+        answers.primary_goal ? `Primary goal: ${answers.primary_goal}` : null,
+        answers.training_days_per_week ? `Training days/week: ${answers.training_days_per_week}` : null,
+        `Email: ${email}`,
+        `Phone: ${phone || 'Not provided'}`,
+        '',
+        'Call to continue the application and walk through onboarding. Use "ASSIGN ONBOARDING QUESTIONS" on this profile to capture the rest of the question set live on the call.',
+      ].filter(Boolean);
+      await serviceDb('/rest/v1/coach_tasks', {
+        method: 'POST',
+        headers: { Prefer: 'return=minimal' },
+        body: JSON.stringify({
+          title: `New lead: ${fullName}`,
+          description: contextLines.join('\n'),
+          related_name: fullName,
+          task_type: 'New lead follow-up',
+          priority: 'High',
+          application_id: application.id,
+        }),
+      }).catch((error) => console.error('Auto-created follow-up task failed', error && error.message));
+    }
 
     return res.status(200).json({ ok: true });
   } catch (error) {
