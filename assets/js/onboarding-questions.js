@@ -40,6 +40,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     status.remove();
     form.hidden = false;
 
+    // Same conditional field logic as the public application - see
+    // EFC_PROGRAM_FIELD_ADJUSTMENTS in application-questions-renderer.js.
+    // This link shows the full active question set, so a program that
+    // hides certain questions on the short form (Private Group Training's
+    // primary_goal/training_days_per_week) needs the same treatment here.
+    const applyAdjustments = () => window.applyProgramFieldAdjustments?.(form.elements.program_interest?.value || '');
+    form.elements.program_interest?.addEventListener('change', applyAdjustments);
+    applyAdjustments();
+
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
         const submitButton = form.querySelector('button[type="submit"]');
