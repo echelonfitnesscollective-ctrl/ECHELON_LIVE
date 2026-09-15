@@ -5669,6 +5669,32 @@ BRAND
 
 }
 
+.footer-contact{
+
+    display:block;
+
+    color:#fff;
+
+    font-size:.95rem;
+
+    font-weight:700;
+
+    letter-spacing:.04em;
+
+    text-decoration:none;
+
+    margin-bottom:18px;
+
+    transition:.3s;
+
+}
+
+.footer-contact:hover{
+
+    color:#D4AF37;
+
+}
+
 .footer-socials{
 
     display:flex;

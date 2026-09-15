@@ -110,6 +110,7 @@ function installSharedFooter() {
             <div class="footer-brand">
                 <h2>ECHELON <span>FITNESS COLLECTIVE</span></h2>
                 <p class="footer-tagline">Building Strength Through Structure.</p>
+                <a href="tel:+14078487025" class="footer-contact">407-848-7025</a>
                 <div class="footer-socials"><a href="https://www.instagram.com/EchelonFitness.co" target="_blank" rel="noopener">INSTAGRAM</a><a href="https://tr.ee/pO3gLtovXy" target="_blank" rel="noopener">TIKTOK</a></div>
             </div>
             <div class="footer-links-row"><a href="${prefix}index.html">HOME</a><a href="${prefix}index.html#about">ABOUT</a><a href="${prefix}index.html#training">TRAINING</a><a href="${prefix}index.html#resources">RESOURCES</a><a href="${prefix}index.html#shop">SHOP</a><a href="${prefix}index.html#contact">CONTACT</a></div>
