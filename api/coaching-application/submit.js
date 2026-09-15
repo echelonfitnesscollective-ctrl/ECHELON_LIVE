@@ -161,22 +161,22 @@ module.exports = async function submitCoachingApplication(req, res) {
 
   if (body.token) return handleOnboardingLinkSubmit(req, res, body, fullName, email, phone, programInterest);
 
-  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
     return res.status(503).json({ error: 'This form is being prepared. Please try again shortly.' });
   }
 
   try {
-    const insertResponse = await fetch(`${process.env.SUPABASE_URL}/rest/v1/coaching_applications`, {
+    // Service role, not the anon key: coaching_applications' RLS only
+    // grants anon INSERT, not SELECT, and Prefer: return=representation
+    // needs the inserting role to be able to read the row right back -
+    // with the anon key that combination made every submission fail
+    // ("We could not save your application"). Service role bypasses RLS
+    // and is already how handleOnboardingLinkSubmit does this same
+    // insert above; every field here is still server-sanitized the same
+    // way regardless of which key performs the write.
+    const insertResult = await serviceDb('/rest/v1/coaching_applications', {
       method: 'POST',
-      headers: {
-        apikey: process.env.SUPABASE_ANON_KEY,
-        authorization: `Bearer ${process.env.SUPABASE_ANON_KEY}`,
-        'content-type': 'application/json',
-        // return=representation (not minimal): the new row's id is
-        // needed below to link the auto-created follow-up task back
-        // to this application.
-        prefer: 'return=representation',
-      },
+      headers: { Prefer: 'return=representation' },
       body: JSON.stringify({
         full_name: fullName,
         email,
@@ -186,13 +186,12 @@ module.exports = async function submitCoachingApplication(req, res) {
       }),
     });
 
-    if (!insertResponse.ok) {
-      console.error('Coaching application insert failed', insertResponse.status, await insertResponse.text());
+    if (!insertResult.result.ok) {
+      console.error('Coaching application insert failed', insertResult.result.status, insertResult.body);
       return res.status(502).json({ error: 'We could not save your application. Please try again.' });
     }
 
-    const inserted = await insertResponse.json().catch(() => null);
-    const application = Array.isArray(inserted) ? inserted[0] : null;
+    const application = Array.isArray(insertResult.body) ? insertResult.body[0] : null;
 
     await notifyOwner({
       subject: `New Coaching Application: ${fullName}`,
