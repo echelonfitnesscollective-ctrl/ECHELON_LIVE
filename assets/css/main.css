@@ -405,7 +405,11 @@ textarea{
 
     transition:.4s ease;
 
-    z-index:4999;
+    /* Must clear .site-header's z-index:5000 - this is a full-screen
+       takeover (inset:0), and at z-index:4999 the header rendered on
+       top of it instead of being covered, leaving the logo/nav/cart
+       visibly floating over the menu instead of disappearing under it. */
+    z-index:5500;
 
 }
 
