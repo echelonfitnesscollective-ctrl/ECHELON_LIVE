@@ -2458,7 +2458,7 @@ function trainingProfileSelect(label, options, value) {
     return select;
 }
 
-const TRAINING_PROFILE_DELIVERY_SETTINGS = ['Group Fitness', 'Private Group Training', '1-on-1 Coaching', '12-Week Transformation', 'VL Body Lab', 'Faith & Favor Mobility'];
+const TRAINING_PROFILE_DELIVERY_SETTINGS = ['Group Fitness', 'Private Group Training', '1-on-1 Coaching', '12-Week Transformation', 'Kinetic Labs', 'Faith & Favor Mobility'];
 const TRAINING_PROFILE_GOALS = ['Cutting', 'Weight Loss', 'Bulking', 'Muscle (Hypertrophy)', 'Performance', 'Older-Adult Wellness'];
 const TRAINING_PROFILE_EXPERIENCE = ['New to training', 'Beginner (under 6 months)', 'Intermediate (6 months-2 years)', 'Advanced (2+ years)'];
 const TRAINING_PROFILE_EQUIPMENT = ['Full gym', 'Home gym - dumbbells/bands', 'Bodyweight only', 'Mobile - coach brings equipment'];
