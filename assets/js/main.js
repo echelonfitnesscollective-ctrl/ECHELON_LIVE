@@ -514,35 +514,40 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-    const container = document.querySelector('.carousel-container');
-    const leftArrow = document.querySelector('.left-arrow');
-    const rightArrow = document.querySelector('.right-arrow');
-
-    // Adjust this value based on your card width + gap
-    const scrollAmount = 320;
-
-    if (container && rightArrow && leftArrow) {
-        rightArrow.addEventListener('click', () => {
-            container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-        });
-
-        leftArrow.addEventListener('click', () => {
-            container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
-        });
-    }
-
-
+// Training program carousel arrows (index.html's onclick="scrollCarousel(...)").
+// Cards snap to the viewport's center (scroll-snap-align:center), so a
+// fixed-pixel scrollBy() drifts out of sync with where a card actually
+// sits - and clicking the arrow again before a smooth scroll settles
+// just stacks another blind offset on top, which is what let it run
+// past the last real card into the track's own trailing padding
+// ("blank pages" / glitching, worst on mobile where taps land fast).
+// Recomputing "current card" fresh from the live scroll position on
+// every click, and always targeting a real card's centered position,
+// makes every click self-correcting instead of additive.
 function scrollCarousel(direction) {
     const carousel = document.getElementById('trainingCarousel');
-    const scrollAmount = 350; // Adjust this value to match your card width + gap
-
     if (!carousel) return;
+    const cards = [...carousel.querySelectorAll('.training-card:not([hidden])')];
+    if (!cards.length) return;
 
-    if (direction === 'left') {
-        carousel.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
-    } else {
-        carousel.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-    }
+    let currentIndex = 0;
+    let closestDist = Infinity;
+    cards.forEach((card, i) => {
+        const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+        const viewCenter = carousel.scrollLeft + carousel.clientWidth / 2;
+        const dist = Math.abs(cardCenter - viewCenter);
+        if (dist < closestDist) {
+            closestDist = dist;
+            currentIndex = i;
+        }
+    });
+
+    const nextIndex = direction === 'left'
+        ? Math.max(0, currentIndex - 1)
+        : Math.min(cards.length - 1, currentIndex + 1);
+    const target = cards[nextIndex];
+    const left = target.offsetLeft - carousel.clientWidth / 2 + target.offsetWidth / 2;
+    carousel.scrollTo({ left, behavior: 'smooth' });
 }
 
 // Adds a show/hide toggle to every password field sitewide, no per-page markup needed.
