@@ -402,6 +402,21 @@ function initResourceHub() {
     });
 
     if (firstCatId) setActiveResourceCategory(firstCatId, false);
+
+    // Deep link support: pages/resources-hub.html#resource=free-training
+    // opens straight to that guide instead of leaving a visitor to hunt for
+    // it again, the exact thing a homepage preview card should do.
+    const hashMatch = window.location.hash.match(/^#resource=(.+)$/);
+    if (hashMatch) {
+        const item = RESOURCE_ITEMS.find(entry => entry.id === hashMatch[1]);
+        if (item) {
+            const cat = RESOURCE_CATEGORY_GROUPS.flatMap(group => group.cats).find(entry => entry.id === item.category);
+            if (cat) {
+                setActiveResourceCategory(cat.id, true);
+                openResourceModal(item, cat);
+            }
+        }
+    }
 }
 
 document.addEventListener('DOMContentLoaded', initResourceHub);

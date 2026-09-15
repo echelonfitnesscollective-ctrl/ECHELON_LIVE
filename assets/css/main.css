@@ -1630,6 +1630,23 @@ RESOURCES
 
 .training-intro{max-width:700px;margin:0 auto 40px;text-align:center;color:#bdbdbd;line-height:1.8}
 
+.resources-card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;margin-bottom:48px}
+.resource-preview-card{display:flex;flex-direction:column;gap:10px;padding:28px 26px;border:1px solid rgba(215,181,91,.2);background:rgba(255,255,255,.02);text-decoration:none;transition:.3s}
+.resource-preview-card:hover{border-color:var(--primary);transform:translateY(-4px)}
+.resource-preview-card h3{margin:2px 0 0;font-size:1.35rem;line-height:1.15;color:#fff}
+.resource-preview-card p{margin:0;color:#aaa;font-size:.85rem;line-height:1.55;flex-grow:1}
+.resource-preview-cta{color:#d7b55b;font:700 .68rem 'Montserrat',sans-serif;letter-spacing:.1em;margin-top:6px}
+.resource-preview-card.resource-preview-all{background:linear-gradient(135deg,rgba(215,181,91,.14),rgba(255,255,255,.02));border-color:rgba(215,181,91,.4)}
+
+.resources-vault-strip{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,.9fr) auto;gap:32px;align-items:center;padding:36px;border:1px solid rgba(215,181,91,.3);background:linear-gradient(115deg,rgba(215,181,91,.1),rgba(255,255,255,.02))}
+.resources-vault-strip h3{margin:8px 0 10px;font-size:1.5rem;color:#fff}
+.resources-vault-strip>div>p{margin:0;color:#bbb;font-size:.88rem;line-height:1.6}
+.resources-vault-strip ul{list-style:none;margin:0;padding:0}
+.resources-vault-strip li{padding:8px 0;color:#ddd;font-size:.85rem;border-bottom:1px solid rgba(255,255,255,.08)}
+.resources-vault-strip li:last-child{border-bottom:none}
+.resources-vault-strip .btn-secondary{white-space:nowrap}
+@media(max-width:860px){.resources-vault-strip{grid-template-columns:1fr}}
+
 .resources-grid{
 
     display:grid;
