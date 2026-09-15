@@ -96,6 +96,27 @@
                     </form>
                     <section class="cms-published-panel"><div class="cms-list-heading"><div><span class="checkin-tag">CONTENT QUEUE</span><h3>YOUR SITE UPDATES</h3></div><span id="site-content-count">Loading…</span></div><div id="site-content-list" class="cms-content-list"></div></section>
                 </div>
+
+                <div class="cms-intro testimonials-intro">
+                    <div><span class="checkin-tag">SOCIAL PROOF</span><h3>REAL CLIENTS. REAL RESULTS.</h3><p>Add a quote from a real client, with an optional before/after photo pair. Drafts stay private until you publish them. Client permission for their name and any photos is on you to confirm before publishing.</p></div>
+                    <div class="cms-placement-key"><span>QUOTE</span><span>BEFORE / AFTER</span><span>REORDER</span><span>PUBLISH</span></div>
+                </div>
+                <div class="cms-layout">
+                    <form id="testimonial-form" class="echelon-form site-content-form" enctype="multipart/form-data">
+                        <div class="cms-form-heading"><span class="checkin-tag">NEW TESTIMONIAL</span><strong>ADD A CLIENT STORY</strong></div>
+                        <div class="cms-form-grid"><input name="client_name" type="text" maxlength="80" placeholder="Client name (ex: Zamiyah M.)" required aria-label="Client name"><input name="program" type="text" maxlength="80" placeholder="Program (optional, ex: 1-on-1 Coaching)" aria-label="Program"></div>
+                        <textarea name="quote" rows="4" maxlength="600" placeholder="The client's own words." required aria-label="Testimonial quote"></textarea>
+                        <label>STAR RATING (OPTIONAL)<select name="rating" aria-label="Star rating"><option value="">No rating shown</option><option value="5">★★★★★ (5)</option><option value="4">★★★★☆ (4)</option><option value="3">★★★☆☆ (3)</option></select></label>
+                        <div class="cms-form-grid">
+                            <label>BEFORE PHOTO (OPTIONAL)<input name="before_photo" type="file" accept="image/jpeg,image/png,image/webp" aria-label="Before photo"></label>
+                            <label>AFTER PHOTO (OPTIONAL)<input name="after_photo" type="file" accept="image/jpeg,image/png,image/webp" aria-label="After photo"></label>
+                        </div>
+                        <div class="cms-form-grid"><label>VISIBILITY<select name="published" aria-label="Publish to the public site"><option value="true">Publish now</option><option value="false">Save as a private draft</option></select></label><label>DISPLAY ORDER<input name="sort_order" type="number" min="0" max="999" value="0" aria-label="Sort Order"><small>Lower numbers appear first.</small></label></div>
+                        <div class="cms-form-actions"><button type="submit" class="btn-primary" id="testimonial-save">SAVE TESTIMONIAL</button></div>
+                        <p id="testimonial-feedback" class="form-error" role="status"></p>
+                    </form>
+                    <section class="cms-published-panel"><div class="cms-list-heading"><div><span class="checkin-tag">TESTIMONIAL QUEUE</span><h3>YOUR CLIENT STORIES</h3></div><span id="testimonial-count">Loading…</span></div><div id="testimonial-list" class="cms-content-list"></div></section>
+                </div>
             </details>
 
             <details class="admin-intake-section admin-console-section admin-media-section admin-tab-panel" data-admin-panel="media" id="admin-panel-media" role="tabpanel">

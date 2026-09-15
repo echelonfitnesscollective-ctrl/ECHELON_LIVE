@@ -1890,6 +1890,114 @@ async function initializeSiteMediaManager() {
     await refresh();
 }
 
+function testimonialPhotoUrl(path) {
+    return path ? echelonAdminClient.storage.from('testimonial-photos').getPublicUrl(path).data.publicUrl : '';
+}
+
+async function initializeTestimonialsManager() {
+    const form = document.getElementById('testimonial-form');
+    if (!form) return;
+    const list = document.getElementById('testimonial-list');
+    const feedback = document.getElementById('testimonial-feedback');
+    const count = document.getElementById('testimonial-count');
+    const save = document.getElementById('testimonial-save');
+
+    const refresh = async () => {
+        count.textContent = 'LOADING…';
+        const { data, error } = await echelonAdminClient.from('testimonials').select('*').order('sort_order', { ascending: true }).order('created_at', { ascending: false }).limit(60);
+        if (error) { list.textContent = 'Run the Testimonials database update to activate this section.'; count.textContent = 'SETUP REQUIRED'; return; }
+        const records = data || [];
+        list.replaceChildren(); count.textContent = `${records.length} STOR${records.length === 1 ? 'Y' : 'IES'}`;
+        if (!records.length) { const empty = document.createElement('p'); empty.className = 'cms-content-empty'; empty.textContent = 'No testimonials yet.'; list.append(empty); return; }
+        records.forEach((item) => {
+            const card = document.createElement('article'); card.className = `cms-content-item testimonial-admin-item${item.published ? ' is-published' : ''}`;
+            const copy = document.createElement('div');
+            if (item.before_image_path || item.after_image_path) {
+                const previewWrap = document.createElement('div'); previewWrap.className = 'testimonial-admin-preview';
+                if (item.before_image_path) { const img = document.createElement('img'); img.className = 'media-manager-preview'; img.src = testimonialPhotoUrl(item.before_image_path); img.alt = `${item.client_name} before`; previewWrap.append(img); }
+                if (item.after_image_path) { const img = document.createElement('img'); img.className = 'media-manager-preview'; img.src = testimonialPhotoUrl(item.after_image_path); img.alt = `${item.client_name} after`; previewWrap.append(img); }
+                copy.append(previewWrap);
+            }
+            const tag = document.createElement('span'); tag.className = 'checkin-tag'; tag.textContent = item.program || 'TESTIMONIAL';
+            const title = document.createElement('h4'); title.textContent = item.client_name;
+            const quote = document.createElement('p'); quote.textContent = `“${item.quote}”`;
+            const meta = document.createElement('div'); meta.className = 'cms-content-meta';
+            const visibility = document.createElement('span'); visibility.className = 'cms-status'; visibility.textContent = item.published ? 'PUBLISHED' : 'DRAFT';
+            const order = document.createElement('span'); order.textContent = `ORDER ${item.sort_order}`;
+            meta.append(visibility, order);
+            if (item.rating) { const rating = document.createElement('span'); rating.textContent = '★'.repeat(item.rating); meta.append(rating); }
+            copy.append(tag, title, quote, meta);
+            const actions = document.createElement('div'); actions.className = 'cms-content-actions';
+            const reorder = document.createElement('button'); reorder.type = 'button'; reorder.textContent = 'SET ORDER';
+            reorder.addEventListener('click', async () => {
+                const value = window.prompt('Display order (lower numbers appear first):', String(item.sort_order));
+                if (value === null) return; const sortOrder = Number(value);
+                if (!Number.isInteger(sortOrder) || sortOrder < 0 || sortOrder > 999) { feedback.textContent = 'Use a whole number from 0 to 999.'; return; }
+                const { error: orderError } = await echelonAdminClient.from('testimonials').update({ sort_order: sortOrder }).eq('id', item.id);
+                if (orderError) { feedback.textContent = 'The display order could not be saved.'; return; } feedback.textContent = 'Display order updated.'; refresh();
+            });
+            const publish = document.createElement('button'); publish.type = 'button'; publish.textContent = item.published ? 'UNPUBLISH' : 'PUBLISH';
+            publish.addEventListener('click', async () => {
+                const { error: publishError } = await echelonAdminClient.from('testimonials').update({ published: !item.published }).eq('id', item.id);
+                if (publishError) { feedback.textContent = 'That testimonial could not be updated.'; return; } feedback.textContent = item.published ? 'Removed from the public site.' : 'Published to the public site.'; refresh();
+            });
+            const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'cms-delete'; remove.textContent = 'REMOVE';
+            remove.addEventListener('click', async () => {
+                if (!window.confirm(`Remove ${item.client_name}'s testimonial?`)) return;
+                remove.disabled = true;
+                const { error: deleteError } = await echelonAdminClient.from('testimonials').delete().eq('id', item.id);
+                if (deleteError) { feedback.textContent = 'The testimonial could not be removed.'; remove.disabled = false; return; }
+                const paths = [item.before_image_path, item.after_image_path].filter(Boolean);
+                if (paths.length) await echelonAdminClient.storage.from('testimonial-photos').remove(paths);
+                feedback.textContent = 'Removed.'; refresh();
+            });
+            actions.append(reorder, publish, remove); card.append(copy, actions); list.append(card);
+        });
+    };
+
+    async function uploadPhoto(file) {
+        if (!file) return null;
+        const safeName = file.name.toLowerCase().replace(/[^a-z0-9.]+/g, '-');
+        const path = `${Date.now()}-${safeName}`;
+        const upload = await echelonAdminClient.storage.from('testimonial-photos').upload(path, file, { contentType: file.type, upsert: false });
+        if (upload.error) return undefined;
+        return path;
+    }
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault(); feedback.textContent = '';
+        const clientName = form.elements.client_name.value.trim();
+        const quote = form.elements.quote.value.trim();
+        if (!clientName || !quote) { feedback.textContent = 'Enter the client name and their quote.'; return; }
+        save.disabled = true; save.textContent = 'SAVING…';
+        const beforePath = await uploadPhoto(form.elements.before_photo.files[0]);
+        const afterPath = await uploadPhoto(form.elements.after_photo.files[0]);
+        if (beforePath === undefined || afterPath === undefined) {
+            feedback.textContent = 'A photo could not be uploaded. Please try again.';
+            save.disabled = false; save.textContent = 'SAVE TESTIMONIAL'; return;
+        }
+        const { error } = await echelonAdminClient.from('testimonials').insert({
+            client_name: clientName,
+            program: form.elements.program.value.trim() || null,
+            quote,
+            rating: form.elements.rating.value ? Number(form.elements.rating.value) : null,
+            before_image_path: beforePath,
+            after_image_path: afterPath,
+            published: form.elements.published.value === 'true',
+            sort_order: Number(form.elements.sort_order.value) || 0,
+        });
+        save.disabled = false; save.textContent = 'SAVE TESTIMONIAL';
+        if (error) {
+            const cleanup = [beforePath, afterPath].filter(Boolean);
+            if (cleanup.length) await echelonAdminClient.storage.from('testimonial-photos').remove(cleanup);
+            feedback.textContent = 'The testimonial could not be saved.'; return;
+        }
+        form.reset(); form.elements.published.value = 'true'; form.elements.sort_order.value = '0';
+        feedback.textContent = 'Testimonial saved. It is live if you chose Publish now.'; await refresh();
+    });
+    await refresh();
+}
+
 function renderIntakeDetail(row) {
     const detail = document.getElementById('admin-intake-detail');
     const profile = row.profile;
@@ -2860,6 +2968,7 @@ document.addEventListener('DOMContentLoaded', () => {
         initializeMemberLibraryManager();
         initializeSiteContentManager();
         initializeSiteMediaManager();
+        initializeTestimonialsManager();
         initializeCommunicationsLibrary();
         initializeSectionControl();
         initializeEquipmentManager();
