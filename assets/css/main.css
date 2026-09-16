@@ -1430,6 +1430,18 @@ html{
 
 /* PRINCIPLES */
 
+.principles-heading{
+    text-align:center;
+    max-width:700px;
+    margin:0 auto 40px;
+}
+
+.principles-heading h3{
+    font-size:clamp(2rem,4vw,3rem);
+    line-height:1;
+    margin:12px 0 0;
+}
+
 .principles-grid{
     display:grid;
     grid-template-columns:repeat(4,1fr);
