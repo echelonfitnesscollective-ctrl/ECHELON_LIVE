@@ -1,18 +1,24 @@
 // Vercel serverless endpoint for the free starter-plan giveaway
 // (pages/free-plan.html). Same shape as api/free-class/submit.js: a
 // lead-capture form, no payment, writes to the shared website_leads
-// table. The one difference is this also emails the matched template
-// straight to the lead and returns it in the response so the page can
-// render it immediately, no second round trip.
+// table for the coach's own lead tracking. On top of that, this also
+// writes the lead's *resolved* plan into free_plan_deliveries (same
+// shared Supabase project EchelonOS uses) under a random token, and
+// returns the resulting app.echelonfitness.co/plan/[token] URL - the
+// actual plan now lives on a real EchelonOS page instead of being
+// dumped inline on the marketing site or crammed into the email body.
 // Required Vercel environment variables: SUPABASE_URL, SUPABASE_ANON_KEY.
 // Optional: RESEND_API_KEY (email is skipped, not failed, without it).
 
+const crypto = require('crypto');
 const { notifyOwner, sendEmail } = require('../_lib/email');
 const { getTemplate, templateGoals } = require('../_lib/free-plan-templates');
 
 const inMemoryRateLimit = new Map();
 const WINDOW_MS = 60_000;
 const MAX_PER_WINDOW = 3;
+
+const APP_URL = 'https://app.echelonfitness.co';
 
 function publicSiteUrl() {
   return String(process.env.SITE_URL || 'https://www.echelonfitness.co').trim().replace(/\/$/, '');
@@ -38,52 +44,38 @@ function rateLimited(ip) {
   return entry.count > MAX_PER_WINDOW;
 }
 
-function escapeHtml(value) {
-  return String(value)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-}
-
-function renderTemplateEmail(name, template) {
-  const daysHtml = template.days
-    .map(
-      (day) => `
-        <tr><td style="padding:16px 0 4px;font-weight:700;color:#111;">${escapeHtml(day.label)}</td></tr>
-        ${day.items.map((item) => `<tr><td style="padding:2px 0 2px 12px;color:#333;">• ${escapeHtml(item)}</td></tr>`).join('')}
-      `
-    )
-    .join('');
+// Short, personal, from Luther - not a corporate blast. The plan
+// itself lives on the linked page now, so the email's job is just to
+// feel like a real note and get them there.
+function renderPlanEmail(name, template, planUrl, experienceLevel, daysPerWeek) {
+  const firstName = (name || '').split(' ')[0] || 'there';
+  const context = [
+    experienceLevel ? `${experienceLevel.toLowerCase()} level` : null,
+    daysPerWeek ? `${daysPerWeek} days a week to train` : null,
+  ]
+    .filter(Boolean)
+    .join(', ');
 
   const html = `
-    <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;">
-      <p style="color:#111;">Hey ${escapeHtml(name) || 'there'},</p>
-      <p style="color:#333;">Here's your free starter plan from Echelon Fitness Collective.</p>
-      <h2 style="color:#111;margin-top:24px;">${escapeHtml(template.title)}</h2>
-      <p style="color:#555;font-style:italic;">${escapeHtml(template.subtitle)}</p>
-      <p style="color:#333;"><b>Level:</b> ${escapeHtml(template.level)}<br><b>Structure:</b> ${escapeHtml(template.structure)}</p>
-      <table style="width:100%;border-collapse:collapse;">${daysHtml}</table>
-      <p style="margin-top:20px;color:#333;"><b>Nutrition guidance:</b> ${escapeHtml(template.nutrition)}</p>
-      <p style="margin-top:24px;color:#333;">This plan is Week 1, static, forever — it doesn't adjust as you progress, doesn't account for injuries, and isn't personalized beyond your goal. That's exactly what real coaching adds.</p>
-      <p style="margin-top:16px;"><a href="https://www.echelonfitness.co/pages/coaching-application.html" style="background:#D4AF37;color:#111;padding:12px 20px;text-decoration:none;font-weight:700;display:inline-block;">APPLY FOR COACHING</a></p>
-      <p style="margin-top:24px;color:#999;font-size:12px;">Echelon Fitness Collective</p>
+    <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;color:#222;">
+      <p>${firstName},</p>
+      <p>I put together a ${template.title.split('—')[0].trim()} starter week for you${context ? ` — ${context}` : ''}. It's a real week, not a preview.</p>
+      <p style="margin-top:20px;"><a href="${planUrl}" style="background:#D4AF37;color:#111;padding:12px 22px;text-decoration:none;font-weight:700;display:inline-block;">VIEW YOUR PLAN</a></p>
+      <p style="margin-top:24px;">Run it, see how it feels, and let me know what questions come up.</p>
+      <p style="margin-top:20px;">— Luther</p>
     </div>
   `;
 
   const text = [
-    `Hey ${name || 'there'},`,
+    `${firstName},`,
     '',
-    `Here's your free starter plan: ${template.title}`,
-    template.subtitle,
+    `I put together a ${template.title.split('—')[0].trim()} starter week for you${context ? ` — ${context}` : ''}. It's a real week, not a preview.`,
     '',
-    `Level: ${template.level}`,
-    `Structure: ${template.structure}`,
+    `View your plan: ${planUrl}`,
     '',
-    ...template.days.flatMap((day) => [day.label, ...day.items.map((item) => `  - ${item}`)]),
+    'Run it, see how it feels, and let me know what questions come up.',
     '',
-    `Nutrition guidance: ${template.nutrition}`,
-    '',
-    'This plan is Week 1, static, forever - it does not adjust as you progress. Real coaching adapts. Apply: https://www.echelonfitness.co/pages/coaching-application.html',
+    '— Luther',
   ].join('\n');
 
   return { html, text };
@@ -127,15 +119,16 @@ module.exports = async function submitFreePlan(req, res) {
     return res.status(400).json({ error: `Please pick a goal from: ${templateGoals().join(', ')}` });
   }
 
+  const supabaseHeaders = {
+    apikey: process.env.SUPABASE_ANON_KEY,
+    authorization: `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+    'content-type': 'application/json',
+  };
+
   try {
     const insertResponse = await fetch(`${process.env.SUPABASE_URL}/rest/v1/website_leads`, {
       method: 'POST',
-      headers: {
-        apikey: process.env.SUPABASE_ANON_KEY,
-        authorization: `Bearer ${process.env.SUPABASE_ANON_KEY}`,
-        'content-type': 'application/json',
-        prefer: 'return=minimal',
-      },
+      headers: { ...supabaseHeaders, prefer: 'return=minimal' },
       body: JSON.stringify({
         lead_type: 'Free plan request',
         full_name: name,
@@ -151,15 +144,37 @@ module.exports = async function submitFreePlan(req, res) {
       return res.status(502).json({ error: 'We could not send your plan. Please try again.' });
     }
 
-    const { html, text } = renderTemplateEmail(name, template);
-    await sendEmail({ to: email, subject: `Your Free ${goal} Starter Plan — Echelon Fitness Collective`, text, html });
+    const token = crypto.randomUUID().replace(/-/g, '');
+    const deliveryResponse = await fetch(`${process.env.SUPABASE_URL}/rest/v1/free_plan_deliveries`, {
+      method: 'POST',
+      headers: { ...supabaseHeaders, prefer: 'return=minimal' },
+      body: JSON.stringify({
+        token,
+        full_name: name,
+        email,
+        goal,
+        experience_level: experienceLevel || null,
+        days_per_week: daysPerWeek || null,
+        plan: template,
+      }),
+    });
+
+    if (!deliveryResponse.ok) {
+      console.error('Free-plan delivery insert failed', deliveryResponse.status, await deliveryResponse.text());
+      return res.status(502).json({ error: 'We could not build your plan page. Please try again.' });
+    }
+
+    const planUrl = `${APP_URL}/plan/${token}`;
+
+    const { html, text } = renderPlanEmail(name, template, planUrl, experienceLevel, daysPerWeek);
+    await sendEmail({ to: email, subject: `Your Free ${goal} Starter Plan`, text, html });
 
     await notifyOwner({
       subject: `New Free Plan Request: ${name} (${goal})`,
-      text: `Name: ${name}\nEmail: ${email}\nGoal: ${goal}\nExperience: ${experienceLevel || 'Not provided'}\nDays/week: ${daysPerWeek || 'Not provided'}`,
+      text: `Name: ${name}\nEmail: ${email}\nGoal: ${goal}\nExperience: ${experienceLevel || 'Not provided'}\nDays/week: ${daysPerWeek || 'Not provided'}\nPlan: ${planUrl}`,
     });
 
-    return res.status(200).json({ ok: true, template });
+    return res.status(200).json({ ok: true, planUrl });
   } catch (error) {
     console.error('Free-plan form submission error', error && error.message);
     return res.status(503).json({ error: 'This form is temporarily unavailable. Please try again.' });

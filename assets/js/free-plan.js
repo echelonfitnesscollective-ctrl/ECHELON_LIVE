@@ -5,25 +5,6 @@
     const success = document.getElementById('free-plan-success');
     const submitButton = form.querySelector('button[type="submit"]');
 
-    function renderTemplate(template) {
-        const daysHtml = template.days
-            .map((day) => {
-                const items = day.items.map((item) => `<li>${item}</li>`).join('');
-                return `<div class="free-plan-day"><h4>${day.label}</h4>${items ? `<ul>${items}</ul>` : ''}</div>`;
-            })
-            .join('');
-
-        success.innerHTML = `
-            <h2>${template.title}</h2>
-            <p class="free-plan-subtitle">${template.subtitle}</p>
-            <p><strong>Level:</strong> ${template.level}<br><strong>Structure:</strong> ${template.structure}</p>
-            <div class="free-plan-days">${daysHtml}</div>
-            <p class="free-plan-nutrition"><strong>Nutrition guidance:</strong> ${template.nutrition}</p>
-            <p class="free-plan-hook">This plan is Week 1, static, forever, it doesn't adjust as you progress, doesn't account for injuries, and isn't personalized beyond your goal. That's exactly what real coaching adds. We also emailed you a copy.</p>
-            <a href="coaching-application.html" class="btn-primary">APPLY FOR COACHING</a>
-        `;
-    }
-
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
         submitButton.disabled = true;
@@ -47,8 +28,17 @@
             return;
         }
         window.efcTrack?.('free_plan_request', { goal: values.goal });
-        renderTemplate(result.template);
+
+        // The plan itself now lives on a real EchelonOS page - redirect
+        // there. Success div stays as a brief fallback in case the
+        // redirect is blocked (some in-app browsers do this) so there's
+        // still a real link to click instead of a dead end.
         form.style.display = 'none';
         success.style.display = 'block';
+        success.innerHTML = `
+            <h2>Your plan is ready.</h2>
+            <p>We're taking you there now. If nothing happens, <a href="${result.planUrl}">view your plan here</a>.</p>
+        `;
+        window.location.href = result.planUrl;
     });
 }());
