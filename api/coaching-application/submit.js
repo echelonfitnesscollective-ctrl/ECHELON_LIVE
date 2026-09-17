@@ -208,6 +208,7 @@ module.exports = async function submitCoachingApplication(req, res) {
         `Program interest: ${programInterest}`,
         answers.primary_goal ? `Primary goal: ${answers.primary_goal}` : null,
         answers.training_days_per_week ? `Training days/week: ${answers.training_days_per_week}` : null,
+        answers.training_delivery_preference ? `Training preference: ${answers.training_delivery_preference}` : null,
         `Email: ${email}`,
         `Phone: ${phone || 'Not provided'}`,
         '',

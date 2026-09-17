@@ -97,8 +97,21 @@ const EFC_PROGRAM_FIELD_ADJUSTMENTS = {
         // group-experience-details (shown via groupFieldsId below)
         // already asks for group size, schedule, and what they want the
         // experience to accomplish.
-        hideQuestionKeys: ['primary_goal', 'training_days_per_week'],
+        hideQuestionKeys: ['primary_goal', 'training_days_per_week', 'training_delivery_preference'],
         groupFieldsId: 'group-experience-fields',
+    },
+    // training_delivery_preference (remote vs. in-person add-on) only
+    // makes sense for 12-Week Transformation right now - every other
+    // program already has its own fixed delivery format - so it's
+    // hidden everywhere except there instead of defaulting to shown.
+    '1-On-1 Coaching': {
+        hideQuestionKeys: ['training_delivery_preference'],
+    },
+    'Kinetic Labs': {
+        hideQuestionKeys: ['training_delivery_preference'],
+    },
+    'Faith & Favor Mobility': {
+        hideQuestionKeys: ['training_delivery_preference'],
     },
 };
 
