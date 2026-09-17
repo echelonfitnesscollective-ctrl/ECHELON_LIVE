@@ -184,47 +184,39 @@ function changeProductImage(imageId, newImage, dot){
 
 <section class="program-compare-section">
     <div class="container">
-        <div class="program-compare">
-            <p class="program-compare-eyebrow">NOT SURE WHICH TO APPLY FOR?</p>
-            <div class="program-compare-scroll">
-                <table class="program-compare-table">
-                    <thead>
-                        <tr>
-                            <th>Program</th>
-                            <th>Best For</th>
-                            <th>Format</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td data-label="Program">1-On-1 Coaching</td>
-                            <td data-label="Best For">Full individual attention on your body, schedule, and goals</td>
-                            <td data-label="Format">Private, in-person or hybrid based on fit</td>
-                        </tr>
-                        <tr>
-                            <td data-label="Program">12-Week Transformation</td>
-                            <td data-label="Best For">Structured accountability with measurable results</td>
-                            <td data-label="Format">One-on-one programming through the Member Portal, plus one shared group workout a week</td>
-                        </tr>
-                        <tr>
-                            <td data-label="Program">Private Group Training / Organization Wellness</td>
-                            <td data-label="Best For">Teams, companies, churches, and friend groups (3–25 people)</td>
-                            <td data-label="Format">Custom group experience built around your group</td>
-                        </tr>
-                        <tr>
-                            <td data-label="Program">Kinetic Labs <span class="program-compare-soon">In Development</span></td>
-                            <td data-label="Best For">Athletes who want more power and conditioning</td>
-                            <td data-label="Format">High-energy group performance sessions</td>
-                        </tr>
-                        <tr>
-                            <td data-label="Program">Faith &amp; Favor Mobility <span class="program-compare-soon">In Development</span></td>
-                            <td data-label="Best For">Recovery and how you move between harder training days</td>
-                            <td data-label="Format">Small-group restorative sessions</td>
-                        </tr>
-                    </tbody>
-                </table>
+        <details class="program-compare">
+            <summary class="program-compare-summary">
+                <span>NOT SURE WHICH TO APPLY FOR? COMPARE PROGRAMS</span>
+                <span class="program-compare-chevron" aria-hidden="true">+</span>
+            </summary>
+            <div class="program-compare-grid">
+                <div class="program-compare-card">
+                    <h3>1-On-1 Coaching</h3>
+                    <p><span>Best For</span>Full individual attention on your body, schedule, and goals</p>
+                    <p><span>Format</span>Private, in-person or hybrid based on fit</p>
+                </div>
+                <div class="program-compare-card">
+                    <h3>12-Week Transformation</h3>
+                    <p><span>Best For</span>Structured accountability with measurable results</p>
+                    <p><span>Format</span>One-on-one programming through the Member Portal, plus one shared group workout a week</p>
+                </div>
+                <div class="program-compare-card">
+                    <h3>Private Group Training / Organization Wellness</h3>
+                    <p><span>Best For</span>Teams, companies, churches, and friend groups (3–25 people)</p>
+                    <p><span>Format</span>Custom group experience built around your group</p>
+                </div>
+                <div class="program-compare-card">
+                    <h3>Kinetic Labs <span class="program-compare-soon">In Development</span></h3>
+                    <p><span>Best For</span>Athletes who want more power and conditioning</p>
+                    <p><span>Format</span>High-energy group performance sessions</p>
+                </div>
+                <div class="program-compare-card">
+                    <h3>Faith &amp; Favor Mobility <span class="program-compare-soon">In Development</span></h3>
+                    <p><span>Best For</span>Recovery and how you move between harder training days</p>
+                    <p><span>Format</span>Small-group restorative sessions</p>
+                </div>
             </div>
-        </div>
+        </details>
     </div>
 </section>
 
