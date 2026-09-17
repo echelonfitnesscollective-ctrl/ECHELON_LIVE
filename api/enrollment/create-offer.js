@@ -5,6 +5,18 @@ const { randomBytes } = require('node:crypto');
 const PAYMENT_OPTIONS = {
   echelon_12_monthly: { priceEnv: 'STRIPE_PRICE_12_WEEK_MONTHLY', mode: 'subscription', label: 'Echelon 12 · $149 / month' },
   echelon_12_paid_in_full: { priceEnv: 'STRIPE_PRICE_12_WEEK_FULL', mode: 'payment', label: 'Echelon 12 · $399 paid in full' },
+  // The coaching application's training_delivery_preference question
+  // (12-Week Transformation only) captures whether a lead wants the
+  // +$40 in-person check-in add-on, so this needs its own price rather
+  // than the coach manually adjusting an amount - Stripe Checkout only
+  // takes a configured Price, not an arbitrary one at send time. These
+  // two env vars don't exist yet; until STRIPE_PRICE_12_WEEK_MONTHLY_IN_PERSON
+  // and STRIPE_PRICE_12_WEEK_FULL_IN_PERSON are set in Vercel (new Stripe
+  // Prices: $189/month and $439 paid in full), selecting either option
+  // fails with "Choose a configured Echelon payment option" below,
+  // same as any other unconfigured option - safe to ship ahead of that.
+  echelon_12_monthly_in_person: { priceEnv: 'STRIPE_PRICE_12_WEEK_MONTHLY_IN_PERSON', mode: 'subscription', label: 'Echelon 12 (In-Person Check-Ins) · $189 / month' },
+  echelon_12_paid_in_full_in_person: { priceEnv: 'STRIPE_PRICE_12_WEEK_FULL_IN_PERSON', mode: 'payment', label: 'Echelon 12 (In-Person Check-Ins) · $439 paid in full' },
   one_on_one_monthly: { priceEnv: 'STRIPE_PRICE_ONE_ON_ONE_MONTHLY', mode: 'subscription', label: '1-on-1 Coaching · monthly, up to 3x/week' },
   one_on_one_starter: { priceEnv: 'STRIPE_PRICE_ONE_ON_ONE_STARTER', mode: 'payment', label: '1-on-1 Coaching · $55 starter session' },
   one_on_one_20pack: { priceEnv: 'STRIPE_PRICE_ONE_ON_ONE_20PACK', mode: 'payment', label: '1-on-1 Coaching · $840 20-session pack' },
