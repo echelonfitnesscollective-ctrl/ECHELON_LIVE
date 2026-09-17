@@ -106,11 +106,12 @@ module.exports = async function submitFreePlan(req, res) {
 
   const name = String(body.name || '').trim().slice(0, 200);
   const email = String(body.email || '').trim().slice(0, 200);
+  const phone = String(body.phone || '').trim().slice(0, 40);
   const goal = String(body.goal || '').trim();
   const experienceLevel = String(body.experience_level || '').trim().slice(0, 60);
   const daysPerWeek = String(body.days_per_week || '').trim().slice(0, 20);
 
-  if (!name || !email) {
+  if (!name || !email || !phone) {
     return res.status(400).json({ error: 'Please complete the required fields.' });
   }
 
@@ -133,6 +134,7 @@ module.exports = async function submitFreePlan(req, res) {
         lead_type: 'Free plan request',
         full_name: name,
         email,
+        phone,
         category: goal,
         message: `Experience: ${experienceLevel || 'Not provided'}. Days/week available: ${daysPerWeek || 'Not provided'}.`,
         source_data: { goal, experience_level: experienceLevel, days_per_week: daysPerWeek },
@@ -171,7 +173,7 @@ module.exports = async function submitFreePlan(req, res) {
 
     await notifyOwner({
       subject: `New Free Plan Request: ${name} (${goal})`,
-      text: `Name: ${name}\nEmail: ${email}\nGoal: ${goal}\nExperience: ${experienceLevel || 'Not provided'}\nDays/week: ${daysPerWeek || 'Not provided'}\nPlan: ${planUrl}`,
+      text: `Name: ${name}\nEmail: ${email}\nPhone: ${phone}\nGoal: ${goal}\nExperience: ${experienceLevel || 'Not provided'}\nDays/week: ${daysPerWeek || 'Not provided'}\nPlan: ${planUrl}`,
     });
 
     return res.status(200).json({ ok: true, planUrl });
