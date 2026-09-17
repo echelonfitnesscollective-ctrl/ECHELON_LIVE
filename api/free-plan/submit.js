@@ -47,7 +47,7 @@ function rateLimited(ip) {
 // Short, personal, from Luther - not a corporate blast. The plan
 // itself lives on the linked page now, so the email's job is just to
 // feel like a real note and get them there.
-function renderPlanEmail(name, template, planUrl, experienceLevel, daysPerWeek) {
+function renderPlanEmail(name, goal, planUrl, experienceLevel, daysPerWeek) {
   const firstName = (name || '').split(' ')[0] || 'there';
   const context = [
     experienceLevel ? `${experienceLevel.toLowerCase()} level` : null,
@@ -59,23 +59,23 @@ function renderPlanEmail(name, template, planUrl, experienceLevel, daysPerWeek) 
   const html = `
     <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;color:#222;">
       <p>${firstName},</p>
-      <p>I put together a ${template.title.split('—')[0].trim()} starter week for you${context ? ` — ${context}` : ''}. It's a real week, not a preview.</p>
+      <p>I put together a ${goal} starter week for you${context ? `, ${context}` : ''}. It's a real week, not a preview.</p>
       <p style="margin-top:20px;"><a href="${planUrl}" style="background:#D4AF37;color:#111;padding:12px 22px;text-decoration:none;font-weight:700;display:inline-block;">VIEW YOUR PLAN</a></p>
       <p style="margin-top:24px;">Run it, see how it feels, and let me know what questions come up.</p>
-      <p style="margin-top:20px;">— Luther</p>
+      <p style="margin-top:20px;">Luther</p>
     </div>
   `;
 
   const text = [
     `${firstName},`,
     '',
-    `I put together a ${template.title.split('—')[0].trim()} starter week for you${context ? ` — ${context}` : ''}. It's a real week, not a preview.`,
+    `I put together a ${goal} starter week for you${context ? `, ${context}` : ''}. It's a real week, not a preview.`,
     '',
     `View your plan: ${planUrl}`,
     '',
     'Run it, see how it feels, and let me know what questions come up.',
     '',
-    '— Luther',
+    'Luther',
   ].join('\n');
 
   return { html, text };
@@ -108,14 +108,16 @@ module.exports = async function submitFreePlan(req, res) {
   const email = String(body.email || '').trim().slice(0, 200);
   const phone = String(body.phone || '').trim().slice(0, 40);
   const goal = String(body.goal || '').trim();
+  const gymAccessRaw = String(body.gym_access || '').trim().toLowerCase();
   const experienceLevel = String(body.experience_level || '').trim().slice(0, 60);
   const daysPerWeek = String(body.days_per_week || '').trim().slice(0, 20);
 
-  if (!name || !email || !phone) {
+  if (!name || !email || !phone || (gymAccessRaw !== 'yes' && gymAccessRaw !== 'no')) {
     return res.status(400).json({ error: 'Please complete the required fields.' });
   }
 
-  const template = getTemplate(goal);
+  const hasGymAccess = gymAccessRaw === 'yes';
+  const template = getTemplate(goal, hasGymAccess);
   if (!template) {
     return res.status(400).json({ error: `Please pick a goal from: ${templateGoals().join(', ')}` });
   }
@@ -136,8 +138,8 @@ module.exports = async function submitFreePlan(req, res) {
         email,
         phone,
         category: goal,
-        message: `Experience: ${experienceLevel || 'Not provided'}. Days/week available: ${daysPerWeek || 'Not provided'}.`,
-        source_data: { goal, experience_level: experienceLevel, days_per_week: daysPerWeek },
+        message: `Gym access: ${hasGymAccess ? 'Yes' : 'No'}. Experience: ${experienceLevel || 'Not provided'}. Days/week available: ${daysPerWeek || 'Not provided'}.`,
+        source_data: { goal, gym_access: hasGymAccess ? 'Yes' : 'No', experience_level: experienceLevel, days_per_week: daysPerWeek },
       }),
     });
 
@@ -168,12 +170,12 @@ module.exports = async function submitFreePlan(req, res) {
 
     const planUrl = `${APP_URL}/plan/${token}`;
 
-    const { html, text } = renderPlanEmail(name, template, planUrl, experienceLevel, daysPerWeek);
+    const { html, text } = renderPlanEmail(name, goal, planUrl, experienceLevel, daysPerWeek);
     await sendEmail({ to: email, subject: `Your Free ${goal} Starter Plan`, text, html });
 
     await notifyOwner({
       subject: `New Free Plan Request: ${name} (${goal})`,
-      text: `Name: ${name}\nEmail: ${email}\nPhone: ${phone}\nGoal: ${goal}\nExperience: ${experienceLevel || 'Not provided'}\nDays/week: ${daysPerWeek || 'Not provided'}\nPlan: ${planUrl}`,
+      text: `Name: ${name}\nEmail: ${email}\nPhone: ${phone}\nGoal: ${goal}\nGym access: ${hasGymAccess ? 'Yes' : 'No'}\nExperience: ${experienceLevel || 'Not provided'}\nDays/week: ${daysPerWeek || 'Not provided'}\nPlan: ${planUrl}`,
     });
 
     return res.status(200).json({ ok: true, planUrl });
