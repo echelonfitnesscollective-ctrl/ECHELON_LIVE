@@ -4688,6 +4688,88 @@ WAIVER
     margin:0 auto;
 }
 
+.free-plan-cta-link{
+    display:block;
+    margin:18px auto 0;
+    text-align:center;
+    color:#d7b55b;
+    font-size:.85rem;
+    font-weight:600;
+    text-decoration:underline;
+    text-underline-offset:3px;
+}
+
+.free-plan-cta-link:hover{
+    color:var(--primary);
+}
+
+.free-plan-result h2{
+    font-family:var(--heading-font);
+    font-size:2.4rem;
+    line-height:1.05;
+    color:var(--primary);
+    margin-bottom:6px;
+}
+
+.free-plan-subtitle{
+    color:#bdbdbd;
+    font-style:italic;
+    margin-bottom:16px;
+}
+
+.free-plan-result > p{
+    color:#e6e6e6;
+    line-height:1.7;
+    margin-bottom:8px;
+}
+
+.free-plan-days{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    margin:24px 0;
+}
+
+.free-plan-day{
+    border:1px solid #1A1917;
+    background:rgba(215,181,91,.04);
+    padding:16px 18px;
+}
+
+.free-plan-day h4{
+    color:var(--primary);
+    font-size:.85rem;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    margin-bottom:8px;
+}
+
+.free-plan-day ul{
+    list-style:none;
+    padding:0;
+    margin:0;
+}
+
+.free-plan-day li{
+    color:#d5d5d5;
+    line-height:1.7;
+    font-size:.92rem;
+}
+
+.free-plan-nutrition{
+    border-left:2px solid var(--primary);
+    background:rgba(215,181,91,.08);
+    padding:14px 16px;
+    margin:20px 0;
+}
+
+.free-plan-hook{
+    color:#9a9a98;
+    font-size:.85rem;
+    line-height:1.6;
+    margin:20px 0;
+}
+
 .checkin-note-list{
     list-style:none;
     padding:0;

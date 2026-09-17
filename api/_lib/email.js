@@ -32,4 +32,30 @@ async function notifyOwner({ subject, text }) {
   }
 }
 
-module.exports = { notifyOwner };
+// General-purpose send, for anything that isn't the owner-notification
+// case above (e.g. emailing a lead their own requested content).
+// Supports an optional html body alongside the required plain-text one.
+async function sendEmail({ to, subject, text, html }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey || !to) {
+    if (!apiKey) console.error('RESEND_API_KEY is not set; skipping email.');
+    return;
+  }
+
+  const from = process.env.RESEND_FROM_EMAIL || 'Echelon Fitness Collective <onboarding@resend.dev>';
+
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from, to, subject, text, ...(html ? { html } : {}) }),
+    });
+    if (!response.ok) {
+      console.error('Email send failed', response.status, await response.text());
+    }
+  } catch (error) {
+    console.error('Email send error', error && error.message);
+  }
+}
+
+module.exports = { notifyOwner, sendEmail };
