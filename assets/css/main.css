@@ -5577,20 +5577,6 @@ MOBILE
     color: #d5d5d5;
 }
 
-#training .training-card p.training-card-price {
-    min-height: 0;
-    margin-top: 12px;
-    color: var(--primary);
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    font-size: 0.85rem;
-    text-transform: uppercase;
-}
-
-#training .training-card:hover p.training-card-price {
-    color: var(--primary);
-}
-
 #training .training-card:hover .coach-name {
     color: #ffe680;
 }
