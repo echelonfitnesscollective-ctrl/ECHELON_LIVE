@@ -41,14 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const programInterest = document.getElementById('program-interest');
     const selectedProgram = new URLSearchParams(window.location.search).get('program');
     const programMap = {
-        // Echelon Online and Echelon Hybrid are two front doors to the
-        // same underlying program (still "12-Week Transformation" here
-        // and in Stripe/the coaching playbook, deliberately not renamed
-        // there - see the training_delivery_preference pre-fill below
-        // for how the two doors are told apart after this point).
         '12-week-transformation': '12-Week Transformation',
-        'echelon-online': '12-Week Transformation',
-        'echelon-hybrid': '12-Week Transformation',
         '1-on-1-coaching': '1-On-1 Coaching',
         'private-group-training': 'Private Group Training / Organization Wellness',
         'organization-wellness': 'Private Group Training / Organization Wellness',
@@ -59,15 +52,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // attributes, not with what the card displays.
         'vl-body-lab': 'Kinetic Labs',
         'faith-favor-mobility': 'Faith & Favor Mobility'
-    };
-
-    // Which door they came through also pre-fills the dynamic
-    // training_delivery_preference question once it renders, so
-    // "Echelon Hybrid" doesn't dump someone back onto a form that still
-    // has to ask them Remote vs In-Person from scratch.
-    const deliveryPreferenceMap = {
-        'echelon-online': 'Remote (Member Portal only)',
-        'echelon-hybrid': 'In-Person Check-Ins'
     };
 
     if (programInterest && programMap[selectedProgram]) {
@@ -82,15 +66,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const applyAdjustments = () => window.applyProgramFieldAdjustments?.(programInterest?.value || '');
     programInterest?.addEventListener('change', applyAdjustments);
     applyAdjustments();
-
-    // Also runs from loadDynamicApplicationQuestions once the dynamic
-    // fields exist - see the same reasoning as applyAdjustments above.
-    window.applyDeliveryPreferenceDefault = () => {
-        const preference = deliveryPreferenceMap[selectedProgram];
-        const field = document.querySelector('[name="training_delivery_preference"]');
-        if (preference && field && !field.value) field.value = preference;
-    };
-    window.applyDeliveryPreferenceDefault();
 });
 
 function changeProductImage(imageId, newImage, dot){
@@ -219,14 +194,9 @@ function changeProductImage(imageId, newImage, dot){
                     <p><span>Format</span>Private, in-person or hybrid based on fit</p>
                 </div>
                 <div class="program-compare-card">
-                    <h3>Echelon Online</h3>
-                    <p><span>Best For</span>Structured accountability with measurable results, entirely remote</p>
-                    <p><span>Format</span>Fully remote through the Member Portal, no in-person component</p>
-                </div>
-                <div class="program-compare-card">
-                    <h3>Echelon Hybrid</h3>
-                    <p><span>Best For</span>The same structure, plus hands-on check-ins</p>
-                    <p><span>Format</span>Fully remote through the Member Portal, plus a weekly in-person check-in for form checks and testing new maxes</p>
+                    <h3>12-Week Transformation</h3>
+                    <p><span>Best For</span>Structured accountability with measurable results</p>
+                    <p><span>Format</span>Fully remote through the Member Portal, with an optional in-person check-in for form checks and testing new maxes</p>
                 </div>
                 <div class="program-compare-card">
                     <h3>Private Group Training / Organization Wellness</h3>
