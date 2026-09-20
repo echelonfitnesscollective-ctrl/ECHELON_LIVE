@@ -532,7 +532,7 @@ textarea{
     flex-direction:column;
     align-items:center;
 
-    max-width:720px;
+    max-width:920px;
 
     margin:0 auto 1.75rem;
 
@@ -559,7 +559,7 @@ textarea{
 
     font-style:italic;
 
-    font-size:clamp(1.5rem, 3vw, 2.1rem);
+    font-size:clamp(1.3rem, 2.4vw, 1.8rem);
 
     line-height:1.5;
 
@@ -571,7 +571,9 @@ textarea{
 
     text-align:center;
 
-    max-width:650px;
+    max-width:900px;
+
+    white-space:nowrap;
 
     margin:0;
 }
@@ -610,7 +612,9 @@ textarea{
 
         line-height:1.45;
 
-        font-size:1.3rem;
+        font-size:1.1rem;
+
+        white-space:normal;
     }
 
     .verse-reference{
@@ -639,9 +643,9 @@ textarea{
 
 .hero-logo{
 
-    width:400px;
+    width:460px;
 
-    max-width:55vw;
+    max-width:60vw;
 
     display:block;
 
@@ -1039,7 +1043,7 @@ textarea{
 
     .hero-logo{
 
-        width:190px;
+        width:220px;
 
         margin-bottom:6px;
 
