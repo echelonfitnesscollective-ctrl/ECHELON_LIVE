@@ -70,6 +70,10 @@ async function loadDynamicApplicationQuestions(form) {
     // change/initial-load handling ran, so apply the current program's
     // field adjustments now that they do.
     window.applyProgramFieldAdjustments?.(document.getElementById('program-interest')?.value || '');
+    // Same reasoning: pre-fill training_delivery_preference based on
+    // which Training Hub card (Echelon Online vs Echelon Hybrid) sent
+    // them here, now that the field actually exists in the DOM.
+    window.applyDeliveryPreferenceDefault?.();
     if (status) status.remove();
     if (submitButton) submitButton.disabled = false;
 }
