@@ -2968,7 +2968,6 @@ document.addEventListener('DOMContentLoaded', () => {
         initializeMemberLibraryManager();
         initializeSiteContentManager();
         initializeSiteMediaManager();
-        initializeShopManager();
         initializeTestimonialsManager();
         initializeCommunicationsLibrary();
         initializeSectionControl();
