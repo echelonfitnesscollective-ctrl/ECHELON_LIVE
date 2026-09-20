@@ -2,10 +2,30 @@
 
 // Cart-to-Stripe bridge for the Echelon Goods shop. The browser only
 // ever sends product id / color / size / quantity - never a price -
-// and every price paid is looked up here from the same catalog file
-// the storefront renders from, so a tampered request can only ever be
-// rejected, never charged the wrong amount.
-const CATALOG = require('../../assets/js/shop-catalog.js');
+// and every price paid is looked up here from the same published
+// shop_products rows the storefront renders from (Supabase, admin-
+// managed from the Admin Console's SHOP tab), so a tampered request
+// or a since-hidden product can only ever be rejected, never charged
+// the wrong amount.
+//
+// Required Vercel environment variables: SUPABASE_URL, SUPABASE_ANON_KEY.
+async function fetchCatalog() {
+  const response = await fetch(
+    `${process.env.SUPABASE_URL}/rest/v1/shop_products?select=slug,name,price_cents,sizes,colors&published=eq.true`,
+    { headers: { apikey: process.env.SUPABASE_ANON_KEY, authorization: `Bearer ${process.env.SUPABASE_ANON_KEY}` } }
+  );
+  if (!response.ok) return [];
+  const rows = await response.json();
+  return Array.isArray(rows)
+    ? rows.map((row) => ({
+        id: row.slug,
+        name: row.name,
+        priceCents: row.price_cents,
+        sizes: Array.isArray(row.sizes) ? row.sizes : [],
+        colors: Array.isArray(row.colors) ? row.colors : [],
+      }))
+    : [];
+}
 
 const inMemoryRateLimit = new Map();
 const WINDOW_MS = 60_000;
@@ -40,9 +60,9 @@ function publicSiteUrl() {
 // Validates one cart line against the catalog and returns the
 // authoritative product/color/qty to charge, or null if it doesn't
 // resolve to a real, currently-sellable combination.
-function resolveLine(rawItem) {
+function resolveLine(catalog, rawItem) {
   if (!rawItem || typeof rawItem !== 'object') return null;
-  const product = CATALOG.find((p) => p.id === String(rawItem.productId || ''));
+  const product = catalog.find((p) => p.id === String(rawItem.productId || ''));
   if (!product) return null;
   const color = product.colors.find((c) => c.name === String(rawItem.color || ''));
   if (!color) return null;
@@ -68,7 +88,7 @@ module.exports = async function shopCheckout(req, res) {
     return res.status(429).json({ error: 'Too many requests. Please wait a minute and try again.' });
   }
 
-  if (!process.env.STRIPE_SECRET_KEY) {
+  if (!process.env.STRIPE_SECRET_KEY || !process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
     return res.status(503).json({ error: 'Checkout is being prepared. Please try again shortly.' });
   }
 
@@ -76,7 +96,8 @@ module.exports = async function shopCheckout(req, res) {
   if (!rawItems.length) return res.status(400).json({ error: 'Your cart is empty.' });
   if (rawItems.length > MAX_LINE_ITEMS) return res.status(400).json({ error: 'Too many items in one order. Please split it into two orders.' });
 
-  const lines = rawItems.map(resolveLine);
+  const catalog = await fetchCatalog();
+  const lines = rawItems.map((rawItem) => resolveLine(catalog, rawItem));
   if (lines.some((line) => !line)) {
     return res.status(400).json({ error: 'One of the items in your cart is no longer available. Please refresh the shop and try again.' });
   }

@@ -6433,6 +6433,17 @@ MOBILE
 .testimonial-admin-preview{display:flex;gap:8px;margin-bottom:12px}
 .testimonial-admin-preview .media-manager-preview{width:78px;height:70px}
 
+/* Shop Manager: per-color rows (name, swatch, photo upload, remove) inside the product form */
+.shop-color-row{display:grid;grid-template-columns:minmax(0,1fr) 38px minmax(0,1.5fr) 40px auto;gap:8px;align-items:center}
+.shop-color-row input[type=text]{margin:0}
+.shop-color-row input[type=color]{width:38px;height:38px;padding:2px;border:1px solid rgba(255,255,255,.18);background:transparent;cursor:pointer}
+.shop-color-row input[type=file]{margin:0;padding:8px;font-size:.62rem}
+.shop-color-thumb{width:40px;height:40px;object-fit:cover;border:1px solid rgba(215,181,91,.32);background:#0D0D0C}
+.shop-product-item{grid-template-columns:104px minmax(0,1fr) auto;align-items:center}
+.shop-product-item .media-manager-preview{width:104px;height:94px}
+@media(max-width:800px){.shop-color-row{grid-template-columns:1fr 1fr;grid-template-areas:"name swatch" "file file" "thumb remove"}.shop-color-row input[name=color_name]{grid-area:name}.shop-color-row input[type=color]{grid-area:swatch;justify-self:end}.shop-color-row input[type=file]{grid-area:file}.shop-color-thumb{grid-area:thumb}.shop-color-row .detail-row-remove{grid-area:remove;justify-self:end}}
+@media(max-width:700px){.shop-product-item{grid-template-columns:78px minmax(0,1fr)}.shop-product-item .media-manager-preview{width:78px;height:78px}.shop-product-item .cms-content-actions{grid-column:1/-1;flex-direction:row;flex-wrap:wrap}.shop-product-item .cms-content-actions button{flex:1;min-width:100px}}
+
 /* TESTIMONIALS */
 .testimonials-section{background:#0D0D0C}
 .testimonials-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;margin-top:44px}

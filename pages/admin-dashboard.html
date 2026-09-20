@@ -17,6 +17,7 @@
     <script src="../assets/js/admin-auth.js" defer></script>
     <script src="../assets/js/admin-coaching-playbook.js" defer></script>
     <script src="../assets/js/admin-scheduling.js" defer></script>
+    <script src="../assets/js/admin-shop.js" defer></script>
 </head>
 <body>
 <a href="#main-content" class="skip-link">Skip to content</a>
@@ -62,12 +63,13 @@
                 <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="programs" aria-controls="admin-panel-programs" data-step="04">PROGRAMS</button>
                 <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="content" aria-controls="admin-panel-content" data-step="05">SITE CONTENT</button>
                 <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="media" aria-controls="admin-panel-media" data-step="06">MEDIA</button>
-                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="communications" aria-controls="admin-panel-communications" data-step="07">COMMS</button>
-                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="library" aria-controls="admin-panel-library admin-panel-library-2" data-step="08">LIBRARY</button>
-                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="equipment" aria-controls="admin-panel-equipment" data-step="09">EQUIPMENT</button>
-                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="workouts" aria-controls="admin-panel-workouts" data-step="10">WORKOUT LIBRARY</button>
-                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="playbook" aria-controls="admin-panel-playbook" data-step="11">COACHING PLAYBOOK</button>
-                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="sessions" aria-controls="admin-panel-sessions" data-step="12">SESSIONS</button>
+                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="shop" aria-controls="admin-panel-shop" data-step="07">SHOP</button>
+                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="communications" aria-controls="admin-panel-communications" data-step="08">COMMS</button>
+                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="library" aria-controls="admin-panel-library admin-panel-library-2" data-step="09">LIBRARY</button>
+                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="equipment" aria-controls="admin-panel-equipment" data-step="10">EQUIPMENT</button>
+                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="workouts" aria-controls="admin-panel-workouts" data-step="11">WORKOUT LIBRARY</button>
+                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="playbook" aria-controls="admin-panel-playbook" data-step="12">COACHING PLAYBOOK</button>
+                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="sessions" aria-controls="admin-panel-sessions" data-step="13">SESSIONS</button>
             </nav>
 
             <details class="admin-intake-section admin-console-section admin-content-section admin-tab-panel" data-admin-panel="content" id="admin-panel-content" role="tabpanel">
@@ -139,6 +141,36 @@
                         <p id="site-media-feedback" class="form-error" role="status"></p>
                     </form>
                     <section class="cms-published-panel"><div class="cms-list-heading"><div><span class="checkin-tag">CURRENT GALLERY</span><h3>YOUR MEDIA QUEUE</h3></div><span id="site-media-count">Loading…</span></div><div id="site-media-list" class="cms-content-list media-content-list"></div></section>
+                </div>
+            </details>
+
+            <details class="admin-intake-section admin-console-section admin-shop-section admin-tab-panel" data-admin-panel="shop" id="admin-panel-shop" role="tabpanel">
+                <summary class="admin-section-heading">
+                    <div><span class="checkin-tag">ECHELON GOODS MANAGER</span><h2>WHAT'S FOR SALE</h2></div>
+                    <p>Add a product, set its price, sizes, and color photos, then decide what the public shop shows.</p>
+                </summary>
+                <div class="cms-intro media-manager-intro">
+                    <div><span class="checkin-tag">SHOW · HIDE · ADD</span><h3>YOUR STOREFRONT, ON YOUR TERMS.</h3><p>New products are saved as a draft first. Publish when it's ready to sell, or hide a product any time without deleting it. Changes save straight to the public shop, no request to me needed.</p></div>
+                    <div class="cms-placement-key"><span>NAME + PRICE</span><span>SIZES</span><span>COLORS + PHOTOS</span><span>PUBLISH</span></div>
+                </div>
+                <div class="cms-layout media-manager-layout">
+                    <form id="shop-product-form" class="echelon-form site-content-form" enctype="multipart/form-data">
+                        <input type="hidden" name="product_id" value="">
+                        <div class="cms-form-heading"><span class="checkin-tag" id="shop-form-mode-tag">NEW PRODUCT</span><strong>ADD OR EDIT A PRODUCT</strong></div>
+                        <input name="name" type="text" maxlength="80" placeholder="Product name" aria-label="Product name" required>
+                        <textarea name="description" rows="3" maxlength="240" placeholder="Short description shown on the product card" aria-label="Description"></textarea>
+                        <div class="cms-form-grid">
+                            <label>PRICE (USD)<input name="price" type="number" min="0.01" step="0.01" placeholder="32.00" aria-label="Price in dollars" required></label>
+                            <label>SIZES<input name="sizes" type="text" placeholder="S, M, L, XL" aria-label="Sizes, comma separated" required><small>Comma separated, shown in this order.</small></label>
+                        </div>
+                        <div class="cms-form-grid"><label>VISIBILITY<select name="published" aria-label="Publish to the public shop"><option value="true">Publish to the public shop</option><option value="false">Save as a private draft</option></select></label><label>DISPLAY ORDER<input name="sort_order" type="number" min="0" max="999" value="0" aria-label="Sort Order"><small>Lower numbers appear first.</small></label></div>
+                        <div class="cms-form-heading"><strong>COLORS</strong></div>
+                        <div class="shop-color-row-list" data-shop-color-rows></div>
+                        <button type="button" class="btn-secondary" data-add-shop-color>+ ADD COLOR</button>
+                        <div class="cms-form-actions"><button type="submit" class="btn-primary" id="shop-product-save">SAVE PRODUCT</button><button type="button" class="btn-secondary" id="shop-product-cancel" hidden>CANCEL EDIT</button></div>
+                        <p id="shop-product-feedback" class="form-error" role="status"></p>
+                    </form>
+                    <section class="cms-published-panel"><div class="cms-list-heading"><div><span class="checkin-tag">CURRENT CATALOG</span><h3>YOUR PRODUCT QUEUE</h3></div><span id="shop-product-count">Loading…</span></div><div id="shop-product-list" class="cms-content-list media-content-list"></div></section>
                 </div>
             </details>
 

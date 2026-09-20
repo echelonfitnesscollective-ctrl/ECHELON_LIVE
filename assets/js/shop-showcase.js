@@ -1,6 +1,7 @@
 // Echelon Goods: a real, cart-enabled storefront. Products, prices,
-// colors, sizes and photos all come from shop-catalog.js (loaded before
-// this file) - edit that file, not this one, to change what's for sale.
+// colors, sizes and photos all come from the shop_products Supabase
+// table, managed from the Admin Console's SHOP tab - show, hide, or add
+// a product there and it appears here with no code change or redeploy.
 //
 // The cart lives in localStorage under EFC_CART_KEY so it survives a
 // reload or a trip to another page. Checkout POSTs the cart's product
@@ -8,8 +9,32 @@
 // up the real price server-side and builds the Stripe Checkout Session
 // - the browser's cart is never a source of truth for price.
 
+const EFC_SHOP_SUPABASE_URL = 'https://plkdyvtriajpzcfgtwzp.supabase.co';
+const EFC_SHOP_SUPABASE_KEY = 'sb_publishable_CwFNrWSrhLKURZIk_-yt1A_ZVpFHEwf';
 const EFC_CART_KEY = 'efc_shop_cart_v1';
 const EFC_CART_ENDPOINT = 'api/shop/checkout';
+
+async function efcLoadShopCatalog() {
+    try {
+        const client = window.supabase.createClient(EFC_SHOP_SUPABASE_URL, EFC_SHOP_SUPABASE_KEY);
+        const { data, error } = await client
+            .from('shop_products')
+            .select('slug, name, description, price_cents, sizes, colors')
+            .eq('published', true)
+            .order('sort_order', { ascending: true });
+        if (error || !data) return [];
+        return data.map((row) => ({
+            id: row.slug,
+            name: row.name,
+            description: row.description,
+            priceCents: row.price_cents,
+            sizes: Array.isArray(row.sizes) ? row.sizes : [],
+            colors: Array.isArray(row.colors) ? row.colors : [],
+        })).filter((product) => product.colors.length && product.sizes.length);
+    } catch (_) {
+        return [];
+    }
+}
 
 function efcPic(src, alt, eager, imgClass) {
     const webp = src.replace(/\.(jpe?g|png)$/i, '.webp');
@@ -41,11 +66,12 @@ function efcSaveCart(cart) {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const shop = document.getElementById('shop');
     const container = shop?.querySelector('.container');
-    const catalog = window.EFC_SHOP_CATALOG;
-    if (!container || !Array.isArray(catalog)) return;
+    if (!container) return;
+    const catalog = await efcLoadShopCatalog();
+    if (!catalog.length) return;
 
     let cart = efcLoadCart();
     // Per-card UI state: which color/size is currently selected, keyed
