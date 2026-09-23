@@ -105,6 +105,33 @@ function submitCheckin(body) {
   };
 }
 
+function submitBuildYourGroup(body) {
+  const fullName = String(body.full_name || '').trim().slice(0, 200);
+  const email = String(body.email || '').trim().slice(0, 200);
+  const phone = String(body.phone || '').trim().slice(0, 40);
+  const instagram = String(body.instagram_handle || '').trim().slice(0, 100);
+  const groupSize = String(body.group_size || '').trim().slice(0, 50);
+  const message = String(body.message || '').trim().slice(0, 2000);
+  const contentConsent = body.content_consent === 'on' || body.content_consent === 'YES' || body.content_consent === true;
+
+  if (!fullName || !email || !phone || !groupSize || !contentConsent) {
+    return { error: 'Please complete the required fields.' };
+  }
+
+  return {
+    table: 'website_leads',
+    payload: {
+      lead_type: 'Build Your Group',
+      full_name: fullName,
+      email,
+      phone,
+      category: groupSize,
+      message,
+      source_data: { ...body, instagram_handle: instagram, content_consent: contentConsent },
+    },
+  };
+}
+
 function submitWaitlist(body) {
   const fullName = String(body.full_name || '').trim().slice(0, 200);
   const email = String(body.email || '').trim().slice(0, 200);
@@ -167,6 +194,7 @@ module.exports = async function submitSiteForm(req, res) {
   let result;
   if (form === 'checkin') result = submitCheckin(body);
   else if (form === 'waitlist') result = submitWaitlist(body);
+  else if (form === 'build_your_group') result = submitBuildYourGroup(body);
   else return res.status(400).json({ error: 'Unknown form.' });
 
   if (result.error) return res.status(400).json({ error: result.error });
@@ -183,6 +211,11 @@ module.exports = async function submitSiteForm(req, res) {
       await notifyOwner({
         subject: `New Waitlist Signup: ${result.payload.full_name}`,
         text: `Interest: ${result.payload.category || 'Not specified'}\nName: ${result.payload.full_name}\nEmail: ${result.payload.email}\nPhone: ${result.payload.phone || 'Not provided'}`,
+      });
+    } else if (form === 'build_your_group') {
+      await notifyOwner({
+        subject: `Build Your Group Application: ${result.payload.full_name}`,
+        text: `Group size: ${result.payload.category || 'Not specified'}\nName: ${result.payload.full_name}\nEmail: ${result.payload.email}\nPhone: ${result.payload.phone || 'Not provided'}\nInstagram: ${result.payload.source_data.instagram_handle || 'Not provided'}\nMessage: ${result.payload.message || 'None'}`,
       });
     }
 
