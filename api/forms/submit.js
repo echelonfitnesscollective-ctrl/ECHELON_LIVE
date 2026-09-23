@@ -10,6 +10,7 @@
 // commit history / admin manual changelog "Security audit fixes" for context.
 // Required Vercel environment variables: SUPABASE_URL, SUPABASE_ANON_KEY.
 
+const { randomUUID } = require('node:crypto');
 const { notifyOwner } = require('../_lib/email');
 
 const inMemoryRateLimit = new Map();
@@ -60,6 +61,12 @@ async function verifiedMember(req) {
 }
 
 async function insertRow(table, payload) {
+  // return=minimal, not return=representation: website_leads has an
+  // anon INSERT policy but no anon SELECT policy, and PostgREST needs
+  // the row to also be selectable to hand back a representation - the
+  // build_your_group form needs its new row's id back without that, so
+  // it generates the id client-side (crypto.randomUUID()) and includes
+  // it in the payload instead of reading it back after the fact.
   const response = await fetch(`${process.env.SUPABASE_URL}/rest/v1/${table}`, {
     method: 'POST',
     headers: {
@@ -120,7 +127,12 @@ function submitBuildYourGroup(body) {
 
   return {
     table: 'website_leads',
+    // id generated here, not read back after insert - see insertRow's
+    // comment: website_leads has no anon SELECT policy, so this is the
+    // only way to hand the new lead's id to the browser (it needs it
+    // immediately to build the group-management panel and share link).
     payload: {
+      id: randomUUID(),
       lead_type: 'Build Your Group',
       full_name: fullName,
       email,
@@ -219,6 +231,7 @@ module.exports = async function submitSiteForm(req, res) {
       });
     }
 
+    if (form === 'build_your_group') return res.status(200).json({ ok: true, leadId: result.payload.id });
     return res.status(200).json({ ok: true });
   } catch (error) {
     console.error('Site form submission error', error && error.message);

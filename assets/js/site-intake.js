@@ -223,40 +223,4 @@ document.addEventListener('DOMContentLoaded', () => {
             showEchelonSuccess(success, 'YOU’RE ON THE LIST', 'Your place is secured. You will be among the first to hear about new Echelon opportunities.', { onDismiss: () => { waitlistForm.style.display = ''; submitButton.disabled = false; submitButton.textContent = 'JOIN THE WAITLIST'; } });
         });
     }
-
-    const buildGroupForm = document.getElementById('build-group-form');
-    if (buildGroupForm) {
-        const success = document.getElementById('build-group-success');
-        const feedback = document.getElementById('build-group-feedback');
-        const submitButton = buildGroupForm.querySelector('button[type="submit"]');
-        buildGroupForm.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            submitButton.disabled = true;
-            submitButton.textContent = 'SUBMITTING…';
-            const values = formValues(buildGroupForm);
-            let submitError = null;
-            try {
-                const response = await fetch('/api/forms/submit', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ form: 'build_your_group', ...values })
-                });
-                const result = await response.json();
-                if (!response.ok) submitError = result.error || 'Submission failed.';
-            } catch {
-                submitError = 'We could not save your application. Please try again.';
-            }
-            if (submitError) {
-                submitButton.disabled = false;
-                submitButton.textContent = 'APPLY TO BUILD YOUR GROUP';
-                if (feedback) feedback.textContent = submitError;
-                return;
-            }
-            if (feedback) feedback.textContent = '';
-            buildGroupForm.reset();
-            buildGroupForm.style.display = 'none';
-            window.efcTrack?.('build_your_group_apply', { group_size: values.group_size });
-            showEchelonSuccess(success, 'APPLICATION RECEIVED', 'Spots are limited and selected personally. If you’re chosen, Echelon will reach out directly with the date and location.', { onDismiss: () => { buildGroupForm.style.display = ''; submitButton.disabled = false; submitButton.textContent = 'APPLY TO BUILD YOUR GROUP'; } });
-        });
-    }
 });

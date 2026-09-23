@@ -4675,6 +4675,87 @@ WAIVER
     color:#bdbdbd;
     font-size:1rem;
 }
+
+.checkin-private-note{
+    max-width:600px;
+    margin:20px auto 0;
+    padding:14px 18px;
+    border:1px solid rgba(212,175,55,.4);
+    background:rgba(212,175,55,.06);
+    color:#d7b55b!important;
+    font-size:.82rem!important;
+    line-height:1.6;
+}
+
+.build-group-help{
+    margin:0 0 14px;
+    color:#a8a8a8;
+    font-size:.82rem;
+    line-height:1.6;
+}
+
+.build-group-link-row{
+    display:flex;
+    gap:10px;
+    margin-bottom:24px;
+}
+
+.build-group-link-row input{
+    flex:1;
+    min-width:0;
+    margin:0;
+}
+
+.build-group-link-row .btn-secondary{
+    flex-shrink:0;
+    white-space:nowrap;
+}
+
+.build-group-roster-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:12px 0;
+    border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.build-group-roster-item:last-child{
+    border-bottom:0;
+}
+
+.build-group-roster-name{
+    color:#f0f0f0;
+    font-size:.9rem;
+    font-weight:600;
+}
+
+.build-group-roster-contact{
+    color:#8f8f8f;
+    font-size:.75rem;
+}
+
+.build-group-roster-status{
+    flex-shrink:0;
+    padding:5px 10px;
+    font-size:.62rem;
+    font-weight:700;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    border:1px solid rgba(255,255,255,.18);
+    color:#a8a8a8;
+}
+
+.build-group-roster-status.is-signed{
+    border-color:rgba(212,175,55,.5);
+    color:#d7b55b;
+}
+
+@media(max-width:600px){
+    .build-group-link-row{
+        flex-direction:column;
+    }
+}
 .checkin-header{
     padding:64px 0 32px;
     text-align:center;

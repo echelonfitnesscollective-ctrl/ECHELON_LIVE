@@ -7,10 +7,12 @@
 // instead of one file per action -- /api/calendar/oauth-start,
 // /api/calendar/oauth-callback, /api/calendar/status,
 // /api/calendar/sync-booking, /api/calendar/freebusy, /api/groups/create,
-// /api/groups/info, /api/groups/join, and (public URL unchanged)
-// /api/health all resolve here.
+// /api/groups/info, /api/groups/join, /api/build-group/info,
+// /api/build-group/invite, /api/build-group/join, and (public URL
+// unchanged) /api/health all resolve here.
 
 const { randomBytes } = require('node:crypto');
+const { sendEmail } = require('../_lib/email');
 
 const EFC_SESSION_TYPE_LABELS = { one_on_one: '1-on-1 Coaching', private_group: 'Private Training Group', group_fitness: 'Group Fitness' };
 
@@ -407,6 +409,136 @@ async function handleGroupJoin(request, response) {
   }
 }
 
+// Build Your Group: a lead's own id (an unguessable uuid, never publicly
+// enumerable - website_leads has no public read policy) is the only key
+// needed to manage or join a group, same trust model as session_groups'
+// join_token above. No admin/member session involved anywhere in this
+// flow - the "coach" side is just the existing Leads checklist.
+async function getBuildGroupLead(leadId) {
+  const result = await supabase(`/rest/v1/website_leads?id=eq.${encodeURIComponent(leadId)}&lead_type=eq.${encodeURIComponent('Build Your Group')}&select=id,full_name&limit=1`);
+  return Array.isArray(result.body) && result.body[0] ? result.body[0] : null;
+}
+
+async function handleBuildGroupInfo(request, response) {
+  if (request.method !== 'GET') return response.status(405).json({ error: 'Method not allowed.' });
+  const leadId = request.query.lead;
+  if (!leadId) return response.status(400).json({ error: 'A group link is required.' });
+
+  try {
+    const lead = await getBuildGroupLead(leadId);
+    if (!lead) return response.status(404).json({ error: 'This group link is not valid.' });
+
+    const attendeesResult = await supabase(`/rest/v1/build_group_attendees?lead_id=eq.${encodeURIComponent(leadId)}&select=id,name,phone,email,waiver_agreed,added_by&order=created_at.asc`);
+    const attendees = Array.isArray(attendeesResult.body) ? attendeesResult.body : [];
+    return response.status(200).json({
+      attendees: attendees.map((a) => ({ id: a.id, name: a.name, phone: a.phone, email: a.email, waiverAgreed: a.waiver_agreed, addedBy: a.added_by })),
+    });
+  } catch (error) {
+    console.error('Build group info error', error && error.message);
+    return response.status(503).json({ error: 'Could not load your group right now.' });
+  }
+}
+
+// Organizer enters someone directly - creates the attendee row right
+// away (so the roster and the coach's checklist both see them
+// immediately) and, when an email was given, sends that person their
+// own personal confirm-and-sign-the-waiver link. Phone-only attendees
+// still get a personal joinUrl back in the response so the organizer
+// can copy and text it themselves - there is no SMS sending here.
+async function handleBuildGroupInvite(request, response) {
+  if (request.method !== 'POST') return response.status(405).json({ error: 'Method not allowed.' });
+  if (isGroupJoinRateLimited(clientIp(request))) return response.status(429).json({ error: 'Too many requests. Please wait a minute and try again.' });
+
+  const { leadId, name, phone, email } = request.body || {};
+  if (!leadId || !name?.trim() || (!phone?.trim() && !email?.trim())) {
+    return response.status(400).json({ error: 'A name and a phone or email are required.' });
+  }
+
+  try {
+    const lead = await getBuildGroupLead(leadId);
+    if (!lead) return response.status(404).json({ error: 'This group link is not valid.' });
+
+    const insertResult = await supabase('/rest/v1/build_group_attendees', {
+      method: 'POST', headers: { Prefer: 'return=representation' },
+      body: JSON.stringify({
+        lead_id: leadId,
+        name: name.trim(),
+        phone: phone?.trim() || null,
+        email: email?.trim() || null,
+        added_by: 'organizer',
+        invited_at: new Date().toISOString(),
+      }),
+    });
+    const attendee = Array.isArray(insertResult.body) ? insertResult.body[0] : null;
+    if (!insertResult.response.ok || !attendee) return response.status(502).json({ error: 'Could not add that person.' });
+
+    const joinUrl = `${siteUrl()}/pages/build-your-group-join.html?lead=${leadId}&attendee=${attendee.id}`;
+    if (attendee.email) {
+      await sendEmail({
+        to: attendee.email,
+        subject: "You're invited to join an Echelon group",
+        text: `Hi ${attendee.name.split(' ')[0]},\n\n${lead.full_name || 'Someone'} added you to their group for Echelon's Build Your Group promo. Confirm your spot and sign the quick waiver here:\n\n${joinUrl}\n\nThis is a private invite - please don't share this link on social media.`,
+      });
+    }
+
+    return response.status(200).json({ id: attendee.id, name: attendee.name, phone: attendee.phone, email: attendee.email, waiverAgreed: false, addedBy: 'organizer', joinUrl });
+  } catch (error) {
+    console.error('Build group invite error', error && error.message);
+    return response.status(503).json({ error: 'Could not add that person right now.' });
+  }
+}
+
+// Two shapes through one route: attendeeId present means the organizer
+// already entered this person and they're just confirming + signing
+// their own waiver (an update); no attendeeId means a brand-new
+// self-join off the shared group link (an insert).
+async function handleBuildGroupJoin(request, response) {
+  if (request.method !== 'POST') return response.status(405).json({ error: 'Method not allowed.' });
+  if (isGroupJoinRateLimited(clientIp(request))) return response.status(429).json({ error: 'Too many requests. Please wait a minute and try again.' });
+
+  const { leadId, attendeeId, fullName, email, phone, waiverAgreed } = request.body || {};
+  if (!leadId || !fullName?.trim() || !waiverAgreed) return response.status(400).json({ error: 'Your name and a signed waiver are required.' });
+
+  try {
+    const lead = await getBuildGroupLead(leadId);
+    if (!lead) return response.status(404).json({ error: 'This group link is not valid.' });
+
+    if (attendeeId) {
+      const updateResult = await supabase(`/rest/v1/build_group_attendees?id=eq.${encodeURIComponent(attendeeId)}&lead_id=eq.${encodeURIComponent(leadId)}`, {
+        method: 'PATCH', headers: { Prefer: 'return=representation' },
+        body: JSON.stringify({
+          name: fullName.trim(),
+          phone: phone?.trim() || null,
+          email: email?.trim() || null,
+          waiver_agreed: true,
+          joined_at: new Date().toISOString(),
+        }),
+      });
+      const updated = Array.isArray(updateResult.body) ? updateResult.body[0] : null;
+      if (!updateResult.response.ok || !updated) return response.status(404).json({ error: 'This personal link is not valid.' });
+      return response.status(200).json({ confirmed: true });
+    }
+
+    const insertResult = await supabase('/rest/v1/build_group_attendees', {
+      method: 'POST', headers: { Prefer: 'return=representation' },
+      body: JSON.stringify({
+        lead_id: leadId,
+        name: fullName.trim(),
+        phone: phone?.trim() || null,
+        email: email?.trim() || null,
+        added_by: 'self',
+        waiver_agreed: true,
+        joined_at: new Date().toISOString(),
+      }),
+    });
+    if (!insertResult.response.ok) return response.status(502).json({ error: 'Could not save your spot, try again.' });
+    return response.status(200).json({ confirmed: true });
+  } catch (error) {
+    console.error('Build group join error', error && error.message);
+    return response.status(503).json({ error: 'Could not save your spot right now.' });
+  }
+}
+
 async function handleSyncBooking(request, response) {
   if (request.method !== 'POST') return response.status(405).json({ error: 'Method not allowed.' });
   const user = await requireUser(request);
@@ -456,5 +588,8 @@ module.exports = async function calendarGateway(request, response) {
   if (route === 'group-create') return handleGroupCreate(request, response);
   if (route === 'group-info') return handleGroupInfo(request, response);
   if (route === 'group-join') return handleGroupJoin(request, response);
+  if (route === 'build-group-info') return handleBuildGroupInfo(request, response);
+  if (route === 'build-group-invite') return handleBuildGroupInvite(request, response);
+  if (route === 'build-group-join') return handleBuildGroupJoin(request, response);
   return response.status(404).json({ error: 'Not found.' });
 };

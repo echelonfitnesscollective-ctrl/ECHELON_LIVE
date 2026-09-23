@@ -29,7 +29,10 @@
     { "source": "/api/calendar/freebusy", "destination": "/api/calendar/gateway?route=freebusy" },
     { "source": "/api/groups/create", "destination": "/api/calendar/gateway?route=group-create" },
     { "source": "/api/groups/info", "destination": "/api/calendar/gateway?route=group-info" },
-    { "source": "/api/groups/join", "destination": "/api/calendar/gateway?route=group-join" }
+    { "source": "/api/groups/join", "destination": "/api/calendar/gateway?route=group-join" },
+    { "source": "/api/build-group/info", "destination": "/api/calendar/gateway?route=build-group-info" },
+    { "source": "/api/build-group/invite", "destination": "/api/calendar/gateway?route=build-group-invite" },
+    { "source": "/api/build-group/join", "destination": "/api/calendar/gateway?route=build-group-join" }
   ],
   "headers": [
     {

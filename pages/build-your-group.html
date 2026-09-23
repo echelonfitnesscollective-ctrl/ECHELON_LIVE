@@ -22,6 +22,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 <script src="../assets/js/analytics.js" defer></script>
 <script src="../assets/js/site-intake.js" defer></script>
+<script src="../assets/js/build-your-group.js" defer></script>
 
 <script src="../assets/js/main.js" defer></script>
 </head>
@@ -102,6 +103,13 @@
         We're looking for a few motivated people to build their own private
         training group for a special Echelon promotion and content shoot.
         Bring your people, train together, and be part of the movement.
+    </p>
+
+    <p class="checkin-private-note">
+        This is a private, special invite &mdash; you're seeing this because
+        someone at Echelon sent you this exact link. Please don't post or
+        advertise this invite on social media. Once your workout actually
+        happens, feel free to post and tag us all you want.
     </p>
 
 </div>
@@ -235,10 +243,6 @@
                     How many people would you bring?
                 </option>
 
-                <option value="Just me">
-                    Just me for now
-                </option>
-
                 <option value="2-4">
                     2-4 people
                 </option>
@@ -288,12 +292,20 @@
 
                     If selected, you agree that Echelon Fitness Collective may
                     photograph and/or film your group for promotional use on
-                    our website, social media, and marketing materials.
+                    our website, social media, and marketing materials. If
+                    someone in your group would rather not be on camera, just
+                    let us know &mdash; we're happy to edit around them.
 
                     <br><br>
 
                     This is not a paid program or membership. No payment is
                     required or collected through this form.
+
+                    <br><br>
+
+                    Each person in your group will confirm their own spot and
+                    sign a quick waiver individually, either by the link you
+                    share with them or one we send them directly.
 
                 </div>
 
@@ -329,25 +341,64 @@
 
         </form>
 
-        <!-- SUCCESS MESSAGE -->
+        <!-- GROUP MANAGER (shown after a successful application) -->
 
         <div
-            id="build-group-success"
+            id="build-group-manager"
             style="display:none;">
 
             <h2>
-
                 APPLICATION RECEIVED
-
             </h2>
 
             <p>
-
-                Thank you for applying to Build Your Group. Spots are limited
-                and selected personally &mdash; if you're chosen, Echelon will
-                reach out directly with the date and location.
-
+                Thank you for applying. Spots are limited and selected
+                personally &mdash; if you're chosen, Echelon will reach out
+                directly with the date and location. In the meantime, go
+                ahead and start building your group below.
             </p>
+
+            <div class="form-section-header">
+                <h2>YOUR GROUP LINK</h2>
+            </div>
+
+            <p class="build-group-help">
+                Share this link with your people. Each person fills in their
+                own name, phone or email, and signs a quick waiver on their
+                own. This link is private &mdash; please don't post it on
+                social media.
+            </p>
+
+            <div class="build-group-link-row">
+                <input type="text" id="build-group-link-input" readonly aria-label="Your group link">
+                <button type="button" id="build-group-copy-link" class="btn-secondary">COPY LINK</button>
+            </div>
+
+            <div class="form-section-header">
+                <h2>OR ADD SOMEONE DIRECTLY</h2>
+            </div>
+
+            <p class="build-group-help">
+                Enter their name and a phone or email. If you give an email,
+                we'll send them their own personal link to confirm and sign
+                the waiver.
+            </p>
+
+            <form id="build-group-invite-form" class="echelon-form">
+                <input type="text" name="name" placeholder="Their Name" required aria-label="Their Name">
+                <input type="tel" name="phone" placeholder="Their Phone" aria-label="Their Phone">
+                <input type="email" name="email" placeholder="Their Email" aria-label="Their Email">
+                <button type="submit" class="btn-secondary">ADD TO MY GROUP</button>
+                <p id="build-group-invite-feedback" class="form-error" role="status"></p>
+            </form>
+
+            <div class="form-section-header">
+                <h2>YOUR ROSTER</h2>
+            </div>
+
+            <div id="build-group-roster">
+                <p class="build-group-help">No one added yet.</p>
+            </div>
 
         </div>
 
