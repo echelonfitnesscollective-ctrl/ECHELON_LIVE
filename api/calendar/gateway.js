@@ -602,6 +602,75 @@ async function handleCreateCampaignPrices(request, response) {
   }
 }
 
+// One-time admin action: creates a real Stripe Coupon + Promotion Code
+// against an existing recurring Price (defaults to the Echelon 12 monthly
+// price), so a coach can hand out a redeemable code - like "WEDDING65" -
+// instead of a one-off Payment Link. The discount is computed from the
+// Price's live unit_amount rather than a hardcoded number, so it stays
+// correct even if that price ever changes. Applies_to[products] scopes the
+// coupon to that one product so it can't be misapplied to unrelated
+// checkouts. Requires STRIPE_ALLOW_PROMOTION_CODES=true so the checkout
+// flows in api/enrollment/checkout.js and api/checkout/create.js actually
+// show the "Add promotion code" field.
+async function handleCreatePromoCode(request, response) {
+  if (request.method !== 'POST') return response.status(405).json({ error: 'Method not allowed.' });
+  const admin = await requireAdmin(request);
+  if (!admin) return response.status(401).json({ error: 'Your admin session is required.' });
+  if (!process.env.STRIPE_SECRET_KEY) return response.status(503).json({ error: 'Stripe is not configured yet.' });
+
+  const { code, priceId, discountedAmountCents, maxRedemptions, redeemBy } = request.body || {};
+  const targetPriceId = priceId || process.env.STRIPE_PRICE_12_WEEK_MONTHLY;
+  if (!code?.trim() || !targetPriceId || !Number.isFinite(Number(discountedAmountCents)) || Number(discountedAmountCents) <= 0) {
+    return response.status(400).json({ error: 'A code, target price, and positive discounted amount (in cents) are required.' });
+  }
+  if (!Number.isInteger(Number(maxRedemptions)) || Number(maxRedemptions) <= 0) {
+    return response.status(400).json({ error: 'Enter how many people can redeem this code.' });
+  }
+
+  const stripeHeaders = { Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}`, 'Content-Type': 'application/x-www-form-urlencoded' };
+
+  try {
+    const priceResponse = await fetch(`https://api.stripe.com/v1/prices/${encodeURIComponent(targetPriceId)}`, { headers: stripeHeaders });
+    const price = await priceResponse.json();
+    if (!priceResponse.ok) return response.status(502).json({ error: price.error?.message || 'Could not look up that Stripe price.' });
+
+    const amountOff = Number(price.unit_amount) - Number(discountedAmountCents);
+    if (!(amountOff > 0)) return response.status(400).json({ error: 'The discounted amount must be less than the price’s current amount.' });
+
+    const couponParams = new URLSearchParams();
+    couponParams.set('amount_off', String(Math.round(amountOff)));
+    couponParams.set('currency', price.currency || 'usd');
+    couponParams.set('duration', 'forever');
+    couponParams.set('name', `${code.trim().toUpperCase()} Promo`);
+    couponParams.set('applies_to[products][0]', price.product);
+    const couponResponse = await fetch('https://api.stripe.com/v1/coupons', { method: 'POST', headers: stripeHeaders, body: couponParams });
+    const coupon = await couponResponse.json();
+    if (!couponResponse.ok) return response.status(502).json({ error: coupon.error?.message || 'Could not create the Stripe coupon.' });
+
+    const promoParams = new URLSearchParams();
+    promoParams.set('coupon', coupon.id);
+    promoParams.set('code', code.trim().toUpperCase());
+    promoParams.set('max_redemptions', String(Number(maxRedemptions)));
+    if (redeemBy) promoParams.set('expires_at', String(Math.floor(new Date(redeemBy).getTime() / 1000)));
+    const promoResponse = await fetch('https://api.stripe.com/v1/promotion_codes', { method: 'POST', headers: stripeHeaders, body: promoParams });
+    const promo = await promoResponse.json();
+    if (!promoResponse.ok) return response.status(502).json({ error: promo.error?.message || 'Could not create the promotion code.' });
+
+    return response.status(200).json({
+      code: promo.code,
+      couponId: coupon.id,
+      promotionCodeId: promo.id,
+      originalAmountCents: price.unit_amount,
+      discountedAmountCents: Number(discountedAmountCents),
+      maxRedemptions: promo.max_redemptions,
+      expiresAt: promo.expires_at,
+    });
+  } catch (error) {
+    console.error('Create promo code error', error && error.message);
+    return response.status(503).json({ error: 'Could not create the promo code right now.' });
+  }
+}
+
 async function handleSyncBooking(request, response) {
   if (request.method !== 'POST') return response.status(405).json({ error: 'Method not allowed.' });
   const user = await requireUser(request);
@@ -655,5 +724,6 @@ module.exports = async function calendarGateway(request, response) {
   if (route === 'build-group-invite') return handleBuildGroupInvite(request, response);
   if (route === 'build-group-join') return handleBuildGroupJoin(request, response);
   if (route === 'create-campaign-prices') return handleCreateCampaignPrices(request, response);
+  if (route === 'create-promo-code') return handleCreatePromoCode(request, response);
   return response.status(404).json({ error: 'Not found.' });
 };
