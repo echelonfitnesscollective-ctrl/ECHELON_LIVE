@@ -648,7 +648,8 @@ async function handleCreatePromoCode(request, response) {
     if (!couponResponse.ok) return response.status(502).json({ error: coupon.error?.message || 'Could not create the Stripe coupon.', step: 'coupon', stripeError: coupon.error });
 
     const promoParams = new URLSearchParams();
-    promoParams.set('coupon', coupon.id);
+    promoParams.set('promotion[type]', 'coupon');
+    promoParams.set('promotion[coupon]', coupon.id);
     promoParams.set('code', code.trim().toUpperCase());
     promoParams.set('max_redemptions', String(Number(maxRedemptions)));
     if (redeemBy) promoParams.set('expires_at', String(Math.floor(new Date(redeemBy).getTime() / 1000)));
