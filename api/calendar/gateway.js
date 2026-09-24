@@ -645,7 +645,7 @@ async function handleCreatePromoCode(request, response) {
     couponParams.set('applies_to[products][0]', price.product);
     const couponResponse = await fetch('https://api.stripe.com/v1/coupons', { method: 'POST', headers: stripeHeaders, body: couponParams });
     const coupon = await couponResponse.json();
-    if (!couponResponse.ok) return response.status(502).json({ error: coupon.error?.message || 'Could not create the Stripe coupon.' });
+    if (!couponResponse.ok) return response.status(502).json({ error: coupon.error?.message || 'Could not create the Stripe coupon.', step: 'coupon', stripeError: coupon.error });
 
     const promoParams = new URLSearchParams();
     promoParams.set('coupon', coupon.id);
@@ -654,7 +654,7 @@ async function handleCreatePromoCode(request, response) {
     if (redeemBy) promoParams.set('expires_at', String(Math.floor(new Date(redeemBy).getTime() / 1000)));
     const promoResponse = await fetch('https://api.stripe.com/v1/promotion_codes', { method: 'POST', headers: stripeHeaders, body: promoParams });
     const promo = await promoResponse.json();
-    if (!promoResponse.ok) return response.status(502).json({ error: promo.error?.message || 'Could not create the promotion code.' });
+    if (!promoResponse.ok) return response.status(502).json({ error: promo.error?.message || 'Could not create the promotion code.', step: 'promotion_code', stripeError: promo.error, couponId: coupon.id });
 
     return response.status(200).json({
       code: promo.code,
