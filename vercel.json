@@ -32,7 +32,8 @@
     { "source": "/api/groups/join", "destination": "/api/calendar/gateway?route=group-join" },
     { "source": "/api/build-group/info", "destination": "/api/calendar/gateway?route=build-group-info" },
     { "source": "/api/build-group/invite", "destination": "/api/calendar/gateway?route=build-group-invite" },
-    { "source": "/api/build-group/join", "destination": "/api/calendar/gateway?route=build-group-join" }
+    { "source": "/api/build-group/join", "destination": "/api/calendar/gateway?route=build-group-join" },
+    { "source": "/api/admin/create-campaign-prices", "destination": "/api/calendar/gateway?route=create-campaign-prices" }
   ],
   "headers": [
     {

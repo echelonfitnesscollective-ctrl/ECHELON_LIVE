@@ -539,6 +539,69 @@ async function handleBuildGroupJoin(request, response) {
   }
 }
 
+// One-time admin action: creates a real Stripe Product plus the two
+// recurring Prices and Payment Links a manual campaign like Wedding
+// Ready Group needs (a $65/mo group rate and a $100/mo individual
+// rate), then hands both Payment Link URLs straight back so they can
+// be wired into wherever the coach sends them from. Deliberately not
+// idempotent - re-running this creates a second product/set of prices,
+// so it's meant to be triggered once per campaign, by the coach's own
+// admin session, never automatically.
+async function handleCreateCampaignPrices(request, response) {
+  if (request.method !== 'POST') return response.status(405).json({ error: 'Method not allowed.' });
+  const admin = await requireAdmin(request);
+  if (!admin) return response.status(401).json({ error: 'Your admin session is required.' });
+  if (!process.env.STRIPE_SECRET_KEY) return response.status(503).json({ error: 'Stripe is not configured yet.' });
+
+  const { productName, productDescription, prices } = request.body || {};
+  if (!productName?.trim() || !Array.isArray(prices) || prices.length === 0) {
+    return response.status(400).json({ error: 'A product name and at least one price are required.' });
+  }
+  for (const p of prices) {
+    if (!p?.label || !Number.isFinite(Number(p.unitAmount)) || Number(p.unitAmount) <= 0) {
+      return response.status(400).json({ error: 'Each price needs a label and a positive unit amount in cents.' });
+    }
+  }
+
+  const stripeHeaders = { Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}`, 'Content-Type': 'application/x-www-form-urlencoded' };
+
+  try {
+    const productParams = new URLSearchParams();
+    productParams.set('name', productName.trim());
+    if (productDescription?.trim()) productParams.set('description', productDescription.trim());
+    const productResponse = await fetch('https://api.stripe.com/v1/products', { method: 'POST', headers: stripeHeaders, body: productParams });
+    const product = await productResponse.json();
+    if (!productResponse.ok) return response.status(502).json({ error: product.error?.message || 'Could not create the Stripe product.' });
+
+    const results = [];
+    for (const p of prices) {
+      const priceParams = new URLSearchParams();
+      priceParams.set('product', product.id);
+      priceParams.set('unit_amount', String(Math.round(Number(p.unitAmount))));
+      priceParams.set('currency', 'usd');
+      priceParams.set('nickname', p.label);
+      if (p.recurringInterval) priceParams.set('recurring[interval]', p.recurringInterval);
+      const priceResponse = await fetch('https://api.stripe.com/v1/prices', { method: 'POST', headers: stripeHeaders, body: priceParams });
+      const price = await priceResponse.json();
+      if (!priceResponse.ok) return response.status(502).json({ error: price.error?.message || `Could not create the "${p.label}" price.` });
+
+      const linkParams = new URLSearchParams();
+      linkParams.set('line_items[0][price]', price.id);
+      linkParams.set('line_items[0][quantity]', '1');
+      const linkResponse = await fetch('https://api.stripe.com/v1/payment_links', { method: 'POST', headers: stripeHeaders, body: linkParams });
+      const link = await linkResponse.json();
+      if (!linkResponse.ok) return response.status(502).json({ error: link.error?.message || `Could not create a payment link for "${p.label}".` });
+
+      results.push({ label: p.label, priceId: price.id, paymentLink: link.url });
+    }
+
+    return response.status(200).json({ productId: product.id, prices: results });
+  } catch (error) {
+    console.error('Create campaign prices error', error && error.message);
+    return response.status(503).json({ error: 'Could not create Stripe prices right now.' });
+  }
+}
+
 async function handleSyncBooking(request, response) {
   if (request.method !== 'POST') return response.status(405).json({ error: 'Method not allowed.' });
   const user = await requireUser(request);
@@ -591,5 +654,6 @@ module.exports = async function calendarGateway(request, response) {
   if (route === 'build-group-info') return handleBuildGroupInfo(request, response);
   if (route === 'build-group-invite') return handleBuildGroupInvite(request, response);
   if (route === 'build-group-join') return handleBuildGroupJoin(request, response);
+  if (route === 'create-campaign-prices') return handleCreateCampaignPrices(request, response);
   return response.status(404).json({ error: 'Not found.' });
 };
