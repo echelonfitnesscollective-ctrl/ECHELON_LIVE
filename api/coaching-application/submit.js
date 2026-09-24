@@ -95,22 +95,53 @@ async function handleOnboardingLinkSubmit(req, res, body, fullName, email, phone
     if (!linkResult.result.ok || !link) return res.status(404).json({ error: 'This link could not be found.' });
     if (link.status !== 'pending') return res.status(410).json({ error: 'This link has already been used.' });
 
-    const insertResult = await serviceDb('/rest/v1/coaching_applications', {
-      method: 'POST',
-      headers: { Prefer: 'return=representation' },
-      body: JSON.stringify({
-        full_name: fullName,
-        email,
-        phone: phone || null,
-        program_interest: programInterest,
-        application_data: answers,
-        source: 'admin_assigned_link',
-      }),
-    });
-    const application = Array.isArray(insertResult.body) ? insertResult.body[0] : null;
-    if (!insertResult.result.ok || !application) {
-      console.error('Onboarding link application insert failed', insertResult.result.status, insertResult.body);
-      return res.status(502).json({ error: 'We could not save your answers. Please try again.' });
+    // Direct feedback: this used to always insert a second, separate
+    // coaching_applications row, leaving a prospect who'd already
+    // applied with two disconnected records. If she already has a real
+    // application on file (matched by email, the one identifier both
+    // the public form and this link always require), merge the new
+    // answers into it instead of creating a duplicate - only a prospect
+    // with no application yet (an assigned link sent to a website_leads-
+    // only contact, e.g. someone who only filled out a Contact form)
+    // still gets a fresh row here.
+    const existingQuery = `/rest/v1/coaching_applications?email=eq.${encodeURIComponent(email)}&order=created_at.desc&limit=1&select=id,application_data`;
+    const existingResult = await serviceDb(existingQuery);
+    const existing = Array.isArray(existingResult.body) ? existingResult.body[0] : null;
+
+    let application;
+    if (existing) {
+      const mergedData = { ...(existing.application_data && typeof existing.application_data === 'object' ? existing.application_data : {}), ...answers };
+      const updateResult = await serviceDb(`/rest/v1/coaching_applications?id=eq.${encodeURIComponent(existing.id)}`, {
+        method: 'PATCH',
+        headers: { Prefer: 'return=representation' },
+        body: JSON.stringify({
+          application_data: mergedData,
+          phone: phone || undefined,
+        }),
+      });
+      application = Array.isArray(updateResult.body) ? updateResult.body[0] : null;
+      if (!updateResult.result.ok || !application) {
+        console.error('Onboarding link application merge failed', updateResult.result.status, updateResult.body);
+        return res.status(502).json({ error: 'We could not save your answers. Please try again.' });
+      }
+    } else {
+      const insertResult = await serviceDb('/rest/v1/coaching_applications', {
+        method: 'POST',
+        headers: { Prefer: 'return=representation' },
+        body: JSON.stringify({
+          full_name: fullName,
+          email,
+          phone: phone || null,
+          program_interest: programInterest,
+          application_data: answers,
+          source: 'admin_assigned_link',
+        }),
+      });
+      application = Array.isArray(insertResult.body) ? insertResult.body[0] : null;
+      if (!insertResult.result.ok || !application) {
+        console.error('Onboarding link application insert failed', insertResult.result.status, insertResult.body);
+        return res.status(502).json({ error: 'We could not save your answers. Please try again.' });
+      }
     }
 
     await serviceDb(`/rest/v1/prospect_onboarding_links?id=eq.${encodeURIComponent(link.id)}`, {
