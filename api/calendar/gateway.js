@@ -453,6 +453,9 @@ async function handleBuildGroupInvite(request, response) {
   if (!leadId || !name?.trim() || (!phone?.trim() && !email?.trim())) {
     return response.status(400).json({ error: 'A name and a phone or email are required.' });
   }
+  const cleanName = String(name).trim().slice(0, 200);
+  const cleanPhone = phone ? String(phone).trim().slice(0, 50) : null;
+  const cleanEmail = email ? String(email).trim().slice(0, 200) : null;
 
   try {
     const lead = await getBuildGroupLead(leadId);
@@ -462,9 +465,9 @@ async function handleBuildGroupInvite(request, response) {
       method: 'POST', headers: { Prefer: 'return=representation' },
       body: JSON.stringify({
         lead_id: leadId,
-        name: name.trim(),
-        phone: phone?.trim() || null,
-        email: email?.trim() || null,
+        name: cleanName,
+        phone: cleanPhone,
+        email: cleanEmail,
         added_by: 'organizer',
         invited_at: new Date().toISOString(),
       }),
@@ -498,6 +501,9 @@ async function handleBuildGroupJoin(request, response) {
 
   const { leadId, attendeeId, fullName, email, phone, waiverAgreed } = request.body || {};
   if (!leadId || !fullName?.trim() || !waiverAgreed) return response.status(400).json({ error: 'Your name and a signed waiver are required.' });
+  const cleanName = String(fullName).trim().slice(0, 200);
+  const cleanPhone = phone ? String(phone).trim().slice(0, 50) : null;
+  const cleanEmail = email ? String(email).trim().slice(0, 200) : null;
 
   try {
     const lead = await getBuildGroupLead(leadId);
@@ -507,9 +513,9 @@ async function handleBuildGroupJoin(request, response) {
       const updateResult = await supabase(`/rest/v1/build_group_attendees?id=eq.${encodeURIComponent(attendeeId)}&lead_id=eq.${encodeURIComponent(leadId)}`, {
         method: 'PATCH', headers: { Prefer: 'return=representation' },
         body: JSON.stringify({
-          name: fullName.trim(),
-          phone: phone?.trim() || null,
-          email: email?.trim() || null,
+          name: cleanName,
+          phone: cleanPhone,
+          email: cleanEmail,
           waiver_agreed: true,
           joined_at: new Date().toISOString(),
         }),
@@ -523,9 +529,9 @@ async function handleBuildGroupJoin(request, response) {
       method: 'POST', headers: { Prefer: 'return=representation' },
       body: JSON.stringify({
         lead_id: leadId,
-        name: fullName.trim(),
-        phone: phone?.trim() || null,
-        email: email?.trim() || null,
+        name: cleanName,
+        phone: cleanPhone,
+        email: cleanEmail,
         added_by: 'self',
         waiver_agreed: true,
         joined_at: new Date().toISOString(),

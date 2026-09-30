@@ -14,21 +14,43 @@ function buildGroupJoinUrl(leadId) {
 }
 
 function renderRoster(container, attendees) {
+    container.textContent = '';
     if (!attendees.length) {
-        container.innerHTML = '<p class="build-group-help">No one added yet.</p>';
+        const empty = document.createElement('p');
+        empty.className = 'build-group-help';
+        empty.textContent = 'No one added yet.';
+        container.append(empty);
         return;
     }
-    container.innerHTML = attendees.map((a) => {
+    // Attendee name/phone/email come from a public, unauthenticated
+    // endpoint (anyone with the shared join link can submit them), so
+    // they're untrusted - built as real DOM nodes with textContent
+    // rather than interpolated into innerHTML, which previously let a
+    // name like "<img src=x onerror=...>" execute in the organizer's
+    // browser on this origin the next time the roster refreshed.
+    for (const a of attendees) {
         const contact = [a.phone, a.email].filter(Boolean).join(' · ') || 'No contact info';
         const signed = a.waiverAgreed;
-        return `<div class="build-group-roster-item">
-            <div>
-                <p class="build-group-roster-name">${a.name}</p>
-                <p class="build-group-roster-contact">${contact}</p>
-            </div>
-            <span class="build-group-roster-status${signed ? ' is-signed' : ''}">${signed ? 'Waiver Signed' : 'Pending'}</span>
-        </div>`;
-    }).join('');
+
+        const item = document.createElement('div');
+        item.className = 'build-group-roster-item';
+
+        const info = document.createElement('div');
+        const name = document.createElement('p');
+        name.className = 'build-group-roster-name';
+        name.textContent = a.name;
+        const contactEl = document.createElement('p');
+        contactEl.className = 'build-group-roster-contact';
+        contactEl.textContent = contact;
+        info.append(name, contactEl);
+
+        const status = document.createElement('span');
+        status.className = `build-group-roster-status${signed ? ' is-signed' : ''}`;
+        status.textContent = signed ? 'Waiver Signed' : 'Pending';
+
+        item.append(info, status);
+        container.append(item);
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
