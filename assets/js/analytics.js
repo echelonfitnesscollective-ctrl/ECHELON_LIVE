@@ -1,13 +1,82 @@
 /*
- * CONVERSION TRACKING
+ * PostHog: page analytics, session replay, and error tracking across
+ * the marketing site. Pageviews are automatic (this is a real
+ * multi-page site, not a single-page app, so PostHog's own default
+ * page-load capture is exactly right - no manual capture needed like
+ * the EchelonOS app's App Router setup needs).
  *
- * This helper is a safe no-op until a GA4 Measurement ID is installed.
- * To activate: add the standard gtag.js snippet (with your G-XXXXXXX ID)
- * to <head> on every page, before this script. Every call below will
- * start reaching GA4 automatically -- no other code changes needed.
+ * efcTrack is the same conversion-event hook already called from
+ * site-intake.js, checkout.js, build-your-group.js, and others - this
+ * is the only file that changed; every call site is untouched. It used
+ * to be a GA4 stub that silently no-op'd since no GA4 ID was ever
+ * installed.
  */
+!function (t, e) {
+  var o, n, p, r;
+  (e.__SV || (window.posthog && window.posthog.__loaded)) ||
+    ((window.posthog = e),
+    (e._i = []),
+    (e.init = function (i, s, a) {
+      function g(t, e) {
+        var o = e.split(".");
+        2 == o.length && ((t = t[o[0]]), (e = o[1]));
+        t[e] = function () {
+          t.push([e].concat(Array.prototype.slice.call(arguments, 0)));
+        };
+      }
+      p ||
+        (((p = t.createElement("script")).type = "text/javascript"),
+        (p.crossOrigin = "anonymous"),
+        (p.async = !0),
+        (p.src = s.api_host.replace(".i.posthog.com", "-assets.i.posthog.com") + "/static/array.js"),
+        (p.onerror = function () {
+          p = null;
+        }),
+        (r = t.getElementsByTagName("script")[0]).parentNode.insertBefore(p, r));
+      var u = e;
+      for (
+        void 0 !== a ? (u = e[a] = []) : (a = "posthog"),
+          (u.people = u.people || []),
+          Object.defineProperty(u, "toString", {
+            configurable: !0,
+            enumerable: !0,
+            writable: !0,
+            value: function (t) {
+              var e = "posthog";
+              return "posthog" !== a && (e += "." + a), t || (e += " (stub)"), e;
+            },
+          }),
+          Object.defineProperty(u.people, "toString", {
+            configurable: !0,
+            enumerable: !0,
+            writable: !0,
+            value: function () {
+              return u.toString(1) + ".people (stub)";
+            },
+          }),
+          o =
+            "mu yu bu Su init Vu Gu zu Uu Ku il Wu Yu ju rh oh ah uh hh dh capture getExtension Zu pu gh calculateEventProperties ph register register_once register_for_session unregister unregister_for_session Hu mh getFeatureFlag getFeatureFlagPayload getFeatureFlagResult getAllFeatureFlags isFeatureEnabled reloadFeatureFlags updateFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSurveysLoaded onSessionId getSurveys getActiveMatchingSurveys renderSurvey displaySurvey cancelPendingSurvey canRenderSurvey canRenderSurveyAsync wh identify setPersonProperties unsetPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset kh shutdown setIdentity clearIdentity get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException addExceptionStep captureLog startExceptionAutocapture stopExceptionAutocapture loadToolbar get_property getSessionProperty yh ih createPersonProfile setInternalOrTestUser bh xu Cu opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing get_explicit_consent_status is_capturing clear_opt_in_out_capturing th debug nl Os getPageViewId captureTraceFeedback captureTraceMetric Du".split(
+              " "
+            ),
+          n = 0;
+        n < o.length;
+        n++
+      )
+        g(u, o[n]);
+      e._i.push([i, s, a]);
+    }),
+    (e.__SV = 1));
+}(document, window.posthog || []);
+
+posthog.init("phc_rwcSh3xWqdzKYoow5Xa8SwxkNdPtpMYS8ktxUPPiC9uR", {
+  api_host: "https://us.i.posthog.com",
+  defaults: "2026-05-30",
+  person_profiles: "identified_only",
+  capture_exceptions: true,
+});
+
 window.efcTrack = function efcTrack(eventName, params) {
-    if (typeof window.gtag === 'function') {
-        window.gtag('event', eventName, params || {});
-    }
+  if (window.posthog && typeof window.posthog.capture === "function") {
+    window.posthog.capture(eventName, params || {});
+  }
 };
