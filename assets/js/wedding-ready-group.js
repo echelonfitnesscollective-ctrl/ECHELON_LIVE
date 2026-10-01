@@ -39,6 +39,6 @@ document.addEventListener('DOMContentLoaded', () => {
         form.reset();
         form.style.display = 'none';
         window.efcTrack?.('wedding_ready_group_signup', {});
-        showEchelonSuccess(success, 'YOU’RE ON THE LIST', 'Coach Luther will follow up directly with the schedule and pricing once the group is finalized.', { onDismiss: () => { form.style.display = ''; submitButton.disabled = false; submitButton.textContent = 'SIGN ME UP'; } });
+        showEchelonSuccess(success, 'YOU’RE ON THE LIST', 'Coach Lex will follow up directly with the schedule and pricing once the group is finalized.', { onDismiss: () => { form.style.display = ''; submitButton.disabled = false; submitButton.textContent = 'SIGN ME UP'; } });
     });
 });

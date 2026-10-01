@@ -44,7 +44,7 @@ function rateLimited(ip) {
   return entry.count > MAX_PER_WINDOW;
 }
 
-// Short, personal, from Luther - not a corporate blast. The plan
+// Short, personal, from Lex - not a corporate blast. The plan
 // itself lives on the linked page now, so the email's job is just to
 // feel like a real note and get them there.
 function renderPlanEmail(name, goal, planUrl, experienceLevel, daysPerWeek) {
@@ -62,7 +62,7 @@ function renderPlanEmail(name, goal, planUrl, experienceLevel, daysPerWeek) {
       <p>I put together a ${goal} starter week for you${context ? `, ${context}` : ''}. It's a real week, not a preview.</p>
       <p style="margin-top:20px;"><a href="${planUrl}" style="background:#D4AF37;color:#111;padding:12px 22px;text-decoration:none;font-weight:700;display:inline-block;">VIEW YOUR PLAN</a></p>
       <p style="margin-top:24px;">Run it, see how it feels, and let me know what questions come up.</p>
-      <p style="margin-top:20px;">Luther</p>
+      <p style="margin-top:20px;">Lex</p>
     </div>
   `;
 
@@ -75,7 +75,7 @@ function renderPlanEmail(name, goal, planUrl, experienceLevel, daysPerWeek) {
     '',
     'Run it, see how it feels, and let me know what questions come up.',
     '',
-    'Luther',
+    'Lex',
   ].join('\n');
 
   return { html, text };
