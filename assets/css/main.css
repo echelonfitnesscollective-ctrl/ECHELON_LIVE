@@ -964,7 +964,12 @@ textarea{
 
     color:white;
 
-    border:1px solid #333;
+    /* Was #333 - 1.39:1 against this field's own #1A1917 fill and
+       1.54:1 against the page background, below WCAG 1.4.11's 3:1
+       minimum for UI component boundaries. Used on every public
+       lead-gen form (application, waitlist, check-in, free class) -
+       there was no visible way to tell where a field started or ended. */
+    border:1px solid #726b5c;
 
     padding:16px;
 
