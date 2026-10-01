@@ -514,8 +514,9 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-// Training program carousel arrows (index.html's onclick="scrollCarousel(...)").
-// Cards snap to the viewport's center (scroll-snap-align:center), so a
+// Training program carousel arrows (index.html's two .carousel-arrow
+// buttons, wired to this below the function). Cards snap to the
+// viewport's center (scroll-snap-align:center), so a
 // fixed-pixel scrollBy() drifts out of sync with where a card actually
 // sits - and clicking the arrow again before a smooth scroll settles
 // just stacks another blind offset on top, which is what let it run
@@ -549,6 +550,12 @@ function scrollCarousel(direction) {
     const left = target.offsetLeft - carousel.clientWidth / 2 + target.offsetWidth / 2;
     carousel.scrollTo({ left, behavior: 'smooth' });
 }
+
+// Used to be an inline onclick="scrollCarousel(...)" on each button,
+// which needed 'unsafe-inline' in the CSP's script-src just for these
+// two clicks. Real listeners instead, same effect, no CSP exception.
+document.querySelector('.carousel-arrow.left-arrow')?.addEventListener('click', () => scrollCarousel('left'));
+document.querySelector('.carousel-arrow.right-arrow')?.addEventListener('click', () => scrollCarousel('right'));
 
 // Adds a show/hide toggle to every password field sitewide, no per-page markup needed.
 function efcInitPasswordToggles() {

@@ -34,26 +34,6 @@
 <script src="../assets/js/main.js" defer></script>
 </head>
 
-<script>
-
-function changeProductImage(imageId, newImage, dot){
-
-    const image =
-        document.getElementById(imageId);
-
-    image.src = newImage;
-
-    const dots =
-        dot.parentElement.querySelectorAll('.image-dot');
-
-    dots.forEach(d =>
-        d.classList.remove('active')
-    );
-
-    dot.classList.add('active');
-}
-
-</script>
 
 <body>
 <a href="#main-content" class="skip-link">Skip to content</a>
