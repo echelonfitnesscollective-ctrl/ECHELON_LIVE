@@ -1172,7 +1172,7 @@ textarea{
     border-radius:12px;
 }
 
-.coach-content h3{
+.coach-content h2{
     font-size:2rem;
     margin:15px 0 20px;
 }
@@ -1397,7 +1397,7 @@ html{
     transform:scale(1.03);
 }
 
-.coach-content h3{
+.coach-content h2{
     font-size:clamp(2rem,4vw,3.5rem);
     line-height:1;
     margin:12px 0 20px;
@@ -1445,7 +1445,7 @@ html{
     margin:0 auto 40px;
 }
 
-.principles-heading h3{
+.principles-heading h2{
     font-size:clamp(1.8rem,3.6vw,2.75rem);
     line-height:1;
     margin:12px 0 0;
@@ -1453,7 +1453,7 @@ html{
 }
 
 @media(max-width:760px){
-    .principles-heading h3{
+    .principles-heading h2{
         white-space:normal;
         font-size:clamp(1.6rem,7vw,2.25rem);
     }
@@ -1500,7 +1500,7 @@ html{
     letter-spacing:2px;
 }
 
-.principle-card h4{
+.principle-card h3{
     margin:12px 0;
     font-size:1.3rem;
 }
@@ -1534,7 +1534,7 @@ html{
     margin:0 auto 70px;
 }
 
-.who-we-train h3{
+.who-we-train h2{
     font-size:clamp(2rem,4vw,3rem);
     line-height:1;
     margin:12px 0 20px;
@@ -1625,7 +1625,7 @@ html{
     padding-top:50px;
 }
 
-.about-cta h3{
+.about-cta h2{
     margin-bottom:25px;
     font-size:clamp(1.8rem,3vw,2.5rem);
 }
@@ -1660,7 +1660,7 @@ html{
         grid-template-columns:1fr;
     }
 
-    .coach-content h3{
+    .coach-content h2{
         line-height:1.05;
     }
 
