@@ -253,7 +253,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     refreshAvailability();
                     return;
                 }
-                feedback.textContent = data.status === 'waitlisted' ? "You're on the waitlist — we'll confirm you if a spot opens up." : '';
+                feedback.textContent = data.status === 'waitlisted' ? "You're on the waitlist. We'll confirm you if a spot opens up." : '';
                 loadMySessions();
                 refreshAvailability();
                 efcSyncBookingToCalendar(data.id, 'create');
