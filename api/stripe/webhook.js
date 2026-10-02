@@ -55,12 +55,12 @@ async function processEnrollmentPayment(event) {
     await serviceRequest(`/rest/v1/onboarding_projects?id=eq.${encodeURIComponent(project.id)}`, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ payment_status: 'paid', membership_status: 'approved', onboarding_status: 'awaiting_admin' }) });
     await serviceRequest(`/rest/v1/coaching_applications?id=eq.${encodeURIComponent(project.application_id)}`, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ status: 'Paid: Ready to Invite', payment_status: 'paid' }) });
     await completeLaunchTask(project.id, 'Verify payment or approved exemption');
-    if (offer.payment_option === 'echelon_12_monthly' || offer.payment_option === 'echelon_12_paid_in_full') {
+    if (String(offer.payment_option || '').startsWith('echelon_12_')) {
       const clientName = project.coaching_applications?.full_name || 'this client';
       const checkinDue = new Date(Date.now() + 70 * 24 * 60 * 60 * 1000).toISOString();
       await serviceRequest('/rest/v1/coach_tasks', { method: 'POST', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({
         title: `Week 10 Progress Review: ${clientName}`,
-        description: `${clientName}'s 12-Week Transformation started today. Their plan keeps running until you or they change it, nothing auto-cancels. Around week 10-11, sit down for a real Progress Review: pull up their progress photos and weekly check-in history from the Coaching Hub, walk through wins and what to improve, then present the 3 ways to continue. Group Fitness, $79/month for 3 sessions a week. Coaching Membership, $149/month for ongoing personalized coaching. 1-on-1 Coaching, $399/month, the highest-touch option. Use the GENERATE CHECKOUT LINK button on their Members profile for whichever they choose.`,
+        description: `${clientName}'s Transformation Coaching started today. Their plan keeps running until you or they change it, nothing auto-cancels. Around week 10-11, sit down for a real Progress Review: pull up their progress photos and weekly check-in history from the Coaching Hub, walk through wins and what to improve, then present the options to continue or step up a tier. Use the GENERATE CHECKOUT LINK button on their Members profile for whichever they choose.`,
         related_name: clientName,
         task_type: 'Renewal check-in',
         priority: 'Normal',

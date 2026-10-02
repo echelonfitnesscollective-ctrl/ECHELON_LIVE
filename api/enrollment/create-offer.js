@@ -9,13 +9,17 @@ const PAYMENT_OPTIONS = {
   // are being archived - if any of these six env vars aren't set yet in
   // Vercel, selecting that tier fails with "Choose a configured Echelon
   // payment option" below, same as any other unconfigured option - safe
-  // to ship ahead of them existing.
-  echelon_12_base_monthly: { priceEnv: 'STRIPE_PRICE_12_WEEK_BASE_MONTHLY', mode: 'subscription', label: 'Echelon 12 · Base · $69 / month' },
-  echelon_12_base_annual: { priceEnv: 'STRIPE_PRICE_12_WEEK_BASE_ANNUAL', mode: 'subscription', label: 'Echelon 12 · Base · $699 / year' },
-  echelon_12_elevate_monthly: { priceEnv: 'STRIPE_PRICE_12_WEEK_ELEVATE_MONTHLY', mode: 'subscription', label: 'Echelon 12 · Elevate · $99 / month' },
-  echelon_12_elevate_annual: { priceEnv: 'STRIPE_PRICE_12_WEEK_ELEVATE_ANNUAL', mode: 'subscription', label: 'Echelon 12 · Elevate · $899 / year' },
-  echelon_12_summit_monthly: { priceEnv: 'STRIPE_PRICE_12_WEEK_SUMMIT_MONTHLY', mode: 'subscription', label: 'Echelon 12 · Summit · $149 / month' },
-  echelon_12_summit_annual: { priceEnv: 'STRIPE_PRICE_12_WEEK_SUMMIT_ANNUAL', mode: 'subscription', label: 'Echelon 12 · Summit · $1,299 / year' },
+  // to ship ahead of them existing. Renamed "12-Week Transformation" to
+  // "Transformation Coaching" since it's an open-ended monthly/annual
+  // subscription, not a bounded 12-week engagement - object keys stay
+  // echelon_12_* (internal identifiers, already stored on existing
+  // enrollment_offers rows), only the customer-facing labels changed.
+  echelon_12_base_monthly: { priceEnv: 'STRIPE_PRICE_12_WEEK_BASE_MONTHLY', mode: 'subscription', label: 'Transformation Coaching · Base · $69 / month' },
+  echelon_12_base_annual: { priceEnv: 'STRIPE_PRICE_12_WEEK_BASE_ANNUAL', mode: 'subscription', label: 'Transformation Coaching · Base · $699 / year' },
+  echelon_12_elevate_monthly: { priceEnv: 'STRIPE_PRICE_12_WEEK_ELEVATE_MONTHLY', mode: 'subscription', label: 'Transformation Coaching · Elevate · $99 / month' },
+  echelon_12_elevate_annual: { priceEnv: 'STRIPE_PRICE_12_WEEK_ELEVATE_ANNUAL', mode: 'subscription', label: 'Transformation Coaching · Elevate · $899 / year' },
+  echelon_12_summit_monthly: { priceEnv: 'STRIPE_PRICE_12_WEEK_SUMMIT_MONTHLY', mode: 'subscription', label: 'Transformation Coaching · Summit · $149 / month' },
+  echelon_12_summit_annual: { priceEnv: 'STRIPE_PRICE_12_WEEK_SUMMIT_ANNUAL', mode: 'subscription', label: 'Transformation Coaching · Summit · $1,299 / year' },
   one_on_one_monthly: { priceEnv: 'STRIPE_PRICE_ONE_ON_ONE_MONTHLY', mode: 'subscription', label: '1-on-1 Coaching · monthly, up to 3x/week' },
   one_on_one_starter: { priceEnv: 'STRIPE_PRICE_ONE_ON_ONE_STARTER', mode: 'payment', label: '1-on-1 Coaching · $55 starter session' },
   one_on_one_10pack: { priceEnv: 'STRIPE_PRICE_ONE_ON_ONE_10PACK', mode: 'payment', label: '1-on-1 Coaching · $499 10-session pack' },

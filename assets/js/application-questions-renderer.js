@@ -75,7 +75,7 @@ function buildApplicationQuestionFields(questions, answers) {
 window.buildApplicationQuestionFields = buildApplicationQuestionFields;
 
 // Per-program adjustments to the shared application. Every program
-// (1-on-1 Coaching, 12-Week Transformation, Private Group Training,
+// (1-on-1 Coaching, Transformation Coaching, Private Group Training,
 // and whatever gets added later - Kinetic Lab, Faith & Favor Mobility,
 // a revived Group Training, etc.) answers the same question_key with
 // the same meaning where it applies, but not every question fits
@@ -101,7 +101,7 @@ const EFC_PROGRAM_FIELD_ADJUSTMENTS = {
         groupFieldsId: 'group-experience-fields',
     },
     // training_delivery_preference (remote vs. in-person add-on) only
-    // makes sense for 12-Week Transformation right now - every other
+    // makes sense for Transformation Coaching right now - every other
     // program already has its own fixed delivery format - so it's
     // hidden everywhere except there instead of defaulting to shown.
     '1-On-1 Coaching': {

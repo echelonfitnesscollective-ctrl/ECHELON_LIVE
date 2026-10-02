@@ -609,8 +609,9 @@ async function handleCreateCampaignPrices(request, response) {
 }
 
 // One-time admin action: creates a real Stripe Coupon + Promotion Code
-// against an existing recurring Price (defaults to the Echelon 12 monthly
-// price), so a coach can hand out a redeemable code - like "WEDDING65" -
+// against an existing recurring Price (defaults to Transformation
+// Coaching's Base monthly price), so a coach can hand out a redeemable
+// code - like "WEDDING65" -
 // instead of a one-off Payment Link. The discount is computed from the
 // Price's live unit_amount rather than a hardcoded number, so it stays
 // correct even if that price ever changes. Applies_to[products] scopes the
@@ -625,7 +626,7 @@ async function handleCreatePromoCode(request, response) {
   if (!process.env.STRIPE_SECRET_KEY) return response.status(503).json({ error: 'Stripe is not configured yet.' });
 
   const { code, priceId, discountedAmountCents, maxRedemptions, redeemBy } = request.body || {};
-  const targetPriceId = priceId || process.env.STRIPE_PRICE_12_WEEK_MONTHLY;
+  const targetPriceId = priceId || process.env.STRIPE_PRICE_12_WEEK_BASE_MONTHLY;
   if (!code?.trim() || !targetPriceId || !Number.isFinite(Number(discountedAmountCents)) || Number(discountedAmountCents) <= 0) {
     return response.status(400).json({ error: 'A code, target price, and positive discounted amount (in cents) are required.' });
   }
