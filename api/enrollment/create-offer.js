@@ -3,24 +3,34 @@
 const { randomBytes } = require('node:crypto');
 
 const PAYMENT_OPTIONS = {
-  echelon_12_monthly: { priceEnv: 'STRIPE_PRICE_12_WEEK_MONTHLY', mode: 'subscription', label: 'Echelon 12 · $149 / month' },
-  echelon_12_paid_in_full: { priceEnv: 'STRIPE_PRICE_12_WEEK_FULL', mode: 'payment', label: 'Echelon 12 · $399 paid in full' },
-  // The coaching application's training_delivery_preference question
-  // (12-Week Transformation only) captures whether a lead wants the
-  // +$40 in-person check-in add-on, so this needs its own price rather
-  // than the coach manually adjusting an amount - Stripe Checkout only
-  // takes a configured Price, not an arbitrary one at send time. These
-  // two env vars don't exist yet; until STRIPE_PRICE_12_WEEK_MONTHLY_IN_PERSON
-  // and STRIPE_PRICE_12_WEEK_FULL_IN_PERSON are set in Vercel (new Stripe
-  // Prices: $189/month and $439 paid in full), selecting either option
-  // fails with "Choose a configured Echelon payment option" below,
-  // same as any other unconfigured option - safe to ship ahead of that.
-  echelon_12_monthly_in_person: { priceEnv: 'STRIPE_PRICE_12_WEEK_MONTHLY_IN_PERSON', mode: 'subscription', label: 'Echelon 12 (In-Person Check-Ins) · $189 / month' },
-  echelon_12_paid_in_full_in_person: { priceEnv: 'STRIPE_PRICE_12_WEEK_FULL_IN_PERSON', mode: 'payment', label: 'Echelon 12 (In-Person Check-Ins) · $439 paid in full' },
+  // Replaced the old single-tier Echelon 12 options (echelon_12_monthly /
+  // _paid_in_full / _monthly_in_person / _paid_in_full_in_person) with
+  // three real tiers, each monthly or annual. Those four Stripe Prices
+  // are being archived - if any of these six env vars aren't set yet in
+  // Vercel, selecting that tier fails with "Choose a configured Echelon
+  // payment option" below, same as any other unconfigured option - safe
+  // to ship ahead of them existing.
+  echelon_12_base_monthly: { priceEnv: 'STRIPE_PRICE_12_WEEK_BASE_MONTHLY', mode: 'subscription', label: 'Echelon 12 · Base · $69 / month' },
+  echelon_12_base_annual: { priceEnv: 'STRIPE_PRICE_12_WEEK_BASE_ANNUAL', mode: 'subscription', label: 'Echelon 12 · Base · $699 / year' },
+  echelon_12_elevate_monthly: { priceEnv: 'STRIPE_PRICE_12_WEEK_ELEVATE_MONTHLY', mode: 'subscription', label: 'Echelon 12 · Elevate · $99 / month' },
+  echelon_12_elevate_annual: { priceEnv: 'STRIPE_PRICE_12_WEEK_ELEVATE_ANNUAL', mode: 'subscription', label: 'Echelon 12 · Elevate · $899 / year' },
+  echelon_12_summit_monthly: { priceEnv: 'STRIPE_PRICE_12_WEEK_SUMMIT_MONTHLY', mode: 'subscription', label: 'Echelon 12 · Summit · $149 / month' },
+  echelon_12_summit_annual: { priceEnv: 'STRIPE_PRICE_12_WEEK_SUMMIT_ANNUAL', mode: 'subscription', label: 'Echelon 12 · Summit · $1,299 / year' },
   one_on_one_monthly: { priceEnv: 'STRIPE_PRICE_ONE_ON_ONE_MONTHLY', mode: 'subscription', label: '1-on-1 Coaching · monthly, up to 3x/week' },
   one_on_one_starter: { priceEnv: 'STRIPE_PRICE_ONE_ON_ONE_STARTER', mode: 'payment', label: '1-on-1 Coaching · $55 starter session' },
+  one_on_one_10pack: { priceEnv: 'STRIPE_PRICE_ONE_ON_ONE_10PACK', mode: 'payment', label: '1-on-1 Coaching · $499 10-session pack' },
   one_on_one_20pack: { priceEnv: 'STRIPE_PRICE_ONE_ON_ONE_20PACK', mode: 'payment', label: '1-on-1 Coaching · $840 20-session pack' },
-  private_group_training: { basePriceEnv: 'STRIPE_PRICE_PRIVATE_GROUP_BASE', addonPriceEnv: 'STRIPE_PRICE_PRIVATE_GROUP_ADDON', mode: 'payment', basePeople: 5, baseAmount: 199, addonAmount: 25 }
+  private_group_training: { basePriceEnv: 'STRIPE_PRICE_PRIVATE_GROUP_BASE', addonPriceEnv: 'STRIPE_PRICE_PRIVATE_GROUP_ADDON', mode: 'payment', basePeople: 5, baseAmount: 199, addonAmount: 25 },
+  // Reserves a group's recurring weekly slots before training starts.
+  // Forfeited if the group cancels or never starts; credited toward
+  // month one via the coupon on the two team-monthly options below,
+  // applied when the coach sends that second, separate payment link
+  // once the group is actually ready to begin.
+  private_group_deposit: { priceEnv: 'STRIPE_PRICE_PRIVATE_GROUP_DEPOSIT', mode: 'payment', label: 'Private Group Training · $100 reservation deposit' },
+  // $100-off-once coupon (couponEnv) nets the deposit already collected
+  // against month one, so the group never pays it twice.
+  private_group_team_5: { priceEnv: 'STRIPE_PRICE_PRIVATE_GROUP_TEAM_5', couponEnv: 'STRIPE_COUPON_TEAM_DEPOSIT_CREDIT', mode: 'subscription', label: 'Private Group Training · Team Monthly · 5 people · $425/mo' },
+  private_group_team_10: { priceEnv: 'STRIPE_PRICE_PRIVATE_GROUP_TEAM_10', couponEnv: 'STRIPE_COUPON_TEAM_DEPOSIT_CREDIT', mode: 'subscription', label: 'Private Group Training · Team Monthly · 10 people · $600/mo' }
 };
 
 function siteUrl() { return String(process.env.SITE_URL || 'https://www.echelonfitness.co').replace(/\/$/, ''); }
@@ -225,6 +235,11 @@ module.exports = async function createEnrollmentOffer(request, response) {
     label = option.label;
     if (!price) return response.status(400).json({ error: 'Choose a configured Echelon payment option.' });
   }
+  // couponEnv (Team Monthly only) nets the already-collected $100
+  // deposit against this first invoice. A missing coupon env var
+  // degrades to "no discount" rather than blocking checkout - the
+  // deposit would just need reconciling by hand that one time.
+  const coupon = option.couponEnv ? process.env[option.couponEnv] || null : null;
   try {
     const appResult = await supabase(`/rest/v1/coaching_applications?id=eq.${encodeURIComponent(applicationId)}&select=id,full_name,email,program_interest`);
     const application = Array.isArray(appResult.body) ? appResult.body[0] : null;
@@ -236,7 +251,7 @@ module.exports = async function createEnrollmentOffer(request, response) {
     await supabase(`/rest/v1/enrollment_offers?project_id=eq.${encodeURIComponent(project.id)}&status=in.(draft,sent)`, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ status: 'canceled' }) });
     const token = randomBytes(24).toString('hex');
     const now = new Date().toISOString();
-    const offerResult = await supabase('/rest/v1/enrollment_offers', { method: 'POST', headers: { Prefer: 'return=representation' }, body: JSON.stringify({ project_id: project.id, allowed_payment_options: [{ key: paymentOption, label, mode: option.mode }], payment_option: paymentOption, stripe_price_id: price, line_items: lineItems, group_size: resolvedGroupSize, checkout_token: token, status: 'sent', payment_status: 'awaiting_payment', sent_at: now, expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() }) });
+    const offerResult = await supabase('/rest/v1/enrollment_offers', { method: 'POST', headers: { Prefer: 'return=representation' }, body: JSON.stringify({ project_id: project.id, allowed_payment_options: [{ key: paymentOption, label, mode: option.mode, coupon }], payment_option: paymentOption, stripe_price_id: price, line_items: lineItems, group_size: resolvedGroupSize, checkout_token: token, status: 'sent', payment_status: 'awaiting_payment', sent_at: now, expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() }) });
     const offer = Array.isArray(offerResult.body) ? offerResult.body[0] : null;
     if (!offerResult.response.ok || !offer) return response.status(502).json({ error: 'The payment offer could not be created.' });
     await supabase(`/rest/v1/coaching_applications?id=eq.${encodeURIComponent(applicationId)}`, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ status: 'Accepted: Payment Pending', application_status: 'approved', approved_program: label, payment_status: 'awaiting_payment', approved_at: now }) });
