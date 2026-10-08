@@ -979,6 +979,17 @@ textarea{
 
 }
 
+/* Placeholder text had no explicit color anywhere in this file, so it
+   fell back to each browser's default gray against these fields' dark
+   #1A1917 fill - unreadable, same contrast problem already fixed above
+   for the field border. Used on every public lead-gen form. */
+.echelon-form input::placeholder,
+.echelon-form select::placeholder,
+.echelon-form textarea::placeholder{
+    color:#8f8f8f;
+    opacity:1;
+}
+
 .echelon-form textarea{
 
     resize:vertical;
@@ -6725,4 +6736,93 @@ MOBILE
 @media(max-width:760px){
     .training-modal-panel{ padding:60px 22px 28px; }
     .training-modal-overlay{ padding:0; }
+}
+
+/* BUILD YOUR GROUP - "what's in it for you" strip. Was reusing the
+   shared .principle-card (homepage + wedding-ready-group): rounded,
+   blurred glass cards that don't match this site's otherwise sharp,
+   thin-gold-border look, and its CSS targeted h3 while the markup
+   used h4, so the card titles were never actually getting styled.
+   Given its own classes here rather than fixed in place so the
+   homepage's cards are untouched. One bordered strip divided into
+   4 columns, matching the .communications-rules pattern already used
+   elsewhere in this file, instead of 4 separate floating boxes. */
+.byg-perks{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    margin-bottom:60px;
+    border:1px solid rgba(212,175,55,.22);
+    background:rgba(255,255,255,.02);
+}
+
+.byg-perk{
+    padding:30px 26px;
+    transition:background .25s ease;
+}
+
+.byg-perk + .byg-perk{
+    border-left:1px solid rgba(212,175,55,.18);
+}
+
+.byg-perk:hover{
+    background:rgba(212,175,55,.05);
+}
+
+.byg-perk span{
+    display:block;
+    font-family:var(--heading-font);
+    font-size:2rem;
+    line-height:1;
+    color:rgba(212,175,55,.5);
+    margin-bottom:10px;
+}
+
+.byg-perk h4{
+    margin:0 0 8px;
+    color:#fff;
+    font-size:1.05rem;
+    letter-spacing:.2px;
+}
+
+.byg-perk p{
+    margin:0;
+    color:#a8a8a8;
+    font-size:.84rem;
+    line-height:1.6;
+}
+
+@media(max-width:768px){
+    .byg-perks{
+        grid-template-columns:repeat(2,1fr);
+    }
+    .byg-perk:nth-child(2n+1){
+        border-left:0;
+    }
+    .byg-perk:nth-child(n+3){
+        border-top:1px solid rgba(212,175,55,.18);
+    }
+}
+
+@media(max-width:480px){
+    .byg-perks{
+        grid-template-columns:1fr;
+    }
+    .byg-perk{
+        padding:24px 22px;
+    }
+    .byg-perk + .byg-perk{
+        border-left:0;
+        border-top:1px solid rgba(212,175,55,.18);
+    }
+}
+
+/* .portal-card (the public application form shell used on this page,
+   wedding-ready-group, free-plan, check-in, etc.) had a flat 50px
+   padding with no mobile reduction, unlike every other card in this
+   file - cramped on a phone screen that's already down to ~90% width
+   from .container. */
+@media(max-width:600px){
+    .portal-card{
+        padding:30px 22px;
+    }
 }
