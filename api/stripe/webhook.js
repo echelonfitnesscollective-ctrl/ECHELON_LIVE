@@ -116,6 +116,60 @@ async function processShopOrder(event) {
   });
 }
 
+// Echelon Online Coaching: the $97 Custom 12-Week Program (+ optional
+// $27 Holiday Travel Pack add-on, same session, extra line item).
+// metadata[intake_id] ties this checkout session back to the
+// plan_intakes row api/plan/submit-intake.js created before Stripe was
+// ever involved - this is the moment that row flips to "paid" and
+// becomes eligible for the coach's approval queue (a later step).
+async function processPlanOrder(event) {
+  const object = event.data && event.data.object;
+  if (object?.metadata?.order_type !== 'plan') return;
+  const intakeId = object?.metadata?.intake_id;
+  if (!intakeId || !process.env.SUPABASE_SERVICE_ROLE_KEY) return;
+  const paid = event.type === 'checkout.session.completed' || event.type === 'checkout.session.async_payment_succeeded';
+  const expired = event.type === 'checkout.session.expired' || event.type === 'checkout.session.async_payment_failed';
+  if (!paid && !expired) return;
+
+  const prior = await serviceRequest(`/rest/v1/stripe_payment_events?stripe_event_id=eq.${encodeURIComponent(event.id)}&select=stripe_event_id&limit=1`);
+  if (Array.isArray(prior.body) && prior.body.length) return;
+  await serviceRequest('/rest/v1/stripe_payment_events', { method: 'POST', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ stripe_event_id: event.id, event_type: event.type, payload: { checkout_session_id: object?.id || null, intake_id: intakeId, amount_total: object?.amount_total ?? null, addon_travel_pack: object?.metadata?.addon_travel_pack === 'true' } }) });
+
+  if (paid) {
+    const now = new Date().toISOString();
+    await serviceRequest(`/rest/v1/plan_intakes?id=eq.${encodeURIComponent(intakeId)}`, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ status: 'paid', paid_at: now, stripe_customer_id: object?.customer || null, updated_at: now }) });
+    const amount = typeof object?.amount_total === 'number' ? `$${(object.amount_total / 100).toFixed(2)}` : 'unknown amount';
+    const email = object?.customer_details?.email || object?.customer_email || 'unknown email';
+    await notifyOwner({
+      subject: `New Echelon Online Coaching order: ${amount}`,
+      text: `A Custom 12-Week Program order just came in.\n\nEmail: ${email}\nAmount: ${amount}\nHoliday Travel Pack add-on: ${object?.metadata?.addon_travel_pack === 'true' ? 'yes' : 'no'}\n\nThe intake is now marked paid in plan_intakes (id ${intakeId}). It's ready for the approval queue once that's built.`,
+    });
+  } else if (expired) {
+    await serviceRequest(`/rest/v1/plan_intakes?id=eq.${encodeURIComponent(intakeId)}&status=eq.checkout_pending`, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ status: 'expired', updated_at: new Date().toISOString() }) });
+  }
+}
+
+// The Monthly Coaching upsell (api/plan/upsell-checkout.js), a separate
+// subscription checkout offered right after the main plan purchase.
+async function processPlanMonthlyCoaching(event) {
+  const object = event.data && event.data.object;
+  if (object?.metadata?.order_type !== 'plan_monthly_coaching') return;
+  const intakeId = object?.metadata?.intake_id;
+  if (!intakeId || !process.env.SUPABASE_SERVICE_ROLE_KEY) return;
+  const paid = event.type === 'checkout.session.completed' || event.type === 'checkout.session.async_payment_succeeded';
+  if (!paid) return;
+
+  const prior = await serviceRequest(`/rest/v1/stripe_payment_events?stripe_event_id=eq.${encodeURIComponent(event.id)}&select=stripe_event_id&limit=1`);
+  if (Array.isArray(prior.body) && prior.body.length) return;
+  await serviceRequest('/rest/v1/stripe_payment_events', { method: 'POST', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ stripe_event_id: event.id, event_type: event.type, payload: { checkout_session_id: object?.id || null, intake_id: intakeId, subscription: object?.subscription || null } }) });
+  await serviceRequest(`/rest/v1/plan_intakes?id=eq.${encodeURIComponent(intakeId)}`, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ monthly_coaching_status: 'subscribed', updated_at: new Date().toISOString() }) });
+  const email = object?.customer_details?.email || object?.customer_email || 'unknown email';
+  await notifyOwner({
+    subject: 'New Monthly Coaching subscriber ($49/mo)',
+    text: `${email} just started Monthly Coaching right after their Custom 12-Week Program purchase (intake ${intakeId}).`,
+  });
+}
+
 module.exports = async function stripeWebhook(request, response) {
   response.setHeader('X-Content-Type-Options', 'nosniff');
   response.setHeader('Cache-Control', 'no-store');
@@ -129,6 +183,8 @@ module.exports = async function stripeWebhook(request, response) {
     await processEnrollmentPayment(event);
     await processGroupFitnessPayment(event);
     await processShopOrder(event);
+    await processPlanOrder(event);
+    await processPlanMonthlyCoaching(event);
     return response.status(200).json({ received: true });
   } catch (error) {
     console.error('Stripe webhook error', error && error.message);
