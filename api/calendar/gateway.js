@@ -608,9 +608,30 @@ async function handleCreateCampaignPrices(request, response) {
   }
 }
 
+// Every self-serve checkout offer a promo code can currently target,
+// keyed by the same offer key the checkout buttons themselves use
+// (api/checkout/create.js's OFFERS, api/plan/checkout.js,
+// api/plan/upsell-checkout.js) - a safe, non-secret allowlist the
+// admin UI picks from, resolved to the real env var name here, never
+// an attacker (or a confused admin client) supplying an arbitrary
+// process.env key directly. That matters: a raw price lookup against
+// an invalid Stripe price ID echoes the invalid ID back in its error
+// message, so resolving any client-supplied string straight through
+// process.env[...] would let someone fish a secret's value out of a
+// Stripe 404 - this map is what keeps the lookup to real, intentional
+// prices only.
+const PROMO_PRICE_ENV_BY_OFFER_KEY = {
+  group_drop_in: 'STRIPE_PRICE_GROUP_DROP_IN',
+  group_unlimited: 'STRIPE_PRICE_GROUP_UNLIMITED',
+  coaching_membership_monthly: 'STRIPE_PRICE_COACHING_MEMBERSHIP_MONTHLY',
+  plan_custom_12_week: 'STRIPE_PRICE_PLAN_CUSTOM_12_WEEK',
+  plan_holiday_travel_pack: 'STRIPE_PRICE_PLAN_HOLIDAY_TRAVEL_PACK',
+  plan_monthly_coaching: 'STRIPE_PRICE_PLAN_MONTHLY_COACHING',
+};
+
 // One-time admin action: creates a real Stripe Coupon + Promotion Code
-// against an existing recurring Price (defaults to Transformation
-// Coaching's Base monthly price), so a coach can hand out a redeemable
+// against an existing Price for any of the offers above (chosen by
+// offerKey from the EchelonOS UI), so a coach can hand out a redeemable
 // code - like "WEDDING65" -
 // instead of a one-off Payment Link. The discount is computed from the
 // Price's live unit_amount rather than a hardcoded number, so it stays
@@ -625,8 +646,12 @@ async function handleCreatePromoCode(request, response) {
   if (!admin) return response.status(401).json({ error: 'Your admin session is required.' });
   if (!process.env.STRIPE_SECRET_KEY) return response.status(503).json({ error: 'Stripe is not configured yet.' });
 
-  const { code, priceId, discountedAmountCents, maxRedemptions, redeemBy } = request.body || {};
-  const targetPriceId = priceId || process.env.STRIPE_PRICE_12_WEEK_BASE_MONTHLY;
+  const { code, offerKey, priceId, discountedAmountCents, maxRedemptions, redeemBy } = request.body || {};
+  const resolvedEnvKey = offerKey && Object.prototype.hasOwnProperty.call(PROMO_PRICE_ENV_BY_OFFER_KEY, offerKey)
+    ? PROMO_PRICE_ENV_BY_OFFER_KEY[offerKey]
+    : null;
+  if (offerKey && !resolvedEnvKey) return response.status(400).json({ error: 'Unrecognized program.' });
+  const targetPriceId = (resolvedEnvKey && process.env[resolvedEnvKey]) || priceId || process.env.STRIPE_PRICE_12_WEEK_BASE_MONTHLY;
   if (!code?.trim() || !targetPriceId || !Number.isFinite(Number(discountedAmountCents)) || Number(discountedAmountCents) <= 0) {
     return response.status(400).json({ error: 'A code, target price, and positive discounted amount (in cents) are required.' });
   }
