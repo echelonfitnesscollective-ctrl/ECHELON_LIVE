@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const programInterest = document.getElementById('program-interest');
     const selectedProgram = new URLSearchParams(window.location.search).get('program');
     const programMap = {
-        '12-week-transformation': 'Transformation Coaching',
         '1-on-1-coaching': '1-On-1 Coaching',
         'private-group-training': 'Private Group Training / Organization Wellness',
         'organization-wellness': 'Private Group Training / Organization Wellness',

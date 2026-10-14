@@ -4,7 +4,7 @@ const EFC_SECTION_SUPABASE_KEY = 'sb_publishable_CwFNrWSrhLKURZIk_-yt1A_ZVpFHEwf
 const SECTION_REFUND_LINK_KEYS = new Set([
     'group-fitness',
     'private-group-training',
-    '12-week-transformation',
+    'echelon-online-coaching',
     '1-on-1-coaching',
 ]);
 
