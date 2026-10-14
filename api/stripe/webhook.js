@@ -162,7 +162,8 @@ async function processPlanMonthlyCoaching(event) {
   const prior = await serviceRequest(`/rest/v1/stripe_payment_events?stripe_event_id=eq.${encodeURIComponent(event.id)}&select=stripe_event_id&limit=1`);
   if (Array.isArray(prior.body) && prior.body.length) return;
   await serviceRequest('/rest/v1/stripe_payment_events', { method: 'POST', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ stripe_event_id: event.id, event_type: event.type, payload: { checkout_session_id: object?.id || null, intake_id: intakeId, subscription: object?.subscription || null } }) });
-  await serviceRequest(`/rest/v1/plan_intakes?id=eq.${encodeURIComponent(intakeId)}`, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ monthly_coaching_status: 'subscribed', updated_at: new Date().toISOString() }) });
+  const subscribedAt = new Date().toISOString();
+  await serviceRequest(`/rest/v1/plan_intakes?id=eq.${encodeURIComponent(intakeId)}`, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ monthly_coaching_status: 'subscribed', monthly_coaching_subscribed_at: subscribedAt, updated_at: subscribedAt }) });
   const email = object?.customer_details?.email || object?.customer_email || 'unknown email';
   await notifyOwner({
     subject: 'New Monthly Coaching subscriber ($49/mo)',
