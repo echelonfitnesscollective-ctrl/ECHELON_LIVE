@@ -1,11 +1,14 @@
 'use strict';
 
 // Echelon Online Coaching intake (pages/plan.html, $97 Custom 12-Week
-// Program). This is the one safety-critical gate in the whole flow: if
-// the buyer flags pregnancy, an injury, a heart condition, or an eating
-// disorder, the sale stops HERE, before any Stripe session is ever
-// created - never trust the client-side copy of this check alone, this
-// server-side check is the real one.
+// Program). A flagged buyer (pregnancy, injury, heart condition, eating
+// disorder) still pays and gets an intake row like anyone else - the
+// coach reviews these personally (call within 24-48h, text/email if no
+// answer) rather than blocking the sale outright. safety_flagged is
+// still the real server-side source of truth downstream: it's what
+// keeps isSafeToDraft() (echelonos/src/lib/plan-program-rules.ts) from
+// ever letting the AI auto-draft one of these, and plan-queue's
+// draftProgram moves it straight to "Needs Human Review" instead.
 //
 // Writes with the service-role key, not the anon key used by
 // lower-sensitivity forms (free-plan, leads) - plan_intakes holds real
@@ -46,8 +49,6 @@ function publicSiteUrl() {
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const SEE_YOUR_DOCTOR_MESSAGE =
-  "For your safety, we can't sell this self-guided program online based on what you shared. Please check with your doctor first. If you'd still like to train with us, apply for 1-on-1 coaching instead, a real coach reviews every application and can build around your situation directly.";
 
 module.exports = async function submitPlanIntake(req, res) {
   const origin = String(req.headers.origin || '').replace(/\/$/, '');
@@ -72,10 +73,10 @@ module.exports = async function submitPlanIntake(req, res) {
   const body = req.body || {};
 
   // Honeypot: a bot fills this, a real visitor never sees it. Reply
-  // with the same shape a real safety block uses so nothing about this
-  // check is observable from the outside.
+  // 200 with no real intakeId rather than a 4xx, so a bot can't tell
+  // this field is being checked.
   if (String(body.efc_hp || '').trim()) {
-    return res.status(200).json({ blocked: true, message: SEE_YOUR_DOCTOR_MESSAGE });
+    return res.status(200).json({ blocked: false, intakeId: null });
   }
 
   const fullName = String(body.full_name || '').trim().slice(0, 200);
@@ -108,7 +109,7 @@ module.exports = async function submitPlanIntake(req, res) {
     safety_heart_condition: safetyHeart,
     safety_eating_disorder: safetyEatingDisorder,
     safety_flagged: flagged,
-    status: flagged ? 'blocked' : 'submitted',
+    status: 'submitted',
   };
 
   try {
@@ -130,17 +131,16 @@ module.exports = async function submitPlanIntake(req, res) {
 
     if (flagged) {
       await notifyOwner({
-        subject: `Plan intake blocked by safety screen: ${fullName}`,
-        text: `${fullName} (${email}) was stopped from purchasing the Custom 12-Week Program by the safety screen.\n\nFlags: ${[
+        subject: `SAFETY REVIEW NEEDED: ${fullName} (Echelon Online Coaching)`,
+        text: `${fullName} (${email}) flagged a safety concern on the Custom 12-Week Program intake and is proceeding to checkout.\n\nFlags: ${[
           safetyPregnancy && 'pregnancy',
           safetyInjury && `injury (${row.safety_injury_detail || 'no detail given'})`,
           safetyHeart && 'heart condition',
           safetyEatingDisorder && 'eating disorder history',
         ]
           .filter(Boolean)
-          .join(', ')}\n\nThey were shown a see-your-doctor message and directed to the 1-on-1 coaching application instead. No action needed unless you want to follow up directly.`,
+          .join(', ')}\n\nThis order will NOT be auto-drafted - it'll sit under Needs Human Review in the queue once paid. Call them within 24-48 hours; text or email to schedule a call if they don't pick up.\n\nPhone: ${String(body.phone || '').trim() || 'not provided'}`,
       });
-      return res.status(200).json({ blocked: true, message: SEE_YOUR_DOCTOR_MESSAGE });
     }
 
     return res.status(200).json({ blocked: false, intakeId: inserted[0].id });
