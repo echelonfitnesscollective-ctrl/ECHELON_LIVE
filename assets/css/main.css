@@ -4763,6 +4763,27 @@ WAIVER
     font-size:1rem;
 }
 
+/* Small badge row under a .checkin-header, e.g. plan.html's
+   24-48hr/coach-reviewed/refund trio - shared here so any header
+   using .checkin-header can reuse it instead of a page-local copy. */
+.trust-bar{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:12px;
+    margin:28px 0 0;
+}
+
+.trust-bar span{
+    padding:8px 16px;
+    border:1px solid rgba(255,215,0,.3);
+    background:rgba(255,215,0,.05);
+    color:var(--primary);
+    font:700 .68rem var(--body-font);
+    letter-spacing:.08em;
+    text-transform:uppercase;
+}
+
 .wedding-pricing-section{
     padding:20px 0 10px;
 }
