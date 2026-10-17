@@ -1537,6 +1537,62 @@ html{
     box-shadow:0 0 36px rgba(212,175,55,.22);
 }
 
+/* HOMEPAGE PILLARS - scoped separately from .principle-card above,
+   which pages/wedding-ready-group.html also uses for an unrelated
+   4-item list; changes here were asked for on the homepage only. */
+
+.pillars-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:1px;
+    margin-bottom:70px;
+    background:rgba(212,175,55,.14);
+    border:1px solid rgba(212,175,55,.14);
+}
+
+.pillar-card{
+    background:#0D0D0C;
+    padding:36px 30px;
+    transition:.35s ease;
+}
+
+.pillar-card:hover{
+    background:rgba(212,175,55,.045);
+}
+
+.pillar-card::before{
+    content:"";
+    display:block;
+    width:28px;
+    height:2px;
+    background:var(--primary);
+    margin-bottom:22px;
+}
+
+.pillar-card h3{
+    margin-bottom:12px;
+    font-size:1.2rem;
+    letter-spacing:.02em;
+}
+
+.pillar-card p{
+    color:#b0b0ae;
+    line-height:1.7;
+    font-size:.92rem;
+}
+
+@media(max-width:991px){
+    .pillars-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+}
+
+@media(max-width:560px){
+    .pillars-grid{
+        grid-template-columns:1fr;
+    }
+}
+
 /* WHO WE TRAIN */
 
 .who-we-train{
@@ -1708,7 +1764,7 @@ RESOURCES
 .training-intro{max-width:700px;margin:0 auto 40px;text-align:center;color:#bdbdbd;line-height:1.8}
 
 .resources-card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;margin-bottom:48px}
-.resource-preview-card{display:flex;flex-direction:column;gap:10px;padding:28px 26px;border:1px solid rgba(215,181,91,.2);background:rgba(255,255,255,.02);text-decoration:none;transition:.3s}
+.resource-preview-card{display:flex;flex-direction:column;gap:10px;padding:28px 26px;border:1px solid rgba(215,181,91,.2);background:rgba(255,255,255,.055);text-decoration:none;transition:.3s}
 .resource-preview-card:hover{border-color:var(--primary);transform:translateY(-4px)}
 .resource-preview-card h3{margin:2px 0 0;font-size:1.35rem;line-height:1.15;color:#fff;transition:.3s}
 .resource-preview-card:hover h3{text-shadow:0 0 18px rgba(255,255,255,.45)}
@@ -1716,7 +1772,7 @@ RESOURCES
 .resource-preview-card:hover p{color:#e6e6e6}
 .resource-preview-cta{color:#d7b55b;font:700 .68rem 'Montserrat',sans-serif;letter-spacing:.1em;margin-top:6px;transition:.3s}
 .resource-preview-card:hover .resource-preview-cta{color:#ffe680}
-.resource-preview-card.resource-preview-all{background:linear-gradient(135deg,rgba(215,181,91,.14),rgba(255,255,255,.02));border-color:rgba(215,181,91,.4)}
+.resource-preview-card.resource-preview-all{background:linear-gradient(135deg,rgba(215,181,91,.16),rgba(255,255,255,.055));border-color:rgba(215,181,91,.4)}
 
 .resources-vault-strip{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,.9fr) auto;gap:32px;align-items:center;padding:36px;border:1px solid rgba(215,181,91,.3);background:linear-gradient(115deg,rgba(215,181,91,.1),rgba(255,255,255,.02))}
 .resources-vault-strip h3{margin:8px 0 10px;font-size:1.5rem;color:#fff}
