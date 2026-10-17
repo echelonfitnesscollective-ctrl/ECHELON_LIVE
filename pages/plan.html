@@ -28,6 +28,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="../assets/css/main.css">
+<link rel="stylesheet" href="../assets/css/plan.css">
 
 </head>
 
@@ -94,40 +95,53 @@
         <span class="checkin-tag">FINISH THE YEAR STRONGER</span>
         <h1>YOUR HOLIDAY-PROOF TRAINING PLAN</h1>
         <p>Custom-built by your Echelon coach. Tell us your goals, schedule and equipment, within 24 to 48 hours you'll have a 12-week training and nutrition program built around the weeks you'll actually have. Gym, home or hotel room.</p>
+        <div class="plan-trust-bar">
+            <span>24&ndash;48HR DELIVERY</span>
+            <span>COACH-REVIEWED</span>
+            <span>14-DAY REFUND</span>
+        </div>
     </div>
 </header>
 
 <!-- ==========================
      WHY NOW
 ========================== -->
-<section class="portal-section">
-    <div class="container" style="max-width:700px;">
-        <p style="color:#ccc;line-height:1.8;font-size:1.05rem;">Most plans fail in November because they assume your schedule stays the same. Then come the trips, the dinners and the parties. Your Echelon program is built around your real calendar, with a 20-minute version of every workout for the busy days.</p>
+<section class="plan-section">
+    <div class="plan-section-narrow">
+        <div class="plan-callout">Most plans fail in November because they assume your schedule stays the same. Then come the trips, the dinners and the parties. Your Echelon program is built around your real calendar, with a 20-minute version of every workout for the busy days.</div>
     </div>
 </section>
 
 <!-- ==========================
      WHAT YOU GET
 ========================== -->
-<section class="portal-section">
-    <div class="container" style="max-width:700px;">
-        <div class="form-section-header"><h2>WHAT YOU GET</h2></div>
-        <ul style="color:#ccc;line-height:2;font-size:1rem;padding-left:20px;">
-            <li>12 weeks of workouts matched to your level, equipment and days per week</li>
-            <li>Clear progression, so every week is a little harder than the last</li>
-            <li>Daily nutrition targets and a simple meal structure, no fad diets</li>
-            <li>A tracker to log your workouts</li>
-            <li>A PDF you can keep, print, or pull up on your phone</li>
-            <li>Delivered to your email within 24 to 48 hours</li>
-        </ul>
-        <p style="color:#888;font-size:.85rem;margin-top:16px;">Designed and reviewed by your Echelon coach before it ever reaches your inbox.</p>
+<section class="plan-section">
+    <div class="plan-section-narrow">
+        <span class="plan-section-label">THE PROGRAM</span>
+        <h2>WHAT YOU GET</h2>
+        <div class="plan-feature-grid">
+            <div class="plan-feature-card"><p>12 weeks of workouts matched to your level, equipment and days per week</p></div>
+            <div class="plan-feature-card"><p>Clear progression, so every week is a little harder than the last</p></div>
+            <div class="plan-feature-card"><p>Daily nutrition targets and a simple meal structure, no fad diets</p></div>
+            <div class="plan-feature-card"><p>A tracker to log your workouts</p></div>
+            <div class="plan-feature-card"><p>A PDF you can keep, print, or pull up on your phone</p></div>
+            <div class="plan-feature-card"><p>Delivered to your email within 24 to 48 hours</p></div>
+        </div>
+        <p class="plan-feature-note">Designed and reviewed by your Echelon coach before it ever reaches your inbox.</p>
     </div>
 </section>
 
 <!-- ==========================
      INTAKE FORM
 ========================== -->
-<section class="portal-section">
+<section class="plan-section">
+    <div class="plan-offer-card">
+        <div>
+            <h3>Custom 12-Week Program</h3>
+            <p>One-time payment. No subscription, no auto-renew.</p>
+        </div>
+        <div class="plan-offer-price">$97<span>ONE-TIME</span></div>
+    </div>
     <div class="container">
         <div class="portal-card">
 
@@ -184,31 +198,35 @@
                 <textarea name="travel_notes" rows="2" placeholder="Any travel coming up in the next 12 weeks? Dates and whether you'll have hotel gym access help us plan around it." aria-label="Travel Notes"></textarea>
 
                 <div class="form-section-header"><h2>ADD-ON</h2></div>
-                <label class="checkbox-row">
-                    <input type="checkbox" name="addon_travel_pack" value="true">
-                    <span><strong>Holiday Travel Pack, +$27</strong> &mdash; 20-minute hotel and bodyweight workouts, plus a holiday eating playbook for the weeks you're away from home.</span>
-                </label>
+                <div class="plan-addon-card">
+                    <label class="checkbox-row">
+                        <input type="checkbox" name="addon_travel_pack" value="true">
+                        <span><strong>Holiday Travel Pack, +$27</strong> &mdash; 20-minute hotel and bodyweight workouts, plus a holiday eating playbook for the weeks you're away from home.</span>
+                    </label>
+                </div>
 
                 <div class="form-section-header"><h2>HEALTH &amp; SAFETY</h2></div>
-                <p style="color:#888;font-size:.85rem;margin-bottom:4px;">This is a self-guided program with no live screening, so we ask these up front. If any apply, your program won't be auto-generated - your coach will personally review your situation and call you within 24-48 hours before anything is built.</p>
+                <div class="plan-safety-box">
+                    <p>This is a self-guided program with no live screening, so we ask these up front. If any apply, your program won't be auto-generated - your coach will personally review your situation and call you within 24-48 hours before anything is built.</p>
 
-                <label class="checkbox-row">
-                    <input type="checkbox" name="safety_pregnancy" value="true">
-                    <span>I am currently pregnant or less than 12 weeks postpartum.</span>
-                </label>
-                <label class="checkbox-row">
-                    <input type="checkbox" name="safety_injury" value="true" id="plan-safety-injury">
-                    <span>I have a current injury or a condition my doctor has told me to be careful with.</span>
-                </label>
-                <textarea id="plan-safety-injury-detail" name="safety_injury_detail" rows="2" placeholder="Briefly, what's the injury or condition?" aria-label="Injury Detail" hidden></textarea>
-                <label class="checkbox-row">
-                    <input type="checkbox" name="safety_heart_condition" value="true">
-                    <span>I have a diagnosed heart condition or have been told to avoid strenuous exercise.</span>
-                </label>
-                <label class="checkbox-row">
-                    <input type="checkbox" name="safety_eating_disorder" value="true">
-                    <span>I have a current or recent history of disordered eating.</span>
-                </label>
+                    <label class="checkbox-row">
+                        <input type="checkbox" name="safety_pregnancy" value="true">
+                        <span>I am currently pregnant or less than 12 weeks postpartum.</span>
+                    </label>
+                    <label class="checkbox-row">
+                        <input type="checkbox" name="safety_injury" value="true" id="plan-safety-injury">
+                        <span>I have a current injury or a condition my doctor has told me to be careful with.</span>
+                    </label>
+                    <textarea id="plan-safety-injury-detail" name="safety_injury_detail" rows="2" placeholder="Briefly, what's the injury or condition?" aria-label="Injury Detail" hidden></textarea>
+                    <label class="checkbox-row">
+                        <input type="checkbox" name="safety_heart_condition" value="true">
+                        <span>I have a diagnosed heart condition or have been told to avoid strenuous exercise.</span>
+                    </label>
+                    <label class="checkbox-row">
+                        <input type="checkbox" name="safety_eating_disorder" value="true">
+                        <span>I have a current or recent history of disordered eating.</span>
+                    </label>
+                </div>
 
                 <button type="submit" class="btn-primary">START MY PROGRAM &middot; $97</button>
                 <p style="color:#666;font-size:.8rem;text-align:center;">14-day refund policy. No results are promised.</p>
@@ -221,17 +239,19 @@
 <!-- ==========================
      MEET YOUR COACH
 ========================== -->
-<section class="portal-section">
-    <div class="container" style="max-width:700px;">
-        <div class="form-section-header"><h2>MEET YOUR COACH</h2></div>
-        <div style="display:flex;gap:1.5rem;align-items:flex-start;flex-wrap:wrap;">
-            <picture style="flex:0 0 140px;">
+<section class="plan-section">
+    <div class="plan-section-narrow">
+        <span class="plan-section-label">YOUR COACH</span>
+        <h2>MEET YOUR COACH</h2>
+        <div class="plan-coach">
+            <picture class="plan-coach-image">
                 <source srcset="../assets/images/coach.webp" type="image/webp">
-                <img src="../assets/images/coach.jpg" alt="Coach Lex of Echelon Fitness Collective" loading="lazy" style="width:140px;height:140px;object-fit:cover;border-radius:4px;">
+                <img src="../assets/images/coach.jpg" alt="Coach Lex of Echelon Fitness Collective" loading="lazy">
             </picture>
-            <div style="flex:1;min-width:220px;">
-                <p style="color:#ccc;line-height:1.8;margin:0 0 .5rem;"><strong>Lex</strong> &middot; ISSA Certified Personal Trainer</p>
-                <p style="color:#ccc;line-height:1.8;">Every program on this page is designed and personally reviewed by your Echelon coach before it reaches your inbox, built around real competitive-sports coaching experience: discipline, accountability, and systems that hold you to your best at whatever stage you're in.</p>
+            <div class="plan-coach-content">
+                <strong>Lex</strong>
+                <span class="credential-badge">ISSA CERTIFIED PERSONAL TRAINER</span>
+                <p>Every program on this page is designed and personally reviewed by your Echelon coach before it reaches your inbox, built around real competitive-sports coaching experience: discipline, accountability, and systems that hold you to your best at whatever stage you're in.</p>
             </div>
         </div>
     </div>
@@ -240,13 +260,26 @@
 <!-- ==========================
      FAQ
 ========================== -->
-<section class="portal-section">
-    <div class="container" style="max-width:700px;">
-        <div class="form-section-header"><h2>FAQ</h2></div>
-        <p style="color:#ccc;line-height:1.8;"><strong>Who builds my program?</strong> Your Echelon coach designs and reviews every program before it's sent.</p>
-        <p style="color:#ccc;line-height:1.8;"><strong>I have an injury or medical condition.</strong> Please check with your doctor first. Flag it on the form above and your coach will personally review your situation and call you within 24-48 hours before your program is built.</p>
-        <p style="color:#ccc;line-height:1.8;"><strong>How long until I get it?</strong> 24 to 48 hours by email.</p>
-        <p style="color:#ccc;line-height:1.8;"><strong>Refunds?</strong> 14 days, no questions asked.</p>
+<section class="plan-section">
+    <div class="plan-section-narrow">
+        <span class="plan-section-label">QUESTIONS</span>
+        <h2>FAQ</h2>
+        <details class="plan-faq-item">
+            <summary>Who builds my program?</summary>
+            <p>Your Echelon coach designs and reviews every program before it's sent.</p>
+        </details>
+        <details class="plan-faq-item">
+            <summary>I have an injury or medical condition</summary>
+            <p>Please check with your doctor first. Flag it on the form above and your coach will personally review your situation and call you within 24-48 hours before your program is built.</p>
+        </details>
+        <details class="plan-faq-item">
+            <summary>How long until I get it?</summary>
+            <p>24 to 48 hours by email.</p>
+        </details>
+        <details class="plan-faq-item">
+            <summary>Refunds?</summary>
+            <p>14 days, no questions asked.</p>
+        </details>
     </div>
 </section>
 

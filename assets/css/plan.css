@@ -1,0 +1,279 @@
+/* ========================================
+   ECHELON ONLINE COACHING - SALES PAGE
+   Scoped to pages/plan.html. Built on the
+   same tokens as main.css (--primary gold,
+   --card, --border, Bebas Neue/Montserrat)
+   rather than introducing a new palette.
+======================================== */
+
+.plan-trust-bar{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:12px;
+    margin:28px 0 0;
+}
+
+.plan-trust-bar span{
+    padding:8px 16px;
+    border:1px solid rgba(255,215,0,.3);
+    background:rgba(255,215,0,.05);
+    color:var(--primary);
+    font:700 .68rem var(--body-font);
+    letter-spacing:.08em;
+    text-transform:uppercase;
+}
+
+.plan-section{
+    padding:60px 0;
+}
+
+.plan-section-narrow{
+    max-width:720px;
+    margin:0 auto;
+    padding:0 24px;
+}
+
+.plan-callout{
+    border-left:3px solid var(--primary);
+    background:rgba(255,215,0,.04);
+    padding:24px 28px;
+    color:#ccc;
+    line-height:1.8;
+    font-size:1.05rem;
+}
+
+.plan-section-label{
+    display:block;
+    color:var(--primary);
+    font-size:.75rem;
+    font-weight:700;
+    letter-spacing:.18em;
+    margin-bottom:10px;
+}
+
+.plan-section-narrow h2{
+    font-family:var(--heading-font);
+    font-size:clamp(1.8rem,4vw,2.5rem);
+    color:#fff;
+    margin-bottom:28px;
+}
+
+.plan-feature-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:16px;
+}
+
+.plan-feature-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    padding:22px 24px;
+    transition:.3s;
+}
+
+.plan-feature-card:hover{
+    border-color:var(--primary);
+    transform:translateY(-3px);
+}
+
+.plan-feature-card p{
+    color:#ddd;
+    line-height:1.55;
+    font-size:.92rem;
+}
+
+.plan-feature-note{
+    margin-top:18px;
+    color:#888;
+    font-size:.85rem;
+    text-align:center;
+}
+
+/* Offer recap, directly above the intake form */
+.plan-offer-card{
+    max-width:720px;
+    margin:0 auto 32px;
+    padding:28px 30px;
+    border:1px solid rgba(255,215,0,.35);
+    background:linear-gradient(115deg,rgba(255,215,0,.1),rgba(255,255,255,.02));
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+    flex-wrap:wrap;
+}
+
+.plan-offer-card h3{
+    font-family:var(--heading-font);
+    font-size:1.5rem;
+    color:#fff;
+    letter-spacing:.02em;
+}
+
+.plan-offer-card p{
+    color:#bbb;
+    font-size:.85rem;
+    margin-top:4px;
+}
+
+.plan-offer-price{
+    font-family:var(--heading-font);
+    font-size:2.75rem;
+    color:var(--primary);
+    line-height:1;
+    white-space:nowrap;
+}
+
+.plan-offer-price span{
+    display:block;
+    font-family:var(--body-font);
+    font-size:.62rem;
+    letter-spacing:.1em;
+    color:#999;
+    margin-top:4px;
+}
+
+/* Health & safety - set apart from the rest of the form without
+   reading as alarming */
+.plan-safety-box{
+    border:1px solid rgba(255,215,0,.25);
+    background:rgba(255,255,255,.015);
+    padding:20px 22px 6px;
+    margin-top:4px;
+}
+
+.plan-safety-box p{
+    color:#999;
+    font-size:.85rem;
+    line-height:1.7;
+    margin-bottom:14px;
+}
+
+.plan-safety-box .checkbox-row{
+    margin-top:0;
+    margin-bottom:16px;
+}
+
+/* Add-on upsell, styled as a small card rather than a bare checkbox */
+.plan-addon-card{
+    border:1px solid rgba(255,215,0,.3);
+    background:rgba(255,215,0,.04);
+    padding:18px 20px;
+}
+
+.plan-addon-card .checkbox-row{
+    margin-top:0;
+}
+
+/* Coach section - a lighter version of the homepage's .coach-section,
+   sized for this page's narrower column */
+.plan-coach{
+    display:flex;
+    gap:32px;
+    align-items:center;
+    flex-wrap:wrap;
+}
+
+.plan-coach-image{
+    flex:0 0 160px;
+}
+
+.plan-coach-image img{
+    width:160px;
+    height:160px;
+    object-fit:cover;
+    border-radius:50%;
+    border:2px solid var(--primary);
+    display:block;
+}
+
+.plan-coach-content{
+    flex:1;
+    min-width:240px;
+}
+
+.plan-coach-content strong{
+    display:block;
+    color:#fff;
+    font-family:var(--heading-font);
+    font-size:1.5rem;
+    letter-spacing:.02em;
+}
+
+.plan-coach-content .credential-badge{
+    display:inline-block;
+    margin:6px 0 14px;
+}
+
+.plan-coach-content p{
+    color:#c0c0c0;
+    line-height:1.8;
+}
+
+/* FAQ - native <details>, no JS dependency */
+.plan-faq-item{
+    border:1px solid var(--border);
+    background:var(--card);
+    margin-bottom:10px;
+}
+
+.plan-faq-item summary{
+    list-style:none;
+    cursor:pointer;
+    padding:18px 22px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    color:#fff;
+    font-weight:600;
+    font-size:.95rem;
+}
+
+.plan-faq-item summary::-webkit-details-marker{
+    display:none;
+}
+
+.plan-faq-item summary::after{
+    content:'+';
+    color:var(--primary);
+    font-size:1.4rem;
+    line-height:1;
+    flex-shrink:0;
+    transition:transform .25s;
+}
+
+.plan-faq-item[open] summary::after{
+    transform:rotate(45deg);
+}
+
+.plan-faq-item[open] summary{
+    border-bottom:1px solid var(--border);
+}
+
+.plan-faq-item p{
+    padding:16px 22px 20px;
+    margin:0;
+    color:#bbb;
+    line-height:1.7;
+    font-size:.9rem;
+}
+
+@media(max-width:640px){
+    .plan-feature-grid{
+        grid-template-columns:1fr;
+    }
+    .plan-offer-card{
+        flex-direction:column;
+        align-items:flex-start;
+        text-align:left;
+    }
+    .plan-coach{
+        flex-direction:column;
+        text-align:center;
+    }
+    .plan-coach-content{
+        min-width:0;
+    }
+}
