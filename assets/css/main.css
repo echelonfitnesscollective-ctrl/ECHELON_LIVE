@@ -1539,57 +1539,57 @@ html{
 
 /* HOMEPAGE PILLARS - scoped separately from .principle-card above,
    which pages/wedding-ready-group.html also uses for an unrelated
-   4-item list; changes here were asked for on the homepage only. */
+   4-item list; changes here were asked for on the homepage only.
+   An editorial row (no card backgrounds, no numbering) rather than a
+   boxed grid - four large names read like a stated creed, separated
+   by hairlines instead of boxed off from each other. */
 
-.pillars-grid{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:1px;
-    margin-bottom:70px;
-    background:rgba(212,175,55,.14);
-    border:1px solid rgba(212,175,55,.14);
+.pillars-row{
+    display:flex;
+    justify-content:center;
+    margin-bottom:90px;
 }
 
-.pillar-card{
-    background:#0D0D0C;
-    padding:36px 30px;
-    transition:.35s ease;
+.pillar-item{
+    flex:1;
+    max-width:300px;
+    padding:0 36px;
 }
 
-.pillar-card:hover{
-    background:rgba(212,175,55,.045);
+.pillar-item + .pillar-item{
+    border-left:1px solid rgba(212,175,55,.25);
 }
 
-.pillar-card::before{
-    content:"";
-    display:block;
-    width:28px;
-    height:2px;
-    background:var(--primary);
-    margin-bottom:22px;
+.pillar-item h3{
+    font-family:var(--heading-font);
+    font-size:2.75rem;
+    line-height:1;
+    color:#fff;
+    letter-spacing:.01em;
+    margin-bottom:16px;
 }
 
-.pillar-card h3{
-    margin-bottom:12px;
-    font-size:1.2rem;
-    letter-spacing:.02em;
-}
-
-.pillar-card p{
-    color:#b0b0ae;
+.pillar-item p{
+    color:#a8a8a6;
     line-height:1.7;
-    font-size:.92rem;
+    font-size:.95rem;
 }
 
-@media(max-width:991px){
-    .pillars-grid{
-        grid-template-columns:repeat(2,1fr);
+@media(max-width:900px){
+    .pillars-row{
+        flex-direction:column;
+        align-items:center;
+        gap:36px;
     }
-}
-
-@media(max-width:560px){
-    .pillars-grid{
-        grid-template-columns:1fr;
+    .pillar-item{
+        max-width:440px;
+        text-align:center;
+        padding:0;
+    }
+    .pillar-item + .pillar-item{
+        border-left:0;
+        border-top:1px solid rgba(212,175,55,.25);
+        padding-top:36px;
     }
 }
 
@@ -1697,6 +1697,91 @@ html{
     background:linear-gradient(135deg,rgba(212,175,55,.28),rgba(212,175,55,.08));
     transform:translateY(-3px);
     box-shadow:0 10px 24px rgba(212,175,55,.18);
+}
+
+/* GOALS MARQUEE - the Training Goals / Life Stage tags as two
+   continuously scrolling rows (opposite directions) instead of a
+   static wrapped panel. Each track is the tag list duplicated once;
+   animating to -50% loops seamlessly. */
+
+.goals-marquee-group{
+    display:flex;
+    flex-direction:column;
+    gap:26px;
+    max-width:1100px;
+    margin:36px auto 0;
+}
+
+.goals-marquee-label{
+    display:block;
+    text-align:center;
+    margin-bottom:14px;
+}
+
+.goals-marquee{
+    overflow:hidden;
+    -webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
+    mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
+}
+
+.goals-marquee-track{
+    display:flex;
+    width:max-content;
+    gap:14px;
+    animation:marquee-left 24s linear infinite;
+}
+
+.goals-marquee-reverse .goals-marquee-track{
+    animation-name:marquee-right;
+    animation-duration:28s;
+}
+
+.goals-marquee:hover .goals-marquee-track{
+    animation-play-state:paused;
+}
+
+@keyframes marquee-left{
+    from{ transform:translateX(0); }
+    to{ transform:translateX(-50%); }
+}
+
+@keyframes marquee-right{
+    from{ transform:translateX(-50%); }
+    to{ transform:translateX(0); }
+}
+
+.goals-marquee-track span{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:11px 20px 11px 16px;
+    border:1px solid rgba(212,175,55,.4);
+    border-radius:999px;
+    color:#f2ede0;
+    font-size:.85rem;
+    font-weight:600;
+    letter-spacing:.3px;
+    background:linear-gradient(135deg,rgba(212,175,55,.16),rgba(212,175,55,.03));
+    white-space:nowrap;
+    flex-shrink:0;
+}
+
+.goals-marquee-track span::before{
+    content:"";
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:#D4AF37;
+    flex-shrink:0;
+}
+
+@media(prefers-reduced-motion: reduce){
+    .goals-marquee-track{
+        animation:none;
+    }
+    .goals-marquee{
+        overflow-x:auto;
+    }
 }
 
 /* CTA */
