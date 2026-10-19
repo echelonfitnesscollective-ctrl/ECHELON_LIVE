@@ -5349,24 +5349,32 @@ plain unstyled text with no card, no centering, no color.
 }
 
 /* ==========================================
-SHARED SUB-PAGE HERO (split headline + facts column)
+SHARED SUB-PAGE HERO
 Used by coaching-application.html and plan.html - the one interior-
 page hero pattern, instead of each page growing its own one-off
-header/trust-indicator design. Replaces a never-wired-up
-.application-hero/.highlight-card design that had no matching HTML
-anywhere on the site.
+header/trust-indicator design.
+
+Third pass: the first two attempts (a centered pill row, then a boxed
+split layout with a bordered facts sidebar) both read as a flat black
+page with text on it - nothing tying it back to the rest of the site.
+This one uses the same photo-plus-gradient treatment index.html's own
+#about/#training sections already use (efc-studio-dawn.png), so the
+page actually looks like it belongs to a fitness brand instead of a
+SaaS pricing page, and drops the bordered sidebar for a single column
+with the facts folded into one quiet inline line instead of competing
+boxes.
 ========================================== */
 
 .page-hero{
-    padding:130px 0 70px;
-    background:#0D0D0C;
+    position:relative;
+    padding:150px 0 90px;
+    background:
+        linear-gradient(100deg,rgba(13,13,12,.88),rgba(13,13,12,.74) 55%,rgba(13,13,12,.5)),
+        url("../images/efc-studio-dawn.png") center / cover no-repeat;
 }
 
-.page-hero-grid{
-    display:grid;
-    grid-template-columns:1.3fr 1fr;
-    gap:60px;
-    align-items:start;
+.page-hero-main{
+    max-width:640px;
 }
 
 .page-hero-main h1{
@@ -5378,10 +5386,9 @@ anywhere on the site.
 }
 
 .page-hero-main p{
-    color:#bdbdbd;
+    color:#d6d6d4;
     line-height:1.8;
     font-size:1.05rem;
-    max-width:560px;
 }
 
 .page-hero-alt{
@@ -5395,50 +5402,44 @@ anywhere on the site.
 
 .page-hero-facts{
     display:flex;
-    flex-direction:column;
-    gap:28px;
-    border-left:1px solid rgba(212,175,55,.25);
-    padding-left:36px;
-    margin-top:6px;
+    flex-wrap:wrap;
+    gap:10px 28px;
+    margin-top:34px;
+    padding-top:26px;
+    border-top:1px solid rgba(212,175,55,.25);
+}
+
+.page-hero-fact{
+    display:flex;
+    align-items:baseline;
+    gap:8px;
 }
 
 .page-hero-fact::before{
     content:"";
-    display:block;
-    width:28px;
-    height:2px;
+    width:5px;
+    height:5px;
+    border-radius:50%;
     background:var(--primary);
-    margin-bottom:14px;
+    flex-shrink:0;
+    align-self:center;
 }
 
 .page-hero-fact strong{
-    display:block;
     color:#fff;
-    font-family:var(--heading-font);
-    font-size:1.25rem;
-    letter-spacing:.02em;
-    margin-bottom:6px;
-}
-
-.page-hero-fact p{
-    color:#9a9a98;
-    font-size:.88rem;
-    line-height:1.6;
+    font-size:.82rem;
+    font-weight:700;
+    letter-spacing:.04em;
+    text-transform:uppercase;
 }
 
 @media(max-width:860px){
     .page-hero{
-        padding:90px 0 50px;
-    }
-    .page-hero-grid{
-        grid-template-columns:1fr;
-        gap:40px;
+        padding:100px 0 50px;
     }
     .page-hero-facts{
-        border-left:0;
-        padding-left:0;
-        border-top:1px solid rgba(212,175,55,.25);
-        padding-top:32px;
+        flex-direction:column;
+        gap:10px;
     }
 }
 
