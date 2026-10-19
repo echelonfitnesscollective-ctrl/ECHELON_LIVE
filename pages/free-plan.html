@@ -9,8 +9,8 @@
 <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png?v=10">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="canonical" href="https://www.echelonfitness.co/pages/free-plan.html">
-<meta property="og:title" content="Echelon Fitness Collective | Free Starter Plan">
-<meta property="og:description" content="Get a free one-week starter training plan built around your goal, from Echelon Fitness Collective.">
+<meta property="og:title" content="Echelon Fitness Collective | Find Your Program">
+<meta property="og:description" content="Two quick questions. Tell us your goal and how you want to train, and we'll point you to the right Echelon program.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://www.echelonfitness.co/pages/free-plan.html">
 <meta property="og:image" content="https://www.echelonfitness.co/assets/images/og-homepage.jpg">
@@ -18,9 +18,9 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://www.echelonfitness.co/assets/images/og-homepage.jpg">
-<meta name="description" content="Get a free one-week starter training plan built around your goal, from Echelon Fitness Collective.">
+<meta name="description" content="Two quick questions. Tell us your goal and how you want to train, and we'll point you to the right Echelon program.">
 
-<title>Echelon Fitness Collective | Free Starter Plan</title>
+<title>Echelon Fitness Collective | Find Your Program</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -87,18 +87,18 @@
 
 
 <!-- ==========================
-     FREE PLAN HEADER
+     FIND YOUR PROGRAM HEADER
 ========================== -->
 <header class="checkin-header" id="main-content">
     <div class="container">
         <span class="checkin-tag">NEW HERE?</span>
-        <h1>GET YOUR FREE STARTER PLAN</h1>
-        <p>Tell us your goal and we'll build you a real one-week training plan, right now, free. No payment, no obligation.</p>
+        <h1>FIND YOUR PROGRAM</h1>
+        <p>Two quick questions. Tell us your goal and how you want to train, and we'll point you to the right Echelon program.</p>
     </div>
 </header>
 
 <!-- ==========================
-     FREE PLAN REQUEST FORM
+     PROGRAM QUIZ
 ========================== -->
 <section class="portal-section">
     <div class="container">
@@ -110,11 +110,6 @@
 
                 <p id="free-plan-note" class="member-checkin-note" hidden role="status"></p>
 
-                <div class="form-section-header"><h2>YOUR INFORMATION</h2></div>
-                <input type="text" name="name" placeholder="First Name" required aria-label="First Name">
-                <input type="email" name="email" placeholder="Email Address" required aria-label="Email Address">
-                <input type="tel" name="phone" placeholder="Phone Number" required aria-label="Phone Number">
-
                 <div class="form-section-header"><h2>YOUR GOAL</h2></div>
 
                 <select name="goal" required aria-label="Primary Goal">
@@ -124,31 +119,24 @@
                     <option>Bulking</option>
                     <option>Muscle</option>
                     <option>Performance</option>
+                    <option>General Fitness</option>
                     <option>Older-Adult Wellness</option>
                     <option>Pregnancy</option>
                 </select>
 
-                <select name="gym_access" required aria-label="Gym and Equipment Access">
-                    <option value="">Do You Have Access To A Gym And Equipment?</option>
-                    <option value="yes">Yes</option>
-                    <option value="no">No</option>
+                <select name="training_style" required aria-label="How You Want To Train">
+                    <option value="">How Do You Want To Train?</option>
+                    <option value="self-guided">On my own, with a program to follow</option>
+                    <option value="1-on-1">1-on-1 with a coach for accountability</option>
+                    <option value="group">As part of a group, team, or organization</option>
                 </select>
 
-                <select name="experience_level" aria-label="Experience Level">
-                    <option value="">Experience Level (optional)</option>
-                    <option>Beginner</option>
-                    <option>Intermediate</option>
-                    <option>Advanced</option>
-                </select>
+                <div class="form-section-header"><h2>YOUR INFORMATION</h2></div>
+                <input type="text" name="name" placeholder="First Name" required aria-label="First Name">
+                <input type="email" name="email" placeholder="Email Address" required aria-label="Email Address">
+                <input type="tel" name="phone" placeholder="Phone Number" required aria-label="Phone Number">
 
-                <select name="days_per_week" aria-label="Days Available Per Week">
-                    <option value="">Days Available Per Week (optional)</option>
-                    <option>2-3</option>
-                    <option>4-5</option>
-                    <option>6-7</option>
-                </select>
-
-                <button type="submit" class="btn-primary">GET MY FREE PLAN</button>
+                <button type="submit" class="btn-primary">SEE MY RECOMMENDATION</button>
             </form>
 
             <div id="free-plan-success" class="free-plan-result" style="display:none;"></div>

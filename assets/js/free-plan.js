@@ -5,40 +5,68 @@
     const success = document.getElementById('free-plan-success');
     const submitButton = form.querySelector('button[type="submit"]');
 
+    // The recommendation is a static lookup, not something the server
+    // needs to compute - it mirrors the 3 programs on the Compare
+    // Programs carousel (coaching-application.html). The ?program=
+    // values match the keys coaching-application.js already reads to
+    // preselect "What Are You Applying For?".
+    const RECOMMENDATIONS = {
+        'self-guided': {
+            name: 'Echelon Online Coaching',
+            copy: 'A custom 12-week program built around your goal, delivered by email in 24–48 hours. No live application, no subscription.',
+            href: 'plan.html',
+            cta: 'See Echelon Online Coaching'
+        },
+        '1-on-1': {
+            name: '1-On-1 Coaching',
+            copy: 'Full individual attention on your body, schedule and goals, with a coach who adjusts your plan as you go.',
+            href: 'coaching-application.html?program=1-on-1-coaching',
+            cta: 'Apply For 1-On-1 Coaching'
+        },
+        group: {
+            name: 'Private Group Training / Organization Wellness',
+            copy: 'A custom group experience built around your team, company, church or friend group (3–25 people).',
+            href: 'coaching-application.html?program=private-group-training',
+            cta: 'Apply For Group Training'
+        }
+    };
+
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
         submitButton.disabled = true;
-        submitButton.textContent = 'BUILDING YOUR PLAN…';
+        submitButton.textContent = 'FINDING YOUR PROGRAM…';
         note.hidden = true;
+
         const values = Object.fromEntries(new FormData(form).entries());
-        let result;
+        const recommendation = RECOMMENDATIONS[values.training_style];
+
         try {
             const response = await fetch('/api/free-plan/submit', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(values)
             });
-            result = await response.json();
-            if (!response.ok) throw new Error(result.error || 'Submission failed.');
+            if (!response.ok) {
+                const result = await response.json().catch(() => ({}));
+                throw new Error(result.error || 'Submission failed.');
+            }
         } catch (error) {
             note.hidden = false;
-            note.textContent = error.message || 'We could not build your plan. Please try again.';
+            note.textContent = error.message || 'Something went wrong. Please try again.';
             submitButton.disabled = false;
-            submitButton.textContent = 'GET MY FREE PLAN';
+            submitButton.textContent = 'SEE MY RECOMMENDATION';
             return;
         }
-        window.efcTrack?.('free_plan_request', { goal: values.goal });
 
-        // The plan itself now lives on a real EchelonOS page - redirect
-        // there. Success div stays as a brief fallback in case the
-        // redirect is blocked (some in-app browsers do this) so there's
-        // still a real link to click instead of a dead end.
+        window.efcTrack?.('program_quiz_complete', { goal: values.goal, training_style: values.training_style });
+
         form.style.display = 'none';
         success.style.display = 'block';
         success.innerHTML = `
-            <h2>Your plan is ready.</h2>
-            <p>We're taking you there now. If nothing happens, <a href="${result.planUrl}">view your plan here</a>.</p>
+            <span class="checkin-tag">RECOMMENDED FOR YOU</span>
+            <h2>${recommendation.name}</h2>
+            <p>${recommendation.copy}</p>
+            <a href="${recommendation.href}" class="btn-primary">${recommendation.cta} →</a>
         `;
-        window.location.href = result.planUrl;
     });
 }());

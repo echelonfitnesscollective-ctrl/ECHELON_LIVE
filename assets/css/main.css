@@ -5098,66 +5098,17 @@ plain unstyled text with no card, no centering, no color.
     font-size:2.4rem;
     line-height:1.05;
     color:var(--primary);
-    margin-bottom:6px;
-}
-
-.free-plan-subtitle{
-    color:#bdbdbd;
-    font-style:italic;
-    margin-bottom:16px;
+    margin:10px 0 6px;
 }
 
 .free-plan-result > p{
     color:#e6e6e6;
     line-height:1.7;
-    margin-bottom:8px;
+    margin-bottom:20px;
 }
 
-.free-plan-days{
-    display:flex;
-    flex-direction:column;
-    gap:14px;
-    margin:24px 0;
-}
-
-.free-plan-day{
-    border:1px solid #1A1917;
-    background:rgba(215,181,91,.04);
-    padding:16px 18px;
-}
-
-.free-plan-day h4{
-    color:var(--primary);
-    font-size:.85rem;
-    letter-spacing:1px;
-    text-transform:uppercase;
-    margin-bottom:8px;
-}
-
-.free-plan-day ul{
-    list-style:none;
-    padding:0;
-    margin:0;
-}
-
-.free-plan-day li{
-    color:#d5d5d5;
-    line-height:1.7;
-    font-size:.92rem;
-}
-
-.free-plan-nutrition{
-    border-left:2px solid var(--primary);
-    background:rgba(215,181,91,.08);
-    padding:14px 16px;
-    margin:20px 0;
-}
-
-.free-plan-hook{
-    color:#9a9a98;
-    font-size:.85rem;
-    line-height:1.6;
-    margin:20px 0;
+.free-plan-result .btn-primary{
+    display:inline-block;
 }
 
 .checkin-note-list{
