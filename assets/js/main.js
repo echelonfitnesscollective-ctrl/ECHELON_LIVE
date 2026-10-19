@@ -557,6 +557,47 @@ function scrollCarousel(direction) {
 document.querySelector('.carousel-arrow.left-arrow')?.addEventListener('click', () => scrollCarousel('left'));
 document.querySelector('.carousel-arrow.right-arrow')?.addEventListener('click', () => scrollCarousel('right'));
 
+// Generic version of the same self-correcting arrow logic above, for
+// any other slide-to-compare row: wrap the scroll container in
+// [data-carousel], mark the actual scrollable element
+// [data-carousel-track], and drop a .carousel-arrow.left-arrow/
+// right-arrow pair inside. Scoped per-wrapper (querySelector inside
+// `root`, not document) so this never collides with the hardcoded
+// #trainingCarousel wiring above if a page ever has both.
+function efcInitGenericCarousels() {
+    document.querySelectorAll('[data-carousel]').forEach((root) => {
+        const track = root.querySelector('[data-carousel-track]');
+        if (!track) return;
+        const leftBtn = root.querySelector('.carousel-arrow.left-arrow');
+        const rightBtn = root.querySelector('.carousel-arrow.right-arrow');
+
+        function scrollTo(direction) {
+            const cards = [...track.children];
+            if (!cards.length) return;
+            let currentIndex = 0;
+            let closestDist = Infinity;
+            cards.forEach((card, i) => {
+                const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+                const viewCenter = track.scrollLeft + track.clientWidth / 2;
+                const dist = Math.abs(cardCenter - viewCenter);
+                if (dist < closestDist) {
+                    closestDist = dist;
+                    currentIndex = i;
+                }
+            });
+            const nextIndex = direction === 'left' ? Math.max(0, currentIndex - 1) : Math.min(cards.length - 1, currentIndex + 1);
+            const target = cards[nextIndex];
+            const left = target.offsetLeft - track.clientWidth / 2 + target.offsetWidth / 2;
+            track.scrollTo({ left, behavior: 'smooth' });
+        }
+
+        leftBtn?.addEventListener('click', () => scrollTo('left'));
+        rightBtn?.addEventListener('click', () => scrollTo('right'));
+    });
+}
+
+efcInitGenericCarousels();
+
 // Adds a show/hide toggle to every password field sitewide, no per-page markup needed.
 function efcInitPasswordToggles() {
     document.querySelectorAll('input[type="password"]').forEach((input) => {
