@@ -5255,12 +5255,12 @@ plain unstyled text with no card, no centering, no color.
 
 .program-compare-track{
     display:flex;
-    gap:16px;
+    gap:14px;
     overflow-x:auto;
     scroll-snap-type:x mandatory;
     scroll-behavior:smooth;
     scrollbar-width:none;
-    padding:24px 20px;
+    padding:16px 20px;
 }
 
 .program-compare-track::-webkit-scrollbar{
@@ -5301,27 +5301,27 @@ plain unstyled text with no card, no centering, no color.
 }
 
 .program-compare-card{
-    flex:0 0 78vw;
-    max-width:320px;
+    flex:0 0 72vw;
+    max-width:270px;
     scroll-snap-align:center;
     background:#0D0D0C;
     border:1px solid var(--border);
-    padding:22px 24px;
+    padding:16px 18px;
 }
 
 .program-compare-card h3{
     font-family:var(--heading-font);
-    font-size:1.3rem;
+    font-size:1.1rem;
     letter-spacing:.5px;
     line-height:1.1;
     color:var(--white);
-    margin-bottom:10px;
+    margin-bottom:4px;
 }
 
 .program-compare-card p{
-    margin-top:10px;
-    font-size:.82rem;
-    line-height:1.5;
+    margin-top:8px;
+    font-size:.78rem;
+    line-height:1.4;
     color:#d6d6d6;
 }
 
