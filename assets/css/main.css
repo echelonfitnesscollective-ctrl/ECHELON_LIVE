@@ -4833,6 +4833,22 @@ WAIVER
     margin-bottom:10px;
 }
 
+/* .section-tag (index.html, coaching-application.html,
+   wedding-ready-group.html, build-your-group.html) never had a CSS
+   rule anywhere in this file's history - every "eyebrow" label using
+   it was rendering as plain inline text with no color or spacing.
+   Same treatment as .checkin-tag, the other eyebrow class already
+   used sitewide, so both read as the same component. */
+.section-tag{
+    display:block;
+    color:var(--primary);
+    font-size:.75rem;
+    font-weight:700;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    margin-bottom:10px;
+}
+
 .checkin-header h1{
     font-family:var(--heading-font);
     font-size:5rem;
@@ -4846,27 +4862,6 @@ WAIVER
     margin:auto;
     color:#bdbdbd;
     font-size:1rem;
-}
-
-/* Small badge row under a .checkin-header, e.g. plan.html's
-   24-48hr/coach-reviewed/refund trio - shared here so any header
-   using .checkin-header can reuse it instead of a page-local copy. */
-.trust-bar{
-    display:flex;
-    flex-wrap:wrap;
-    justify-content:center;
-    gap:12px;
-    margin:28px 0 0;
-}
-
-.trust-bar span{
-    padding:8px 16px;
-    border:1px solid rgba(255,215,0,.3);
-    background:rgba(255,215,0,.05);
-    color:var(--primary);
-    font:700 .68rem var(--body-font);
-    letter-spacing:.08em;
-    text-transform:uppercase;
 }
 
 .wedding-pricing-section{
@@ -5279,24 +5274,27 @@ WAIVER
 }
 
 /* ==========================================
-COACHING APPLICATION HEADER
-(replaces a never-wired-up .application-hero/.highlight-card design
-that had no matching HTML anywhere on the site)
+SHARED SUB-PAGE HERO (split headline + facts column)
+Used by coaching-application.html and plan.html - the one interior-
+page hero pattern, instead of each page growing its own one-off
+header/trust-indicator design. Replaces a never-wired-up
+.application-hero/.highlight-card design that had no matching HTML
+anywhere on the site.
 ========================================== */
 
-.app-hero{
+.page-hero{
     padding:130px 0 70px;
     background:#0D0D0C;
 }
 
-.app-hero-grid{
+.page-hero-grid{
     display:grid;
     grid-template-columns:1.3fr 1fr;
     gap:60px;
     align-items:start;
 }
 
-.app-hero-main h1{
+.page-hero-main h1{
     font-family:var(--heading-font);
     font-size:clamp(3rem,6vw,5rem);
     line-height:.95;
@@ -5304,23 +5302,23 @@ that had no matching HTML anywhere on the site)
     margin:14px 0 24px;
 }
 
-.app-hero-main p{
+.page-hero-main p{
     color:#bdbdbd;
     line-height:1.8;
     font-size:1.05rem;
     max-width:560px;
 }
 
-.app-hero-alt{
+.page-hero-alt{
     margin-top:16px;
     font-size:.95rem!important;
 }
 
-.app-hero-alt a{
+.page-hero-alt a{
     color:var(--primary);
 }
 
-.app-hero-facts{
+.page-hero-facts{
     display:flex;
     flex-direction:column;
     gap:28px;
@@ -5329,7 +5327,7 @@ that had no matching HTML anywhere on the site)
     margin-top:6px;
 }
 
-.app-hero-fact::before{
+.page-hero-fact::before{
     content:"";
     display:block;
     width:28px;
@@ -5338,7 +5336,7 @@ that had no matching HTML anywhere on the site)
     margin-bottom:14px;
 }
 
-.app-hero-fact strong{
+.page-hero-fact strong{
     display:block;
     color:#fff;
     font-family:var(--heading-font);
@@ -5347,21 +5345,21 @@ that had no matching HTML anywhere on the site)
     margin-bottom:6px;
 }
 
-.app-hero-fact p{
+.page-hero-fact p{
     color:#9a9a98;
     font-size:.88rem;
     line-height:1.6;
 }
 
 @media(max-width:860px){
-    .app-hero{
+    .page-hero{
         padding:90px 0 50px;
     }
-    .app-hero-grid{
+    .page-hero-grid{
         grid-template-columns:1fr;
         gap:40px;
     }
-    .app-hero-facts{
+    .page-hero-facts{
         border-left:0;
         padding-left:0;
         border-top:1px solid rgba(212,175,55,.25);
