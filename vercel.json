@@ -7,6 +7,7 @@
     { "source": "/checkin.html", "destination": "/pages/checkin.html", "permanent": true },
     { "source": "/coaching-application.html", "destination": "/pages/coaching-application.html", "permanent": true },
     { "source": "/disclaimer.html", "destination": "/pages/disclaimer.html", "permanent": true },
+    { "source": "/pages/free-class.html", "destination": "https://app.echelonfitness.co/free-class", "permanent": false },
     { "source": "/member-coaching.html", "destination": "/pages/member-coaching.html", "permanent": true },
     { "source": "/member-library.html", "destination": "/pages/member-library.html", "permanent": true },
     { "source": "/member-login.html", "destination": "/pages/member-login.html", "permanent": true },

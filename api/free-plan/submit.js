@@ -1,7 +1,7 @@
 // Vercel serverless endpoint for the "Find Your Program" quiz
-// (pages/free-plan.html). Same shape as api/free-class/submit.js: a
-// lead-capture form, no payment, writes to the shared website_leads
-// table for the coach's own lead tracking. The actual program
+// (pages/free-plan.html). A lead-capture form, no payment, writes to
+// the shared website_leads table for the coach's own lead tracking.
+// The actual program
 // recommendation is a static lookup computed client-side in
 // assets/js/free-plan.js from the training_style answer, so this
 // endpoint's only job is to save the lead and notify the owner.
