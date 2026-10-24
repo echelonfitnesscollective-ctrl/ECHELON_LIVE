@@ -415,7 +415,7 @@ async function handleGroupJoin(request, response) {
 // join_token above. No admin/member session involved anywhere in this
 // flow - the "coach" side is just the existing Leads checklist.
 async function getBuildGroupLead(leadId) {
-  const result = await supabase(`/rest/v1/website_leads?id=eq.${encodeURIComponent(leadId)}&lead_type=eq.${encodeURIComponent('Build Your Group')}&select=id,full_name&limit=1`);
+  const result = await supabase(`/rest/v1/website_leads?id=eq.${encodeURIComponent(leadId)}&lead_type=eq.${encodeURIComponent('Build Your Group')}&select=id,full_name,source_data&limit=1`);
   return Array.isArray(result.body) && result.body[0] ? result.body[0] : null;
 }
 
@@ -430,8 +430,17 @@ async function handleBuildGroupInfo(request, response) {
 
     const attendeesResult = await supabase(`/rest/v1/build_group_attendees?lead_id=eq.${encodeURIComponent(leadId)}&select=id,name,phone,email,waiver_agreed,added_by&order=created_at.asc`);
     const attendees = Array.isArray(attendeesResult.body) ? attendeesResult.body : [];
+    // scheduled_session is written by EchelonOS's /build-group/[leadId]
+    // page (src/lib/build-group-schedule.ts) once the organizer picks a
+    // real date/time for their group - this is the one place the
+    // marketing site reads it back, so the organizer's own page can
+    // gate the roster-building UI behind having a time set.
+    const scheduledSession = lead.source_data && typeof lead.source_data === 'object' ? lead.source_data.scheduled_session : null;
     return response.status(200).json({
       attendees: attendees.map((a) => ({ id: a.id, name: a.name, phone: a.phone, email: a.email, waiverAgreed: a.waiver_agreed, addedBy: a.added_by })),
+      scheduledSession: scheduledSession && scheduledSession.scheduledAtISO
+        ? { scheduledAtISO: scheduledSession.scheduledAtISO, durationMinutes: scheduledSession.durationMinutes, capacity: scheduledSession.capacity, joinToken: scheduledSession.joinToken }
+        : null,
     });
   } catch (error) {
     console.error('Build group info error', error && error.message);

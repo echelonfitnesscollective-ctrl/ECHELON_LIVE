@@ -1,16 +1,25 @@
 // Build Your Group: applying reveals a private group-management panel
 // (no login, gated only by the lead's own unguessable id) where the
-// organizer either shares one link so each person self-registers and
-// signs their own waiver, or adds someone directly by name/phone/email
-// - the latter, when an email is given, sends that person their own
-// personal confirm-and-sign link (api/build-group/invite). Everything
-// here talks to api/calendar/gateway.js's build-group-* routes, never
-// Supabase directly - the same trust model as the real group-join
-// links (assets/js/join-group.js), just for a promo with no fixed
-// session yet.
+// organizer first picks a real date/time for their session (over on
+// EchelonOS's public /build-group/<leadId> picker - see
+// src/lib/build-group-schedule.ts there), then can share one link so
+// each person self-registers and signs their own waiver, or add
+// someone directly by name/phone/email - the latter, when an email is
+// given, sends that person their own personal confirm-and-sign link
+// (api/build-group/invite). Everything here talks to
+// api/calendar/gateway.js's build-group-* routes, never Supabase
+// directly - the same trust model as the real group-join links
+// (assets/js/join-group.js), just for a promo that now has a real
+// time once the organizer sets one.
+
+const BUILD_GROUP_APP_URL = 'https://app.echelonfitness.co';
 
 function buildGroupJoinUrl(leadId) {
     return `${window.location.origin}/pages/build-your-group-join.html?lead=${encodeURIComponent(leadId)}`;
+}
+
+function buildGroupScheduleUrl(leadId) {
+    return `${BUILD_GROUP_APP_URL}/build-group/${encodeURIComponent(leadId)}`;
 }
 
 function renderRoster(container, attendees) {
@@ -65,18 +74,61 @@ document.addEventListener('DOMContentLoaded', () => {
     const inviteForm = document.getElementById('build-group-invite-form');
     const inviteFeedback = document.getElementById('build-group-invite-feedback');
     const roster = document.getElementById('build-group-roster');
+    const scheduleLink = document.getElementById('build-group-schedule-link');
+    const unscheduledBox = document.getElementById('build-group-unscheduled');
+    const scheduledBox = document.getElementById('build-group-scheduled');
+    const scheduledWhen = document.getElementById('build-group-scheduled-when');
+    const inviteSection = document.getElementById('build-group-invite-section');
 
     let leadId = null;
 
-    async function refreshRoster() {
-        if (!leadId || !roster) return;
+    function showManager() {
+        form.style.display = 'none';
+        if (linkInput) linkInput.value = buildGroupJoinUrl(leadId);
+        if (scheduleLink) scheduleLink.href = buildGroupScheduleUrl(leadId);
+        if (manager) manager.style.display = '';
+    }
+
+    async function refreshGroupInfo() {
+        if (!leadId) return;
         try {
             const response = await fetch(`/api/build-group/info?lead=${encodeURIComponent(leadId)}`);
             const result = await response.json();
-            if (response.ok) renderRoster(roster, result.attendees || []);
+            if (!response.ok) return;
+
+            if (roster) renderRoster(roster, result.attendees || []);
+
+            const scheduled = result.scheduledSession;
+            const isScheduled = Boolean(scheduled && scheduled.scheduledAtISO);
+            if (unscheduledBox) unscheduledBox.style.display = isScheduled ? 'none' : '';
+            if (scheduledBox) scheduledBox.style.display = isScheduled ? '' : 'none';
+            if (inviteSection) inviteSection.style.display = isScheduled ? '' : 'none';
+            if (isScheduled && scheduledWhen) {
+                const when = new Date(scheduled.scheduledAtISO);
+                scheduledWhen.textContent = when.toLocaleString('en-US', {
+                    timeZone: 'America/New_York',
+                    weekday: 'long',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    timeZoneName: 'short',
+                });
+            }
         } catch (_) {
-            // Roster just won't refresh this time; the next add/reload will retry.
+            // Info just won't refresh this time; the next reload will retry.
         }
+    }
+
+    // A returning organizer (e.g. the "pick a time" link they were
+    // emailed, or just their own bookmarked group link) reaches this
+    // page as pages/build-your-group.html?lead=<id> - skip straight to
+    // the manager panel instead of showing the application form again.
+    const existingLeadId = new URLSearchParams(window.location.search).get('lead');
+    if (existingLeadId) {
+        leadId = existingLeadId;
+        showManager();
+        refreshGroupInfo();
     }
 
     form.addEventListener('submit', async (event) => {
@@ -105,12 +157,10 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         if (feedback) feedback.textContent = '';
-        form.style.display = 'none';
         window.efcTrack?.('build_your_group_apply', { group_size: values.group_size });
 
-        if (linkInput) linkInput.value = buildGroupJoinUrl(leadId);
-        if (manager) manager.style.display = '';
-        refreshRoster();
+        showManager();
+        refreshGroupInfo();
     });
 
     if (copyButton && linkInput) {
@@ -158,7 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if (inviteFeedback) inviteFeedback.textContent = '';
             inviteForm.reset();
-            refreshRoster();
+            refreshGroupInfo();
         });
     }
 });

@@ -371,50 +371,74 @@
             <p>
                 Thank you for applying. Spots are limited and selected
                 personally &mdash; if you're chosen, Echelon will reach out
-                directly with the date and location. In the meantime, go
-                ahead and start building your group below.
+                directly. In the meantime, here's where things stand.
             </p>
 
             <div class="form-section-header">
-                <h2>YOUR GROUP LINK</h2>
+                <h2>YOUR SESSION TIME</h2>
             </div>
 
-            <p class="build-group-help">
-                Share this link with your people. Each person fills in their
-                own name, phone or email, and signs a quick waiver on their
-                own. This link is private &mdash; please don't post it on
-                social media.
-            </p>
-
-            <div class="build-group-link-row">
-                <input type="text" id="build-group-link-input" readonly aria-label="Your group link">
-                <button type="button" id="build-group-copy-link" class="btn-secondary">COPY LINK</button>
+            <div id="build-group-unscheduled">
+                <p class="build-group-help">
+                    Before you can invite your group, pick a real open time for
+                    your session &mdash; it only takes a minute.
+                </p>
+                <a id="build-group-schedule-link" href="#" class="btn-primary" target="_blank" rel="noopener">
+                    PICK A DATE &amp; TIME →
+                </a>
             </div>
 
-            <div class="form-section-header">
-                <h2>OR ADD SOMEONE DIRECTLY</h2>
+            <div id="build-group-scheduled" style="display:none;">
+                <p class="build-group-help">
+                    Your session is set for <strong id="build-group-scheduled-when"></strong>.
+                    You're all set to invite your group below.
+                </p>
             </div>
 
-            <p class="build-group-help">
-                Enter their name and a phone or email. If you give an email,
-                we'll send them their own personal link to confirm and sign
-                the waiver.
-            </p>
+            <div id="build-group-invite-section" style="display:none;">
 
-            <form id="build-group-invite-form" class="echelon-form">
-                <input type="text" name="name" placeholder="Their Name" required aria-label="Their Name">
-                <input type="tel" name="phone" placeholder="Their Phone" aria-label="Their Phone">
-                <input type="email" name="email" placeholder="Their Email" aria-label="Their Email">
-                <button type="submit" class="btn-secondary">ADD TO MY GROUP</button>
-                <p id="build-group-invite-feedback" class="form-error" role="status"></p>
-            </form>
+                <div class="form-section-header">
+                    <h2>YOUR GROUP LINK</h2>
+                </div>
 
-            <div class="form-section-header">
-                <h2>YOUR ROSTER</h2>
-            </div>
+                <p class="build-group-help">
+                    Share this link with your people. Each person fills in their
+                    own name, phone or email, and signs a quick waiver on their
+                    own. This link is private &mdash; please don't post it on
+                    social media.
+                </p>
 
-            <div id="build-group-roster">
-                <p class="build-group-help">No one added yet.</p>
+                <div class="build-group-link-row">
+                    <input type="text" id="build-group-link-input" readonly aria-label="Your group link">
+                    <button type="button" id="build-group-copy-link" class="btn-secondary">COPY LINK</button>
+                </div>
+
+                <div class="form-section-header">
+                    <h2>OR ADD SOMEONE DIRECTLY</h2>
+                </div>
+
+                <p class="build-group-help">
+                    Enter their name and a phone or email. If you give an email,
+                    we'll send them their own personal link to confirm and sign
+                    the waiver.
+                </p>
+
+                <form id="build-group-invite-form" class="echelon-form">
+                    <input type="text" name="name" placeholder="Their Name" required aria-label="Their Name">
+                    <input type="tel" name="phone" placeholder="Their Phone" aria-label="Their Phone">
+                    <input type="email" name="email" placeholder="Their Email" aria-label="Their Email">
+                    <button type="submit" class="btn-secondary">ADD TO MY GROUP</button>
+                    <p id="build-group-invite-feedback" class="form-error" role="status"></p>
+                </form>
+
+                <div class="form-section-header">
+                    <h2>YOUR ROSTER</h2>
+                </div>
+
+                <div id="build-group-roster">
+                    <p class="build-group-help">No one added yet.</p>
+                </div>
+
             </div>
 
         </div>
